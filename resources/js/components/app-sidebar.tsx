@@ -62,7 +62,7 @@ const navSections: NavSection[] = [
         items: [
             { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
             { title: 'Asset Register', href: assetRegister(), icon: Package },
-            { title: 'Asset Location / Geographic View', href: assetLocation(), icon: MapPin },
+            { title: 'Asset Location' , href: assetLocation(), icon: MapPin },
             { title: 'Asset Availability', href: assetAvailability(), icon: ClipboardCheck },
         ],
     },

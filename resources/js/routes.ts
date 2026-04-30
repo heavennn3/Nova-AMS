@@ -20,7 +20,7 @@ export function operationsMaintenance() {
 
 
 export function assetRegister() {
-    return '/operations-maintanance';
+    return '/assets';
 }
 export function assetLocation() {
     return '/operations-maintanance';

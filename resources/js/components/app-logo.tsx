@@ -2,15 +2,14 @@ import AppLogoIcon from '@/components/app-logo-icon';
 
 export default function AppLogo() {
     return (
-        <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
-            </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Nova AMS
-                </span>
-            </div>
-        </>
+        <div className="flex flex-col items-center">
+            <img
+                src="/images/novatis-logo.png"
+                alt="Novatis Logo"
+className="h-15 w-auto object-contain"
+            />
+
+           
+        </div>
     );
 }
