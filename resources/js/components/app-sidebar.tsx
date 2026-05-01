@@ -1,22 +1,10 @@
 import { Link } from '@inertiajs/react';
 import {
-    BookOpen,
-    FolderGit2,
     LayoutGrid,
     Map,
-    Users,
-    BarChart,
-    Settings,
-    FileText,
     Package,
-    Building,
-    Wrench,
-    Calendar,
     Database,
-    UserCheck,
-    ListChecks,
-    MapPin,
-    ClipboardCheck,
+    Wrench,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -34,19 +22,10 @@ import {
 
 import {
     dashboard,
-    assetRegister,
-    assetLocation,
-    assetAvailability,
-    assetAssignment,
-    workOrders,
-    preventiveMaintenance,
-    spareParts,
-    vendors,
-    documents,
+    assetInventory,
+    geographicView,
     masterData,
-    userManagement,
-    reports,
-    systemSettings,
+    operationsMaintenance,
 } from '@/routes';
 
 import type { NavItem } from '@/types';
@@ -58,37 +37,23 @@ type NavSection = {
 
 const navSections: NavSection[] = [
     {
-        title: 'MAIN',
+        title: 'OVERVIEW',
         items: [
             { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
-            { title: 'Asset Register', href: assetRegister(), icon: Package },
-            { title: 'Asset Location' , href: assetLocation(), icon: MapPin },
-            { title: 'Asset Availability', href: assetAvailability(), icon: ClipboardCheck },
+            { title: 'Geographic View', href: geographicView(), icon: Map },
         ],
     },
     {
-        title: 'OPERATIONS',
+        title: 'ASSET MANAGEMENT',
         items: [
-            { title: 'Asset Assigned', href: assetAssignment(), icon: UserCheck },
-            { title: 'Work Orders / Faults', href: workOrders(), icon: Wrench },
-            { title: 'Preventive Maintenance', href: preventiveMaintenance(), icon: Calendar },
-            { title: 'Spare Parts', href: spareParts(), icon: Package },
-        ],
-    },
-    {
-        title: 'RESOURCES',
-        items: [
-            { title: 'Vendors', href: vendors(), icon: Building },
-            { title: 'Documents', href: documents(), icon: FileText },
+            { title: 'Asset Inventory', href: assetInventory(), icon: Package },
             { title: 'Master Data', href: masterData(), icon: Database },
         ],
     },
     {
-        title: 'ADMINISTRATION',
+        title: 'OPERATIONS & MAINTENANCE',
         items: [
-            { title: 'User Management', href: userManagement(), icon: Users },
-            { title: 'Reports', href: reports(), icon: BarChart },
-            { title: 'System Settings', href: systemSettings(), icon: Settings },
+            { title: 'Maintenance Operations', href: operationsMaintenance(), icon: Wrench },
         ],
     },
 ];
