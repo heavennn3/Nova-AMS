@@ -28,6 +28,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('categories', AssetCategoryController::class);
     Route::resource('vendors', VendorController::class);
     Route::resource('locations', LocationController::class);
+    
+    // User Management & Security
+    Route::resource('users', \App\Http\Controllers\UserController::class);
 });
 
 require __DIR__.'/settings.php';

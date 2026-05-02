@@ -34,6 +34,7 @@ import {
     geographicView,
     masterData,
     operationsMaintenance,
+    userManagement,
 } from '@/routes';
 
 import type { NavItem } from '@/types';
@@ -159,11 +160,9 @@ const navSections: NavSection[] = [
                 href: '#',
                 icon: Shield,
                 items: [
-                    { title: 'Role-Based Access', href: '/security/rbac' },
-                    { title: 'Site Permissions', href: '/security/permissions' },
+                    { title: 'Manage Users & Roles', href: userManagement() },
                     { title: 'Audit Logging', href: '/security/logs' },
-                    { title: '2FA Settings', href: '/security/2fa' },
-                    { title: 'Approval Workflows', href: '/security/approvals' },
+                    { title: '2FA Settings', href: '/settings/profile' },
                 ],
             },
             {

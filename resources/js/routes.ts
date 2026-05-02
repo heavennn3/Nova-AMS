@@ -45,9 +45,13 @@ export function spareParts() {
 }
 export function documents() {
     return '/operations-maintanance';
-}export function userManagement() {
-    return '/operations-maintanance';
-}export function reports() {
+}
+
+export function userManagement() {
+    return '/users';
+}
+
+export function reports() {
     return '/operations-maintanance';
 }export function systemSettings() {
     return '/operations-maintanance';
