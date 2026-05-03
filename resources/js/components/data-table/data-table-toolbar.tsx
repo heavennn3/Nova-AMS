@@ -80,12 +80,41 @@ export function DataTableToolbar<TData>({
         if (!file) return;
 
         Papa.parse(file, {
-            header: true,
+            header: false, // We'll manually find the headers
             skipEmptyLines: true,
             complete: (results) => {
-                if (onImportCsv) {
-                    onImportCsv(results.data);
+                const rows = results.data as string[][];
+                
+                // Find the header row (look for typical ID column like 'Aset ID' or 'Asset ID')
+                let headerRowIndex = 0;
+                for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                    const row = rows[i];
+                    if (row.some(cell => typeof cell === 'string' && (cell.trim().toLowerCase() === 'aset id' || cell.trim().toLowerCase() === 'asset id' || cell.trim().toLowerCase() === 'asset_id'))) {
+                        headerRowIndex = i;
+                        break;
+                    }
                 }
+
+                if (headerRowIndex >= rows.length) {
+                    alert("Could not detect valid headers in CSV.");
+                    return;
+                }
+
+                const headers = rows[headerRowIndex].map(h => h.trim());
+                const dataRows = rows.slice(headerRowIndex + 1);
+
+                const parsedData = dataRows.map(row => {
+                    const obj: any = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = row[index];
+                    });
+                    return obj;
+                });
+
+                if (onImportCsv) {
+                    onImportCsv(parsedData);
+                }
+                
                 // Reset input
                 if (fileInputRef.current) fileInputRef.current.value = '';
             },

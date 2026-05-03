@@ -21,6 +21,8 @@ class Asset extends Model
         'notes',
         'latitude',
         'longitude',
+        'quantity',
+        'site_id',
     ];
 
     public function category()
@@ -41,5 +43,10 @@ class Asset extends Model
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
     }
 }

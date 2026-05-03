@@ -3,7 +3,7 @@ export function dashboard() {
 }
 
 export function assetInventory() {
-    return '/asset-inventory';
+    return '/assets';
 }
 
 export function geographicView() {

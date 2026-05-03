@@ -11,9 +11,6 @@ class Site extends Model
 
     protected $fillable = ['name', 'code', 'region'];
 
-    /**
-     * Get the users assigned to the site.
-     */
     public function users()
     {
         return $this->hasMany(User::class);

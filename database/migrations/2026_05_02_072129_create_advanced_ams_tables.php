@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. SITES (Multi-Site Asset Management)
+
         Schema::create('sites', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -17,15 +17,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Add extra fields to ASSETS table based on new requirements and XLSX
+
         Schema::table('assets', function (Blueprint $table) {
-            // Assign to a master Site (for the 7 KK FIR locations independently)
+
             $table->foreignId('site_id')->nullable()->constrained('sites')->nullOnDelete();
             
-            // From XLSX: Quantity
+
             $table->integer('quantity')->default(1)->after('location_id');
 
-            // Advanced Asset Lifecycle & Financial Management
             $table->decimal('purchase_price', 15, 2)->nullable();
             $table->decimal('salvage_value', 15, 2)->nullable();
             $table->integer('useful_life_years')->nullable();
@@ -35,7 +34,7 @@ return new class extends Migration
             $table->string('barcode_path')->nullable();
         });
 
-        // 3. ASSET TRANSFERS (Inter-site asset transfer workflows)
+
         Schema::create('asset_transfers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('asset_id')->constrained('assets')->cascadeOnDelete();
@@ -49,7 +48,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 4. SPARE PARTS INVENTORY (Comprehensive Maintenance System)
+
         Schema::create('spare_parts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -61,7 +60,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 5. MAINTENANCE RECORDS (Complete service records per asset)
+
         Schema::create('maintenance_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('asset_id')->constrained('assets')->cascadeOnDelete();
@@ -74,7 +73,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 6. CONTRACTS (Vendor & Contract Management)
+
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vendor_id')->constrained('vendors')->cascadeOnDelete();
@@ -88,10 +87,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 7. DOCUMENTS (Document Management System)
+
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            // morphs allow documents to attach to Assets, Contracts, Work Orders, etc.
+
             $table->morphs('documentable'); 
             $table->string('file_name');
             $table->string('file_path');

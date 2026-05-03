@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('/operations-maintanance', 'operations-maintanance')->name('operations-maintenance');
     
     // Asset CRUD (this automatically handles: index, create, store, show, edit, update, destroy)
+    Route::post('assets/import-bulk', [AssetController::class, 'importBulk'])->name('assets.import');
     Route::resource('assets', AssetController::class);
     
     // Master data CRUD

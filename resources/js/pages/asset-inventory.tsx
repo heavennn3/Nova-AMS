@@ -13,9 +13,45 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
             ),
         },
         {
+            accessorKey: "category",
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Category" />
+            ),
+        },
+        {
+            accessorKey: "type",
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Type" />
+            ),
+        },
+        {
+            accessorKey: "site",
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Location" />
+            ),
+        },
+        {
+            accessorKey: "quantity",
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Quantity" />
+            ),
+        },
+        {
+            accessorKey: "vendor",
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Vendor" />
+            ),
+        },
+        {
             accessorKey: "product_name",
             header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Product Name" />
+                <DataTableColumnHeader column={column} title="Product" />
+            ),
+        },
+        {
+            accessorKey: "purchase_year",
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Purchase Year" />
             ),
         },
         {
@@ -25,9 +61,18 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
             ),
             cell: ({ row }: any) => {
                 const status = row.original.status;
+                const statusColors: Record<string, string> = {
+                    available: 'bg-green-100 text-green-800',
+                    in_use: 'bg-blue-100 text-blue-800',
+                    maintenance: 'bg-yellow-100 text-yellow-800',
+                    faulty: 'bg-red-100 text-red-800',
+                };
+                
+                const colorClass = statusColors[status] || 'bg-secondary text-secondary-foreground';
+
                 return (
                     <div className="flex items-center">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
                             {status || 'Unknown'}
                         </span>
                     </div>
@@ -41,11 +86,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 const asset = row.original;
                 return (
                     <div className="flex items-center space-x-2">
-                        {/* 
-                          Using @ts-ignore for the ziggy route() helper to satisfy TS, 
-                          or falling back to a raw path string if it is unavailable in the environment.
-                        */}
-                        <Link href={(window as any).route?.('assets.edit', asset.id) || `/assets/${asset.id}/edit`}>
+                        <Link href={`/assets/${asset.id}/edit`}>
                             <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
                                 <Edit className="h-4 w-4 mr-1" /> Edit
                             </Button>
@@ -56,7 +97,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                             className="h-8 px-2 text-red-600 hover:bg-red-50"
                             onClick={() => {
                                 if (confirm('Are you sure you want to delete this asset?')) {
-                                    router.delete((window as any).route?.('assets.destroy', asset.id) || `/assets/${asset.id}`);
+                                    router.delete(`/assets/${asset.id}`);
                                 }
                             }}
                         >
@@ -69,10 +110,14 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
     ];
 
     const handleImportCsv = (importedData: any[]) => {
-        console.log("Imported data:", importedData);
-        // You can post this to your backend using Inertia
-        // router.post('/assets/import', { data: importedData });
-        alert(`Successfully parsed ${importedData.length} records from CSV! Check console for data payload.`);
+        router.post('/assets/import-bulk', { assets: importedData }, {
+            preserveScroll: true,
+            onSuccess: () => alert(`Successfully imported ${importedData.length} assets from CSV!`),
+            onError: (err) => {
+                console.error("Import failed:", err);
+                alert("Failed to import CSV. Check console for details.");
+            }
+        });
     };
 
     return (
@@ -83,10 +128,10 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Register</h1>
                     <p className="text-muted-foreground mt-1">
-                        Manage your asset inventory, import datasets, or export to PDF/Excel.
+                        Manage your asset inventory, filter by location (e.g., Sandakan, Tawau), or export to Excel.
                     </p>
                 </div>
-                <Link href={(window as any).route?.('assets.create') || '/assets/create'}>
+                <Link href="/assets/create">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" /> Register New Asset
                     </Button>
@@ -96,7 +141,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
             <DataTable 
                 columns={columns} 
                 data={assets || []} 
-                searchKey="product_name"
+                searchKey="site" // Setting the search key to "site" allows filtering by Location
                 onImportCsv={handleImportCsv}
             />
         </div>
