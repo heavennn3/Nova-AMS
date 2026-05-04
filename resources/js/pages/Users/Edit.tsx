@@ -116,3 +116,12 @@ export default function UserEdit({ user, roles, sites }: { user: any, roles: str
         </div>
     );
 }
+
+UserEdit.layout = {
+    breadcrumbs: [
+        {
+            title: 'UserEdit',
+            href: '#',
+        },
+    ],
+};

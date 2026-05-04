@@ -40,4 +40,14 @@ class User extends Authenticatable implements Auditable
     {
         return $this->belongsTo(Site::class);
     }
+
+    public function tickets()
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    public function assignedTickets()
+    {
+        return $this->hasMany(SupportTicket::class, 'assigned_to');
+    }
 }

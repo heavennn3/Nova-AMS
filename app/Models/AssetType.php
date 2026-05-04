@@ -15,4 +15,9 @@ class AssetType extends Model
     {
         return $this->hasMany(Asset::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(AssetCategory::class, 'asset_category_id');
+    }
 }

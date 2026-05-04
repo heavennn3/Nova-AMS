@@ -74,3 +74,11 @@ export default function Edit({ asset }) {
         </div>
     );
 }
+Edit.layout = {
+    breadcrumbs: [
+        {
+            title: 'Edit',
+            href: '#',
+        },
+    ],
+};

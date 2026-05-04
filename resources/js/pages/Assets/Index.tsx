@@ -152,7 +152,8 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
                     <p className="text-muted-foreground mt-1">
-                        Manage your asset inventory per location, or export to Excel.
+                        Maintenance Services for Air Traffic Management Systems in Kota Kinabalu Flight Information Region (KK FIR) Encompassing Sabah and Sarawak 
+(CAAM.BKP.400-5/8/24)
                     </p>
                 </div>
                 <Link href={`/assets/create?site_id=${selectedSiteId}`}>
@@ -181,7 +182,6 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
             <DataTable 
                 columns={columns} 
                 data={filteredAssets || []} 
-                searchKey="product_name" // Allow filtering by product name
                 onImportCsv={handleImportCsv}
             />
 
@@ -217,3 +217,11 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
         </div>
     );
 }
+AssetIndex.layout = {
+    breadcrumbs: [
+        {
+            title: 'Asset Inventory',
+            href: '#',
+        },
+    ],
+};

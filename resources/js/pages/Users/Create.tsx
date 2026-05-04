@@ -118,3 +118,12 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
         </div>
     );
 }
+
+UserCreate.layout = {
+    breadcrumbs: [
+        {
+            title: 'Create User',
+            href: '#',
+        },
+    ],
+};

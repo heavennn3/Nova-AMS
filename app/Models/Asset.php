@@ -49,4 +49,16 @@ class Asset extends Model
     {
         return $this->belongsTo(Site::class);
     }
+
+    /** The currently active (in-use) assignment, if any. */
+    public function activeAssignment()
+    {
+        return $this->hasOne(AssetAssignment::class)->where('status', 'active')->latest();
+    }
+
+    /** All assignment history. */
+    public function assignments()
+    {
+        return $this->hasMany(AssetAssignment::class)->latest();
+    }
 }

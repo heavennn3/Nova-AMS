@@ -1,9 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { LayoutGrid, Menu, Moon, Search, Sun } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { NotificationBell } from '@/components/notification-bell';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -29,6 +29,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { useAppearance } from '@/hooks/use-appearance';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
@@ -68,6 +69,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const isDark = resolvedAppearance === 'dark';
 
     return (
         <>
@@ -93,7 +96,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     Navigation menu
                                 </SheetTitle>
                                 <SheetHeader className="flex justify-start text-left">
-                                    <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
+                                    <img
+                                        src="/images/novatis-logo.png"
+                                        alt="Novatis Resources"
+                                        className="h-7 w-auto object-contain"
+                                    />
                                 </SheetHeader>
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
@@ -185,31 +192,47 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             >
                                 <Search className="!size-5 opacity-80 group-hover:opacity-100" />
                             </Button>
-                            <div className="ml-1 hidden gap-1 lg:flex">
-                                {rightNavItems.map((item) => (
-                                    <Tooltip key={item.title}>
-                                        <TooltipTrigger>
-                                            <a
-                                                href={toUrl(item.href)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="group inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-                                            >
-                                                <span className="sr-only">
-                                                    {item.title}
-                                                </span>
-                                                {item.icon && (
-                                                    <item.icon className="size-5 opacity-80 group-hover:opacity-100" />
-                                                )}
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{item.title}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                ))}
-                            </div>
                         </div>
+
+                        {/* Dark / Light mode toggle pill */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
+                                    aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                                    className={cn(
+                                        'relative flex h-7 w-[52px] items-center rounded-full border px-0.5 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                                        isDark
+                                            ? 'border-slate-600 bg-slate-800'
+                                            : 'border-amber-200 bg-amber-50',
+                                    )}
+                                >
+                                    {/* sliding knob */}
+                                    <span
+                                        className={cn(
+                                            'absolute flex h-5 w-5 items-center justify-center rounded-full shadow-sm transition-all duration-300',
+                                            isDark
+                                                ? 'left-[28px] bg-slate-200'
+                                                : 'left-[2px] bg-amber-400',
+                                        )}
+                                    >
+                                        {isDark
+                                            ? <Moon className="h-3 w-3 text-slate-700" />
+                                            : <Sun className="h-3 w-3 text-white" />
+                                        }
+                                    </span>
+                                    {/* background icons */}
+                                    <Sun className={cn('ml-1 h-3 w-3 transition-opacity duration-300', isDark ? 'opacity-30 text-slate-400' : 'opacity-0')} />
+                                    <Moon className={cn('ml-auto mr-1 h-3 w-3 transition-opacity duration-300', isDark ? 'opacity-0' : 'opacity-30 text-amber-400')} />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                                <p>{isDark ? 'Switch to light mode' : 'Switch to dark mode'}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <NotificationBell />
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button

@@ -108,3 +108,12 @@ export default function UsersIndex({ users }: { users: any[] }) {
         </div>
     );
 }
+
+UsersIndex.layout = {
+    breadcrumbs: [
+        {
+            title: 'User Management',
+            href: '#',
+        },
+    ],
+};

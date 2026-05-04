@@ -1,15 +1,13 @@
-import AppLogoIcon from '@/components/app-logo-icon';
-
+/**
+ * Full Novatis logo — used in the sidebar header (expanded state).
+ * Shows the logo at a comfortable height that fits the sidebar.
+ */
 export default function AppLogo() {
     return (
-        <div className="flex flex-col items-center">
-            <img
-                src="/images/novatis-logo.png"
-                alt="Novatis Logo"
-className="h-15 w-auto object-contain"
-            />
-
-           
-        </div>
+        <img
+            src="/images/novatis-logo.png"
+            alt="Novatis Resources"
+            className="h-8 w-auto object-contain"
+        />
     );
 }

@@ -15,4 +15,9 @@ class Site extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function assets()
+    {
+        return $this->hasMany(Asset::class);
+    }
 }

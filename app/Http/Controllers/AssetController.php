@@ -57,7 +57,12 @@ class AssetController extends Controller
             'status' => 'required',
         ]);
 
-        Asset::create($validated);
+        $asset = Asset::create($validated);
+
+        // Notify Admins
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $admins = \App\Models\User::role('Admin')->get();
+        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\NewAssetNotification($asset, $user->name));
 
         return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
     }

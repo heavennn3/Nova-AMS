@@ -165,3 +165,11 @@ export default function AssetCreate({ categories, types, vendors, sites }: any) 
         </div>
     );
 }
+AssetCreate.layout = {
+    breadcrumbs: [
+        {
+            title: 'Register Asset',
+            href: '#',
+        },
+    ],
+};

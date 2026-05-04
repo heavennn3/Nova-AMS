@@ -44,7 +44,7 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="email@nova.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>

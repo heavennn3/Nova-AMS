@@ -128,7 +128,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Register</h1>
                     <p className="text-muted-foreground mt-1">
-                        Manage your asset inventory, filter by location (e.g., Sandakan, Tawau), or export to Excel.
+                        
                     </p>
                 </div>
                 <Link href="/assets/create">
@@ -147,3 +147,12 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
         </div>
     );
 }
+
+AssetIndex.layout = {
+    breadcrumbs: [
+        {
+            title: 'Asset Inventory',
+            href: '/asset-inventory',
+        },
+    ],
+};
