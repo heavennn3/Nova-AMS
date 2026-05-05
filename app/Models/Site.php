@@ -20,4 +20,17 @@ class Site extends Model
     {
         return $this->hasMany(Asset::class);
     }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('site_access', function ($builder) {
+            $user = auth()->user();
+            if ($user && !$user->hasRole('Admin') && $user->site_id) {
+                $builder->where('id', $user->site_id);
+            }
+        });
+    }
 }

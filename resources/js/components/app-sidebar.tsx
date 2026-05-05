@@ -168,7 +168,7 @@ const navSections: NavSection[] = [
                 href: '#',
                 icon: Headset,
                 items: [
-                    { title: 'Live Chat & Tickets', href: '/support/tickets' },
+                    { title: 'Chat with Helpdesk', href: '/support/tickets' },
                 ],
             },
         ],

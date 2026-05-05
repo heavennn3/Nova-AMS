@@ -52,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/live-tracking/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('live-tracking.checkin');
     });
 
-    // ── Geographic & Mapping (Asset Inventory permission reused) ────────────
+    // ── Geographic & Mapping (Asset Inventory permission reused) 
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
         Route::get('/geographic-view', [\App\Http\Controllers\MappingController::class, 'geographicView'])->name('geographic-view');
         Route::get('/mapping/floor-plans', [\App\Http\Controllers\MappingController::class, 'floorPlans'])->name('mapping.floor-plans');
@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/mapping/routes', [\App\Http\Controllers\MappingController::class, 'routes'])->name('mapping.routes');
     });
 
-    // ── Master Data ─────────────────────────────────────────────────────────
+    // ── Master Data 
     Route::middleware(['permission:module.master-data'])->group(function () {
         Route::get('/master-data', [\App\Http\Controllers\MasterDataController::class, 'index'])->name('master-data');
 

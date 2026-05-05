@@ -39,7 +39,16 @@ class MultiSiteController extends Controller
     {
         return Inertia::render('MultiSite/Access', [
             'sites' => Site::all(),
-            'users' => \App\Models\User::all()
+            'users' => \App\Models\User::with(['roles', 'site'])->get()->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->roles->pluck('name')->first() ?? 'None',
+                    'site' => $user->site ? $user->site->name : 'Global Access',
+                    'site_id' => $user->site_id,
+                ];
+            })
         ]);
     }
 }

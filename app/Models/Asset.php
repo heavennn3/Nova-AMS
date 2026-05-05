@@ -50,6 +50,19 @@ class Asset extends Model
         return $this->belongsTo(Site::class);
     }
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('site_access', function ($builder) {
+            $user = auth()->user();
+            if ($user && !$user->hasRole('Admin') && $user->site_id) {
+                $builder->where('site_id', $user->site_id);
+            }
+        });
+    }
+
     /** The currently active (in-use) assignment, if any. */
     public function activeAssignment()
     {
