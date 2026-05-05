@@ -35,11 +35,19 @@ class AssetTrackingController extends Controller
                 'asset_id'     => $asset->asset_id,
                 'product_name' => $asset->product_name,
                 'category'     => $asset->category?->name,
-                'site'         => $asset->site?->name,
+                'site_id'      => $asset->site_id,
+                'site_name'    => $asset->site?->name,
                 'status'       => $asset->status,
             ]);
 
-        $users = User::select('id', 'name', 'email')->orderBy('name')->get();
+        $users = User::with('sites')->select('id', 'name', 'email')->orderBy('name')->get()->map(fn($u) => [
+            'id'    => $u->id,
+            'name'  => $u->name,
+            'email' => $u->email,
+            'site_ids' => $u->sites->pluck('id')->toArray(),
+        ]);
+
+        $sites = \App\Models\Site::select('id', 'name')->orderBy('name')->get();
 
         $stats = [
             'total_assets'    => Asset::count(),
@@ -50,7 +58,7 @@ class AssetTrackingController extends Controller
             'total_history'   => AssetAssignment::where('status', 'returned')->count(),
         ];
 
-        // Pass first page of history inline so the tab loads instantly
+        // Pass first page of history inline
         $history = AssetAssignment::with([
                 'asset.category',
                 'asset.site',
@@ -66,6 +74,7 @@ class AssetTrackingController extends Controller
             'liveAssignments' => $liveAssignments,
             'availableAssets' => $availableAssets,
             'users'           => $users,
+            'sites'           => $sites,
             'stats'           => $stats,
             'history'         => $history->getCollection()->map(fn($a) => $this->formatHistoryRecord($a))->values(),
             'historyMeta'     => [
@@ -93,6 +102,19 @@ class AssetTrackingController extends Controller
             ->get()
             ->map(fn($a) => $this->formatAssignment($a));
 
+        $availableAssets = Asset::with(['category', 'site'])
+            ->where('status', 'available')
+            ->get()
+            ->map(fn($asset) => [
+                'id'           => $asset->id,
+                'asset_id'     => $asset->asset_id,
+                'product_name' => $asset->product_name,
+                'category'     => $asset->category?->name,
+                'site_id'      => $asset->site_id,
+                'site_name'    => $asset->site?->name,
+                'status'       => $asset->status,
+            ]);
+
         $stats = [
             'total_assets'   => Asset::count(),
             'in_use'         => AssetAssignment::active()->count(),
@@ -104,6 +126,7 @@ class AssetTrackingController extends Controller
 
         return response()->json([
             'liveAssignments' => $liveAssignments,
+            'availableAssets' => $availableAssets,
             'stats'           => $stats,
             'timestamp'       => now()->toIso8601String(),
         ]);
@@ -183,12 +206,21 @@ class AssetTrackingController extends Controller
                 $q->whereHas('asset', fn($a) => $a
                     ->where('product_name', 'like', "%{$search}%")
                     ->orWhere('asset_id', 'like', "%{$search}%")
+                    ->orWhere('serial_number', 'like', "%{$search}%")
                 )
                 ->orWhereHas('user', fn($u) => $u
                     ->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                 );
             });
+        }
+
+        if ($startDate = $request->input('start_date')) {
+            $query->whereDate('assigned_at', '>=', $startDate);
+        }
+
+        if ($endDate = $request->input('end_date')) {
+            $query->whereDate('assigned_at', '<=', $endDate);
         }
 
         $records = $query->latest('returned_at')->paginate(50);
@@ -255,6 +287,81 @@ class AssetTrackingController extends Controller
             'duration'        => $mins !== null ? $this->humanDuration($mins) : '—',
             'remarks'         => $a->remarks ?? 'No remarks provided.',
         ];
+    }
+
+    /**
+     * Export history as CSV report.
+     */
+    public function report(Request $request)
+    {
+        $query = AssetAssignment::with([
+                'asset.category',
+                'asset.site',
+                'asset.type',
+                'asset.vendor',
+                'user',
+            ])
+            ->where('status', 'returned');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('asset', fn($a) => $a
+                    ->where('product_name', 'like', "%{$search}%")
+                    ->orWhere('asset_id', 'like', "%{$search}%")
+                    ->orWhere('serial_number', 'like', "%{$search}%")
+                )
+                ->orWhereHas('user', fn($u) => $u
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                );
+            });
+        }
+
+        if ($startDate = $request->input('start_date')) {
+            $query->whereDate('assigned_at', '>=', $startDate);
+        }
+
+        if ($endDate = $request->input('end_date')) {
+            $query->whereDate('assigned_at', '<=', $endDate);
+        }
+
+        $records = $query->latest('returned_at')->get();
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=asset_withdrawal_report_" . date('Ymd_His') . ".csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use($records) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, [
+                'Asset ID', 'Product Name', 'Serial Number', 'Category', 'Site', 
+                'User Name', 'User Email', 'Assigned At', 'Returned At', 'Duration', 'Remarks'
+            ]);
+
+            foreach ($records as $r) {
+                $formatted = $this->formatHistoryRecord($r);
+                fputcsv($file, [
+                    $formatted['asset_id'],
+                    $formatted['product_name'],
+                    $formatted['serial_number'],
+                    $formatted['category'],
+                    $formatted['site'],
+                    $formatted['user_name'],
+                    $formatted['user_email'],
+                    $formatted['assigned_at'],
+                    $formatted['returned_at'],
+                    $formatted['duration'],
+                    $formatted['remarks'],
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     private function humanDuration(int $mins): string

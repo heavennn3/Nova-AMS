@@ -92,7 +92,8 @@ interface AvailableAsset {
     asset_id: string;
     product_name: string;
     category: string;
-    site: string;
+    site_id: number;
+    site_name: string;
     status: string;
 }
 
@@ -100,6 +101,12 @@ interface UserOption {
     id: number;
     name: string;
     email: string;
+    site_ids: number[];
+}
+
+interface SiteOption {
+    id: number;
+    name: string;
 }
 
 interface Stats {
@@ -121,6 +128,7 @@ interface Props {
     liveAssignments: Assignment[];
     availableAssets: AvailableAsset[];
     users: UserOption[];
+    sites: SiteOption[];
     stats: Stats;
     history?: HistoryRecord[];
     historyMeta?: HistoryMeta;
@@ -184,6 +192,7 @@ export default function LiveTracking({
     liveAssignments = [],
     availableAssets: initialAssets = [],
     users = [],
+    sites = [],
     stats: initialStats = { total_assets: 0, in_use: 0, available: 0, returned_today: 0, total_history: 0 },
     history: initialHistory = [],
     historyMeta: initialHistoryMeta = { total: 0, per_page: 50, current_page: 1, last_page: 1 },
@@ -192,8 +201,11 @@ export default function LiveTracking({
     const [assignments, setAssignments] = useState<Assignment[]>(liveAssignments);
     const [stats, setStats]             = useState<Stats>(initialStats);
 
-    // Live search
+    // Live search & filtering
     const [search, setSearch]           = useState('');
+    const [activeSiteFilter, setActiveSiteFilter] = useState<string>('all');
+    const [activeStartDate, setActiveStartDate] = useState('');
+    const [activeEndDate, setActiveEndDate] = useState('');
     const [online, setOnline]           = useState(true);
     const [lastPoll, setLastPoll]       = useState<Date>(new Date());
     const [polling, setPolling]         = useState(false);
@@ -202,15 +214,33 @@ export default function LiveTracking({
     const [historyData, setHistoryData] = useState<HistoryRecord[]>(Array.isArray(initialHistory) ? initialHistory : []);
     const [historyMeta, setHistoryMeta] = useState<HistoryMeta>(initialHistoryMeta);
     const [historySearch, setHistorySearch] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [selectedHistory, setSelectedHistory] = useState<HistoryRecord | null>(null);
 
     // Checkout modal
     const [checkoutOpen, setCheckoutOpen] = useState(false);
+    const [selectedCheckoutSiteId, setSelectedCheckoutSiteId] = useState<string>('all');
     const [checkoutAssetId, setCheckoutAssetId] = useState('');
     const [checkoutUserId, setCheckoutUserId]   = useState('');
     const [checkoutRemarks, setCheckoutRemarks] = useState('');
+    const [assetSearch, setAssetSearch] = useState('');
+    const [userSearch, setUserSearch] = useState('');
+    const [showAssetDropdown, setShowAssetDropdown] = useState(false);
+    const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const [availableAssets, setAvailableAssets] = useState<AvailableAsset[]>(initialAssets);
     const [submitting, setSubmitting]   = useState(false);
+
+    useEffect(() => {
+        if (!checkoutOpen) {
+            setAssetSearch('');
+            setUserSearch('');
+            setCheckoutAssetId('');
+            setCheckoutUserId('');
+            setSelectedCheckoutSiteId('all');
+        }
+    }, [checkoutOpen]);
 
     // Checkin confirmation
     const [checkinTarget, setCheckinTarget] = useState<Assignment | null>(null);
@@ -228,6 +258,7 @@ export default function LiveTracking({
 
             setAssignments(data.liveAssignments || []);
             setStats(prev => ({ ...prev, ...(data.stats || {}) }));
+            if (data.availableAssets) setAvailableAssets(data.availableAssets);
             setLastPoll(new Date());
             setOnline(true);
         } catch (err) {
@@ -245,10 +276,16 @@ export default function LiveTracking({
 
     // ── History Fetching ──────────────────────────────────────────────────
 
-    const fetchHistory = useCallback(async (page = 1, query = historySearch) => {
+    const fetchHistory = useCallback(async (page = 1, query = historySearch, start = startDate, end = endDate) => {
         setLoadingHistory(true);
         try {
-            const res = await fetch(`/api/live-tracking/history?page=${page}&search=${query}`, {
+            const params = new URLSearchParams({
+                page: String(page),
+                search: query,
+                start_date: start,
+                end_date: end
+            });
+            const res = await fetch(`/api/live-tracking/history?${params.toString()}`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
             if (!res.ok) throw new Error('History fetch failed');
@@ -263,14 +300,23 @@ export default function LiveTracking({
         } finally {
             setLoadingHistory(false);
         }
-    }, [historySearch]);
+    }, [historySearch, startDate, endDate]);
 
     useEffect(() => {
         if (activeTab === 'history') {
             const timer = setTimeout(() => fetchHistory(1), 300);
             return () => clearTimeout(timer);
         }
-    }, [activeTab, historySearch, fetchHistory]);
+    }, [activeTab, historySearch, startDate, endDate, fetchHistory]);
+
+    const handleExport = () => {
+        const params = new URLSearchParams({
+            search: historySearch,
+            start_date: startDate,
+            end_date: endDate
+        });
+        window.location.href = `/api/live-tracking/report?${params.toString()}`;
+    };
 
     // ── Actions ────────────────────────────────────────────────────────────
 
@@ -312,13 +358,19 @@ export default function LiveTracking({
 
     // ── Filter ─────────────────────────────────────────────────────────────
 
-    const filtered = (assignments || []).filter(a =>
-        search === '' ||
-        (a.product_name || '').toLowerCase().includes(search.toLowerCase()) ||
-        (a.user_name || '').toLowerCase().includes(search.toLowerCase()) ||
-        (a.asset_id || '').toLowerCase().includes(search.toLowerCase()) ||
-        (a.site || '').toLowerCase().includes(search.toLowerCase()),
-    );
+    const filtered = (assignments || []).filter(a => {
+        const matchesSearch = search === '' ||
+            (a.product_name || '').toLowerCase().includes(search.toLowerCase()) ||
+            (a.user_name || '').toLowerCase().includes(search.toLowerCase()) ||
+            (a.asset_id || '').toLowerCase().includes(search.toLowerCase());
+        
+        const matchesSite = activeSiteFilter === 'all' || a.site === sites.find(s => String(s.id) === activeSiteFilter)?.name;
+        
+        const matchesDate = (!activeStartDate || a.assigned_at >= activeStartDate) && 
+                            (!activeEndDate || a.assigned_at <= activeEndDate + 'T23:59:59');
+
+        return matchesSearch && matchesSite && matchesDate;
+    });
 
     // ── Render ─────────────────────────────────────────────────────────────
 
@@ -329,29 +381,21 @@ export default function LiveTracking({
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10 relative">
-                        <Activity className="h-6 w-6 text-primary" />
-                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-pulse border-2 border-background" />
-                    </div>
+                    
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Asset Tracking</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Asset Withdrawal</h1>
                         <p className="text-sm text-muted-foreground">Trace or view asset being used by</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border font-medium ${
-                        online ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'
-                    }`}>
-                        {online ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                        {online ? 'Live' : 'Offline'}
-                    </div>
+                  
                     <Button size="sm" variant="outline" onClick={poll} disabled={polling}>
                         <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${polling ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
                     <Button size="sm" onClick={() => setCheckoutOpen(true)}>
                         <LogIn className="w-3.5 h-3.5 mr-1.5" />
-                        Check Out
+                        Withdraw Asset
                     </Button>
                 </div>
             </div>
@@ -365,7 +409,7 @@ export default function LiveTracking({
                     }`}
                 >
                     <Activity className="w-4 h-4" />
-                    Live View
+                    Active 
                     <Badge variant="secondary" className="ml-1 px-1.5 h-5">{stats?.in_use ?? 0}</Badge>
                 </button>
                 <button
@@ -401,87 +445,151 @@ export default function LiveTracking({
                         ))}
                     </div>
 
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search live assignments…"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                    </div>
-
-                    {filtered.length === 0 ? (
-                        <Card className="border-dashed py-16 flex flex-col items-center gap-3 text-muted-foreground">
-                            <Activity className="h-12 w-12 opacity-20" />
-                            <p className="text-lg font-medium">{search ? 'No results found' : 'No assets checked out'}</p>
-                        </Card>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                            {filtered.map(a => (
-                                <Card key={a.id} className="shadow-sm border border-border hover:shadow-md transition-shadow">
-                                    <CardContent className="p-4 space-y-3">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className={`w-9 h-9 rounded-full ${avatarColor(a.user_name)} flex items-center justify-center text-white text-xs font-bold`}>
-                                                    {initials(a.user_name)}
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-sm leading-tight">{a.user_name}</p>
-                                                    <p className="text-xs text-muted-foreground">{a.user_email}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                                                <p className="text-sm font-medium truncate">{a.product_name}</p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[11px] font-mono bg-muted px-1.5 py-0.5 rounded">{a.asset_id}</span>
-                                                <span className="text-xs text-muted-foreground">{a.category}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center justify-between pt-2 border-t">
-                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                                <Clock className="h-3.5 w-3.5" />
-                                                <span>{a.duration}</span>
-                                            </div>
-                                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setCheckinTarget(a)}>
-                                                Return
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="relative flex-1 min-w-[200px]">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                placeholder="Search by Asset ID"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
+                            />
                         </div>
-                    )}
-                </>
-            ) : (
-                <div className="space-y-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search history…"
-                            value={historySearch}
-                            onChange={e => setHistorySearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                        {loadingHistory && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            </div>
-                        )}
+                        <Select value={activeSiteFilter} onValueChange={setActiveSiteFilter}>
+                            <SelectTrigger className="w-[180px] h-10"><SelectValue placeholder="Filter Site" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Sites</SelectItem>
+                                {sites.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="date"
+                                value={activeStartDate}
+                                onChange={e => setActiveStartDate(e.target.value)}
+                                className="px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
+                            />
+                            <span className="text-muted-foreground text-xs">to</span>
+                            <input
+                                type="date"
+                                value={activeEndDate}
+                                onChange={e => setActiveEndDate(e.target.value)}
+                                className="px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
+                            />
+                        </div>
                     </div>
 
                     <Card>
                         <Table>
                             <TableHeader>
-                                <TableRow>
+                                <TableRow className="bg-muted/30">
+                                    <TableHead className="w-[100px]">Asset ID</TableHead>
+                                    <TableHead>Product Name</TableHead>
+                                    <TableHead>User / Email</TableHead>
+                                    <TableHead>Site</TableHead>
+                                    <TableHead>Assigned At</TableHead>
+                                    <TableHead>Duration</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filtered.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                                            <Activity className="h-8 w-8 mx-auto opacity-20 mb-2" />
+                                            <p>{search || activeSiteFilter !== 'all' || activeStartDate ? 'No Matching Data Found' : 'No Asset Currently Being Used'}</p>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    filtered.map(a => (
+                                        <TableRow key={a.id} className="hover:bg-muted/10 transition-colors">
+                                            <TableCell className="font-mono text-[11px] font-bold text-primary">{a.asset_id}</TableCell>
+                                            <TableCell className="font-medium text-sm">{a.product_name}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-6 h-6 rounded-full ${avatarColor(a.user_name)} flex items-center justify-center text-[10px] text-white font-bold`}>
+                                                        {initials(a.user_name)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-semibold leading-none mb-1">{a.user_name}</p>
+                                                        <p className="text-[10px] text-muted-foreground">{a.user_email}</p>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell><Badge variant="outline" className="bg-emerald-50/50 text-emerald-700 border-emerald-200">{a.site}</Badge></TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{formatDate(a.assigned_at)}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-1.5 text-xs font-medium">
+                                                    <Clock className="h-3 w-3 text-amber-500" />
+                                                    {a.duration}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button size="sm" variant="ghost" className="h-8 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50" onClick={() => setCheckinTarget(a)}>
+                                                    Return
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Card>
+                </>
+            ) : (
+                <div className="space-y-4">
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                placeholder="Search "
+                                value={historySearch}
+                                onChange={e => setHistorySearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
+                            />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1.5 bg-muted/30 px-2 py-1 rounded-lg border border-border h-10">
+                                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={e => setStartDate(e.target.value)}
+                                    className="bg-transparent text-sm focus:outline-none w-[130px]"
+                                />
+                                <span className="text-muted-foreground text-xs mx-1">to</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={e => setEndDate(e.target.value)}
+                                    className="bg-transparent text-sm focus:outline-none w-[130px]"
+                                />
+                            </div>
+                            <Button 
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white h-10 px-4"
+                                onClick={handleExport}
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                Export CSV
+                            </Button>
+                        </div>
+                    </div>
+
+                    {loadingHistory && (
+                        <div className="flex justify-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                    )}
+
+                    <Card>
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-muted/30">
                                     <TableHead>Asset</TableHead>
                                     <TableHead>User</TableHead>
+                                    <TableHead>Site</TableHead>
                                     <TableHead>Assigned</TableHead>
                                     <TableHead>Returned</TableHead>
                                     <TableHead>Duration</TableHead>
@@ -500,10 +608,13 @@ export default function LiveTracking({
                                             </TableCell>
                                             <TableCell>
                                                 <p className="font-medium text-sm">{record.user_name || 'Unknown'}</p>
-                                                <p className="text-xs text-muted-foreground">{record.user_email || '—'}</p>
+                                                <p className="text-[10px] text-muted-foreground">{record.user_email || '—'}</p>
                                             </TableCell>
-                                            <TableCell className="text-xs">{formatDate(record.assigned_at)}</TableCell>
-                                            <TableCell className="text-xs">{formatDate(record.returned_at)}</TableCell>
+                                            <TableCell>
+                                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 font-normal">{record.site || '—'}</Badge>
+                                            </TableCell>
+                                            <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">{formatDate(record.assigned_at)}</TableCell>
+                                            <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">{formatDate(record.returned_at)}</TableCell>
                                             <TableCell><Badge variant="outline" className="font-normal">{record.duration || '—'}</Badge></TableCell>
                                             <TableCell className="text-right">
                                                 <Button variant="ghost" size="sm" onClick={() => setSelectedHistory(record)}><FileText className="h-4 w-4" /></Button>
@@ -550,36 +661,128 @@ export default function LiveTracking({
                     <DialogHeader>
                         <DialogTitle>Check Out Asset</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-6 py-4">
                         <div>
-                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Asset</label>
-                            <Select value={checkoutAssetId} onValueChange={setCheckoutAssetId}>
-                                <SelectTrigger><SelectValue placeholder="Select Asset" /></SelectTrigger>
+                            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">1. Select Site</label>
+                            <Select value={selectedCheckoutSiteId} onValueChange={(val) => {
+                                setSelectedCheckoutSiteId(val);
+                                setCheckoutAssetId('');
+                                setCheckoutUserId('');
+                            }}>
+                                <SelectTrigger className="w-full h-11"><SelectValue placeholder="All Sites" /></SelectTrigger>
                                 <SelectContent>
-                                    {initialAssets.map(a => (
-                                        <SelectItem key={a.id} value={String(a.id)}>{a.asset_id} - {a.product_name}</SelectItem>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {sites.map(s => (
+                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div>
-                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Assign To</label>
-                            <Select value={checkoutUserId} onValueChange={setCheckoutUserId}>
-                                <SelectTrigger><SelectValue placeholder="Assign To User" /></SelectTrigger>
-                                <SelectContent>
-                                    {users.map(u => (
-                                        <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+
+                        <div onMouseLeave={() => setShowAssetDropdown(false)}>
+                            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">2. Select Asset (Searchable)</label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                                <input
+                                    type="text"
+                                    placeholder="Type to search asset..."
+                                    value={assetSearch}
+                                    onFocus={() => setShowAssetDropdown(true)}
+                                    onChange={e => {
+                                        setAssetSearch(e.target.value);
+                                        setShowAssetDropdown(true);
+                                    }}
+                                    className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 mb-1"
+                                />
+                                {showAssetDropdown && (
+                                    <div className="absolute top-full left-0 right-0 z-[100] bg-background border rounded-lg shadow-2xl max-h-60 overflow-y-auto mt-1 p-1">
+                                        {availableAssets
+                                            .filter(a => (selectedCheckoutSiteId === 'all' || a.site_id === Number(selectedCheckoutSiteId)))
+                                            .filter(a => assetSearch === '' || a.product_name.toLowerCase().includes(assetSearch.toLowerCase()) || a.asset_id.toLowerCase().includes(assetSearch.toLowerCase()))
+                                            .map(a => (
+                                                <button
+                                                    key={a.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setCheckoutAssetId(String(a.id));
+                                                        setAssetSearch(a.product_name + ' (' + a.asset_id + ')');
+                                                        setShowAssetDropdown(false);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex justify-between items-center ${checkoutAssetId === String(a.id) ? 'bg-primary/10' : ''}`}
+                                                >
+                                                    <div>
+                                                        <p className="font-medium">{a.product_name}</p>
+                                                        <p className="text-[10px] text-muted-foreground">{a.asset_id} • {a.site_name}</p>
+                                                    </div>
+                                                    {checkoutAssetId === String(a.id) && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                                                </button>
+                                            ))
+                                        }
+                                        {availableAssets.filter(a => (selectedCheckoutSiteId === 'all' || a.site_id === Number(selectedCheckoutSiteId))).filter(a => assetSearch === '' || a.product_name.toLowerCase().includes(assetSearch.toLowerCase()) || a.asset_id.toLowerCase().includes(assetSearch.toLowerCase())).length === 0 && (
+                                            <div className="p-3 text-center text-xs text-muted-foreground">No available assets match.</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            {checkoutAssetId && !assetSearch.includes('(') && (
+                                <p className="text-[10px] text-emerald-600 font-medium mt-1">✓ Selected: {availableAssets.find(a => String(a.id) === checkoutAssetId)?.product_name}</p>
+                            )}
                         </div>
+
+                        <div onMouseLeave={() => setShowUserDropdown(false)}>
+                            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">3. Assign To User (Searchable)</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                                <input
+                                    type="text"
+                                    placeholder="Type to search user..."
+                                    value={userSearch}
+                                    onFocus={() => setShowUserDropdown(true)}
+                                    onChange={e => {
+                                        setUserSearch(e.target.value);
+                                        setShowUserDropdown(true);
+                                    }}
+                                    className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 mb-1"
+                                />
+                                {showUserDropdown && (
+                                    <div className="absolute top-full left-0 right-0 z-[100] bg-background border rounded-lg shadow-2xl max-h-60 overflow-y-auto mt-1 p-1">
+                                        {users
+                                            .filter(u => (selectedCheckoutSiteId === 'all' || u.site_ids.includes(Number(selectedCheckoutSiteId))))
+                                            .filter(u => userSearch === '' || u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase()))
+                                            .map(u => (
+                                                <button
+                                                    key={u.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setCheckoutUserId(String(u.id));
+                                                        setUserSearch(u.name);
+                                                        setShowUserDropdown(false);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex justify-between items-center ${checkoutUserId === String(u.id) ? 'bg-primary/10' : ''}`}
+                                                >
+                                                    <div>
+                                                        <p className="font-medium">{u.name}</p>
+                                                        <p className="text-[10px] text-muted-foreground">{u.email}</p>
+                                                    </div>
+                                                    {checkoutUserId === String(u.id) && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                                                </button>
+                                            ))
+                                        }
+                                        {users.filter(u => (selectedCheckoutSiteId === 'all' || u.site_ids.includes(Number(selectedCheckoutSiteId)))).filter(u => userSearch === '' || u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase())).length === 0 && (
+                                            <div className="p-3 text-center text-xs text-muted-foreground">No users found.</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div>
                             <label className="text-xs font-medium text-muted-foreground mb-1 block">Remarks</label>
                             <textarea
                                 value={checkoutRemarks}
                                 onChange={e => setCheckoutRemarks(e.target.value)}
                                 placeholder="Optional purpose..."
-                                className="w-full text-sm border rounded p-2 h-20 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                className="w-full text-sm border rounded p-2 h-20 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-inner"
                             />
                         </div>
                     </div>

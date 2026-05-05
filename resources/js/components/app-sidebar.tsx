@@ -66,7 +66,7 @@ const navSections: NavSection[] = [
         title: 'ASSET MANAGEMENT',
         items: [
             { title: 'Asset Inventory', href: assetInventory(), icon: Package, module: 'Asset Inventory' },
-            { title: 'Asset Tracking', href: '/live-tracking', icon: Activity, module: 'Asset Inventory' },
+            { title: 'Asset Withdrawal', href: '/live-tracking', icon: Activity, module: 'Asset Inventory' },
             { title: 'Master Data', href: masterData(), icon: Database, module: 'Master Data' },
             {
                 title: 'Multi-Site Management',
