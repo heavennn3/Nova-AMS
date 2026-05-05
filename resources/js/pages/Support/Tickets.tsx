@@ -236,7 +236,7 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                         Live Support & Helpdesk
                     </h1>
                     <p className="text-muted-foreground mt-1 text-sm">
-                        {isAdmin ? 'Manage system-wide support tickets' : 'Get help from our technical team'}
+                        {isAdmin ? 'Report Issues and Chat with Technical Team' : 'Get help from our technical team'}
                     </p>
                 </div>
                 {!isAdmin && (

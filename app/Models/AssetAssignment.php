@@ -9,6 +9,8 @@ class AssetAssignment extends Model
     protected $fillable = [
         'asset_id',
         'user_id',
+        'site_id',
+        'location_id',
         'assigned_at',
         'returned_at',
         'status',
@@ -28,6 +30,16 @@ class AssetAssignment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
     }
 
     /** Scope: only currently active (not returned) assignments */

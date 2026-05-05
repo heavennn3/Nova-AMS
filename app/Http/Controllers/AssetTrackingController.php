@@ -150,16 +150,20 @@ class AssetTrackingController extends Controller
             return back()->withErrors(['asset_id' => 'This asset is already checked out.']);
         }
 
+        $asset = Asset::find($validated['asset_id']);
+
         AssetAssignment::create([
-            'asset_id'    => $validated['asset_id'],
+            'asset_id'    => $asset->id,
             'user_id'     => $validated['user_id'],
+            'site_id'     => $asset->site_id,
+            'location_id' => $asset->location_id,
             'assigned_at' => Carbon::now(),
             'status'      => 'active',
             'remarks'     => $validated['remarks'] ?? null,
         ]);
 
         // Mark asset as in_use
-        Asset::find($validated['asset_id'])->update(['status' => 'in_use']);
+        $asset->update(['status' => 'in_use']);
 
         return back()->with('success', 'Asset checked out successfully.');
     }
@@ -194,9 +198,10 @@ class AssetTrackingController extends Controller
     {
         $query = AssetAssignment::with([
                 'asset.category',
-                'asset.site',
                 'asset.type',
                 'asset.vendor',
+                'site',
+                'location',
                 'user',
             ])
             ->where('status', 'returned');
@@ -249,7 +254,8 @@ class AssetTrackingController extends Controller
             'asset_db_id'  => $a->asset_id,
             'product_name' => $a->asset?->product_name ?? '—',
             'category'     => $a->asset?->category?->name ?? '—',
-            'site'         => $a->asset?->site?->name ?? '—',
+            'site'         => $a->site?->name ?? $a->asset?->site?->name ?? '—',
+            'location'     => $a->location?->name ?? $a->asset?->location?->name ?? '—',
             'user_name'    => $a->user?->name ?? 'Unknown',
             'user_email'   => $a->user?->email ?? '',
             'assigned_at'  => $a->assigned_at?->toIso8601String(),
@@ -273,7 +279,8 @@ class AssetTrackingController extends Controller
             'brand'           => $a->asset?->brand ?? '—',
             'category'        => $a->asset?->category?->name ?? '—',
             'type'            => $a->asset?->type?->name ?? '—',
-            'site'            => $a->asset?->site?->name ?? '—',
+            'site'            => $a->site?->name ?? $a->asset?->site?->name ?? '—',
+            'location'        => $a->location?->name ?? $a->asset?->location?->name ?? '—',
             'vendor'          => $a->asset?->vendor?->name ?? '—',
             'purchase_year'   => $a->asset?->purchase_year ?? '—',
             'status'          => $a->asset?->status ?? '—',
@@ -296,9 +303,10 @@ class AssetTrackingController extends Controller
     {
         $query = AssetAssignment::with([
                 'asset.category',
-                'asset.site',
                 'asset.type',
                 'asset.vendor',
+                'site',
+                'location',
                 'user',
             ])
             ->where('status', 'returned');
@@ -338,7 +346,7 @@ class AssetTrackingController extends Controller
         $callback = function() use($records) {
             $file = fopen('php://output', 'w');
             fputcsv($file, [
-                'Asset ID', 'Product Name', 'Serial Number', 'Category', 'Site', 
+                'Asset ID', 'Product Name', 'Serial Number', 'Category', 'Site', 'Location',
                 'User Name', 'User Email', 'Assigned At', 'Returned At', 'Duration', 'Remarks'
             ]);
 
@@ -350,6 +358,7 @@ class AssetTrackingController extends Controller
                     $formatted['serial_number'],
                     $formatted['category'],
                     $formatted['site'],
+                    $formatted['location'],
                     $formatted['user_name'],
                     $formatted['user_email'],
                     $formatted['assigned_at'],
