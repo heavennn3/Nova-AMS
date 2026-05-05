@@ -11,7 +11,7 @@ export default function UserEdit({ user, roles, sites }: { user: any, roles: str
         password: '',
         password_confirmation: '',
         role: user.role || '',
-        site_id: user.site_id ? user.site_id.toString() : '',
+        site_ids: user.site_ids || [],
     });
 
     const submit = (e: React.FormEvent) => {
@@ -91,19 +91,35 @@ export default function UserEdit({ user, roles, sites }: { user: any, roles: str
                         {errors.role && <div className="text-sm text-red-500">{errors.role}</div>}
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="site_id">Assign Site (Optional)</Label>
-                        <Select value={data.site_id} onValueChange={(val) => setData('site_id', val)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a site" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {sites.map(site => (
-                                    <SelectItem key={site.id} value={site.id.toString()}>{site.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.site_id && <div className="text-sm text-red-500">{errors.site_id}</div>}
+                    <div className="space-y-2 md:col-span-2">
+                        <Label>Assign Sites</Label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-muted/30 rounded-lg border">
+                            {sites.map(site => (
+                                <div key={site.id} className="flex items-center space-x-2">
+                                    <input 
+                                        type="checkbox"
+                                        id={`site-${site.id}`}
+                                        checked={data.site_ids.includes(site.id)}
+                                        onChange={(e) => {
+                                            const siteIds = [...data.site_ids];
+                                            if (e.target.checked) {
+                                                siteIds.push(site.id);
+                                            } else {
+                                                const index = siteIds.indexOf(site.id);
+                                                if (index > -1) siteIds.splice(index, 1);
+                                            }
+                                            setData('site_ids', siteIds);
+                                        }}
+                                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                    />
+                                    <label htmlFor={`site-${site.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                                        {site.name}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">User will have access to data across all selected sites.</p>
+                        {errors.site_ids && <div className="text-sm text-red-500">{errors.site_ids}</div>}
                     </div>
                 </div>
 

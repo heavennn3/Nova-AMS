@@ -11,7 +11,6 @@ import {
     Shield,
     FileText,
     Briefcase,
-    Sparkles,
     CircleDollarSign,
     Headset,
 } from 'lucide-react';
@@ -59,7 +58,6 @@ const navSections: NavSection[] = [
                     { title: 'Interactive Map View', href: geographicView() },
                     { title: 'Site Floor Plans', href: '/mapping/floor-plans' },
 
-                    { title: 'Route Optimization', href: '/mapping/routes' },
                 ],
             },
         ],
@@ -88,7 +86,6 @@ const navSections: NavSection[] = [
                 module: 'Operations & Maintenance',
                 items: [
                     { title: 'Asset Status Tracking', href: '/lifecycle/status' },
-                    { title: 'Depreciation Calculation', href: '/lifecycle/depreciation' },
                     { title: 'Warranty Management', href: '/lifecycle/warranty' },
                     { title: 'Health Scoring', href: '/lifecycle/health' },
                     { title: 'Audit Trail', href: '/lifecycle/audit' },
@@ -201,35 +198,21 @@ const navSections: NavSection[] = [
                     { title: 'Expiration Alerts', href: '/documents/alerts' },
                 ],
             },
-            {
-                title: 'Advanced Features',
-                href: '#',
-                icon: Sparkles,
-                module: 'Advanced Features',
-                items: [
-                    { title: 'Barcode/QR Generation', href: '/advanced/barcodes' },
-                    { title: 'Mobile App Settings', href: '/advanced/mobile' },
-                    { title: 'Offline Mode Config', href: '/advanced/offline' },
-                    { title: 'Notifications (Email/SMS)', href: '/advanced/notifications' },
-                    { title: 'API Integration', href: '/advanced/api' },
-                    { title: 'Data Import/Export', href: '/advanced/data' },
-                ],
-            },
         ],
     },
 ];
 
 const footerNavItems: NavItem[] = [
-  /*  {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },*/
+    /*  {
+          title: 'Repository',
+          href: 'https://github.com/laravel/react-starter-kit',
+          icon: FolderGit2,
+      },
+      {
+          title: 'Documentation',
+          href: 'https://laravel.com/docs/starter-kits#react',
+          icon: BookOpen,
+      },*/
 ];
 
 export function AppSidebar() {

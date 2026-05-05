@@ -24,10 +24,5 @@ class MappingController extends Controller
 
 
 
-    public function routes()
-    {
-        return Inertia::render('Mapping/Routes', [
-            'sites' => Site::all()
-        ]);
-    }
+
 }

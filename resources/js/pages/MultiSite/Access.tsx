@@ -91,7 +91,7 @@ export default function Access({ sites, users }: { sites: any[], users: any[] })
                 </div>
                 <DataTable 
                     columns={columns} 
-                    data={users} 
+                    data={users.filter(u => u.role !== 'admin')} 
                     searchKey="name" 
                 />
             </div>

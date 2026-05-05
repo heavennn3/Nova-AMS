@@ -9,6 +9,13 @@ import Papa from 'papaparse';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -121,21 +128,49 @@ export function DataTableToolbar<TData>({
         });
     };
 
+    const [searchColumn, setSearchColumn] = React.useState<string>("all");
+
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
             <div className="flex flex-1 items-center space-x-2">
+                <Select value={searchColumn} onValueChange={(val) => {
+                    setSearchColumn(val);
+                    table.setGlobalFilter("");
+                    table.resetColumnFilters();
+                }}>
+                    <SelectTrigger className="h-8 w-[130px] hidden md:flex">
+                        <SelectValue placeholder="Search in..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Columns</SelectItem>
+                        {columns.filter(c => c.accessorKey && typeof c.header === 'string').map(c => (
+                            <SelectItem key={c.accessorKey} value={c.accessorKey}>{c.header}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
                 <Input
-                    placeholder="Search all columns..."
-                    value={(table.getState().globalFilter as string) ?? ''}
-                    onChange={(event) =>
-                        table.setGlobalFilter(event.target.value)
+                    placeholder={searchColumn === "all" ? "Search all data..." : `Search in ${searchColumn}...`}
+                    value={searchColumn === "all" 
+                        ? (table.getState().globalFilter as string ?? '') 
+                        : (table.getColumn(searchColumn)?.getFilterValue() as string ?? '')
                     }
-                    className="h-8 w-[150px] lg:w-[250px]"
+                    onChange={(event) => {
+                        if (searchColumn === "all") {
+                            table.setGlobalFilter(event.target.value);
+                        } else {
+                            table.getColumn(searchColumn)?.setFilterValue(event.target.value);
+                        }
+                    }}
+                    className="h-8 w-[150px] lg:w-[300px]"
                 />
                 {isFiltered && (
                     <Button
                         variant="ghost"
-                        onClick={() => table.resetColumnFilters()}
+                        onClick={() => {
+                            table.resetColumnFilters();
+                            table.setGlobalFilter("");
+                        }}
                         className="h-8 px-2 lg:px-3 text-muted-foreground"
                     >
                         Reset

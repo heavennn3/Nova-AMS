@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Asset extends Model
+class Asset extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'asset_id',
         'serial_number',
@@ -57,8 +59,14 @@ class Asset extends Model
     {
         static::addGlobalScope('site_access', function ($builder) {
             $user = auth()->user();
-            if ($user && !$user->hasRole('Admin') && $user->site_id) {
-                $builder->where('site_id', $user->site_id);
+            if ($user && !$user->hasRole('Admin')) {
+                $siteIds = $user->sites()->pluck('sites.id')->toArray();
+                if (!empty($siteIds)) {
+                    $builder->whereIn('site_id', $siteIds);
+                } elseif ($user->site_id) {
+                    // Fallback to legacy single site_id column
+                    $builder->where('site_id', $user->site_id);
+                }
             }
         });
     }

@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import * as React from 'react';
+import { useState, useMemo } from 'react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Plus, Edit, Trash2, Wrench, FileText, Package, CheckCircle2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function AssetIndex({ assets = [], sites = [] }: { assets: any[], sites?: any[] }) {
     const [selectedSiteId, setSelectedSiteId] = useState<string>(() => {
@@ -14,7 +17,7 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
     const [importSiteId, setImportSiteId] = useState<string>("");
 
-    const columns = [
+    const columns = React.useMemo(() => [
         {
             accessorKey: "asset_id",
             header: ({ column }: any) => (
@@ -95,6 +98,17 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
                 const asset = row.original;
                 return (
                     <div className="flex items-center space-x-2">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 px-2 text-amber-600 hover:text-amber-700">
+                                    <Wrench className="h-4 w-4 mr-1" /> Maint.
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <MaintenanceRequestForm asset={asset} />
+                            </DialogContent>
+                        </Dialog>
+                        
                         <Link href={`/assets/${asset.id}/edit`}>
                             <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
                                 <Edit className="h-4 w-4 mr-1" /> Edit
@@ -116,7 +130,59 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
                 );
             }
         }
-    ];
+    ], []);
+
+    function MaintenanceRequestForm({ asset }: { asset: any }) {
+        const { data, setData, post, processing, reset } = useForm({
+            asset_id: asset.id,
+            issue: '',
+            priority: 'medium',
+        });
+
+        const submit = (e: React.FormEvent) => {
+            e.preventDefault();
+            post('/maintenance/work-orders', {
+                onSuccess: () => {
+                    alert('Maintenance requested successfully!');
+                    reset();
+                }
+            });
+        };
+
+        return (
+            <form onSubmit={submit} className="space-y-4">
+                <DialogHeader>
+                    <DialogTitle>Request Maintenance</DialogTitle>
+                    <DialogDescription>Create a work order for {asset.product_name}.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-2">
+                    <Label>Issue Description</Label>
+                    <Textarea 
+                        placeholder="What needs to be fixed?" 
+                        value={data.issue}
+                        onChange={(e) => setData('issue', e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Priority</Label>
+                    <Select value={data.priority} onValueChange={(val) => setData('priority', val)}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <DialogFooter>
+                    <Button type="submit" disabled={processing} className="w-full">Submit Request</Button>
+                </DialogFooter>
+            </form>
+        );
+    }
 
     const handleImportCsv = (importedData: any[]) => {
         setPendingImportData(importedData);
@@ -148,35 +214,76 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
         <div className="p-8 max-w-7xl mx-auto space-y-6">
             <Head title="Asset Inventory" />
             
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Maintenance Services for Air Traffic Management Systems in Kota Kinabalu Flight Information Region (KK FIR) Encompassing Sabah and Sarawak 
-(CAAM.BKP.400-5/8/24)
-                    </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-card p-4 rounded-lg border shadow-sm flex items-center space-x-4">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                        <Package className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Assets</p>
+                        <p className="text-2xl font-bold">{(assets || []).length}</p>
+                    </div>
                 </div>
-                <Link href={`/assets/create?site_id=${selectedSiteId}`}>
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Register New Asset
-                    </Button>
-                </Link>
+                <div className="bg-card p-4 rounded-lg border shadow-sm flex items-center space-x-4">
+                    <div className="p-3 bg-emerald-500/10 rounded-full">
+                        <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">In Current Site</p>
+                        <p className="text-2xl font-bold">{(assets || []).filter((a: any) => a?.site_id?.toString() === selectedSiteId).length}</p>
+                    </div>
+                </div>
+                <div className="bg-card p-4 rounded-lg border shadow-sm flex items-center space-x-4">
+                    <div className="p-3 bg-blue-500/10 rounded-full">
+                        <Wrench className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Sites Managed</p>
+                        <p className="text-2xl font-bold">{sites?.length || 0}</p>
+                    </div>
+                </div>
             </div>
 
-            <div className="flex space-x-2 border-b border-border w-full overflow-x-auto">
-                {sites?.map((site: any) => (
-                    <button
-                        key={site.id || Math.random()}
-                        onClick={() => setSelectedSiteId(site.id?.toString() || "")}
-                        className={`px-4 py-2 border-b-2 whitespace-nowrap transition-colors ${
-                            selectedSiteId === (site.id?.toString() || "") 
-                            ? 'border-primary text-primary font-medium' 
-                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground'
-                        }`}
-                    >
-                        {site.name}
-                    </button>
-                ))}
+            <div className="flex justify-between items-center pt-4">
+                <div className="space-y-1">
+                    <h2 className="text-lg font-semibold tracking-tight">NRSB Asset List</h2>
+                    <p className="text-sm text-muted-foreground">Maintenance Services for Air Traffic Management Systems in Kota Kinabalu Flight Information Region (KK FIR) Encompassing Sabah and Sarawak 
+(CAAM.BKP.400-5/8/24)</p>
+                </div>
+                <div className="flex space-x-3">
+                   
+                    <Link href={`/assets/create?site_id=${selectedSiteId}`}>
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> Register New Asset
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+
+            <div className="flex space-x-2 border-b border-border w-full overflow-x-auto no-scrollbar pb-px">
+                {sites?.map((site: any) => {
+                    const count = (assets || []).filter((a: any) => a?.site_id === site.id).length;
+                    return (
+                        <button
+                            key={site.id || Math.random()}
+                            onClick={() => setSelectedSiteId(site.id?.toString() || "")}
+                            className={`px-4 py-2 border-b-2 whitespace-nowrap transition-all flex items-center space-x-2 ${
+                                selectedSiteId === (site.id?.toString() || "") 
+                                ? 'border-primary text-primary font-bold bg-primary/5' 
+                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground hover:bg-muted/30'
+                            }`}
+                        >
+                            <span>{site.name}</span>
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                                selectedSiteId === (site.id?.toString() || "") 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-muted text-muted-foreground'
+                            }`}>
+                                {count}
+                            </span>
+                        </button>
+                    );
+                })}
             </div>
             
             <DataTable 

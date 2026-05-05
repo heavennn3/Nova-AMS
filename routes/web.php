@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
         Route::inertia('/asset-inventory', 'asset-inventory')->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
+        Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
 
         // Asset Tracking
@@ -57,7 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/geographic-view', [\App\Http\Controllers\MappingController::class, 'geographicView'])->name('geographic-view');
         Route::get('/mapping/floor-plans', [\App\Http\Controllers\MappingController::class, 'floorPlans'])->name('mapping.floor-plans');
 
-        Route::get('/mapping/routes', [\App\Http\Controllers\MappingController::class, 'routes'])->name('mapping.routes');
+
     });
 
     // ── Master Data 
@@ -94,6 +95,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/operations-maintanance', [\App\Http\Controllers\OperationsController::class, 'dashboard'])->name('operations-maintenance');
         Route::get('/maintenance/scheduling', [\App\Http\Controllers\OperationsController::class, 'scheduling']);
         Route::get('/maintenance/work-orders', [\App\Http\Controllers\OperationsController::class, 'workOrders']);
+        Route::post('/maintenance/work-orders', [\App\Http\Controllers\OperationsController::class, 'storeWorkOrder'])->name('maintenance.work-orders.store');
+        Route::patch('/maintenance/work-orders/{id}/status', [\App\Http\Controllers\OperationsController::class, 'updateWorkOrderStatus'])->name('maintenance.work-orders.status');
         Route::get('/maintenance/history', [\App\Http\Controllers\OperationsController::class, 'history']);
         Route::get('/maintenance/parts', [\App\Http\Controllers\OperationsController::class, 'parts']);
         Route::get('/maintenance/technicians', [\App\Http\Controllers\OperationsController::class, 'technicians']);
@@ -105,7 +108,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/vendors/portal', [\App\Http\Controllers\OperationsController::class, 'portal']);
 
         Route::get('/lifecycle/status', [\App\Http\Controllers\AssetLifecycleController::class, 'status']);
-        Route::get('/lifecycle/depreciation', [\App\Http\Controllers\AssetLifecycleController::class, 'depreciation']);
         Route::get('/lifecycle/warranty', [\App\Http\Controllers\AssetLifecycleController::class, 'warranty']);
         Route::get('/lifecycle/health', [\App\Http\Controllers\AssetLifecycleController::class, 'health']);
         Route::get('/lifecycle/audit', [\App\Http\Controllers\AssetLifecycleController::class, 'audit']);
@@ -140,14 +142,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ── Advanced Features ─────────────────────────────────────────────────────
-    Route::middleware(['permission:module.advanced'])->group(function () {
-        Route::get('/advanced/api', [\App\Http\Controllers\AdvancedFeaturesController::class, 'api']);
-        Route::get('/advanced/barcodes', [\App\Http\Controllers\AdvancedFeaturesController::class, 'barcodes']);
-        Route::get('/advanced/mobile', [\App\Http\Controllers\AdvancedFeaturesController::class, 'mobile']);
-        Route::get('/advanced/offline', [\App\Http\Controllers\AdvancedFeaturesController::class, 'offline']);
-        Route::get('/advanced/notifications', [\App\Http\Controllers\AdvancedFeaturesController::class, 'notifications']);
-        Route::get('/advanced/data', [\App\Http\Controllers\AdvancedFeaturesController::class, 'data']);
-    });
+
 
     // ── System Settings (Admin-level) ─────────────────────────────────────────
     Route::middleware(['permission:module.system-settings'])->group(function () {

@@ -33,12 +33,17 @@ class User extends Authenticatable implements Auditable
         ];
     }
 
-    /**
-     * Get the site associated with the user.
-     */
     public function site()
     {
         return $this->belongsTo(Site::class);
+    }
+
+    /**
+     * Get the sites associated with the user.
+     */
+    public function sites()
+    {
+        return $this->belongsToMany(Site::class);
     }
 
     public function tickets()

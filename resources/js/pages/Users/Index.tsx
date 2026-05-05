@@ -44,10 +44,24 @@ export default function UsersIndex({ users }: { users: any[] }) {
             }
         },
         {
-            accessorKey: "site",
+            accessorKey: "sites",
             header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Assigned Site" />
+                <DataTableColumnHeader column={column} title="Assigned Sites" />
             ),
+            cell: ({ row }: any) => {
+                const sites = row.original.sites || [];
+                if (sites.length === 0) return <span className="text-muted-foreground italic text-xs">All Sites</span>;
+                
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {sites.map((site: string) => (
+                            <span key={site} className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium border border-slate-200">
+                                {site}
+                            </span>
+                        ))}
+                    </div>
+                );
+            }
         },
         {
             id: "actions",

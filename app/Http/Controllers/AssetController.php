@@ -187,6 +187,44 @@ class AssetController extends Controller
         return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
     }
 
+    public function exportCsv()
+    {
+        $assets = Asset::with(['category', 'site', 'vendor'])->get();
+        $filename = "asset_inventory_" . date('Y-m-d') . ".csv";
+        
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['Asset ID', 'Product Name', 'Category', 'Site', 'Status', 'Quantity', 'Purchase Year', 'Vendor'];
+
+        $callback = function() use($assets, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($assets as $asset) {
+                fputcsv($file, [
+                    $asset->asset_id,
+                    $asset->product_name,
+                    $asset->category?->name,
+                    $asset->site?->name,
+                    $asset->status,
+                    $asset->quantity,
+                    $asset->purchase_year,
+                    $asset->vendor?->name,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function destroy(Asset $asset)
     {
         $asset->delete();
@@ -197,12 +235,49 @@ class AssetController extends Controller
 
 public function dashboard()
 {
+    $totalAssets = Asset::count();
+    $availableAssets = Asset::where('status', 'available')->count();
+    $inUseAssets = Asset::where('status', 'in_use')->count();
+    $underMaintenance = Asset::where('status', 'under_maintenance')->count();
+    $faultyAssets = Asset::where('status', 'faulty')->count();
+
+    // Group assets by category for the bar chart
+    $categoryData = \App\Models\AssetCategory::withCount('assets')->get()->map(function($cat) {
+        return [
+            'name' => $cat->name,
+            'count' => $cat->assets_count
+        ];
+    });
+
+    // Group assets by site for the site distribution
+    $siteData = \App\Models\Site::withCount('assets')->get()->map(function($site) {
+        return [
+            'name' => $site->name,
+            'count' => $site->assets_count
+        ];
+    });
+
+    // Recent activities (simulated for now, could be audit logs)
+    $recentActivities = \App\Models\Asset::with(['site', 'category'])->latest()->limit(5)->get()->map(function($asset) {
+        return [
+            'id' => $asset->id,
+            'asset_id' => $asset->asset_id,
+            'product_name' => $asset->product_name,
+            'site' => $asset->site ? $asset->site->name : 'N/A',
+            'status' => $asset->status,
+            'time' => $asset->updated_at->diffForHumans()
+        ];
+    });
+
     return Inertia::render('dashboard', [
-        'totalAssets' => Asset::count(),
-        'availableAssets' => Asset::where('status', 'available')->count(),
-        'inUseAssets' => Asset::where('status', 'in_use')->count(),
-        'underMaintenance' => Asset::where('status', 'under_maintenance')->count(),
-        'faultyAssets' => Asset::where('status', 'faulty')->count(),
+        'totalAssets' => $totalAssets,
+        'availableAssets' => $availableAssets,
+        'inUseAssets' => $inUseAssets,
+        'underMaintenance' => $underMaintenance,
+        'faultyAssets' => $faultyAssets,
+        'categoryData' => $categoryData,
+        'siteData' => $siteData,
+        'recentActivities' => $recentActivities,
     ]);
 }
 }
