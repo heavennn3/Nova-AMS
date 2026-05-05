@@ -12,7 +12,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Always accessible (dashboard + monitoring) ──────────────────────────
     Route::inertia('/dashboard', 'dashboard')->name('dashboard');
 
-    // Support Tickets & Chat
+    // Support Ticket
     Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets');
     Route::post('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'store'])->name('support.tickets.store');
     Route::get('/support/tickets/{ticket}', [\App\Http\Controllers\SupportTicketController::class, 'show'])->name('support.tickets.show');
@@ -33,19 +33,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     });
 
-    // Notifications
+    // Notification
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
 
 
-    // ── Asset Inventory ─────────────────────────────────────────────────────
+    // Asset Inventory 
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
         Route::inertia('/asset-inventory', 'asset-inventory')->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
 
-        // Live Asset Tracking
+        // Asset Tracking
         Route::get('/live-tracking', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('live-tracking');
         Route::get('/api/live-tracking/poll', [\App\Http\Controllers\AssetTrackingController::class, 'poll'])->name('live-tracking.poll');
         Route::post('/live-tracking/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('live-tracking.checkout');
