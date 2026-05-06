@@ -54,10 +54,10 @@ export default function GeographicView({ sites = [] }: { sites: any[] }) {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
                         <Globe className="h-8 w-8 mr-3 text-primary" />
-                        Interactive Map Module
+                        Priview Site Location
                     </h1>
                     <p className="text-muted-foreground mt-2">
-                        Geospatial distribution of operational sites across Sabah & Sarawak.
+                        Geospatial distribution of operational sites across Sabah & Sarawak
                     </p>
                 </div>
                 <div className="bg-primary/10 px-4 py-2 rounded-lg border border-primary/20">
