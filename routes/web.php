@@ -10,7 +10,7 @@ Route::inertia('/', 'nova-ams', [
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Always accessible (dashboard + monitoring) ──────────────────────────
-    Route::inertia('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     // Support Ticket
     Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets');

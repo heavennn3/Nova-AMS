@@ -2,7 +2,57 @@ import { Head } from '@inertiajs/react';
 import { Activity } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function Status() {
+import { DataTable } from '@/components/data-table/data-table';
+import { Badge } from '@/components/ui/badge';
+import * as React from 'react';
+
+export default function Status({ assets = [] }: { assets: any[] }) {
+    const columns = React.useMemo(() => [
+        {
+            accessorKey: 'asset_id',
+            header: 'Asset ID',
+        },
+        {
+            accessorKey: 'product_name',
+            header: 'Product Name',
+        },
+        {
+            accessorKey: 'site.name',
+            header: 'Site',
+        },
+        {
+            accessorKey: 'status',
+            header: 'Operational Status',
+            cell: ({ row }: any) => {
+                const status = row.getValue('status');
+                return (
+                    <Badge variant={
+                        status === 'available' ? 'success' : 
+                        status === 'under_maintenance' ? 'warning' : 
+                        status === 'faulty' ? 'destructive' : 'outline'
+                    }>
+                        {status || 'Unknown'}
+                    </Badge>
+                );
+            }
+        },
+        {
+            accessorKey: 'condition_status',
+            header: 'Physical Condition',
+            cell: ({ row }: any) => {
+                const condition = row.getValue('condition_status');
+                return (
+                    <span className="capitalize">{condition || 'N/A'}</span>
+                );
+            }
+        },
+        {
+            accessorKey: 'updated_at',
+            header: 'Last Updated',
+            cell: ({ row }: any) => new Date(row.getValue('updated_at')).toLocaleDateString()
+        }
+    ], []);
+
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-6">
             <Head title="Asset Status Tracking" />
@@ -12,13 +62,13 @@ export default function Status() {
             </div>
             <p className="text-muted-foreground">Monitor real-time operational states and historical transitions for all assets.</p>
             
-            <Card className="h-[400px] flex items-start justify-start p-8 bg-muted/10 border-dashed">
-                <CardContent className="text-left">
-                    <Activity className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                    <p className="text-lg font-medium">No Status Anomalies Detected</p>
-                    <p className="text-muted-foreground text-sm mt-2">All tracked assets are currently operating within expected parameters.</p>
-                </CardContent>
-            </Card>
+            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden p-6">
+                <DataTable 
+                    columns={columns} 
+                    data={assets} 
+                    searchKey="product_name" 
+                />
+            </div>
         </div>
     );
 }

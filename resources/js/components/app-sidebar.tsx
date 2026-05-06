@@ -7,11 +7,9 @@ import {
     Wrench,
     MapPin,
     Activity,
-    ChartBar,
     Shield,
     FileText,
     Briefcase,
-    CircleDollarSign,
     Headset,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -46,7 +44,7 @@ type NavSection = {
 
 const navSections: NavSection[] = [
     {
-        title: 'OVERVIEW',
+        title: 'NOVA AMS',
         items: [
             { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
             {
@@ -126,38 +124,6 @@ const navSections: NavSection[] = [
         ],
     },
     {
-        title: 'REPORTING & FINANCE',
-        items: [
-            {
-                title: 'Analytics & Reporting',
-                href: '#',
-                icon: ChartBar,
-                module: 'Analytics & Reporting',
-                items: [
-                    { title: 'Asset Utilization', href: '/analytics/utilization' },
-                    { title: 'Cost Analysis', href: '/analytics/costs' },
-                    { title: 'Availability Metrics', href: '/analytics/availability' },
-                    { title: 'Compliance Reports', href: '/analytics/compliance' },
-                    { title: 'Predictive Analytics', href: '/analytics/predictive' },
-                    { title: 'Geographic Heat Maps', href: '/analytics/heatmaps' },
-                ],
-            },
-            {
-                title: 'Financial Management',
-                href: '#',
-                icon: CircleDollarSign,
-                module: 'Financial Management',
-                items: [
-                    { title: 'Asset Valuation', href: '/finance/valuation' },
-                    { title: 'Budget Tracking', href: '/finance/budgets' },
-                    { title: 'Cost Center Allocation', href: '/finance/costs' },
-                    { title: 'Purchase Requisitions', href: '/finance/requisitions' },
-                    { title: 'Asset Insurance', href: '/finance/insurance' },
-                ],
-            },
-        ],
-    },
-    {
         title: 'SUPPORT & HELPDESK',
         items: [
             {
@@ -165,7 +131,7 @@ const navSections: NavSection[] = [
                 href: '#',
                 icon: Headset,
                 items: [
-                    { title: 'Chat with Helpdesk', href: '/support/tickets' },
+                    { title: 'Live Chat', href: '/support/tickets' },
                 ],
             },
         ],
