@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Geographic & Mapping (Asset Inventory permission reused) 
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
         Route::get('/geographic-view', [\App\Http\Controllers\MappingController::class, 'geographicView'])->name('geographic-view');
+        Route::patch('/sites/{site}/location', [\App\Http\Controllers\MappingController::class, 'updateSiteLocation'])->name('sites.update-location');
         Route::get('/mapping/floor-plans', [\App\Http\Controllers\MappingController::class, 'floorPlans'])->name('mapping.floor-plans');
 
 
