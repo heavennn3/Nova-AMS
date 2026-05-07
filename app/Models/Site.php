@@ -31,7 +31,7 @@ class Site extends Model implements Auditable
         static::addGlobalScope('site_access', function ($builder) {
             $user = auth()->user();
             if ($user && !$user->hasRole('Admin') && $user->site_id) {
-                $builder->where('id', $user->site_id);
+                $builder->where($builder->getQuery()->from . '.id', $user->site_id);
             }
         });
     }

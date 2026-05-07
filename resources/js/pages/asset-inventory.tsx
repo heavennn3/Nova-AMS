@@ -11,54 +11,63 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Asset ID" />
             ),
+            headerText: "Asset ID",
         },
         {
             accessorKey: "category",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Category" />
             ),
+            headerText: "Category",
         },
         {
             accessorKey: "type",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Type" />
             ),
+            headerText: "Type",
         },
         {
             accessorKey: "site",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Location" />
             ),
+            headerText: "Location",
         },
         {
             accessorKey: "quantity",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Quantity" />
             ),
+            headerText: "Quantity",
         },
         {
             accessorKey: "vendor",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Vendor" />
             ),
+            headerText: "Vendor",
         },
         {
             accessorKey: "product_name",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Product" />
             ),
+            headerText: "Product",
         },
         {
             accessorKey: "purchase_year",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Purchase Year" />
             ),
+            headerText: "Purchase Year",
         },
         {
             accessorKey: "status",
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Status" />
             ),
+            headerText: "Status",
             cell: ({ row }: any) => {
                 const status = row.original.status;
                 const statusColors: Record<string, string> = {
@@ -66,14 +75,27 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                     in_use: 'bg-blue-100 text-blue-800',
                     maintenance: 'bg-yellow-100 text-yellow-800',
                     faulty: 'bg-red-100 text-red-800',
+                    degraded: 'bg-orange-100 text-orange-800',
+                    new: 'bg-emerald-100 text-emerald-800',
+                    retired: 'bg-slate-100 text-slate-800',
                 };
                 
+                const labels: Record<string, string> = {
+                    available: 'Available',
+                    in_use: 'In Use',
+                    maintenance: 'Maintenance',
+                    faulty: 'Faulty Unit',
+                    degraded: 'Degraded Unit',
+                    new: 'New Unit',
+                    retired: 'Retired',
+                };
+
                 const colorClass = statusColors[status] || 'bg-secondary text-secondary-foreground';
 
                 return (
                     <div className="flex items-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
-                            {status || 'Unknown'}
+                        <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colorClass}`}>
+                            {labels[status] || status || 'Unknown'}
                         </span>
                     </div>
                 );

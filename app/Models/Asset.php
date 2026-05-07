@@ -62,10 +62,10 @@ class Asset extends Model implements Auditable
             if ($user && !$user->hasRole('Admin')) {
                 $siteIds = $user->sites()->pluck('sites.id')->toArray();
                 if (!empty($siteIds)) {
-                    $builder->whereIn('site_id', $siteIds);
+                    $builder->whereIn($builder->getQuery()->from . '.site_id', $siteIds);
                 } elseif ($user->site_id) {
                     // Fallback to legacy single site_id column
-                    $builder->where('site_id', $user->site_id);
+                    $builder->where($builder->getQuery()->from . '.site_id', $user->site_id);
                 }
             }
         });

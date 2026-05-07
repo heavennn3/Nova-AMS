@@ -14,7 +14,7 @@ export default function Dashboard({
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <Head title="System Dashboard" />
+            <Head title="Nova AMS Dashboard" />
             
             <div className="flex justify-between items-start">
                 <div>
@@ -27,7 +27,22 @@ export default function Dashboard({
                     </p>
                 </div>
                 <div className="flex space-x-3">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                        const csvContent = "data:text/csv;charset=utf-8," 
+                            + "Metric,Value\n"
+                            + `Total Assets,${stats.totalAssets}\n`
+                            + `Sites Managed,${stats.totalSites}\n`
+                            + `Active Work Orders,${stats.activeWorkOrders}\n`
+                            + `Open Tickets,${stats.openTickets}`;
+                        
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", "dashboard_summary.csv");
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }}>
                         <TrendingDown className="h-4 w-4 mr-2" />
                         Export Data
                     </Button>

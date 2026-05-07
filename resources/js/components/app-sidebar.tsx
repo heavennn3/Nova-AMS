@@ -53,7 +53,7 @@ const navSections: NavSection[] = [
                 icon: Map,
                 module: 'Asset Inventory',
                 items: [
-                    { title: 'Interactive Map View', href: geographicView() },
+                    { title: 'View Site ', href: geographicView() },
                     { title: 'Site Floor Plans', href: '/mapping/floor-plans' },
 
                 ],

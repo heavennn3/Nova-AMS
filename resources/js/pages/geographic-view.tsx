@@ -30,9 +30,9 @@ export default function GeographicView({ sites = [] }: { sites: any[] }) {
 
     const getGoogleMapsEmbedUrl = (site: any) => {
         if (!site || !site.latitude || !site.longitude) {
-            return `https://maps.google.com/maps?q=${encodeURIComponent(site?.name || 'Malaysia')}&z=14&output=embed`;
+            return `https://maps.google.com/maps?q=${encodeURIComponent(site?.name || 'Malaysia')}&z=19&output=embed`;
         }
-        return `https://maps.google.com/maps?q=${site.latitude},${site.longitude}&z=14&output=embed`;
+        return `https://maps.google.com/maps?q=${site.latitude},${site.longitude}&z=19&output=embed`;
     };
 
     const handleUpdateLocation = (e: React.FormEvent) => {
@@ -168,7 +168,7 @@ export default function GeographicView({ sites = [] }: { sites: any[] }) {
                                             <p className="flex justify-between">
                                                 <span className="text-muted-foreground font-medium">Coordinates:</span>
                                                 <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
-                                                    {selectedSite.latitude || 'Not Set'}, {selectedSite.longitude || 'Not Set'}
+                                                    {selectedSite.latitude || '5.937897941956195'}, {selectedSite.longitude || '116.0550073053758'}
                                                 </span>
                                             </p>
                                             <p className="flex justify-between">

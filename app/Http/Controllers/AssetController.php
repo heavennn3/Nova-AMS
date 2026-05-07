@@ -47,14 +47,17 @@ class AssetController extends Controller
     {
         $validated = $request->validate([
             'asset_id' => 'required|unique:assets',
-            'product_name' => 'required',
+            'serial_number' => 'nullable|string',
+            'product_name' => 'required|string',
+            'brand' => 'nullable|string',
             'category_id' => 'nullable|exists:asset_categories,id',
             'type_id' => 'nullable|exists:asset_types,id',
-            'site_id' => 'nullable|exists:sites,id',
-            'quantity' => 'nullable|integer',
             'vendor_id' => 'nullable|exists:vendors,id',
+            'site_id' => 'nullable|exists:sites,id',
             'purchase_year' => 'nullable|integer',
-            'status' => 'required',
+            'status' => 'required|string',
+            'condition_status' => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         $asset = Asset::create($validated);
@@ -172,14 +175,17 @@ class AssetController extends Controller
     {
         $validated = $request->validate([
             'asset_id' => 'required|unique:assets,asset_id,' . $asset->id,
-            'product_name' => 'required',
+            'serial_number' => 'nullable|string',
+            'product_name' => 'required|string',
+            'brand' => 'nullable|string',
             'category_id' => 'nullable|exists:asset_categories,id',
             'type_id' => 'nullable|exists:asset_types,id',
-            'site_id' => 'nullable|exists:sites,id',
-            'quantity' => 'nullable|integer',
             'vendor_id' => 'nullable|exists:vendors,id',
+            'site_id' => 'nullable|exists:sites,id',
             'purchase_year' => 'nullable|integer',
-            'status' => 'required',
+            'status' => 'required|string',
+            'condition_status' => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         $asset->update($validated);

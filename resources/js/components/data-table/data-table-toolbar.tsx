@@ -143,8 +143,8 @@ export function DataTableToolbar<TData>({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Columns</SelectItem>
-                        {columns.filter(c => c.accessorKey && typeof c.header === 'string').map(c => (
-                            <SelectItem key={c.accessorKey} value={c.accessorKey}>{c.header}</SelectItem>
+                        {columns.filter(c => c.accessorKey && (typeof c.header === 'string' || c.headerText)).map(c => (
+                            <SelectItem key={c.accessorKey} value={c.accessorKey}>{c.headerText || c.header}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
