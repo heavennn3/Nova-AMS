@@ -4,7 +4,7 @@ import { ArrowRightLeft, FileWarning } from 'lucide-react';
 
 export default function Transfers({ sites, transfers }: { sites: any[], transfers: any[] }) {
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Transfer Workflows" />
 
             <div>

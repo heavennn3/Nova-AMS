@@ -20,7 +20,7 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
     };
 
     return (
-        <div className="p-8 max-w-3xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Create User" />
             
             <div className="flex justify-between items-center">

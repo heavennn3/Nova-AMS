@@ -37,7 +37,7 @@ export default function Tracking({ sites, assets }: { sites: any[], assets: any[
         : assets.filter(a => a.site_id?.toString() === selectedSiteId);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Location Tracking" />
 
             <div>

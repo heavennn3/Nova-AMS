@@ -191,7 +191,7 @@ export default function MasterData({ categories = [], types = [], sites = [], ve
     const currentTab = tabConfig[activeTab];
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-8 w-full space-y-8">
             <Head title="Master Data" />
             
             <div className="flex justify-between items-center">

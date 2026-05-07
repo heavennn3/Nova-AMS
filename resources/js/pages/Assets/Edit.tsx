@@ -29,7 +29,7 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
     };
 
     return (
-        <div className="p-8 max-w-5xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title={`Edit Asset - ${asset.asset_id}`} />
             
             <div className="flex items-center justify-between">

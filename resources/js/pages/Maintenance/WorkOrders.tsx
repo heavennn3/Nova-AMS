@@ -112,7 +112,7 @@ export default function WorkOrders({ workOrders, assets, technicians }: any) {
     ];
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Work Orders Management" />
             
             <div className="flex justify-between items-end">

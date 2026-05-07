@@ -226,7 +226,7 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
     // ── Render ─────────────────────────────────────────────────────────────
 
     return (
-        <div className="p-6 max-w-7xl mx-auto flex flex-col h-[calc(100vh-4rem)] space-y-6">
+        <div className="p-6 w-full flex flex-col h-[calc(100vh-4rem)] space-y-6">
             <Head title="Live Support & Tickets" />
 
             <div className="flex justify-between items-center">

@@ -53,7 +53,7 @@ export default function Health({ assets = [] }: { assets: any[] }) {
     ], []);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Health Scoring" />
             <div className="flex items-center">
                 <HeartPulse className="h-8 w-8 mr-3 text-primary" />

@@ -25,7 +25,7 @@ export default function AssetCreate({ categories, types, vendors, sites }: any) 
     };
 
     return (
-        <div className="p-8 max-w-4xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Register Asset" />
             
             <div className="flex justify-between items-center">

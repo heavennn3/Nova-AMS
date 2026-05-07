@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function Availability() {
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Availability Metrics" />
             <div className="flex items-center">
                 <CheckCircle className="h-8 w-8 mr-3 text-primary" />

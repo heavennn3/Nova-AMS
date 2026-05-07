@@ -13,7 +13,7 @@ export default function Dashboard({
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-8 w-full space-y-8">
             <Head title="Nova AMS Dashboard" />
             
             <div className="flex justify-between items-start">

@@ -47,7 +47,7 @@ export default function GeographicView({ sites = [] }: { sites: any[] }) {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-8 w-full space-y-8">
             <Head title="Geographic View" />
 
             <div className="flex justify-between items-end">

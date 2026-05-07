@@ -84,7 +84,7 @@ const navSections: NavSection[] = [
                 items: [
                     { title: 'Asset Status Tracking', href: '/lifecycle/status' },
                     { title: 'Warranty Management', href: '/lifecycle/warranty' },
-                    { title: 'Health Scoring', href: '/lifecycle/health' },
+
                     { title: 'Audit Trail', href: '/lifecycle/audit' },
                 ],
             },
@@ -146,7 +146,7 @@ const navSections: NavSection[] = [
                 items: [
                     { title: 'Manage Users & Roles', href: userManagement() },
                     { title: 'Role Access Matrix', href: '/security/roles' },
-                    { title: 'Audit Logging', href: '/security/logs' },
+                    { title: 'System Logs', href: '/security/logs' },
                     { title: 'Profile Settings', href: '/settings/profile' },
                 ],
             },

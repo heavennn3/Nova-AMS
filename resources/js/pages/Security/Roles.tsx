@@ -124,7 +124,7 @@ export default function Roles({ roles, modules }: Props) {
         roles.filter(r => accessMatrix[r.name]?.[module]).length;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-6 w-full space-y-6">
             <Head title="Role Access & Permissions" />
 
             {/* ── Header ── */}

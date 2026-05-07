@@ -375,7 +375,7 @@ export default function LiveTracking({
     // ── Render ─────────────────────────────────────────────────────────────
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-6 w-full space-y-6">
             <Head title="Asset Tracking" />
 
             {/* Header */}

@@ -7,7 +7,7 @@ export default function Dashboards({ sites }: { sites: any[] }) {
     const totalAssets = sites.reduce((acc, site) => acc + (site.assets_count || 0), 0);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-8 w-full space-y-8">
             <Head title="Multi-Site Dashboards" />
 
             <div>

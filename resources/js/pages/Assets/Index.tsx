@@ -211,7 +211,7 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
     const filteredAssets = (assets || []).filter(a => a?.site_id?.toString() === selectedSiteId);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-8 w-full space-y-6">
             <Head title="Asset Inventory" />
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -220,7 +220,7 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
                         <Package className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Total Assets</p>
+                        <p className="text-sm text-muted-foreground">Total Assets Registered</p>
                         <p className="text-2xl font-bold">{(assets || []).length}</p>
                     </div>
                 </div>

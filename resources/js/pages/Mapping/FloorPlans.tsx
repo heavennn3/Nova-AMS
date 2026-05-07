@@ -8,7 +8,7 @@ export default function FloorPlans({ sites = [] }: { sites: any[] }) {
     const [selectedSite, setSelectedSite] = useState<string>(sites.length > 0 ? sites[0].id.toString() : '');
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-8 w-full space-y-8">
             <Head title="Site Floor Plans" />
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
