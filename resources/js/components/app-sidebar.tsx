@@ -74,7 +74,6 @@ const navSections: NavSection[] = [
                 items: [
                     { title: 'Site Dashboards', href: '/multi-site/dashboards' },
                     { title: 'Transfer Workflows', href: '/multi-site/transfers' },
-                    { title: 'Access Control', href: '/multi-site/access' },
                 ],
             },
             {
@@ -148,7 +147,7 @@ const navSections: NavSection[] = [
                     { title: 'Manage Users & Roles', href: userManagement() },
                     { title: 'Role Access Matrix', href: '/security/roles' },
                     { title: 'Audit Logging', href: '/security/logs' },
-                    { title: '2FA Settings', href: '/settings/profile' },
+                    { title: 'Profile Settings', href: '/settings/profile' },
                 ],
             },
             {

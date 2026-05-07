@@ -25,7 +25,7 @@ export default function UserEdit({ user, roles, sites }: { user: any, roles: str
             
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold tracking-tight">Edit User</h1>
-                <Link href="/users">
+                <Link href="/multi-site/access">
                     <Button variant="outline">Back to Users</Button>
                 </Link>
             </div>

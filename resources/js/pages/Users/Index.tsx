@@ -68,11 +68,14 @@ export default function UsersIndex({ users }: { users: any[] }) {
             header: "Actions",
             cell: ({ row }: any) => {
                 const user = row.original;
+                const isAdmin = user.role === 'Admin';
+
+                if (isAdmin) {
+                    return <span className="text-muted-foreground text-xs italic">System Admin</span>;
+                }
+
                 return (
                     <div className="flex items-center space-x-2">
-                        {/* 
-                          Using dummy route parsing or Ziggy 
-                        */}
                         <Link href={`/users/${user.id}/edit`}>
                             <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
                                 <Edit className="h-4 w-4 mr-1" /> Edit

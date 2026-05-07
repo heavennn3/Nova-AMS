@@ -168,7 +168,7 @@ export default function Roles({ roles, modules }: Props) {
 
             {/* ── Role Summary Cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {roles.map(role => {
+                {roles.filter(role => role.name !== 'Admin').map(role => {
                     const RoleIcon = ROLE_ICONS[role.name] ?? Shield;
                     const colors = ROLE_COLORS[role.name] ?? DEFAULT_COLOR;
                     const accessCount = getAccessCount(role.name);
@@ -241,7 +241,7 @@ export default function Roles({ roles, modules }: Props) {
                                     <TableHead className="w-16 border-r text-center text-[11px] text-muted-foreground font-normal py-2">
                                         Roles w/ Access
                                     </TableHead>
-                                    {roles.map(role => {
+                                    {roles.filter(role => role.name !== 'Admin').map(role => {
                                         const RoleIcon = ROLE_ICONS[role.name] ?? Shield;
                                         const colors = ROLE_COLORS[role.name] ?? DEFAULT_COLOR;
                                         return (
@@ -269,7 +269,7 @@ export default function Roles({ roles, modules }: Props) {
                                                     {accessCount}
                                                 </span>
                                             </TableCell>
-                                            {roles.map(role => {
+                                            {roles.filter(role => role.name !== 'Admin').map(role => {
                                                 const hasAccess = accessMatrix[role.name]?.[module] ?? false;
                                                 // Highlight cells that differ from saved state
                                                 const changed = hasAccess !== (savedMatrix[role.name]?.[module] ?? false);
