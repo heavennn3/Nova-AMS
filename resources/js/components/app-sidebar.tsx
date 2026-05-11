@@ -11,6 +11,7 @@ import {
     FileText,
     Briefcase,
     Headset,
+    Trash2,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -122,19 +123,7 @@ const navSections: NavSection[] = [
             },
         ],
     },
-    {
-        title: 'SUPPORT & HELPDESK',
-        items: [
-            {
-                title: 'Helpdesk & Support',
-                href: '#',
-                icon: Headset,
-                items: [
-                    { title: 'Live Chat', href: '/support/tickets' },
-                ],
-            },
-        ],
-    },
+
     {
         title: 'SYSTEM & ADMINISTRATION',
         items: [
@@ -165,26 +154,46 @@ const navSections: NavSection[] = [
             },
         ],
     },
+    {
+        title: 'RECYCLE BIN',
+        items: [
+            {
+                title: 'Deleted Items',
+                href: '#',
+                icon: Trash2,
+                module: 'System Settings',
+                items: [
+                    { title: 'Vendors', href: '/security/recycle-bin?type=vendors' },
+                    { title: 'Spareparts', href: '/security/recycle-bin?type=spareparts' },
+                    { title: 'Users', href: '/security/recycle-bin?type=users' },
+                    { title: 'Assets', href: '/security/recycle-bin?type=assets' },
+                ],
+            },
+        ],
+    },
+    {
+        title: 'SUPPORT',
+        items: [
+            {
+                title: 'Helpdesk & Support',
+                href: '#',
+                icon: Headset,
+                items: [
+                    { title: 'Live Chat', href: '/support/tickets' },
+                ],
+            },
+        ],
+    },
 ];
 
 const footerNavItems: NavItem[] = [
-    /*  {
-          title: 'Repository',
-          href: 'https://github.com/laravel/react-starter-kit',
-          icon: FolderGit2,
-      },
-      {
-          title: 'Documentation',
-          href: 'https://laravel.com/docs/starter-kits#react',
-          icon: BookOpen,
-      },*/
+
 ];
 
 export function AppSidebar() {
     const { auth } = usePage<any>().props;
 
-    // modulePermissions is a flat array of module names the user can access,
-    // e.g. ['Asset Inventory', 'Analytics & Reporting']
+
     const modulePermissions: string[] = auth.user?.modulePermissions ?? [];
 
     const canAccess = (module?: string) => {
@@ -192,7 +201,7 @@ export function AppSidebar() {
         return modulePermissions.includes(module);
     };
 
-    // Filter each section's items by module access, drop empty sections
+
     const filteredNavSections = navSections
         .map(section => ({
             ...section,
