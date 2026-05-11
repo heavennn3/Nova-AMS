@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { ShieldAlert, Eye, History, User, Activity, Globe } from 'lucide-react';
+import { ShieldAlert, Eye, History, User, Activity, Globe, MapPin } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from '@/components/data-table/data-table';
 import { Badge } from '@/components/ui/badge';
@@ -22,17 +22,29 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
             cell: ({ row }: any) => <span className="font-mono text-xs">{row.getValue('created_at')}</span>
         },
         {
-            accessorKey: 'user_name',
-            header: 'User',
-            headerText: 'User',
+            id: 'user_site',
+            accessorFn: (row: any) => `${row.user_name} ${row.site_name}`,
+            header: 'User & Location',
+            headerText: 'User & Location',
             cell: ({ row }: any) => (
-                <div className="flex items-center space-x-2">
-                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-3 w-3 text-primary" />
+                <div className="flex flex-col">
+                    <div className="flex items-center space-x-2 mb-1">
+                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <User className="h-3 w-3 text-primary" />
+                        </div>
+                        <span className="font-medium">{row.original.user_name}</span>
                     </div>
-                    <span className="font-medium">{row.getValue('user_name')}</span>
+                    <div className="flex items-center ml-8 text-[10px] text-muted-foreground">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {row.original.site_name}
+                    </div>
                 </div>
-            )
+            ),
+            filterFn: (row: any, id: string, filterValue: string) => {
+                const searchStr = `${row.original.user_name} ${row.original.site_name}`.toLowerCase();
+                const searchTerms = filterValue.toLowerCase().split(' ').filter(Boolean);
+                return searchTerms.every((term: string) => searchStr.includes(term));
+            }
         },
         {
             accessorKey: 'event',
@@ -151,7 +163,7 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                 <DataTable
                     columns={columns}
                     data={logs}
-                    searchKey="user_name"
+                    searchKey="user_site"
                 />
             </div>
         </div>

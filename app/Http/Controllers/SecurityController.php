@@ -10,7 +10,7 @@ class SecurityController extends Controller
 {
     public function logs(Request $request) 
     { 
-        $query = Audit::with('user')->latest();
+        $query = Audit::with(['user.site'])->latest();
 
         // Filtering
         if ($request->filled('event')) {
@@ -24,6 +24,7 @@ class SecurityController extends Controller
             return [
                 'id' => $audit->id,
                 'user_name' => $audit->user->name ?? 'System',
+                'site_name' => $audit->user->site->name ?? 'Global',
                 'event' => $audit->event,
                 'auditable_type' => class_basename($audit->auditable_type),
                 'old_values' => $audit->old_values,

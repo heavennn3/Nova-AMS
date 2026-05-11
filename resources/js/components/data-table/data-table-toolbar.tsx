@@ -40,54 +40,81 @@ export function DataTableToolbar<TData>({
     const isFiltered = table.getState().columnFilters.length > 0;
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const formatExportData = (exportData: any[]) => {
-        return exportData.map((item, index) => ({
-            'Bil': index + 1,
-            'Asset ID': item.asset_id || '',
-            'Asset Category': item.category || '',
-            'Asset Type': item.type || '',
-            'Location': item.site?.name || item.site || '',
-            'Quantity': item.quantity || '',
-            'Vendor': item.vendor || '',
-            'Product': item.product_name || '',
-            'Purchase Year': item.purchase_year || '',
-            'Status': item.status || '',
-        }));
+    const formatExportData = () => {
+        const exportRows = table.getFilteredRowModel().rows;
+        const visibleColumns = table.getVisibleLeafColumns().filter(
+            col => col.id !== 'actions' && col.id !== 'select' && col.id !== 'Changes'
+        );
+        
+        return exportRows.map((row, index) => {
+            const formattedRow: any = { 'Bil': index + 1 };
+            
+            visibleColumns.forEach((col) => {
+                const columnDef = col.columnDef as any;
+                // Fallback to capitalizing col.id if no headerText or string header is provided
+                const defaultHeader = col.id.charAt(0).toUpperCase() + col.id.slice(1).replace(/_/g, ' ');
+                const header = columnDef.headerText || (typeof columnDef.header === 'string' ? columnDef.header : defaultHeader);
+                
+                let val = '';
+                try {
+                    val = row.getValue(col.id) as string;
+                } catch (e) {
+                    val = '';
+                }
+                
+                if (val === null || val === undefined) val = '';
+                else if (typeof val === 'object') val = JSON.stringify(val);
+                else val = String(val);
+                
+                formattedRow[header] = val;
+            });
+            
+            return formattedRow;
+        });
     };
 
+    const exportFileName = searchKey ? `${searchKey}_export` : 'data_export';
+
     const handleExportExcel = () => {
-        const formattedData = formatExportData(data as any[]);
+        const formattedData = formatExportData();
+        if (formattedData.length === 0) {
+            alert('No data to export');
+            return;
+        }
         const ws = XLSX.utils.json_to_sheet(formattedData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Asset Inventory');
-        XLSX.writeFile(wb, 'Asset_Inventory_Export.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Data Export');
+        XLSX.writeFile(wb, `${exportFileName}.xlsx`);
     };
 
     const handleExportCSV = () => {
-        const formattedData = formatExportData(data as any[]);
+        const formattedData = formatExportData();
+        if (formattedData.length === 0) {
+            alert('No data to export');
+            return;
+        }
         const ws = XLSX.utils.json_to_sheet(formattedData);
         const csv = XLSX.utils.sheet_to_csv(ws);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'Asset_Inventory_Export.csv');
+        link.setAttribute('download', `${exportFileName}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const handleExportPDF = () => {
-        const formattedData = formatExportData(data as any[]);
-        const doc = new jsPDF('landscape');
-        
+        const formattedData = formatExportData();
         if (formattedData.length === 0) {
             alert('No data to export');
             return;
         }
 
+        const doc = new jsPDF('landscape');
         const headers = Object.keys(formattedData[0]);
-        const rows = formattedData.map(obj => Object.values(obj));
+        const rows = formattedData.map(obj => Object.values(obj)) as any[];
 
         autoTable(doc, {
             head: [headers],
@@ -95,7 +122,7 @@ export function DataTableToolbar<TData>({
             styles: { fontSize: 8 },
         });
 
-        doc.save('Asset_Inventory_Export.pdf');
+        doc.save(`${exportFileName}.pdf`);
     };
 
     const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +171,7 @@ export function DataTableToolbar<TData>({
         });
     };
 
-    const [searchColumn, setSearchColumn] = React.useState<string>("all");
+    const [searchColumn, setSearchColumn] = React.useState<string>(searchKey || "all");
 
     return (
         <div className="flex items-center justify-between gap-4">
@@ -159,9 +186,10 @@ export function DataTableToolbar<TData>({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Columns</SelectItem>
-                        {columns.filter(c => c.accessorKey && (typeof c.header === 'string' || c.headerText)).map(c => (
-                            <SelectItem key={c.accessorKey} value={c.accessorKey}>{c.headerText || c.header}</SelectItem>
-                        ))}
+                        {columns.filter(c => (c.accessorKey || c.id) && (typeof c.header === 'string' || c.headerText)).map(c => {
+                            const key = c.accessorKey || c.id;
+                            return <SelectItem key={key} value={key}>{c.headerText || c.header}</SelectItem>;
+                        })}
                     </SelectContent>
                 </Select>
 
