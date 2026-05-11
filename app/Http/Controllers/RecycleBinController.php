@@ -18,7 +18,7 @@ class RecycleBinController extends Controller
         'vendors' => Vendor::class,
         'assets' => Asset::class,
         'asset_categories' => AssetCategory::class,
-        'spareparts' => AssetType::class,
+        'spareparts' => \App\Models\SparePart::class,
     ];
 
     public function index(Request $request)

@@ -102,6 +102,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/maintenance/work-orders/{id}/status', [\App\Http\Controllers\OperationsController::class, 'updateWorkOrderStatus'])->name('maintenance.work-orders.status');
         Route::get('/maintenance/history', [\App\Http\Controllers\OperationsController::class, 'history']);
         Route::get('/maintenance/parts', [\App\Http\Controllers\OperationsController::class, 'parts']);
+        Route::post('/maintenance/parts', [\App\Http\Controllers\OperationsController::class, 'storePart'])->name('maintenance.parts.store');
+        Route::put('/maintenance/parts/{id}', [\App\Http\Controllers\OperationsController::class, 'updatePart'])->name('maintenance.parts.update');
+        Route::delete('/maintenance/parts/{id}', [\App\Http\Controllers\OperationsController::class, 'destroyPart'])->name('maintenance.parts.destroy');
         Route::get('/maintenance/technicians', [\App\Http\Controllers\OperationsController::class, 'technicians']);
 
         Route::get('/vendors/performance', [\App\Http\Controllers\OperationsController::class, 'performance']);

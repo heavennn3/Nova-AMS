@@ -89,7 +89,52 @@ class OperationsController extends Controller
         ]); 
     }
 
-    public function parts() { return Inertia::render('Maintenance/Parts'); }
+    public function parts() 
+    { 
+        return Inertia::render('Maintenance/Parts', [
+            'parts' => \App\Models\SparePart::with('site')->latest()->get(),
+            'sites' => \App\Models\Site::all(),
+        ]); 
+    }
+
+    public function storePart(Request $request)
+    {
+        $validated = $request->validate([
+            'part_number' => 'required|string|unique:spare_parts,part_number',
+            'name' => 'required|string',
+            'stock_level' => 'required|integer|min:0',
+            'minimum_stock_level' => 'required|integer|min:0',
+            'unit_cost' => 'nullable|numeric|min:0',
+            'site_id' => 'nullable|exists:sites,id',
+        ]);
+
+        \App\Models\SparePart::create($validated);
+        return redirect()->back()->with('success', 'Spare part added successfully.');
+    }
+
+    public function updatePart(Request $request, $id)
+    {
+        $part = \App\Models\SparePart::findOrFail($id);
+        
+        $validated = $request->validate([
+            'part_number' => 'required|string|unique:spare_parts,part_number,' . $part->id,
+            'name' => 'required|string',
+            'stock_level' => 'required|integer|min:0',
+            'minimum_stock_level' => 'required|integer|min:0',
+            'unit_cost' => 'nullable|numeric|min:0',
+            'site_id' => 'nullable|exists:sites,id',
+        ]);
+
+        $part->update($validated);
+        return redirect()->back()->with('success', 'Spare part updated successfully.');
+    }
+
+    public function destroyPart($id)
+    {
+        $part = \App\Models\SparePart::findOrFail($id);
+        $part->delete();
+        return redirect()->back()->with('success', 'Spare part deleted successfully.');
+    }
     public function technicians() { return Inertia::render('Maintenance/Technicians'); }
 
     // Vendors

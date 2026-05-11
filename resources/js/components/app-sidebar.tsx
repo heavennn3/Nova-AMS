@@ -66,6 +66,7 @@ const navSections: NavSection[] = [
         items: [
             { title: 'Asset Inventory', href: assetInventory(), icon: Package, module: 'Asset Inventory' },
             { title: 'Asset Withdrawal', href: '/live-tracking', icon: Activity, module: 'Asset Inventory' },
+            { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench, },
             { title: 'Master Data', href: masterData(), icon: Database, module: 'Master Data' },
             {
                 title: 'Multi-Site Management',
@@ -104,7 +105,7 @@ const navSections: NavSection[] = [
                     { title: 'Preventive Scheduling', href: '/maintenance/scheduling' },
                     { title: 'Work Orders', href: '/maintenance/work-orders' },
                     { title: 'Maintenance History', href: '/maintenance/history' },
-                    { title: 'Spare Parts', href: '/maintenance/parts' },
+
                     { title: 'Technician Assignment', href: '/maintenance/technicians' },
                 ],
             },
@@ -135,7 +136,6 @@ const navSections: NavSection[] = [
                 items: [
                     { title: 'Manage Users & Roles', href: userManagement() },
                     { title: 'Role Access Matrix', href: '/security/roles' },
-                    { title: 'System Logs', href: '/security/logs' },
                     { title: 'Profile Settings', href: '/settings/profile' },
                 ],
             },
@@ -152,11 +152,7 @@ const navSections: NavSection[] = [
                     { title: 'Expiration Alerts', href: '/documents/alerts' },
                 ],
             },
-        ],
-    },
-    {
-        title: 'RECYCLE BIN',
-        items: [
+
             {
                 title: 'Deleted Items',
                 href: '#',
@@ -171,17 +167,13 @@ const navSections: NavSection[] = [
             },
         ],
     },
+
     {
         title: 'SUPPORT',
         items: [
-            {
-                title: 'Helpdesk & Support',
-                href: '#',
-                icon: Headset,
-                items: [
-                    { title: 'Live Chat', href: '/support/tickets' },
-                ],
-            },
+
+            { title: 'Live Chat', href: '/support/tickets', icon: Headset, module: 'Asset Inventory' },
+            { title: 'System Activity Logs', href: '/security/logs', icon: Headset, module: 'System Settings' },
         ],
     },
 ];

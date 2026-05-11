@@ -24,6 +24,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, function (\Illuminate\Auth\Events\Login $event) {
+            \OwenIt\Auditing\Models\Audit::create([
+                'user_type' => get_class($event->user),
+                'user_id' => $event->user->id,
+                'event' => 'login',
+                'auditable_type' => get_class($event->user),
+                'auditable_id' => $event->user->id,
+                'old_values' => [],
+                'new_values' => [],
+                'url' => request()->fullUrl(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
     }
 
     /**
