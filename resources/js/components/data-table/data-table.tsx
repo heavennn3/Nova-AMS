@@ -42,20 +42,14 @@ export function DataTable<TData, TValue>({
     const [globalFilter, setGlobalFilter] = React.useState<string>("");
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
 
-    React.useEffect(() => {
-        setPagination(prev => ({ ...prev, pageIndex: 0 }));
-    }, [data, globalFilter]);
+    const [pageIndex, setPageIndex] = React.useState(0);
+    const [pageSize, setPageSize] = React.useState(10);
 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
@@ -63,23 +57,32 @@ export function DataTable<TData, TValue>({
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
-        onPaginationChange: setPagination,
         state: {
             sorting,
             columnFilters,
             globalFilter,
             columnVisibility,
             rowSelection,
-            pagination,
         },
     });
 
+    // Manually paginate the fully sorted & filtered rows
+    const allRows = table.getRowModel().rows;
+    const totalRows = allRows.length;
+    const pageCount = Math.ceil(totalRows / pageSize);
+    const paginatedRows = allRows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+
+    // Reset page index if the total rows change (e.g. search query filters rows out)
+    React.useEffect(() => {
+        setPageIndex(0);
+    }, [totalRows]);
+
     return (
         <div className="space-y-4">
-            <DataTableToolbar 
-                table={table} 
-                searchKey={searchKey} 
-                data={data} 
+            <DataTableToolbar
+                table={table}
+                searchKey={searchKey}
+                data={data}
                 columns={columns}
                 onImportCsv={onImportCsv}
             />
@@ -94,9 +97,9 @@ export function DataTable<TData, TValue>({
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                      header.column.columnDef.header,
-                                                      header.getContext()
-                                                  )}
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
                                         </TableHead>
                                     );
                                 })}
@@ -104,8 +107,8 @@ export function DataTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
+                        {paginatedRows.length ? (
+                            paginatedRows.map((row) => (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && 'selected'}
@@ -133,7 +136,15 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <DataTablePagination table={table} />
+            <DataTablePagination 
+                table={table}
+                pageIndex={pageIndex}
+                pageSize={pageSize}
+                pageCount={pageCount}
+                totalRows={totalRows}
+                setPageIndex={setPageIndex}
+                setPageSize={setPageSize}
+            />
         </div>
     );
 }
