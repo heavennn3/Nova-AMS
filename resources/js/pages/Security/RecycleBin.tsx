@@ -18,7 +18,7 @@ interface RecycleBinProps {
 
 export default function RecycleBin({ items, filters }: RecycleBinProps) {
     const [type, setType] = useState(filters.type || 'users');
-    
+
     const handleFilterChange = (newType: string) => {
         setType(newType);
         router.get('/security/recycle-bin', { type: newType }, { preserveState: true, preserveScroll: true });
@@ -32,15 +32,15 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
 
     const handleForceDelete = (id: number) => {
         if (confirm('Are you sure you want to PERMANENTLY delete this item? This action cannot be undone.')) {
-            router.delete(`/security/recycle-bin/${id}`, { 
+            router.delete(`/security/recycle-bin/${id}`, {
                 data: { type },
-                preserveScroll: true 
+                preserveScroll: true
             });
         }
     };
 
     const getTypeLabel = (t: string) => {
-        switch(t) {
+        switch (t) {
             case 'users': return 'Users';
             case 'vendors': return 'Vendors';
             case 'assets': return 'Assets';
@@ -96,8 +96,8 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                 const item = row.original;
                 return (
                     <div className="flex gap-2">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => handleRestore(item.id)}
                             title="Restore"
@@ -105,8 +105,8 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                             <RefreshCcw className="h-4 w-4 mr-2" />
                             Restore
                         </Button>
-                        <Button 
-                            variant="destructive" 
+                        <Button
+                            variant="destructive"
                             size="sm"
                             onClick={() => handleForceDelete(item.id)}
                             title="Delete Permanently"
@@ -155,9 +155,9 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                         </div>
                     </div>
 
-                    <DataTable 
-                        columns={columns} 
-                        data={items || []} 
+                    <DataTable
+                        columns={columns}
+                        data={items || []}
                         searchKey="name"
                     />
                 </CardContent>

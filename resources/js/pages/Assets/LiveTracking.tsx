@@ -197,18 +197,18 @@ export default function LiveTracking({
     history: initialHistory = [],
     historyMeta: initialHistoryMeta = { total: 0, per_page: 50, current_page: 1, last_page: 1 },
 }: Props) {
-    const [activeTab, setActiveTab]     = useState<'live' | 'history'>('live');
+    const [activeTab, setActiveTab] = useState<'live' | 'history'>('live');
     const [assignments, setAssignments] = useState<Assignment[]>(liveAssignments);
-    const [stats, setStats]             = useState<Stats>(initialStats);
+    const [stats, setStats] = useState<Stats>(initialStats);
 
     // Live search & filtering
-    const [search, setSearch]           = useState('');
+    const [search, setSearch] = useState('');
     const [activeSiteFilter, setActiveSiteFilter] = useState<string>('all');
     const [activeStartDate, setActiveStartDate] = useState('');
     const [activeEndDate, setActiveEndDate] = useState('');
-    const [online, setOnline]           = useState(true);
-    const [lastPoll, setLastPoll]       = useState<Date>(new Date());
-    const [polling, setPolling]         = useState(false);
+    const [online, setOnline] = useState(true);
+    const [lastPoll, setLastPoll] = useState<Date>(new Date());
+    const [polling, setPolling] = useState(false);
 
     // History state
     const [historyData, setHistoryData] = useState<HistoryRecord[]>(Array.isArray(initialHistory) ? initialHistory : []);
@@ -223,14 +223,14 @@ export default function LiveTracking({
     const [checkoutOpen, setCheckoutOpen] = useState(false);
     const [selectedCheckoutSiteId, setSelectedCheckoutSiteId] = useState<string>('all');
     const [checkoutAssetId, setCheckoutAssetId] = useState('');
-    const [checkoutUserId, setCheckoutUserId]   = useState('');
+    const [checkoutUserId, setCheckoutUserId] = useState('');
     const [checkoutRemarks, setCheckoutRemarks] = useState('');
     const [assetSearch, setAssetSearch] = useState('');
     const [userSearch, setUserSearch] = useState('');
     const [showAssetDropdown, setShowAssetDropdown] = useState(false);
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [availableAssets, setAvailableAssets] = useState<AvailableAsset[]>(initialAssets);
-    const [submitting, setSubmitting]   = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         if (!checkoutOpen) {
@@ -290,7 +290,7 @@ export default function LiveTracking({
             });
             if (!res.ok) throw new Error('History fetch failed');
             const data = await res.json();
-            
+
             if (data && Array.isArray(data.data)) {
                 setHistoryData(data.data);
                 setHistoryMeta(data.meta || { total: 0, per_page: 50, current_page: 1, last_page: 1 });
@@ -363,11 +363,11 @@ export default function LiveTracking({
             (a.product_name || '').toLowerCase().includes(search.toLowerCase()) ||
             (a.user_name || '').toLowerCase().includes(search.toLowerCase()) ||
             (a.asset_id || '').toLowerCase().includes(search.toLowerCase());
-        
+
         const matchesSite = activeSiteFilter === 'all' || a.site === sites.find(s => String(s.id) === activeSiteFilter)?.name;
-        
-        const matchesDate = (!activeStartDate || a.assigned_at >= activeStartDate) && 
-                            (!activeEndDate || a.assigned_at <= activeEndDate + 'T23:59:59');
+
+        const matchesDate = (!activeStartDate || a.assigned_at >= activeStartDate) &&
+            (!activeEndDate || a.assigned_at <= activeEndDate + 'T23:59:59');
 
         return matchesSearch && matchesSite && matchesDate;
     });
@@ -381,14 +381,14 @@ export default function LiveTracking({
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    
+
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Asset Withdrawal</h1>
                         <p className="text-sm text-muted-foreground">Trace or view asset being used by</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  
+
                     <Button size="sm" variant="outline" onClick={poll} disabled={polling}>
                         <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${polling ? 'animate-spin' : ''}`} />
                         Refresh
@@ -404,19 +404,17 @@ export default function LiveTracking({
             <div className="flex p-1 bg-muted rounded-lg w-fit">
                 <button
                     onClick={() => setActiveTab('live')}
-                    className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        activeTab === 'live' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'live' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                        }`}
                 >
                     <Activity className="w-4 h-4" />
-                    Active 
+                    Active
                     <Badge variant="secondary" className="ml-1 px-1.5 h-5">{stats?.in_use ?? 0}</Badge>
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        activeTab === 'history' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'history' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                        }`}
                 >
                     <HistoryIcon className="w-4 h-4" />
                     History Log
@@ -567,7 +565,7 @@ export default function LiveTracking({
                                     className="bg-transparent text-sm focus:outline-none w-[130px]"
                                 />
                             </div>
-                            <Button 
+                            <Button
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white h-10 px-4"
                                 onClick={handleExport}
                             >
@@ -840,7 +838,7 @@ export default function LiveTracking({
                                 <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Total Duration</p><p className="font-medium text-emerald-600">{selectedHistory?.duration}</p></div>
                             </div>
                         </div>
-                        
+
                         <div className="col-span-2 bg-muted/30 p-3 rounded-lg border border-dashed">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1 flex items-center gap-1.5">
                                 <FileText className="w-3 h-3" /> Remarks
