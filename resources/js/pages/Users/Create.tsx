@@ -1,8 +1,10 @@
+import { useState, useRef } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { User, Upload, X } from 'lucide-react';
 
 export default function UserCreate({ roles, sites }: { roles: string[], sites: any[] }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -10,13 +12,35 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
         email: '',
         password: '',
         password_confirmation: '',
+        phone: '',
+        ic_number: '',
+        profile_photo: null as File | null,
         role: '',
         site_ids: [] as number[],
     });
 
+    const [preview, setPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('profile_photo', file);
+            setPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removePhoto = () => {
+        setData('profile_photo', null);
+        setPreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/users');
+        post('/users', {
+            forceFormData: true,
+        });
     };
 
     return (
@@ -30,33 +54,100 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                 </Link>
             </div>
 
-            <form onSubmit={submit} className="space-y-6 bg-card p-6 rounded-lg border shadow-sm">
+            <form onSubmit={submit} className="space-y-6 bg-card p-6 rounded-xl border shadow-sm">
+                {/* Profile Photo Upload */}
+                <div className="space-y-3">
+                    <Label>Profile Photo</Label>
+                    <div className="flex items-center gap-6">
+                        <div className="h-24 w-24 rounded-full border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden relative">
+                            {preview ? (
+                                <>
+                                    <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={removePhoto}
+                                        className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </button>
+                                </>
+                            ) : (
+                                <User className="h-10 w-10 text-muted-foreground" />
+                            )}
+                        </div>
+                        <div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="gap-2"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <Upload className="h-4 w-4" /> Upload Photo
+                            </Button>
+                            <p className="text-xs text-muted-foreground mt-1.5">PNG, JPG up to 2MB</p>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handlePhotoChange}
+                            />
+                        </div>
+                    </div>
+                    {errors.profile_photo && <div className="text-sm text-red-500">{errors.profile_photo}</div>}
+                </div>
+
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
+                        <Label htmlFor="name">Full Name *</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             required
+                            placeholder="e.g. Ahmad bin Abdullah"
                         />
                         {errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">Email Address *</Label>
                         <Input
                             id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             required
+                            placeholder="e.g. user@company.com"
                         />
                         {errors.email && <div className="text-sm text-red-500">{errors.email}</div>}
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input
+                            id="phone"
+                            value={data.phone}
+                            onChange={(e) => setData('phone', e.target.value)}
+                            placeholder="e.g. +60 12-345-6789"
+                        />
+                        {errors.phone && <div className="text-sm text-red-500">{errors.phone}</div>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="ic_number">IC Number</Label>
+                        <Input
+                            id="ic_number"
+                            value={data.ic_number}
+                            onChange={(e) => setData('ic_number', e.target.value)}
+                            placeholder="e.g. 900101-01-1234"
+                        />
+                        {errors.ic_number && <div className="text-sm text-red-500">{errors.ic_number}</div>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Password *</Label>
                         <Input
                             id="password"
                             type="password"
@@ -68,7 +159,7 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="password_confirmation">Confirm Password</Label>
+                        <Label htmlFor="password_confirmation">Confirm Password *</Label>
                         <Input
                             id="password_confirmation"
                             type="password"

@@ -80,9 +80,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/master-data/sites/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateSite'])->name('sites.update');
         Route::delete('/master-data/sites/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroySite'])->name('sites.destroy');
 
-        Route::post('/master-data/vendors', [\App\Http\Controllers\MasterDataController::class, 'storeVendor'])->name('vendors.store');
-        Route::put('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateVendor'])->name('vendors.update');
-        Route::delete('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyVendor'])->name('vendors.destroy');
+        Route::post('/master-data/vendors', [\App\Http\Controllers\MasterDataController::class, 'storeVendor'])->name('vendors.store.master');
+        Route::put('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateVendor'])->name('vendors.update.master');
+        Route::delete('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyVendor'])->name('vendors.destroy.master');
+
+        // Vendor dedicated pages
+        Route::resource('vendors', \App\Http\Controllers\VendorController::class);
     });
 
     // ── Multi-Site Management ────────────────────────────────────────────────

@@ -155,10 +155,39 @@ export default function MasterData({ categories = [], types = [], sites = [], ve
             title: "Vendors",
             data: vendors,
             columns: [
+                {
+                    id: "logo",
+                    header: "",
+                    cell: ({ row }: any) => {
+                        const logo = row.original.logo;
+                        return (
+                            <div className="h-10 w-10 rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
+                                {logo ? (
+                                    <img src={logo} alt={row.original.name} className="h-full w-full object-cover" />
+                                ) : (
+                                    <span className="text-muted-foreground text-xs font-bold">{(row.original.name || '?')[0]}</span>
+                                )}
+                            </div>
+                        );
+                    },
+                    size: 60,
+                },
                 { accessorKey: "name", header: ({ column }: any) => <DataTableColumnHeader column={column} title="Vendor Name" /> },
                 { accessorKey: "contact_person", header: ({ column }: any) => <DataTableColumnHeader column={column} title="Contact Person" /> },
                 { accessorKey: "phone", header: ({ column }: any) => <DataTableColumnHeader column={column} title="Phone" /> },
                 { accessorKey: "email", header: ({ column }: any) => <DataTableColumnHeader column={column} title="Email" /> },
+                {
+                    accessorKey: "assets_count",
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Total Assets" />,
+                    cell: ({ row }: any) => {
+                        const count = row.original.assets_count ?? 0;
+                        return (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600">
+                                {count}
+                            </span>
+                        );
+                    },
+                },
                 actionColumn
             ],
             renderForm: () => (

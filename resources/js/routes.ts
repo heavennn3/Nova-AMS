@@ -38,7 +38,7 @@ export function preventiveMaintenance() {
     return '/operations-maintanance';
 }
 export function vendors() {
-    return '/operations-maintanance';
+    return '/vendors';
 }
 export function spareParts() {
     return '/operations-maintanance';

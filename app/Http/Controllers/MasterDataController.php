@@ -17,7 +17,18 @@ class MasterDataController extends Controller
             'categories' => AssetCategory::all(),
             'types' => AssetType::with('category')->get(),
             'sites' => Site::all(),
-            'vendors' => Vendor::all()
+            'vendors' => Vendor::withCount('assets')->get()->map(function ($vendor) {
+                return [
+                    'id' => $vendor->id,
+                    'name' => $vendor->name,
+                    'contact_person' => $vendor->contact_person,
+                    'phone' => $vendor->phone,
+                    'email' => $vendor->email,
+                    'address' => $vendor->address,
+                    'logo' => $vendor->logo ? \Storage::url($vendor->logo) : null,
+                    'assets_count' => $vendor->assets_count,
+                ];
+            }),
         ]);
     }
 

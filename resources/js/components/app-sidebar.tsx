@@ -34,6 +34,7 @@ import {
     masterData,
     operationsMaintenance,
     userManagement,
+    vendors,
 } from '@/routes';
 
 import type { NavItem } from '@/types';
@@ -68,6 +69,7 @@ const navSections: NavSection[] = [
             { title: 'Asset Withdrawal', href: '/live-tracking', icon: Activity, module: 'Asset Inventory' },
             { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench, },
             { title: 'Master Data', href: masterData(), icon: Database, module: 'Master Data' },
+            { title: 'Vendor Management', href: vendors(), icon: Briefcase, module: 'Master Data' },
             {
                 title: 'Multi-Site Management',
                 href: '#',
