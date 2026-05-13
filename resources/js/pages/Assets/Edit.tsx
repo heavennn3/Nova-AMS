@@ -31,7 +31,7 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
     return (
         <div className="p-8 w-full space-y-6">
             <Head title={`Edit Asset - ${asset.asset_id}`} />
-            
+
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <Link href="/assets">
@@ -56,26 +56,26 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                 {/* Basic Information */}
                 <Card className="md:col-span-2">
                     <CardHeader>
-                        <CardTitle>Core Details</CardTitle>
+                        <CardTitle>Asset Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="asset_id">Asset ID *</Label>
-                                <Input 
-                                    id="asset_id" 
-                                    value={data.asset_id} 
-                                    onChange={e => setData('asset_id', e.target.value)} 
-                                    required 
+                                <Input
+                                    id="asset_id"
+                                    value={data.asset_id}
+                                    onChange={e => setData('asset_id', e.target.value)}
+                                    required
                                 />
                                 {errors.asset_id && <p className="text-xs text-red-500">{errors.asset_id}</p>}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="serial_number">Serial Number</Label>
-                                <Input 
-                                    id="serial_number" 
-                                    value={data.serial_number} 
-                                    onChange={e => setData('serial_number', e.target.value)} 
+                                <Input
+                                    id="serial_number"
+                                    value={data.serial_number}
+                                    onChange={e => setData('serial_number', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -83,20 +83,20 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="product_name">Product Name *</Label>
-                                <Input 
-                                    id="product_name" 
-                                    value={data.product_name} 
-                                    onChange={e => setData('product_name', e.target.value)} 
-                                    required 
+                                <Input
+                                    id="product_name"
+                                    value={data.product_name}
+                                    onChange={e => setData('product_name', e.target.value)}
+                                    required
                                 />
                                 {errors.product_name && <p className="text-xs text-red-500">{errors.product_name}</p>}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="brand">Brand</Label>
-                                <Input 
-                                    id="brand" 
-                                    value={data.brand} 
-                                    onChange={e => setData('brand', e.target.value)} 
+                                <Input
+                                    id="brand"
+                                    value={data.brand}
+                                    onChange={e => setData('brand', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -132,10 +132,10 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
 
                         <div className="space-y-2">
                             <Label htmlFor="notes">Additional Notes</Label>
-                            <Textarea 
-                                id="notes" 
-                                value={data.notes} 
-                                onChange={e => setData('notes', e.target.value)} 
+                            <Textarea
+                                id="notes"
+                                value={data.notes}
+                                onChange={e => setData('notes', e.target.value)}
                                 placeholder="Enter any maintenance notes or descriptions..."
                                 className="min-h-[100px]"
                             />
@@ -191,7 +191,7 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Assignment</CardTitle>
+                            <CardTitle>Site</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
@@ -209,11 +209,11 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="purchase_year">Purchase Year</Label>
-                                <Input 
-                                    id="purchase_year" 
+                                <Input
+                                    id="purchase_year"
                                     type="number"
-                                    value={data.purchase_year} 
-                                    onChange={e => setData('purchase_year', e.target.value)} 
+                                    value={data.purchase_year}
+                                    onChange={e => setData('purchase_year', e.target.value)}
                                 />
                             </div>
                         </CardContent>
