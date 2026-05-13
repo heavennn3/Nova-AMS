@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
     Plus, Edit, Trash2, ShieldCheck, User as UserIcon,
-    Search, Users, MapPin, Phone, Mail, CreditCard,
-    Filter, X, ChevronDown,
+    Users, Filter, X, Check, Search,
 } from 'lucide-react';
 
 type UserType = {
@@ -23,55 +25,51 @@ type UserType = {
 type SiteType = { id: number; name: string };
 
 export default function UsersIndex({ users, sites }: { users: UserType[]; sites: SiteType[] }) {
-    const [search, setSearch] = useState('');
     const [selectedSite, setSelectedSite] = useState<string>('all');
     const [selectedRole, setSelectedRole] = useState<string>('all');
+    const [search, setSearch] = useState('');
 
-    // Derive unique roles
+    // Unique roles
     const allRoles = useMemo(() => {
         const roles = new Set(users.map(u => u.role));
         return Array.from(roles).sort();
     }, [users]);
 
-    // Filtered users
-    const filtered = useMemo(() => {
+    // Filter
+    const filteredUsers = useMemo(() => {
         return users.filter(u => {
-            const matchesSearch =
-                u.name.toLowerCase().includes(search.toLowerCase()) ||
-                u.email.toLowerCase().includes(search.toLowerCase()) ||
-                (u.phone && u.phone.includes(search)) ||
-                (u.ic_number && u.ic_number.includes(search));
-            const matchesSite =
-                selectedSite === 'all' || u.sites.includes(selectedSite);
-            const matchesRole =
-                selectedRole === 'all' || u.role === selectedRole;
-            return matchesSearch && matchesSite && matchesRole;
+            const matchesSite = selectedSite === 'all' || u.sites.includes(selectedSite);
+            const matchesRole = selectedRole === 'all' || u.role === selectedRole;
+            const q = search.toLowerCase();
+            const matchesSearch = !q ||
+                u.name.toLowerCase().includes(q) ||
+                u.email.toLowerCase().includes(q) ||
+                (u.phone && u.phone.toLowerCase().includes(q)) ||
+                (u.ic_number && u.ic_number.toLowerCase().includes(q));
+            return matchesSite && matchesRole && matchesSearch;
         });
-    }, [users, search, selectedSite, selectedRole]);
+    }, [users, selectedSite, selectedRole, search]);
+
+    const activeFilterCount = (selectedSite !== 'all' ? 1 : 0) + (selectedRole !== 'all' ? 1 : 0);
 
     // Stats
     const totalUsers = users.length;
     const roleBreakdown = useMemo(() => {
         const map: Record<string, number> = {};
-        users.forEach(u => {
-            map[u.role] = (map[u.role] || 0) + 1;
-        });
+        users.forEach(u => { map[u.role] = (map[u.role] || 0) + 1; });
         return map;
     }, [users]);
 
-    const hasActiveFilters = selectedSite !== 'all' || selectedRole !== 'all' || search !== '';
-
-    const roleColors: Record<string, { badge: string; dot: string }> = {
-        'Admin': { badge: 'bg-purple-500/10 text-purple-700 ring-purple-500/20', dot: 'bg-purple-500' },
-        'Site Manager': { badge: 'bg-blue-500/10 text-blue-700 ring-blue-500/20', dot: 'bg-blue-500' },
-        'Technician': { badge: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20', dot: 'bg-emerald-500' },
-        'Viewer': { badge: 'bg-slate-500/10 text-slate-700 ring-slate-500/20', dot: 'bg-slate-500' },
-        'None': { badge: 'bg-gray-500/10 text-gray-600 ring-gray-500/20', dot: 'bg-gray-400' },
+    const roleColors: Record<string, string> = {
+        'Admin': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+        'Site Manager': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+        'Technician': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+        'Viewer': 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300',
+        'None': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     };
 
-    const getInitials = (name: string) => {
-        return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    };
+    const getInitials = (name: string) =>
+        name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
     const avatarGradients = [
         'from-blue-500 to-indigo-600',
@@ -82,243 +80,324 @@ export default function UsersIndex({ users, sites }: { users: UserType[]; sites:
         'from-cyan-500 to-blue-600',
     ];
 
-    const getGradient = (id: number) => avatarGradients[id % avatarGradients.length];
+    const columns: any[] = [
+        {
+            id: 'avatar',
+            header: '',
+            cell: ({ row }: any) => {
+                const user = row.original;
+                const gradient = avatarGradients[user.id % avatarGradients.length];
+                return (
+                    <div className={`h-9 w-9 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border ${!user.profile_photo ? `bg-gradient-to-br ${gradient}` : 'bg-muted'}`}>
+                        {user.profile_photo ? (
+                            <img src={user.profile_photo} alt={user.name} className="h-full w-full object-cover" />
+                        ) : (
+                            <span className="text-white text-xs font-bold">{getInitials(user.name)}</span>
+                        )}
+                    </div>
+                );
+            },
+            size: 50,
+            enableSorting: false,
+        },
+        {
+            accessorKey: 'name',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
+            cell: ({ row }: any) => {
+                const user = row.original;
+                return (
+                    <div className="min-w-[140px]">
+                        <div className="font-medium text-sm">{user.name}</div>
+                        <div className="text-xs text-muted-foreground">{user.email}</div>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'phone',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Phone" />,
+            cell: ({ row }: any) => {
+                const phone = row.original.phone;
+                return phone
+                    ? <span className="text-sm">{phone}</span>
+                    : <span className="text-xs text-muted-foreground italic">—</span>;
+            },
+        },
+        {
+            accessorKey: 'ic_number',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="IC Number" />,
+            cell: ({ row }: any) => {
+                const ic = row.original.ic_number;
+                return ic
+                    ? <span className="text-sm font-mono">{ic}</span>
+                    : <span className="text-xs text-muted-foreground italic">—</span>;
+            },
+        },
+        {
+            accessorKey: 'role',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Role" />,
+            cell: ({ row }: any) => {
+                const role = row.original.role;
+                const colorClass = roleColors[role] || roleColors['None'];
+                return (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colorClass}`}>
+                        {role}
+                    </span>
+                );
+            },
+        },
+        {
+            accessorKey: 'sites',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Assigned Sites" />,
+            cell: ({ row }: any) => {
+                const userSites: string[] = row.original.sites || [];
+                if (userSites.length === 0) {
+                    return <span className="text-xs text-muted-foreground italic">All Sites</span>;
+                }
+                return (
+                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                        {userSites.map(site => (
+                            <span
+                                key={site}
+                                className="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-medium border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
+                            >
+                                {site}
+                            </span>
+                        ))}
+                    </div>
+                );
+            },
+            enableSorting: false,
+        },
+        {
+            accessorKey: 'created_at',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Joined" />,
+            cell: ({ row }: any) => (
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {row.original.created_at.split(' ')[0]}
+                </span>
+            ),
+        },
+        {
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }: any) => {
+                const user = row.original;
+                return (
+                    <div className="flex items-center gap-1">
+                        <Link href={`/users/${user.id}/edit`}>
+                            <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600 gap-1">
+                                <Edit className="h-3.5 w-3.5" /> Edit
+                            </Button>
+                        </Link>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-red-600 hover:bg-red-50 gap-1"
+                            onClick={() => {
+                                if (confirm(`Delete user "${user.name}"? This action cannot be undone.`)) {
+                                    router.delete(`/users/${user.id}`);
+                                }
+                            }}
+                        >
+                            <Trash2 className="h-3.5 w-3.5" /> Delete
+                        </Button>
+                    </div>
+                );
+            },
+            enableSorting: false,
+        },
+    ];
 
     return (
         <div className="p-8 w-full space-y-6">
             <Head title="User Management" />
 
-            {/* ── Header ─────────────────────────────────────────────── */}
+            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
                     <p className="text-muted-foreground mt-1">
-                        Manage user profiles, roles, and site assignments.
+                        Manage user profiles, roles, and site access across the system.
                     </p>
                 </div>
                 <Link href="/users/create">
-                    <Button className="gap-2 shadow-sm">
+                    <Button className="gap-2">
                         <Plus className="h-4 w-4" /> Add New User
                     </Button>
                 </Link>
             </div>
 
-            {/* ── Stats ──────────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-card border rounded-xl p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                            <Users className="h-5 w-5 text-blue-500" />
-                        </div>
-                        <div>
-                            <p className="text-xs text-muted-foreground font-medium">Total Users</p>
-                            <p className="text-xl font-bold">{totalUsers}</p>
-                        </div>
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+                <div className="bg-card border rounded-lg p-3 flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-md bg-blue-500/10 flex items-center justify-center">
+                        <Users className="h-4.5 w-4.5 text-blue-500" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] text-muted-foreground leading-none mb-0.5">Total Users</p>
+                        <p className="text-lg font-bold leading-none">{totalUsers}</p>
                     </div>
                 </div>
-                {allRoles.slice(0, 3).map(role => {
-                    const colors = roleColors[role] || roleColors['None'];
+                {Object.entries(roleBreakdown).map(([role, count]) => {
+                    const color = roleColors[role] || roleColors['None'];
                     return (
-                        <div key={role} className="bg-card border rounded-xl p-4">
-                            <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 rounded-lg ${colors.badge} flex items-center justify-center`}>
-                                    <ShieldCheck className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-medium">{role}s</p>
-                                    <p className="text-xl font-bold">{roleBreakdown[role] || 0}</p>
-                                </div>
+                        <div key={role} className="bg-card border rounded-lg p-3 flex items-center gap-3">
+                            <div className={`h-9 w-9 rounded-md flex items-center justify-center ${color}`}>
+                                <ShieldCheck className="h-4.5 w-4.5" />
+                            </div>
+                            <div>
+                                <p className="text-[11px] text-muted-foreground leading-none mb-0.5">{role}</p>
+                                <p className="text-lg font-bold leading-none">{count}</p>
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            {/* ── Filters Bar ────────────────────────────────────────── */}
-            <div className="bg-card border rounded-xl p-4">
-                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                    {/* Search */}
-                    <div className="relative flex-1 min-w-0 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search name, email, phone, IC..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="pl-9"
-                        />
-                    </div>
-
-                    {/* Site Filter */}
-                    <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        <select
-                            value={selectedSite}
-                            onChange={e => setSelectedSite(e.target.value)}
-                            className="h-9 pl-9 pr-8 rounded-md border border-input bg-background text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
-                        >
-                            <option value="all">All Sites</option>
-                            {sites.map(site => (
-                                <option key={site.id} value={site.name}>{site.name}</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    </div>
-
-                    {/* Role Filter */}
-                    <div className="relative">
-                        <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        <select
-                            value={selectedRole}
-                            onChange={e => setSelectedRole(e.target.value)}
-                            className="h-9 pl-9 pr-8 rounded-md border border-input bg-background text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
-                        >
-                            <option value="all">All Roles</option>
-                            {allRoles.map(role => (
-                                <option key={role} value={role}>{role}</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    </div>
-
-                    {/* Clear */}
-                    {hasActiveFilters && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-1 text-muted-foreground hover:text-foreground shrink-0"
-                            onClick={() => {
-                                setSearch('');
-                                setSelectedSite('all');
-                                setSelectedRole('all');
-                            }}
-                        >
-                            <X className="h-3.5 w-3.5" /> Clear
-                        </Button>
-                    )}
-
-                    <div className="ml-auto text-xs text-muted-foreground shrink-0">
-                        Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {totalUsers} users
-                    </div>
+            {/* Search + Filter row */}
+            <div className="flex items-center gap-2 flex-wrap">
+                <div className="relative w-[250px]">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                        placeholder="Search name, email, phone, IC..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                    />
                 </div>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 gap-1.5 border-dashed">
+                            <Filter className="h-3.5 w-3.5" />
+                            Filters
+                            {activeFilterCount > 0 && (
+                                <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                                    {activeFilterCount}
+                                </span>
+                            )}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[280px] p-0" align="start">
+                        <div className="p-3 border-b">
+                            <p className="text-sm font-semibold">Filter Users</p>
+                        </div>
+
+                        {/* Site Section */}
+                        <div className="p-3 border-b">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Site</p>
+                            <div className="space-y-0.5 max-h-[180px] overflow-y-auto">
+                                <button
+                                    onClick={() => setSelectedSite('all')}
+                                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedSite === 'all' ? 'font-medium' : ''}`}
+                                >
+                                    <span>All Sites</span>
+                                    {selectedSite === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                </button>
+                                {sites.map(site => (
+                                    <button
+                                        key={site.id}
+                                        onClick={() => setSelectedSite(site.name)}
+                                        className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedSite === site.name ? 'font-medium' : ''}`}
+                                    >
+                                        <span>{site.name}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {users.filter(u => u.sites.includes(site.name)).length}
+                                            </span>
+                                            {selectedSite === site.name && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Role Section */}
+                        <div className="p-3 border-b">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Role</p>
+                            <div className="space-y-0.5">
+                                <button
+                                    onClick={() => setSelectedRole('all')}
+                                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedRole === 'all' ? 'font-medium' : ''}`}
+                                >
+                                    <span>All Roles</span>
+                                    {selectedRole === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                </button>
+                                {allRoles.map(role => (
+                                    <button
+                                        key={role}
+                                        onClick={() => setSelectedRole(role)}
+                                        className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedRole === role ? 'font-medium' : ''}`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className={`inline-block h-2 w-2 rounded-full ${role === 'Admin' ? 'bg-purple-500' :
+                                                    role === 'Site Manager' ? 'bg-blue-500' :
+                                                        role === 'Technician' ? 'bg-emerald-500' :
+                                                            role === 'Viewer' ? 'bg-gray-500' : 'bg-orange-500'
+                                                }`} />
+                                            <span>{role}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {roleBreakdown[role] || 0}
+                                            </span>
+                                            {selectedRole === role && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Clear */}
+                        {activeFilterCount > 0 && (
+                            <div className="p-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full h-8 text-xs"
+                                    onClick={() => {
+                                        setSelectedSite('all');
+                                        setSelectedRole('all');
+                                    }}
+                                >
+                                    Clear all filters
+                                </Button>
+                            </div>
+                        )}
+                    </PopoverContent>
+                </Popover>
+
+                {/* Active filter badges */}
+                {selectedSite !== 'all' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                        Site: {selectedSite}
+                        <button onClick={() => setSelectedSite('all')} className="ml-0.5 hover:text-blue-900">
+                            <X className="h-3 w-3" />
+                        </button>
+                    </span>
+                )}
+                {selectedRole !== 'all' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-medium border border-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800">
+                        Role: {selectedRole}
+                        <button onClick={() => setSelectedRole('all')} className="ml-0.5 hover:text-purple-900">
+                            <X className="h-3 w-3" />
+                        </button>
+                    </span>
+                )}
+
+                {activeFilterCount > 0 && (
+                    <span className="text-xs text-muted-foreground ml-1">
+                        {filteredUsers.length} of {totalUsers} users
+                    </span>
+                )}
             </div>
 
-            {/* ── User Cards Grid ────────────────────────────────────── */}
-            {filtered.length === 0 ? (
-                <div className="text-center py-20 bg-card border rounded-xl">
-                    <UserIcon className="h-14 w-14 text-muted-foreground/40 mx-auto mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground">No users found</p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">Try adjusting your search or filters.</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {filtered.map(user => {
-                        const colors = roleColors[user.role] || roleColors['None'];
-                        return (
-                            <div
-                                key={user.id}
-                                className="bg-card border rounded-xl overflow-hidden hover:shadow-lg hover:border-foreground/10 transition-all duration-300 group"
-                            >
-                                {/* Top accent */}
-                                <div className="h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 opacity-60 group-hover:opacity-100 transition-opacity" />
-
-                                <div className="p-5">
-                                    {/* Avatar + Name Row */}
-                                    <div className="flex items-start gap-4">
-                                        <div className={`h-14 w-14 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 border-border ${!user.profile_photo ? `bg-gradient-to-br ${getGradient(user.id)}` : 'bg-muted'}`}>
-                                            {user.profile_photo ? (
-                                                <img
-                                                    src={user.profile_photo}
-                                                    alt={user.name}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-white font-bold text-sm">
-                                                    {getInitials(user.name)}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-base truncate">{user.name}</h3>
-                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold ring-1 ring-inset ${colors.badge} mt-1`}>
-                                                <span className={`h-1.5 w-1.5 rounded-full ${colors.dot}`} />
-                                                {user.role}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Details */}
-                                    <div className="mt-4 space-y-2">
-                                        <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                                            <Mail className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                            <span className="truncate">{user.email}</span>
-                                        </div>
-                                        {user.phone && (
-                                            <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                                                <Phone className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                                <span>{user.phone}</span>
-                                            </div>
-                                        )}
-                                        {user.ic_number && (
-                                            <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                                                <CreditCard className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                                <span>IC: {user.ic_number}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Sites */}
-                                    <div className="mt-4">
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <MapPin className="h-3 w-3 text-muted-foreground/60" />
-                                            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Assigned Sites</span>
-                                        </div>
-                                        {user.sites.length > 0 ? (
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {user.sites.map(site => (
-                                                    <span
-                                                        key={site}
-                                                        className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-500/8 text-blue-700 text-[11px] font-medium border border-blue-500/15"
-                                                    >
-                                                        {site}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span className="text-xs text-muted-foreground italic">All Sites (unrestricted)</span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Action Bar */}
-                                <div className="border-t px-5 py-2.5 flex items-center justify-between bg-muted/20">
-                                    <span className="text-[10px] text-muted-foreground">
-                                        Joined {user.created_at.split(' ')[0]}
-                                    </span>
-                                    <div className="flex items-center gap-1">
-                                        <Link href={`/users/${user.id}/edit`}>
-                                            <Button variant="ghost" size="sm" className="h-7 px-2 text-blue-600 text-xs gap-1">
-                                                <Edit className="h-3 w-3" /> Edit
-                                            </Button>
-                                        </Link>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-7 px-2 text-red-600 hover:bg-red-50 text-xs gap-1"
-                                            onClick={() => {
-                                                if (confirm(`Delete user "${user.name}"? This action cannot be undone.`)) {
-                                                    router.delete(`/users/${user.id}`);
-                                                }
-                                            }}
-                                        >
-                                            <Trash2 className="h-3 w-3" /> Delete
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+            {/* Data Table */}
+            <DataTable
+                columns={columns}
+                data={filteredUsers}
+                hideToolbar
+            />
         </div>
     );
 }

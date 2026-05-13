@@ -29,6 +29,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
     searchKey?: string;
     onImportCsv?: (data: any[]) => void;
+    hideToolbar?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -36,6 +37,7 @@ export function DataTable<TData, TValue>({
     data,
     searchKey,
     onImportCsv,
+    hideToolbar,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -79,13 +81,15 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="space-y-4">
-            <DataTableToolbar
-                table={table}
-                searchKey={searchKey}
-                data={data}
-                columns={columns}
-                onImportCsv={onImportCsv}
-            />
+            {!hideToolbar && (
+                <DataTableToolbar
+                    table={table}
+                    searchKey={searchKey}
+                    data={data}
+                    columns={columns}
+                    onImportCsv={onImportCsv}
+                />
+            )}
             <div className="rounded-md border bg-card">
                 <Table>
                     <TableHeader>
