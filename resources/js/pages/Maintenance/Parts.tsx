@@ -143,7 +143,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
                     </div>
                 </div>
                 <Button onClick={() => { form.reset(); setIsCreateOpen(true); }}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Item
+                    <Plus className="mr-2 h-4 w-4" /> Add Spare Parts
                 </Button>
             </div>
 
@@ -178,7 +178,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
                     <CardContent className="pt-6">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Total Value</p>
+                                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1"></p>
                                 <p className="text-3xl font-bold text-foreground">${totalValue.toFixed(2)}</p>
                             </div>
                             <div className="p-3 bg-emerald-50 rounded-lg text-emerald-600">

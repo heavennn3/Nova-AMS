@@ -10,8 +10,8 @@ class AssetController extends Controller
 {
     public function index()
     {
-        $assets = Asset::with(['category', 'type', 'vendor', 'location', 'site'])->latest()->get()->map(function ($asset) {
-            return [
+        $assets = Asset::with(['category', 'type', 'vendor', 'location', 'site', 'activeAssignment.user'])->latest()->get()->map(function ($asset) {
+            $data = [
                 'id' => $asset->id,
                 'asset_id' => $asset->asset_id,
                 'category' => $asset->category ? $asset->category->name : '',
@@ -23,7 +23,24 @@ class AssetController extends Controller
                 'product_name' => $asset->product_name,
                 'purchase_year' => $asset->purchase_year,
                 'status' => $asset->status,
+                'assignment' => null,
             ];
+
+            if ($asset->status === 'in_use' && $asset->activeAssignment) {
+                $a = $asset->activeAssignment;
+                $mins = (int) \Carbon\Carbon::parse($a->assigned_at)->diffInMinutes(now());
+                $duration = $mins < 1 ? 'Just now' : ($mins < 60 ? "{$mins}m" : ($mins < 1440 ? sprintf('%dh %dm', intdiv($mins, 60), $mins % 60) : sprintf('%dd %dh', intdiv($mins, 1440), intdiv($mins % 1440, 60))));
+
+                $data['assignment'] = [
+                    'user_name' => $a->user?->name ?? 'Unknown',
+                    'user_email' => $a->user?->email ?? '',
+                    'assigned_at' => $a->assigned_at?->format('Y-m-d H:i'),
+                    'duration' => $duration,
+                    'remarks' => $a->remarks,
+                ];
+            }
+
+            return $data;
         });
 
         return Inertia::render('Assets/Index', [

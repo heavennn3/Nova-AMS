@@ -23,7 +23,10 @@ import {
     Building2,
     ChevronLeft,
     ChevronRight,
+    Filter,
+    Check,
 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -204,6 +207,7 @@ export default function LiveTracking({
     // Live search & filtering
     const [search, setSearch] = useState('');
     const [activeSiteFilter, setActiveSiteFilter] = useState<string>('all');
+    const [activeUserFilter, setActiveUserFilter] = useState<string>('all');
     const [activeStartDate, setActiveStartDate] = useState('');
     const [activeEndDate, setActiveEndDate] = useState('');
     const [online, setOnline] = useState(true);
@@ -214,6 +218,7 @@ export default function LiveTracking({
     const [historyData, setHistoryData] = useState<HistoryRecord[]>(Array.isArray(initialHistory) ? initialHistory : []);
     const [historyMeta, setHistoryMeta] = useState<HistoryMeta>(initialHistoryMeta);
     const [historySearch, setHistorySearch] = useState('');
+    const [historyUserFilter, setHistoryUserFilter] = useState<string>('all');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
@@ -276,15 +281,16 @@ export default function LiveTracking({
 
     // ── History Fetching ──────────────────────────────────────────────────
 
-    const fetchHistory = useCallback(async (page = 1, query = historySearch, start = startDate, end = endDate) => {
+    const fetchHistory = useCallback(async (page = 1, query = historySearch, start = startDate, end = endDate, userId = historyUserFilter) => {
         setLoadingHistory(true);
         try {
             const params = new URLSearchParams({
                 page: String(page),
                 search: query,
                 start_date: start,
-                end_date: end
+                end_date: end,
             });
+            if (userId !== 'all') params.set('user_id', userId);
             const res = await fetch(`/api/live-tracking/history?${params.toString()}`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
@@ -300,14 +306,14 @@ export default function LiveTracking({
         } finally {
             setLoadingHistory(false);
         }
-    }, [historySearch, startDate, endDate]);
+    }, [historySearch, startDate, endDate, historyUserFilter]);
 
     useEffect(() => {
         if (activeTab === 'history') {
             const timer = setTimeout(() => fetchHistory(1), 300);
             return () => clearTimeout(timer);
         }
-    }, [activeTab, historySearch, startDate, endDate, fetchHistory]);
+    }, [activeTab, historySearch, startDate, endDate, historyUserFilter, fetchHistory]);
 
     const handleExport = () => {
         const params = new URLSearchParams({
@@ -315,6 +321,7 @@ export default function LiveTracking({
             start_date: startDate,
             end_date: endDate
         });
+        if (historyUserFilter !== 'all') params.set('user_id', historyUserFilter);
         window.location.href = `/api/live-tracking/report?${params.toString()}`;
     };
 
@@ -366,11 +373,16 @@ export default function LiveTracking({
 
         const matchesSite = activeSiteFilter === 'all' || a.site === sites.find(s => String(s.id) === activeSiteFilter)?.name;
 
+        const matchesUser = activeUserFilter === 'all' || a.user_name === users.find(u => String(u.id) === activeUserFilter)?.name;
+
         const matchesDate = (!activeStartDate || a.assigned_at >= activeStartDate) &&
             (!activeEndDate || a.assigned_at <= activeEndDate + 'T23:59:59');
 
-        return matchesSearch && matchesSite && matchesDate;
+        return matchesSearch && matchesSite && matchesUser && matchesDate;
     });
+
+    const liveActiveFilterCount = (activeSiteFilter !== 'all' ? 1 : 0) + (activeUserFilter !== 'all' ? 1 : 0) + (activeStartDate || activeEndDate ? 1 : 0);
+    const historyActiveFilterCount = (historyUserFilter !== 'all' ? 1 : 0) + (startDate || endDate ? 1 : 0);
 
     // ── Render ─────────────────────────────────────────────────────────────
 
@@ -443,39 +455,105 @@ export default function LiveTracking({
                         ))}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className="relative flex-1 min-w-[200px]">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative flex-1 min-w-[200px] max-w-[300px]">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <input
                                 type="text"
-                                placeholder="Search by Asset ID"
+                                placeholder="Search by Asset ID, product, user..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
+                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-9"
                             />
                         </div>
-                        <Select value={activeSiteFilter} onValueChange={setActiveSiteFilter}>
-                            <SelectTrigger className="w-[180px] h-10"><SelectValue placeholder="Filter Site" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Sites</SelectItem>
-                                {sites.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="date"
-                                value={activeStartDate}
-                                onChange={e => setActiveStartDate(e.target.value)}
-                                className="px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
-                            />
-                            <span className="text-muted-foreground text-xs">to</span>
-                            <input
-                                type="date"
-                                value={activeEndDate}
-                                onChange={e => setActiveEndDate(e.target.value)}
-                                className="px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
-                            />
-                        </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-9 gap-1.5 border-dashed">
+                                    <Filter className="h-3.5 w-3.5" />
+                                    Filters
+                                    {liveActiveFilterCount > 0 && (
+                                        <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                                            {liveActiveFilterCount}
+                                        </span>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[300px] p-0" align="start">
+                                <div className="p-3 border-b">
+                                    <p className="text-sm font-semibold">Filter Active Withdrawals</p>
+                                </div>
+                                {/* Site */}
+                                <div className="p-3 border-b">
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Site</p>
+                                    <div className="space-y-0.5 max-h-[140px] overflow-y-auto">
+                                        <button onClick={() => setActiveSiteFilter('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeSiteFilter === 'all' ? 'font-medium' : ''}`}>
+                                            <span>All Sites</span>
+                                            {activeSiteFilter === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </button>
+                                        {sites.map(s => (
+                                            <button key={s.id} onClick={() => setActiveSiteFilter(String(s.id))} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeSiteFilter === String(s.id) ? 'font-medium' : ''}`}>
+                                                <span>{s.name}</span>
+                                                {activeSiteFilter === String(s.id) && <Check className="h-3.5 w-3.5 text-primary" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* User */}
+                                <div className="p-3 border-b">
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">User</p>
+                                    <div className="space-y-0.5 max-h-[140px] overflow-y-auto">
+                                        <button onClick={() => setActiveUserFilter('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeUserFilter === 'all' ? 'font-medium' : ''}`}>
+                                            <span>All Users</span>
+                                            {activeUserFilter === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </button>
+                                        {users.map(u => (
+                                            <button key={u.id} onClick={() => setActiveUserFilter(String(u.id))} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeUserFilter === String(u.id) ? 'font-medium' : ''}`}>
+                                                <span>{u.name}</span>
+                                                {activeUserFilter === String(u.id) && <Check className="h-3.5 w-3.5 text-primary" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Date Range */}
+                                <div className="p-3 border-b">
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Date Range</p>
+                                    <div className="flex items-center gap-2">
+                                        <input type="date" value={activeStartDate} onChange={e => setActiveStartDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                                        <span className="text-muted-foreground text-xs">to</span>
+                                        <input type="date" value={activeEndDate} onChange={e => setActiveEndDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                                    </div>
+                                </div>
+                                {liveActiveFilterCount > 0 && (
+                                    <div className="p-2">
+                                        <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setActiveSiteFilter('all'); setActiveUserFilter('all'); setActiveStartDate(''); setActiveEndDate(''); }}>
+                                            Clear all filters
+                                        </Button>
+                                    </div>
+                                )}
+                            </PopoverContent>
+                        </Popover>
+                        {/* Active filter badges */}
+                        {activeSiteFilter !== 'all' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800">
+                                Site: {sites.find(s => String(s.id) === activeSiteFilter)?.name}
+                                <button onClick={() => setActiveSiteFilter('all')}><X className="h-3 w-3" /></button>
+                            </span>
+                        )}
+                        {activeUserFilter !== 'all' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                                User: {users.find(u => String(u.id) === activeUserFilter)?.name}
+                                <button onClick={() => setActiveUserFilter('all')}><X className="h-3 w-3" /></button>
+                            </span>
+                        )}
+                        {(activeStartDate || activeEndDate) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800">
+                                Date: {activeStartDate || '...'} → {activeEndDate || '...'}
+                                <button onClick={() => { setActiveStartDate(''); setActiveEndDate(''); }}><X className="h-3 w-3" /></button>
+                            </span>
+                        )}
+                        {liveActiveFilterCount > 0 && (
+                            <span className="text-xs text-muted-foreground">{filtered.length} of {assignments.length}</span>
+                        )}
                     </div>
 
                     <Card>
@@ -537,39 +615,87 @@ export default function LiveTracking({
                 </>
             ) : (
                 <div className="space-y-4">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative flex-1 min-w-[200px] max-w-[300px]">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <input
                                 type="text"
-                                placeholder="Search "
+                                placeholder="Search asset, user..."
                                 value={historySearch}
                                 onChange={e => setHistorySearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-10"
+                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-9"
                             />
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <div className="flex items-center gap-1.5 bg-muted/30 px-2 py-1 rounded-lg border border-border h-10">
-                                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={e => setStartDate(e.target.value)}
-                                    className="bg-transparent text-sm focus:outline-none w-[130px]"
-                                />
-                                <span className="text-muted-foreground text-xs mx-1">to</span>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={e => setEndDate(e.target.value)}
-                                    className="bg-transparent text-sm focus:outline-none w-[130px]"
-                                />
-                            </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-9 gap-1.5 border-dashed">
+                                    <Filter className="h-3.5 w-3.5" />
+                                    Filters
+                                    {historyActiveFilterCount > 0 && (
+                                        <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                                            {historyActiveFilterCount}
+                                        </span>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[300px] p-0" align="start">
+                                <div className="p-3 border-b">
+                                    <p className="text-sm font-semibold">Filter History</p>
+                                </div>
+                                {/* User */}
+                                <div className="p-3 border-b">
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">User</p>
+                                    <div className="space-y-0.5 max-h-[160px] overflow-y-auto">
+                                        <button onClick={() => setHistoryUserFilter('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${historyUserFilter === 'all' ? 'font-medium' : ''}`}>
+                                            <span>All Users</span>
+                                            {historyUserFilter === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </button>
+                                        {users.map(u => (
+                                            <button key={u.id} onClick={() => setHistoryUserFilter(String(u.id))} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${historyUserFilter === String(u.id) ? 'font-medium' : ''}`}>
+                                                <span>{u.name}</span>
+                                                {historyUserFilter === String(u.id) && <Check className="h-3.5 w-3.5 text-primary" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Date Range */}
+                                <div className="p-3 border-b">
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Date Range</p>
+                                    <div className="flex items-center gap-2">
+                                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                                        <span className="text-muted-foreground text-xs">to</span>
+                                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                                    </div>
+                                </div>
+                                {historyActiveFilterCount > 0 && (
+                                    <div className="p-2">
+                                        <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setHistoryUserFilter('all'); setStartDate(''); setEndDate(''); }}>
+                                            Clear all filters
+                                        </Button>
+                                    </div>
+                                )}
+                            </PopoverContent>
+                        </Popover>
+                        {/* Active filter badges */}
+                        {historyUserFilter !== 'all' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                                User: {users.find(u => String(u.id) === historyUserFilter)?.name}
+                                <button onClick={() => setHistoryUserFilter('all')}><X className="h-3 w-3" /></button>
+                            </span>
+                        )}
+                        {(startDate || endDate) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800">
+                                Date: {startDate || '...'} → {endDate || '...'}
+                                <button onClick={() => { setStartDate(''); setEndDate(''); }}><X className="h-3 w-3" /></button>
+                            </span>
+                        )}
+                        <div className="ml-auto">
                             <Button
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white h-10 px-4"
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-4"
                                 onClick={handleExport}
                             >
-                                <FileText className="w-4 h-4 mr-2" />
+                                <FileText className="w-3.5 h-3.5 mr-1.5" />
                                 Export CSV
                             </Button>
                         </div>

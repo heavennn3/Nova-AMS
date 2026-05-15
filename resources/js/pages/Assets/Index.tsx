@@ -6,7 +6,7 @@ import { DataTableColumnHeader } from '@/components/data-table/data-table-column
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Edit, Trash2, Wrench, FileText, Package, CheckCircle2, Search, Filter, X, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Wrench, FileText, Package, CheckCircle2, Search, Filter, X, Check, Info, User, Clock, Calendar, MessageSquare } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
@@ -78,20 +78,93 @@ export default function AssetIndex({ assets = [], sites = [] }: { assets: any[],
             ),
             cell: ({ row }: any) => {
                 const status = row.original.status;
+                const assignment = row.original.assignment;
                 const statusColors: Record<string, string> = {
-                    available: 'bg-green-100 text-green-800',
-                    in_use: 'bg-blue-100 text-blue-800',
-                    maintenance: 'bg-yellow-100 text-yellow-800',
-                    faulty: 'bg-red-100 text-red-800',
+                    available: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                    in_use: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                    maintenance: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+                    faulty: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                    degraded: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+                    new: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+                    retired: 'bg-slate-100 text-slate-800 dark:bg-slate-800/50 dark:text-slate-300',
+                };
+
+                const labels: Record<string, string> = {
+                    available: 'Available',
+                    in_use: 'In Use',
+                    maintenance: 'Maintenance',
+                    faulty: 'Faulty',
+                    degraded: 'Degraded',
+                    new: 'New',
+                    retired: 'Retired',
                 };
                 
                 const colorClass = statusColors[status] || 'bg-secondary text-secondary-foreground';
 
                 return (
-                    <div className="flex items-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
-                            {status || 'Unknown'}
+                    <div className="flex items-center gap-1.5">
+                        <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colorClass}`}>
+                            {labels[status] || status || 'Unknown'}
                         </span>
+                        {status === 'in_use' && assignment && (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <button className="h-5 w-5 rounded-full bg-blue-500/15 hover:bg-blue-500/25 flex items-center justify-center transition-colors" title="View usage details">
+                                        <Info className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[420px]">
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2">
+                                            <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                <Info className="h-4 w-4 text-blue-500" />
+                                            </div>
+                                            Asset In Use
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            {row.original.product_name} ({row.original.asset_id})
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-3 pt-2">
+                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border">
+                                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                                                <User className="h-4 w-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">Checked out by</p>
+                                                <p className="text-sm font-semibold">{assignment.user_name}</p>
+                                                <p className="text-xs text-muted-foreground">{assignment.user_email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="p-3 rounded-lg bg-muted/50 border">
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                    <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    <p className="text-xs text-muted-foreground">Assigned</p>
+                                                </div>
+                                                <p className="text-sm font-medium">{assignment.assigned_at}</p>
+                                            </div>
+                                            <div className="p-3 rounded-lg bg-muted/50 border">
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    <p className="text-xs text-muted-foreground">Duration</p>
+                                                </div>
+                                                <p className="text-sm font-medium">{assignment.duration}</p>
+                                            </div>
+                                        </div>
+                                        {assignment.remarks && (
+                                            <div className="p-3 rounded-lg bg-muted/50 border">
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                    <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    <p className="text-xs text-muted-foreground">Remarks</p>
+                                                </div>
+                                                <p className="text-sm">{assignment.remarks}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        )}
                     </div>
                 );
             }

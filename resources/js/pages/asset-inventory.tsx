@@ -105,7 +105,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                     new: 'bg-emerald-100 text-emerald-800',
                     retired: 'bg-slate-100 text-slate-800',
                 };
-                
+
                 const labels: Record<string, string> = {
                     available: 'Available',
                     in_use: 'In Use',
@@ -139,9 +139,9 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                                 <Edit className="h-4 w-4 mr-1" /> Edit
                             </Button>
                         </Link>
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             className="h-8 px-2 text-red-600 hover:bg-red-50"
                             onClick={() => {
                                 if (confirm('Are you sure you want to delete this asset?')) {
@@ -171,12 +171,12 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
     return (
         <div className="p-8 w-full space-y-6">
             <Head title="Asset Inventory" />
-            
+
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Register</h1>
                     <p className="text-muted-foreground mt-1">
-                        
+
                     </p>
                 </div>
                 <Link href="/assets/create">
@@ -185,7 +185,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                     </Button>
                 </Link>
             </div>
-            
+
             {/* Search + Filter row */}
             <div className="flex items-center gap-2 flex-wrap">
                 <div className="relative w-[280px]">
@@ -211,7 +211,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                                     <button key={s} onClick={() => setSelectedStatus(s)} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors capitalize ${selectedStatus === s ? 'font-medium' : ''}`}>
                                         <span>{s}</span>
                                         <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-muted-foreground">{(assets||[]).filter(a => a.status === s).length}</span>
+                                            <span className="text-[10px] text-muted-foreground">{(assets || []).filter(a => a.status === s).length}</span>
                                             {selectedStatus === s && <Check className="h-3.5 w-3.5 text-primary" />}
                                         </div>
                                     </button>
@@ -228,7 +228,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                                     <button key={v} onClick={() => setSelectedVendor(v)} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedVendor === v ? 'font-medium' : ''}`}>
                                         <span>{v}</span>
                                         <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-muted-foreground">{(assets||[]).filter(a => a.vendor === v).length}</span>
+                                            <span className="text-[10px] text-muted-foreground">{(assets || []).filter(a => a.vendor === v).length}</span>
                                             {selectedVendor === v && <Check className="h-3.5 w-3.5 text-primary" />}
                                         </div>
                                     </button>
@@ -240,12 +240,12 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 </Popover>
                 {selectedStatus !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium border border-green-100">Status: {selectedStatus}<button onClick={() => setSelectedStatus('all')} className="ml-0.5"><X className="h-3 w-3" /></button></span>}
                 {selectedVendor !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">Vendor: {selectedVendor}<button onClick={() => setSelectedVendor('all')} className="ml-0.5"><X className="h-3 w-3" /></button></span>}
-                {activeFilterCount > 0 && <span className="text-xs text-muted-foreground ml-1">{filteredAssets.length} of {(assets||[]).length} assets</span>}
+                {activeFilterCount > 0 && <span className="text-xs text-muted-foreground ml-1">{filteredAssets.length} of {(assets || []).length} assets</span>}
             </div>
 
-            <DataTable 
-                columns={columns} 
-                data={filteredAssets} 
+            <DataTable
+                columns={columns}
+                data={filteredAssets}
                 onImportCsv={handleImportCsv}
                 hideToolbar
             />

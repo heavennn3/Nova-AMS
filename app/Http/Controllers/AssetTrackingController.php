@@ -220,6 +220,10 @@ class AssetTrackingController extends Controller
             });
         }
 
+        if ($userId = $request->input('user_id')) {
+            $query->where('user_id', $userId);
+        }
+
         if ($startDate = $request->input('start_date')) {
             $query->whereDate('assigned_at', '>=', $startDate);
         }
