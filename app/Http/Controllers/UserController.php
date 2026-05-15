@@ -25,6 +25,7 @@ class UserController extends Controller
                     'profile_photo' => $user->profile_photo ? Storage::url($user->profile_photo) : null,
                     'role' => $user->roles->pluck('name')->first() ?? 'None',
                     'sites' => $user->sites->pluck('name')->toArray(),
+                    'is_active' => (bool) $user->is_active,
                     'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 ];
             })->values();
@@ -155,5 +156,18 @@ class UserController extends Controller
         }
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    public function toggleActive(User $user)
+    {
+        if ($user->hasRole('Admin')) {
+            return redirect()->back()->with('error', 'Cannot change status of Admin users.');
+        }
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        $status = $user->is_active ? 'activated' : 'deactivated';
+        return redirect()->route('users.index')->with('success', "User {$status} successfully.");
     }
 }

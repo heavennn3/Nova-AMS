@@ -160,6 +160,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/security/roles/matrix', [\App\Http\Controllers\RoleAccessController::class, 'saveMatrix'])->name('roles.save-matrix');
         // User Management
         Route::resource('users', \App\Http\Controllers\UserController::class);
+        Route::patch('/users/{user}/toggle-active', [\App\Http\Controllers\UserController::class, 'toggleActive'])->name('users.toggle-active');
 
         // Recycle Bin
         Route::get('/security/recycle-bin', [\App\Http\Controllers\RecycleBinController::class, 'index'])->name('recycle-bin.index');
