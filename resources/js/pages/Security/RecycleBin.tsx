@@ -158,7 +158,7 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                     <DataTable
                         columns={columns}
                         data={items || []}
-                        searchKey="name"
+                        hideToolbar
                     />
                 </CardContent>
             </Card>

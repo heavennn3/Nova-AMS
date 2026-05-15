@@ -260,7 +260,7 @@ export default function MasterData({ categories = [], types = [], sites = [], ve
                     <DataTable 
                         columns={currentTab.columns} 
                         data={currentTab.data} 
-                        searchKey="name" 
+                        hideToolbar
                     />
                 </div>
             </div>

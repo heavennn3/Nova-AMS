@@ -1,10 +1,36 @@
+import { useState, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Plus, Edit, Trash2, Search, Filter, X, Check } from 'lucide-react';
 
 export default function AssetIndex({ assets }: { assets: any[] }) {
+    const [search, setSearch] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('all');
+    const [selectedVendor, setSelectedVendor] = useState('all');
+
+    const allStatuses = useMemo(() => [...new Set((assets || []).map(a => a.status).filter(Boolean))].sort(), [assets]);
+    const allVendors = useMemo(() => [...new Set((assets || []).map(a => a.vendor).filter(Boolean))].sort(), [assets]);
+
+    const filteredAssets = useMemo(() => {
+        return (assets || []).filter(a => {
+            const matchesStatus = selectedStatus === 'all' || a.status === selectedStatus;
+            const matchesVendor = selectedVendor === 'all' || a.vendor === selectedVendor;
+            const q = search.toLowerCase();
+            const matchesSearch = !q ||
+                (a.asset_id && a.asset_id.toLowerCase().includes(q)) ||
+                (a.product_name && a.product_name.toLowerCase().includes(q)) ||
+                (a.vendor && a.vendor.toLowerCase().includes(q)) ||
+                (a.category && a.category.toLowerCase().includes(q)) ||
+                (a.site && a.site.toLowerCase().includes(q));
+            return matchesStatus && matchesVendor && matchesSearch;
+        });
+    }, [assets, search, selectedStatus, selectedVendor]);
+
+    const activeFilterCount = (selectedStatus !== 'all' ? 1 : 0) + (selectedVendor !== 'all' ? 1 : 0);
     const columns = [
         {
             accessorKey: "asset_id",
@@ -160,11 +186,68 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 </Link>
             </div>
             
+            {/* Search + Filter row */}
+            <div className="flex items-center gap-2 flex-wrap">
+                <div className="relative w-[280px]">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input placeholder="Search asset ID, product, vendor..." value={search} onChange={e => setSearch(e.target.value)} className="h-8 pl-8 text-sm" />
+                </div>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 gap-1.5 border-dashed">
+                            <Filter className="h-3.5 w-3.5" /> Filters
+                            {activeFilterCount > 0 && <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{activeFilterCount}</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[260px] p-0" align="start">
+                        <div className="p-3 border-b"><p className="text-sm font-semibold">Filter Assets</p></div>
+                        <div className="p-3 border-b">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Status</p>
+                            <div className="space-y-0.5 max-h-[150px] overflow-y-auto">
+                                <button onClick={() => setSelectedStatus('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedStatus === 'all' ? 'font-medium' : ''}`}>
+                                    <span>All</span>{selectedStatus === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                </button>
+                                {allStatuses.map(s => (
+                                    <button key={s} onClick={() => setSelectedStatus(s)} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors capitalize ${selectedStatus === s ? 'font-medium' : ''}`}>
+                                        <span>{s}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] text-muted-foreground">{(assets||[]).filter(a => a.status === s).length}</span>
+                                            {selectedStatus === s && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="p-3 border-b">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Vendor</p>
+                            <div className="space-y-0.5 max-h-[150px] overflow-y-auto">
+                                <button onClick={() => setSelectedVendor('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedVendor === 'all' ? 'font-medium' : ''}`}>
+                                    <span>All</span>{selectedVendor === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                </button>
+                                {allVendors.map(v => (
+                                    <button key={v} onClick={() => setSelectedVendor(v)} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedVendor === v ? 'font-medium' : ''}`}>
+                                        <span>{v}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] text-muted-foreground">{(assets||[]).filter(a => a.vendor === v).length}</span>
+                                            {selectedVendor === v && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        {activeFilterCount > 0 && <div className="p-2"><Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setSelectedStatus('all'); setSelectedVendor('all'); }}>Clear all filters</Button></div>}
+                    </PopoverContent>
+                </Popover>
+                {selectedStatus !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium border border-green-100">Status: {selectedStatus}<button onClick={() => setSelectedStatus('all')} className="ml-0.5"><X className="h-3 w-3" /></button></span>}
+                {selectedVendor !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">Vendor: {selectedVendor}<button onClick={() => setSelectedVendor('all')} className="ml-0.5"><X className="h-3 w-3" /></button></span>}
+                {activeFilterCount > 0 && <span className="text-xs text-muted-foreground ml-1">{filteredAssets.length} of {(assets||[]).length} assets</span>}
+            </div>
+
             <DataTable 
                 columns={columns} 
-                data={assets || []} 
-                searchKey="site" // Setting the search key to "site" allows filtering by Location
+                data={filteredAssets} 
                 onImportCsv={handleImportCsv}
+                hideToolbar
             />
         </div>
     );

@@ -1,18 +1,22 @@
+import { useState, useMemo } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { FileText, Plus, Clock, CheckCircle2, AlertCircle, MoreHorizontal } from 'lucide-react';
+import { FileText, Plus, Clock, CheckCircle2, AlertCircle, Search, Filter, X, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/data-table/data-table';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
 
 export default function WorkOrders({ workOrders, assets, technicians }: any) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('all');
+    const [selectedPriority, setSelectedPriority] = useState('all');
     
     const { data, setData, post, processing, reset, errors } = useForm({
         asset_id: '',
@@ -34,6 +38,25 @@ export default function WorkOrders({ workOrders, assets, technicians }: any) {
     const updateStatus = (id: number, status: string) => {
         router.patch(`/maintenance/work-orders/${id}/status`, { status });
     };
+
+    const allStatuses = useMemo(() => [...new Set(workOrders.map((w: any) => w.status).filter(Boolean))].sort(), [workOrders]);
+    const allPriorities = useMemo(() => [...new Set(workOrders.map((w: any) => w.priority).filter(Boolean))].sort(), [workOrders]);
+
+    const filteredOrders = useMemo(() => {
+        return workOrders.filter((w: any) => {
+            const matchesStatus = selectedStatus === 'all' || w.status === selectedStatus;
+            const matchesPriority = selectedPriority === 'all' || w.priority === selectedPriority;
+            const q = search.toLowerCase();
+            const matchesSearch = !q ||
+                (w.issue && w.issue.toLowerCase().includes(q)) ||
+                (w.asset?.product_name && w.asset.product_name.toLowerCase().includes(q)) ||
+                (w.asset?.asset_id && w.asset.asset_id.toLowerCase().includes(q)) ||
+                (w.technician?.name && w.technician.name.toLowerCase().includes(q));
+            return matchesStatus && matchesPriority && matchesSearch;
+        });
+    }, [workOrders, search, selectedStatus, selectedPriority]);
+
+    const activeFilterCount = (selectedStatus !== 'all' ? 1 : 0) + (selectedPriority !== 'all' ? 1 : 0);
 
     const columns = [
         {
@@ -117,11 +140,11 @@ export default function WorkOrders({ workOrders, assets, technicians }: any) {
             
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
-                        <FileText className="h-8 w-8 mr-3 text-primary" />
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center">
+                        <FileText className="h-7 w-7 mr-3 text-primary" />
                         Maintenance Operations
                     </h1>
-                    <p className="text-muted-foreground mt-2">Manage technical work orders and maintenance lifecycle.</p>
+                    <p className="text-muted-foreground mt-1">Manage technical work orders and maintenance lifecycle.</p>
                 </div>
 
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -215,11 +238,62 @@ export default function WorkOrders({ workOrders, assets, technicians }: any) {
                 ))}
             </div>
 
-            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden p-6">
+            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden p-6 space-y-4">
+                {/* Search + Filter row */}
+                <div className="flex items-center gap-2 flex-wrap">
+                    <div className="relative w-[280px]">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        <Input placeholder="Search asset, issue, technician..." value={search} onChange={e => setSearch(e.target.value)} className="h-8 pl-8 text-sm" />
+                    </div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-8 gap-1.5 border-dashed">
+                                <Filter className="h-3.5 w-3.5" /> Filters
+                                {activeFilterCount > 0 && <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{activeFilterCount}</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[260px] p-0" align="start">
+                            <div className="p-3 border-b"><p className="text-sm font-semibold">Filter Work Orders</p></div>
+                            <div className="p-3 border-b">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Status</p>
+                                <div className="space-y-0.5">
+                                    <button onClick={() => setSelectedStatus('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedStatus === 'all' ? 'font-medium' : ''}`}>
+                                        <span>All</span>{selectedStatus === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                    </button>
+                                    {allStatuses.map(s => (
+                                        <button key={s} onClick={() => setSelectedStatus(s)} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors capitalize ${selectedStatus === s ? 'font-medium' : ''}`}>
+                                            <span>{s.replace('_', ' ')}</span>
+                                            <div className="flex items-center gap-1.5"><span className="text-[10px] text-muted-foreground">{workOrders.filter((w: any) => w.status === s).length}</span>{selectedStatus === s && <Check className="h-3.5 w-3.5 text-primary" />}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="p-3 border-b">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Priority</p>
+                                <div className="space-y-0.5">
+                                    <button onClick={() => setSelectedPriority('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${selectedPriority === 'all' ? 'font-medium' : ''}`}>
+                                        <span>All</span>{selectedPriority === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                    </button>
+                                    {allPriorities.map(p => (
+                                        <button key={p} onClick={() => setSelectedPriority(p)} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors capitalize ${selectedPriority === p ? 'font-medium' : ''}`}>
+                                            <span>{p}</span>
+                                            <div className="flex items-center gap-1.5"><span className="text-[10px] text-muted-foreground">{workOrders.filter((w: any) => w.priority === p).length}</span>{selectedPriority === p && <Check className="h-3.5 w-3.5 text-primary" />}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            {activeFilterCount > 0 && <div className="p-2"><Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setSelectedStatus('all'); setSelectedPriority('all'); }}>Clear all filters</Button></div>}
+                        </PopoverContent>
+                    </Popover>
+                    {selectedStatus !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100 capitalize">Status: {selectedStatus.replace('_', ' ')}<button onClick={() => setSelectedStatus('all')} className="ml-0.5"><X className="h-3 w-3" /></button></span>}
+                    {selectedPriority !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-100 capitalize">Priority: {selectedPriority}<button onClick={() => setSelectedPriority('all')} className="ml-0.5"><X className="h-3 w-3" /></button></span>}
+                    {activeFilterCount > 0 && <span className="text-xs text-muted-foreground ml-1">{filteredOrders.length} of {workOrders.length} orders</span>}
+                </div>
+
                 <DataTable 
                     columns={columns} 
-                    data={workOrders} 
-                    searchKey="issue" 
+                    data={filteredOrders} 
+                    hideToolbar
                 />
             </div>
         </div>
