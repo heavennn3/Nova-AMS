@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
+
 Route::inertia('/', 'nova-ams', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('Nova AMS');
