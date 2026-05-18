@@ -1,5 +1,4 @@
 <?php
-//public route
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
