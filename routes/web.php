@@ -9,14 +9,17 @@ Route::inertia('/', 'nova-ams', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
+    // Support Tickets
     Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets');
     Route::post('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'store'])->name('support.tickets.store');
     Route::get('/support/tickets/{ticket}', [\App\Http\Controllers\SupportTicketController::class, 'show'])->name('support.tickets.show');
     Route::post('/support/tickets/{ticket}/message', [\App\Http\Controllers\SupportTicketController::class, 'message'])->name('support.tickets.message');
     Route::patch('/support/tickets/{ticket}/status', [\App\Http\Controllers\SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
 
+    // System Monitoring API
     Route::get('/api/system/monitoring', function () {
         $diskFree  = disk_free_space('/');
         $diskTotal = disk_total_space('/');
@@ -35,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
 
+    // Asset Inventory Module
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
         Route::inertia('/asset-inventory', 'asset-inventory')->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
@@ -55,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/mapping/floor-plans', [\App\Http\Controllers\MappingController::class, 'floorPlans'])->name('mapping.floor-plans');
     });
 
+    // Master Data Module
     Route::middleware(['permission:module.master-data'])->group(function () {
         Route::get('/master-data', [\App\Http\Controllers\MasterDataController::class, 'index'])->name('master-data');
 
@@ -77,6 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('vendors', \App\Http\Controllers\VendorController::class);
     });
 
+    // Multi-Site Module
     Route::middleware(['permission:module.multi-site'])->group(function () {
         Route::get('/multi-site/tracking', [\App\Http\Controllers\MultiSiteController::class, 'tracking'])->name('multi-site.tracking');
         Route::get('/multi-site/dashboards', [\App\Http\Controllers\MultiSiteController::class, 'dashboards'])->name('multi-site.dashboards');
@@ -84,6 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/multi-site/access', [\App\Http\Controllers\MultiSiteController::class, 'access'])->name('multi-site.access');
     });
 
+    // Operations Module
     Route::middleware(['permission:module.operations'])->group(function () {
         Route::get('/operations-maintanance', [\App\Http\Controllers\OperationsController::class, 'dashboard'])->name('operations-maintenance');
         Route::get('/maintenance/scheduling', [\App\Http\Controllers\OperationsController::class, 'scheduling']);
@@ -103,12 +110,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/vendors/po', [\App\Http\Controllers\OperationsController::class, 'po']);
         Route::get('/vendors/portal', [\App\Http\Controllers\OperationsController::class, 'portal']);
 
+        // Asset Lifecycle Module
         Route::get('/lifecycle/status', [\App\Http\Controllers\AssetLifecycleController::class, 'status']);
         Route::get('/lifecycle/warranty', [\App\Http\Controllers\AssetLifecycleController::class, 'warranty']);
         Route::get('/lifecycle/health', [\App\Http\Controllers\AssetLifecycleController::class, 'health']);
         Route::get('/lifecycle/audit', [\App\Http\Controllers\AssetLifecycleController::class, 'audit']);
     });
 
+    // Analytics Module
     Route::middleware(['permission:module.analytics'])->group(function () {
         Route::get('/analytics/utilization', [\App\Http\Controllers\AnalyticsController::class, 'utilization']);
         Route::get('/analytics/costs', [\App\Http\Controllers\AnalyticsController::class, 'costs']);
@@ -118,6 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/analytics/heatmaps', [\App\Http\Controllers\AnalyticsController::class, 'heatmaps']);
     });
 
+    // Finance Module
     Route::middleware(['permission:module.finance'])->group(function () {
         Route::get('/finance/valuation', [\App\Http\Controllers\FinanceController::class, 'valuation']);
         Route::get('/finance/budgets', [\App\Http\Controllers\FinanceController::class, 'budgets']);
@@ -126,6 +136,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/finance/insurance', [\App\Http\Controllers\FinanceController::class, 'insurance']);
     });
 
+    // Documents Module
     Route::middleware(['permission:module.documents'])->group(function () {
         Route::get('/documents/assets', [\App\Http\Controllers\DocumentManagementController::class, 'assets']);
         Route::get('/documents/maintenance', [\App\Http\Controllers\DocumentManagementController::class, 'maintenance']);
@@ -134,6 +145,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/documents/alerts', [\App\Http\Controllers\DocumentManagementController::class, 'alerts']);
     });
 
+    // System Settings Module
     Route::middleware(['permission:module.system-settings'])->group(function () {
         Route::get('/security/logs', [\App\Http\Controllers\SecurityController::class, 'logs']);
         Route::get('/security/roles', [\App\Http\Controllers\RoleAccessController::class, 'index'])->name('roles.index');
@@ -141,6 +153,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', \App\Http\Controllers\UserController::class);
         Route::patch('/users/{user}/toggle-active', [\App\Http\Controllers\UserController::class, 'toggleActive'])->name('users.toggle-active');
 
+        // Recycle Bin
         Route::get('/security/recycle-bin', [\App\Http\Controllers\RecycleBinController::class, 'index'])->name('recycle-bin.index');
         Route::post('/security/recycle-bin/{id}/restore', [\App\Http\Controllers\RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
