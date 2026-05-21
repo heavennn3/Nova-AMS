@@ -1,22 +1,32 @@
 import { Head } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Slas() {
     return (
-        <div className="p-8 w-full space-y-6">
+        <div className="w-full space-y-6 p-8">
             <Head title="Service Level Agreements" />
             <div className="flex items-center">
-                <ShieldCheck className="h-8 w-8 mr-3 text-primary" />
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Service Level Agreements (SLAs)</h1>
+                <ShieldCheck className="mr-3 h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    Service Level Agreements (SLAs)
+                </h1>
             </div>
-            <p className="text-muted-foreground">Track resolution times, uptime guarantees, and vendor compliance metrics.</p>
-            
-            <Card className="h-[400px] flex items-start justify-start p-8 bg-muted/10 border-dashed">
+            <p className="text-muted-foreground">
+                Track resolution times, uptime guarantees, and vendor compliance
+                metrics.
+            </p>
+
+            <Card className="flex h-[400px] items-start justify-start border-dashed bg-muted/10 p-8">
                 <CardContent className="text-left">
-                    <ShieldCheck className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                    <p className="text-lg font-medium">No Active SLAs Tracked</p>
-                    <p className="text-muted-foreground text-sm mt-2">Configure SLA parameters for your active vendor contracts to begin monitoring.</p>
+                    <ShieldCheck className="mb-4 h-16 w-16 text-muted-foreground/30" />
+                    <p className="text-lg font-medium">
+                        No Active SLAs Tracked
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Configure SLA parameters for your active vendor
+                        contracts to begin monitoring.
+                    </p>
                 </CardContent>
             </Card>
         </div>

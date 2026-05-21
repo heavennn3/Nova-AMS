@@ -57,7 +57,6 @@ const navSections: NavSection[] = [
                 items: [
                     { title: 'View Site ', href: geographicView() },
                     { title: 'Site Floor Plans', href: '/mapping/floor-plans' },
-
                 ],
             },
         ],
@@ -65,19 +64,45 @@ const navSections: NavSection[] = [
     {
         title: 'ASSET MANAGEMENT',
         items: [
-            { title: 'Asset Inventory', href: assetInventory(), icon: Package, module: 'Asset Inventory' },
-            { title: 'Asset Withdrawal', href: '/live-tracking', icon: Activity, module: 'Asset Inventory' },
-            { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench, },
-            { title: 'Master Data', href: masterData(), icon: Database, module: 'Master Data' },
-            { title: 'Vendor Management', href: vendors(), icon: Briefcase, module: 'Master Data' },
+            {
+                title: 'Asset Inventory',
+                href: assetInventory(),
+                icon: Package,
+                module: 'Asset Inventory',
+            },
+            {
+                title: 'Asset Withdrawal',
+                href: '/live-tracking',
+                icon: Activity,
+                module: 'Asset Inventory',
+            },
+            { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench },
+            {
+                title: 'Master Data',
+                href: masterData(),
+                icon: Database,
+                module: 'Master Data',
+            },
+            {
+                title: 'Vendor Management',
+                href: vendors(),
+                icon: Briefcase,
+                module: 'Master Data',
+            },
             {
                 title: 'Multi-Site Management',
                 href: '#',
                 icon: MapPin,
                 module: 'Multi-Site Management',
                 items: [
-                    { title: 'Site Dashboards', href: '/multi-site/dashboards' },
-                    { title: 'Transfer Workflows', href: '/multi-site/transfers' },
+                    {
+                        title: 'Site Dashboards',
+                        href: '/multi-site/dashboards',
+                    },
+                    {
+                        title: 'Transfer Workflows',
+                        href: '/multi-site/transfers',
+                    },
                 ],
             },
             {
@@ -86,8 +111,14 @@ const navSections: NavSection[] = [
                 icon: Activity,
                 module: 'Operations & Maintenance',
                 items: [
-                    { title: 'Asset Status Tracking', href: '/lifecycle/status' },
-                    { title: 'Warranty Management', href: '/lifecycle/warranty' },
+                    {
+                        title: 'Asset Status Tracking',
+                        href: '/lifecycle/status',
+                    },
+                    {
+                        title: 'Warranty Management',
+                        href: '/lifecycle/warranty',
+                    },
 
                     { title: 'Audit Trail', href: '/lifecycle/audit' },
                 ],
@@ -97,18 +128,32 @@ const navSections: NavSection[] = [
     {
         title: 'OPERATIONS & MAINTENANCE',
         items: [
-            { title: 'Maintenance Operations', href: operationsMaintenance(), icon: Wrench, module: 'Operations & Maintenance' },
+            {
+                title: 'Maintenance Operations',
+                href: operationsMaintenance(),
+                icon: Wrench,
+                module: 'Operations & Maintenance',
+            },
             {
                 title: 'Comprehensive Maintenance',
                 href: '#',
                 icon: Wrench,
                 module: 'Operations & Maintenance',
                 items: [
-                    { title: 'Preventive Scheduling', href: '/maintenance/scheduling' },
+                    {
+                        title: 'Preventive Scheduling',
+                        href: '/maintenance/scheduling',
+                    },
                     { title: 'Work Orders', href: '/maintenance/work-orders' },
-                    { title: 'Maintenance History', href: '/maintenance/history' },
+                    {
+                        title: 'Maintenance History',
+                        href: '/maintenance/history',
+                    },
 
-                    { title: 'Technician Assignment', href: '/maintenance/technicians' },
+                    {
+                        title: 'Technician Assignment',
+                        href: '/maintenance/technicians',
+                    },
                 ],
             },
             {
@@ -117,7 +162,10 @@ const navSections: NavSection[] = [
                 icon: Briefcase,
                 module: 'Operations & Maintenance',
                 items: [
-                    { title: 'Performance Tracking', href: '/vendors/performance' },
+                    {
+                        title: 'Performance Tracking',
+                        href: '/vendors/performance',
+                    },
                     { title: 'Expiration Alerts', href: '/vendors/alerts' },
                     { title: 'SLAs', href: '/vendors/slas' },
                     { title: 'Purchase Orders', href: '/vendors/po' },
@@ -148,8 +196,14 @@ const navSections: NavSection[] = [
                 module: 'Document Management',
                 items: [
                     { title: 'Asset Documentation', href: '/documents/assets' },
-                    { title: 'Maintenance Records', href: '/documents/maintenance' },
-                    { title: 'Contract Documents', href: '/documents/contracts' },
+                    {
+                        title: 'Maintenance Records',
+                        href: '/documents/maintenance',
+                    },
+                    {
+                        title: 'Contract Documents',
+                        href: '/documents/contracts',
+                    },
                     { title: 'Version Control', href: '/documents/versions' },
                     { title: 'Expiration Alerts', href: '/documents/alerts' },
                 ],
@@ -161,10 +215,22 @@ const navSections: NavSection[] = [
                 icon: Trash2,
                 module: 'System Settings',
                 items: [
-                    { title: 'Vendors', href: '/security/recycle-bin?type=vendors' },
-                    { title: 'Spareparts', href: '/security/recycle-bin?type=spareparts' },
-                    { title: 'Users', href: '/security/recycle-bin?type=users' },
-                    { title: 'Assets', href: '/security/recycle-bin?type=assets' },
+                    {
+                        title: 'Vendors',
+                        href: '/security/recycle-bin?type=vendors',
+                    },
+                    {
+                        title: 'Spareparts',
+                        href: '/security/recycle-bin?type=spareparts',
+                    },
+                    {
+                        title: 'Users',
+                        href: '/security/recycle-bin?type=users',
+                    },
+                    {
+                        title: 'Assets',
+                        href: '/security/recycle-bin?type=assets',
+                    },
                 ],
             },
         ],
@@ -173,20 +239,26 @@ const navSections: NavSection[] = [
     {
         title: 'SUPPORT',
         items: [
-
-            { title: 'Live Chat', href: '/support/tickets', icon: Headset, module: 'Asset Inventory' },
-            { title: 'System Activity Logs', href: '/security/logs', icon: Headset, module: 'System Settings' },
+            {
+                title: 'Live Chat',
+                href: '/support/tickets',
+                icon: Headset,
+                module: 'Asset Inventory',
+            },
+            {
+                title: 'System Activity Logs',
+                href: '/security/logs',
+                icon: Headset,
+                module: 'System Settings',
+            },
         ],
     },
 ];
 
-const footerNavItems: NavItem[] = [
-
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<any>().props;
-
 
     const modulePermissions: string[] = auth.user?.modulePermissions ?? [];
 
@@ -195,13 +267,14 @@ export function AppSidebar() {
         return modulePermissions.includes(module);
     };
 
-
     const filteredNavSections = navSections
-        .map(section => ({
+        .map((section) => ({
             ...section,
-            items: section.items.filter(item => canAccess((item as any).module)),
+            items: section.items.filter((item) =>
+                canAccess((item as any).module),
+            ),
         }))
-        .filter(section => section.items.length > 0);
+        .filter((section) => section.items.length > 0);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -218,9 +291,9 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                {filteredNavSections.map(section => (
+                {filteredNavSections.map((section) => (
                     <div key={section.title}>
-                        <div className="px-4 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        <div className="px-4 py-2 text-xs font-bold tracking-wider text-muted-foreground uppercase">
                             {section.title}
                         </div>
                         <NavMain items={section.items} />

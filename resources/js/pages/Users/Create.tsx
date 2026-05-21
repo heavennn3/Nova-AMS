@@ -3,10 +3,22 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { User, Upload, X } from 'lucide-react';
 
-export default function UserCreate({ roles, sites }: { roles: string[], sites: any[] }) {
+export default function UserCreate({
+    roles,
+    sites,
+}: {
+    roles: string[];
+    sites: any[];
+}) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -44,29 +56,38 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
     };
 
     return (
-        <div className="p-8 w-full space-y-6">
+        <div className="w-full space-y-6 p-8">
             <Head title="Create User" />
-            
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-tight">Add New User</h1>
+
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold tracking-tight">
+                    Add New User
+                </h1>
                 <Link href="/users">
                     <Button variant="outline">Back to Users</Button>
                 </Link>
             </div>
 
-            <form onSubmit={submit} className="space-y-6 bg-card p-6 rounded-xl border shadow-sm">
+            <form
+                onSubmit={submit}
+                className="space-y-6 rounded-xl border bg-card p-6 shadow-sm"
+            >
                 {/* Profile Photo Upload */}
                 <div className="space-y-3">
                     <Label>Profile Photo</Label>
                     <div className="flex items-center gap-6">
-                        <div className="h-24 w-24 rounded-full border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden relative">
+                        <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted">
                             {preview ? (
                                 <>
-                                    <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                                    <img
+                                        src={preview}
+                                        alt="Preview"
+                                        className="h-full w-full object-cover"
+                                    />
                                     <button
                                         type="button"
                                         onClick={removePhoto}
-                                        className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                                        className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>
@@ -85,7 +106,9 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                             >
                                 <Upload className="h-4 w-4" /> Upload Photo
                             </Button>
-                            <p className="text-xs text-muted-foreground mt-1.5">PNG, JPG up to 2MB</p>
+                            <p className="mt-1.5 text-xs text-muted-foreground">
+                                PNG, JPG up to 2MB
+                            </p>
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -95,7 +118,11 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                             />
                         </div>
                     </div>
-                    {errors.profile_photo && <div className="text-sm text-red-500">{errors.profile_photo}</div>}
+                    {errors.profile_photo && (
+                        <div className="text-sm text-red-500">
+                            {errors.profile_photo}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -108,7 +135,11 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                             required
                             placeholder="e.g. Ahmad bin Abdullah"
                         />
-                        {errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
+                        {errors.name && (
+                            <div className="text-sm text-red-500">
+                                {errors.name}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -121,7 +152,11 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                             required
                             placeholder="e.g. user@company.com"
                         />
-                        {errors.email && <div className="text-sm text-red-500">{errors.email}</div>}
+                        {errors.email && (
+                            <div className="text-sm text-red-500">
+                                {errors.email}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -132,7 +167,11 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                             onChange={(e) => setData('phone', e.target.value)}
                             placeholder="e.g. +60 12-345-6789"
                         />
-                        {errors.phone && <div className="text-sm text-red-500">{errors.phone}</div>}
+                        {errors.phone && (
+                            <div className="text-sm text-red-500">
+                                {errors.phone}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -140,10 +179,16 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                         <Input
                             id="ic_number"
                             value={data.ic_number}
-                            onChange={(e) => setData('ic_number', e.target.value)}
+                            onChange={(e) =>
+                                setData('ic_number', e.target.value)
+                            }
                             placeholder="e.g. 900101-01-1234"
                         />
-                        {errors.ic_number && <div className="text-sm text-red-500">{errors.ic_number}</div>}
+                        {errors.ic_number && (
+                            <div className="text-sm text-red-500">
+                                {errors.ic_number}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -152,19 +197,29 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                             id="password"
                             type="password"
                             value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
+                            onChange={(e) =>
+                                setData('password', e.target.value)
+                            }
                             required
                         />
-                        {errors.password && <div className="text-sm text-red-500">{errors.password}</div>}
+                        {errors.password && (
+                            <div className="text-sm text-red-500">
+                                {errors.password}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="password_confirmation">Confirm Password *</Label>
+                        <Label htmlFor="password_confirmation">
+                            Confirm Password *
+                        </Label>
                         <Input
                             id="password_confirmation"
                             type="password"
                             value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            onChange={(e) =>
+                                setData('password_confirmation', e.target.value)
+                            }
                             required
                         />
                     </div>
@@ -176,43 +231,67 @@ export default function UserCreate({ roles, sites }: { roles: string[], sites: a
                                 <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
                             <SelectContent>
-                                {roles.map(role => (
-                                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                                {roles.map((role) => (
+                                    <SelectItem key={role} value={role}>
+                                        {role}
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.role && <div className="text-sm text-red-500">{errors.role}</div>}
+                        {errors.role && (
+                            <div className="text-sm text-red-500">
+                                {errors.role}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
                         <Label>Assign Sites</Label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-muted/30 rounded-lg border">
-                            {sites.map(site => (
-                                <div key={site.id} className="flex items-center space-x-2">
-                                    <input 
+                        <div className="grid grid-cols-2 gap-3 rounded-lg border bg-muted/30 p-4 md:grid-cols-3">
+                            {sites.map((site) => (
+                                <div
+                                    key={site.id}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <input
                                         type="checkbox"
                                         id={`site-${site.id}`}
-                                        checked={data.site_ids.includes(site.id)}
+                                        checked={data.site_ids.includes(
+                                            site.id,
+                                        )}
                                         onChange={(e) => {
                                             const siteIds = [...data.site_ids];
                                             if (e.target.checked) {
                                                 siteIds.push(site.id);
                                             } else {
-                                                const index = siteIds.indexOf(site.id);
-                                                if (index > -1) siteIds.splice(index, 1);
+                                                const index = siteIds.indexOf(
+                                                    site.id,
+                                                );
+                                                if (index > -1)
+                                                    siteIds.splice(index, 1);
                                             }
                                             setData('site_ids', siteIds);
                                         }}
                                         className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                                     />
-                                    <label htmlFor={`site-${site.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                                    <label
+                                        htmlFor={`site-${site.id}`}
+                                        className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
                                         {site.name}
                                     </label>
                                 </div>
                             ))}
                         </div>
-                        <p className="text-[10px] text-muted-foreground">User will have access to data across all selected sites.</p>
-                        {errors.site_ids && <div className="text-sm text-red-500">{errors.site_ids}</div>}
+                        <p className="text-[10px] text-muted-foreground">
+                            User will have access to data across all selected
+                            sites.
+                        </p>
+                        {errors.site_ids && (
+                            <div className="text-sm text-red-500">
+                                {errors.site_ids}
+                            </div>
+                        )}
                     </div>
                 </div>
 

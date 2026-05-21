@@ -17,20 +17,26 @@ export function AppSidebarHeader({
 
     return (
         <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/50 px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4">
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex w-full items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
-                
+
                 <div className="ml-auto flex items-center gap-4">
                     <SystemMonitor />
-                    
-                    <div className="flex items-center gap-2 border-l pl-4 border-border/50">
+
+                    <div className="flex items-center gap-2 border-l border-border/50 pl-4">
                         {/* Dark / Light mode toggle pill */}
                         <button
-                            onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
-                            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                            onClick={() =>
+                                updateAppearance(isDark ? 'light' : 'dark')
+                            }
+                            aria-label={
+                                isDark
+                                    ? 'Switch to light mode'
+                                    : 'Switch to dark mode'
+                            }
                             className={cn(
-                                'relative flex h-7 w-[52px] items-center rounded-full border px-0.5 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                                'relative flex h-7 w-[52px] items-center rounded-full border px-0.5 transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
                                 isDark
                                     ? 'border-slate-600 bg-slate-800'
                                     : 'border-amber-200 bg-amber-50',
@@ -44,13 +50,28 @@ export function AppSidebarHeader({
                                         : 'left-[2px] bg-amber-400',
                                 )}
                             >
-                                {isDark
-                                    ? <Moon className="h-3 w-3 text-slate-700" />
-                                    : <Sun className="h-3 w-3 text-white" />
-                                }
+                                {isDark ? (
+                                    <Moon className="h-3 w-3 text-slate-700" />
+                                ) : (
+                                    <Sun className="h-3 w-3 text-white" />
+                                )}
                             </span>
-                            <Sun className={cn('ml-1 h-3 w-3 transition-opacity duration-300', isDark ? 'opacity-30 text-slate-400' : 'opacity-0')} />
-                            <Moon className={cn('ml-auto mr-1 h-3 w-3 transition-opacity duration-300', isDark ? 'opacity-0' : 'opacity-30 text-amber-400')} />
+                            <Sun
+                                className={cn(
+                                    'ml-1 h-3 w-3 transition-opacity duration-300',
+                                    isDark
+                                        ? 'text-slate-400 opacity-30'
+                                        : 'opacity-0',
+                                )}
+                            />
+                            <Moon
+                                className={cn(
+                                    'mr-1 ml-auto h-3 w-3 transition-opacity duration-300',
+                                    isDark
+                                        ? 'opacity-0'
+                                        : 'text-amber-400 opacity-30',
+                                )}
+                            />
                         </button>
 
                         <NotificationBell />

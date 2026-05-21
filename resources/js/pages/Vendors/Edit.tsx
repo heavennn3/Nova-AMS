@@ -51,29 +51,38 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
     };
 
     return (
-        <div className="p-8 w-full space-y-6">
+        <div className="w-full space-y-6 p-8">
             <Head title={`Edit Vendor: ${vendor.name}`} />
 
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-tight">Edit Vendor</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold tracking-tight">
+                    Edit Vendor
+                </h1>
                 <Link href="/vendors">
                     <Button variant="outline">Back to Vendors</Button>
                 </Link>
             </div>
 
-            <form onSubmit={submit} className="space-y-6 bg-card p-6 rounded-xl border shadow-sm">
+            <form
+                onSubmit={submit}
+                className="space-y-6 rounded-xl border bg-card p-6 shadow-sm"
+            >
                 {/* Logo Upload */}
                 <div className="space-y-3">
                     <Label>Company Logo</Label>
                     <div className="flex items-center gap-6">
-                        <div className="h-24 w-24 rounded-xl border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden relative">
+                        <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted">
                             {preview ? (
                                 <>
-                                    <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                                    <img
+                                        src={preview}
+                                        alt="Preview"
+                                        className="h-full w-full object-cover"
+                                    />
                                     <button
                                         type="button"
                                         onClick={removeLogo}
-                                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>
@@ -92,7 +101,9 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                             >
                                 <Upload className="h-4 w-4" /> Change Logo
                             </Button>
-                            <p className="text-xs text-muted-foreground mt-1.5">PNG, JPG up to 2MB</p>
+                            <p className="mt-1.5 text-xs text-muted-foreground">
+                                PNG, JPG up to 2MB
+                            </p>
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -102,7 +113,11 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                             />
                         </div>
                     </div>
-                    {errors.logo && <div className="text-sm text-red-500">{errors.logo}</div>}
+                    {errors.logo && (
+                        <div className="text-sm text-red-500">
+                            {errors.logo}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -111,10 +126,14 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                         <Input
                             id="name"
                             value={data.name}
-                            onChange={e => setData('name', e.target.value)}
+                            onChange={(e) => setData('name', e.target.value)}
                             required
                         />
-                        {errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
+                        {errors.name && (
+                            <div className="text-sm text-red-500">
+                                {errors.name}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -122,9 +141,15 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                         <Input
                             id="contact_person"
                             value={data.contact_person}
-                            onChange={e => setData('contact_person', e.target.value)}
+                            onChange={(e) =>
+                                setData('contact_person', e.target.value)
+                            }
                         />
-                        {errors.contact_person && <div className="text-sm text-red-500">{errors.contact_person}</div>}
+                        {errors.contact_person && (
+                            <div className="text-sm text-red-500">
+                                {errors.contact_person}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -132,9 +157,13 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                         <Input
                             id="phone"
                             value={data.phone}
-                            onChange={e => setData('phone', e.target.value)}
+                            onChange={(e) => setData('phone', e.target.value)}
                         />
-                        {errors.phone && <div className="text-sm text-red-500">{errors.phone}</div>}
+                        {errors.phone && (
+                            <div className="text-sm text-red-500">
+                                {errors.phone}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -143,9 +172,13 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                             id="email"
                             type="email"
                             value={data.email}
-                            onChange={e => setData('email', e.target.value)}
+                            onChange={(e) => setData('email', e.target.value)}
                         />
-                        {errors.email && <div className="text-sm text-red-500">{errors.email}</div>}
+                        {errors.email && (
+                            <div className="text-sm text-red-500">
+                                {errors.email}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
@@ -153,9 +186,13 @@ export default function VendorEdit({ vendor }: { vendor: VendorData }) {
                         <Input
                             id="address"
                             value={data.address}
-                            onChange={e => setData('address', e.target.value)}
+                            onChange={(e) => setData('address', e.target.value)}
                         />
-                        {errors.address && <div className="text-sm text-red-500">{errors.address}</div>}
+                        {errors.address && (
+                            <div className="text-sm text-red-500">
+                                {errors.address}
+                            </div>
+                        )}
                     </div>
                 </div>
 

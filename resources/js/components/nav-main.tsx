@@ -24,7 +24,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
         <SidebarGroup className="px-2 py-0">
             <SidebarMenu>
                 {items.map((item) => {
-                    const isParentActive = item.items?.some((subItem) => isCurrentUrl(subItem.href)) || isCurrentUrl(item.href);
+                    const isParentActive =
+                        item.items?.some((subItem) =>
+                            isCurrentUrl(subItem.href),
+                        ) || isCurrentUrl(item.href);
 
                     if (item.items && item.items.length > 0) {
                         return (
@@ -48,10 +51,22 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     <CollapsibleContent>
                                         <SidebarMenuSub>
                                             {item.items.map((subItem) => (
-                                                <SidebarMenuSubItem key={subItem.title}>
-                                                    <SidebarMenuSubButton asChild isActive={isCurrentUrl(subItem.href)}>
-                                                        <Link href={subItem.href} prefetch>
-                                                            <span>{subItem.title}</span>
+                                                <SidebarMenuSubItem
+                                                    key={subItem.title}
+                                                >
+                                                    <SidebarMenuSubButton
+                                                        asChild
+                                                        isActive={isCurrentUrl(
+                                                            subItem.href,
+                                                        )}
+                                                    >
+                                                        <Link
+                                                            href={subItem.href}
+                                                            prefetch
+                                                        >
+                                                            <span>
+                                                                {subItem.title}
+                                                            </span>
                                                         </Link>
                                                     </SidebarMenuSubButton>
                                                 </SidebarMenuSubItem>

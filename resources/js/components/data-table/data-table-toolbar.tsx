@@ -42,33 +42,44 @@ export function DataTableToolbar<TData>({
 
     const formatExportData = () => {
         const exportRows = table.getFilteredRowModel().rows;
-        const visibleColumns = table.getVisibleLeafColumns().filter(
-            col => col.id !== 'actions' && col.id !== 'select' && col.id !== 'Changes'
-        );
-        
+        const visibleColumns = table
+            .getVisibleLeafColumns()
+            .filter(
+                (col) =>
+                    col.id !== 'actions' &&
+                    col.id !== 'select' &&
+                    col.id !== 'Changes',
+            );
+
         return exportRows.map((row, index) => {
-            const formattedRow: any = { 'Bil': index + 1 };
-            
+            const formattedRow: any = { Bil: index + 1 };
+
             visibleColumns.forEach((col) => {
                 const columnDef = col.columnDef as any;
                 // Fallback to capitalizing col.id if no headerText or string header is provided
-                const defaultHeader = col.id.charAt(0).toUpperCase() + col.id.slice(1).replace(/_/g, ' ');
-                const header = columnDef.headerText || (typeof columnDef.header === 'string' ? columnDef.header : defaultHeader);
-                
+                const defaultHeader =
+                    col.id.charAt(0).toUpperCase() +
+                    col.id.slice(1).replace(/_/g, ' ');
+                const header =
+                    columnDef.headerText ||
+                    (typeof columnDef.header === 'string'
+                        ? columnDef.header
+                        : defaultHeader);
+
                 let val = '';
                 try {
                     val = row.getValue(col.id) as string;
                 } catch (e) {
                     val = '';
                 }
-                
+
                 if (val === null || val === undefined) val = '';
                 else if (typeof val === 'object') val = JSON.stringify(val);
                 else val = String(val);
-                
+
                 formattedRow[header] = val;
             });
-            
+
             return formattedRow;
         });
     };
@@ -114,7 +125,7 @@ export function DataTableToolbar<TData>({
 
         const doc = new jsPDF('landscape');
         const headers = Object.keys(formattedData[0]);
-        const rows = formattedData.map(obj => Object.values(obj)) as any[];
+        const rows = formattedData.map((obj) => Object.values(obj)) as any[];
 
         autoTable(doc, {
             head: [headers],
@@ -134,26 +145,34 @@ export function DataTableToolbar<TData>({
             skipEmptyLines: true,
             complete: (results) => {
                 const rows = results.data as string[][];
-                
+
                 // Find the header row (look for typical ID column like 'Aset ID' or 'Asset ID')
                 let headerRowIndex = 0;
                 for (let i = 0; i < Math.min(rows.length, 20); i++) {
                     const row = rows[i];
-                    if (row.some(cell => typeof cell === 'string' && (cell.trim().toLowerCase() === 'aset id' || cell.trim().toLowerCase() === 'asset id' || cell.trim().toLowerCase() === 'asset_id'))) {
+                    if (
+                        row.some(
+                            (cell) =>
+                                typeof cell === 'string' &&
+                                (cell.trim().toLowerCase() === 'aset id' ||
+                                    cell.trim().toLowerCase() === 'asset id' ||
+                                    cell.trim().toLowerCase() === 'asset_id'),
+                        )
+                    ) {
                         headerRowIndex = i;
                         break;
                     }
                 }
 
                 if (headerRowIndex >= rows.length) {
-                    alert("Could not detect valid headers in CSV.");
+                    alert('Could not detect valid headers in CSV.');
                     return;
                 }
 
-                const headers = rows[headerRowIndex].map(h => h.trim());
+                const headers = rows[headerRowIndex].map((h) => h.trim());
                 const dataRows = rows.slice(headerRowIndex + 1);
 
-                const parsedData = dataRows.map(row => {
+                const parsedData = dataRows.map((row) => {
                     const obj: any = {};
                     headers.forEach((header, index) => {
                         obj[header] = row[index];
@@ -164,46 +183,71 @@ export function DataTableToolbar<TData>({
                 if (onImportCsv) {
                     onImportCsv(parsedData);
                 }
-                
+
                 // Reset input
                 if (fileInputRef.current) fileInputRef.current.value = '';
             },
         });
     };
 
-    const [searchColumn, setSearchColumn] = React.useState<string>(searchKey || "all");
+    const [searchColumn, setSearchColumn] = React.useState<string>(
+        searchKey || 'all',
+    );
 
     return (
         <div className="flex items-center justify-between gap-4">
             <div className="flex flex-1 items-center space-x-2">
-                <Select value={searchColumn} onValueChange={(val) => {
-                    setSearchColumn(val);
-                    table.setGlobalFilter("");
-                    table.resetColumnFilters();
-                }}>
-                    <SelectTrigger className="h-8 w-[130px] hidden md:flex">
+                <Select
+                    value={searchColumn}
+                    onValueChange={(val) => {
+                        setSearchColumn(val);
+                        table.setGlobalFilter('');
+                        table.resetColumnFilters();
+                    }}
+                >
+                    <SelectTrigger className="hidden h-8 w-[130px] md:flex">
                         <SelectValue placeholder="Search in..." />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Columns</SelectItem>
-                        {columns.filter(c => (c.accessorKey || c.id) && (typeof c.header === 'string' || c.headerText)).map(c => {
-                            const key = c.accessorKey || c.id;
-                            return <SelectItem key={key} value={key}>{c.headerText || c.header}</SelectItem>;
-                        })}
+                        {columns
+                            .filter(
+                                (c) =>
+                                    (c.accessorKey || c.id) &&
+                                    (typeof c.header === 'string' ||
+                                        c.headerText),
+                            )
+                            .map((c) => {
+                                const key = c.accessorKey || c.id;
+                                return (
+                                    <SelectItem key={key} value={key}>
+                                        {c.headerText || c.header}
+                                    </SelectItem>
+                                );
+                            })}
                     </SelectContent>
                 </Select>
 
                 <Input
-                    placeholder={searchColumn === "all" ? "Search all data..." : `Search in ${searchColumn}...`}
-                    value={searchColumn === "all" 
-                        ? (table.getState().globalFilter as string ?? '') 
-                        : (table.getColumn(searchColumn)?.getFilterValue() as string ?? '')
+                    placeholder={
+                        searchColumn === 'all'
+                            ? 'Search all data...'
+                            : `Search in ${searchColumn}...`
+                    }
+                    value={
+                        searchColumn === 'all'
+                            ? ((table.getState().globalFilter as string) ?? '')
+                            : ((table
+                                  .getColumn(searchColumn)
+                                  ?.getFilterValue() as string) ?? '')
                     }
                     onChange={(event) => {
-                        if (searchColumn === "all") {
+                        if (searchColumn === 'all') {
                             table.setGlobalFilter(event.target.value);
                         } else {
-                            table.getColumn(searchColumn)?.setFilterValue(event.target.value);
+                            table
+                                .getColumn(searchColumn)
+                                ?.setFilterValue(event.target.value);
                         }
                     }}
                     className="h-8 w-[150px] lg:w-[300px]"
@@ -213,9 +257,9 @@ export function DataTableToolbar<TData>({
                         variant="ghost"
                         onClick={() => {
                             table.resetColumnFilters();
-                            table.setGlobalFilter("");
+                            table.setGlobalFilter('');
                         }}
-                        className="h-8 px-2 lg:px-3 text-muted-foreground"
+                        className="h-8 px-2 text-muted-foreground lg:px-3"
                     >
                         Reset
                         <X className="ml-2 h-4 w-4" />
@@ -236,7 +280,7 @@ export function DataTableToolbar<TData>({
                         <Button
                             variant="outline"
                             size="sm"
-                            className="h-8 hidden lg:flex"
+                            className="hidden h-8 lg:flex"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <Upload className="mr-2 h-4 w-4" />
@@ -247,7 +291,11 @@ export function DataTableToolbar<TData>({
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 ml-auto hidden lg:flex">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-auto hidden h-8 lg:flex"
+                        >
                             <Download className="mr-2 h-4 w-4" />
                             Export
                         </Button>

@@ -26,10 +26,12 @@ export default function AuthSplitLayout({
                 </Link>
                 <div className="relative z-20 mt-auto">
                     <blockquote className="space-y-2">
-                        <p className="text-lg font-medium italic text-white/80">
+                        <p className="text-lg font-medium text-white/80 italic">
                             "Empowering asset management across every site."
                         </p>
-                        <footer className="text-sm text-white/60">Nova-AMS · Novatis Resources</footer>
+                        <footer className="text-sm text-white/60">
+                            Nova-AMS · Novatis Resources
+                        </footer>
                     </blockquote>
                 </div>
             </div>

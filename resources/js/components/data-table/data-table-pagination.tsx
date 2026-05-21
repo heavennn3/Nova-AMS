@@ -37,8 +37,8 @@ export function DataTablePagination<TData>({
     return (
         <div className="flex items-center justify-between px-2">
             <div className="flex-1 text-sm text-muted-foreground">
-                {table.getFilteredSelectedRowModel().rows.length} of{' '}
-                {totalRows} row(s) selected.
+                {table.getFilteredSelectedRowModel().rows.length} of {totalRows}{' '}
+                row(s) selected.
             </div>
             <div className="flex items-center space-x-6 lg:space-x-8">
                 <div className="flex items-center space-x-2">
@@ -87,7 +87,9 @@ export function DataTablePagination<TData>({
                     <Button
                         variant="outline"
                         className="h-8 w-8 p-0"
-                        onClick={() => setPageIndex(Math.min(pageCount - 1, pageIndex + 1))}
+                        onClick={() =>
+                            setPageIndex(Math.min(pageCount - 1, pageIndex + 1))
+                        }
                         disabled={pageIndex >= pageCount - 1}
                     >
                         <span className="sr-only">Go to next page</span>

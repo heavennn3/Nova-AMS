@@ -40,9 +40,11 @@ export function DataTable<TData, TValue>({
     hideToolbar,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [globalFilter, setGlobalFilter] = React.useState<string>("");
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+    const [columnFilters, setColumnFilters] =
+        React.useState<ColumnFiltersState>([]);
+    const [globalFilter, setGlobalFilter] = React.useState<string>('');
+    const [columnVisibility, setColumnVisibility] =
+        React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
     const [pageIndex, setPageIndex] = React.useState(0);
@@ -72,7 +74,10 @@ export function DataTable<TData, TValue>({
     const allRows = table.getRowModel().rows;
     const totalRows = allRows.length;
     const pageCount = Math.ceil(totalRows / pageSize);
-    const paginatedRows = allRows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+    const paginatedRows = allRows.slice(
+        pageIndex * pageSize,
+        (pageIndex + 1) * pageSize,
+    );
 
     // Reset page index if the total rows change (e.g. search query filters rows out)
     React.useEffect(() => {
@@ -101,9 +106,10 @@ export function DataTable<TData, TValue>({
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext(),
+                                                  )}
                                         </TableHead>
                                     );
                                 })}
@@ -115,13 +121,15 @@ export function DataTable<TData, TValue>({
                             paginatedRows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    data-state={row.getIsSelected() && 'selected'}
+                                    data-state={
+                                        row.getIsSelected() && 'selected'
+                                    }
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
-                                                cell.getContext()
+                                                cell.getContext(),
                                             )}
                                         </TableCell>
                                     ))}
@@ -140,7 +148,7 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <DataTablePagination 
+            <DataTablePagination
                 table={table}
                 pageIndex={pageIndex}
                 pageSize={pageSize}

@@ -26,7 +26,11 @@ import {
     Filter,
     Check,
 } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +56,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -147,7 +151,8 @@ function timeAgo(iso: string): string {
         const secs = Math.floor((Date.now() - date.getTime()) / 1000);
         if (secs < 60) return `${secs}s ago`;
         if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
-        if (secs < 86400) return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
+        if (secs < 86400)
+            return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
         return `${Math.floor(secs / 86400)}d ago`;
     } catch {
         return '—';
@@ -164,7 +169,7 @@ function formatDate(iso: string): string {
             month: 'short',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
         });
     } catch {
         return '—';
@@ -173,12 +178,22 @@ function formatDate(iso: string): string {
 
 function initials(name: string): string {
     if (!name) return '??';
-    return name.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
 }
 
 const AVATAR_COLORS = [
-    'bg-purple-500', 'bg-blue-500', 'bg-emerald-500',
-    'bg-amber-500', 'bg-rose-500', 'bg-cyan-500',
+    'bg-purple-500',
+    'bg-blue-500',
+    'bg-emerald-500',
+    'bg-amber-500',
+    'bg-rose-500',
+    'bg-cyan-500',
 ];
 function avatarColor(name: string): string {
     if (!name) return 'bg-slate-400';
@@ -196,12 +211,24 @@ export default function LiveTracking({
     availableAssets: initialAssets = [],
     users = [],
     sites = [],
-    stats: initialStats = { total_assets: 0, in_use: 0, available: 0, returned_today: 0, total_history: 0 },
+    stats: initialStats = {
+        total_assets: 0,
+        in_use: 0,
+        available: 0,
+        returned_today: 0,
+        total_history: 0,
+    },
     history: initialHistory = [],
-    historyMeta: initialHistoryMeta = { total: 0, per_page: 50, current_page: 1, last_page: 1 },
+    historyMeta: initialHistoryMeta = {
+        total: 0,
+        per_page: 50,
+        current_page: 1,
+        last_page: 1,
+    },
 }: Props) {
     const [activeTab, setActiveTab] = useState<'live' | 'history'>('live');
-    const [assignments, setAssignments] = useState<Assignment[]>(liveAssignments);
+    const [assignments, setAssignments] =
+        useState<Assignment[]>(liveAssignments);
     const [stats, setStats] = useState<Stats>(initialStats);
 
     // Live search & filtering
@@ -215,18 +242,23 @@ export default function LiveTracking({
     const [polling, setPolling] = useState(false);
 
     // History state
-    const [historyData, setHistoryData] = useState<HistoryRecord[]>(Array.isArray(initialHistory) ? initialHistory : []);
-    const [historyMeta, setHistoryMeta] = useState<HistoryMeta>(initialHistoryMeta);
+    const [historyData, setHistoryData] = useState<HistoryRecord[]>(
+        Array.isArray(initialHistory) ? initialHistory : [],
+    );
+    const [historyMeta, setHistoryMeta] =
+        useState<HistoryMeta>(initialHistoryMeta);
     const [historySearch, setHistorySearch] = useState('');
     const [historyUserFilter, setHistoryUserFilter] = useState<string>('all');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
-    const [selectedHistory, setSelectedHistory] = useState<HistoryRecord | null>(null);
+    const [selectedHistory, setSelectedHistory] =
+        useState<HistoryRecord | null>(null);
 
     // Checkout modal
     const [checkoutOpen, setCheckoutOpen] = useState(false);
-    const [selectedCheckoutSiteId, setSelectedCheckoutSiteId] = useState<string>('all');
+    const [selectedCheckoutSiteId, setSelectedCheckoutSiteId] =
+        useState<string>('all');
     const [checkoutAssetId, setCheckoutAssetId] = useState('');
     const [checkoutUserId, setCheckoutUserId] = useState('');
     const [checkoutRemarks, setCheckoutRemarks] = useState('');
@@ -234,7 +266,8 @@ export default function LiveTracking({
     const [userSearch, setUserSearch] = useState('');
     const [showAssetDropdown, setShowAssetDropdown] = useState(false);
     const [showUserDropdown, setShowUserDropdown] = useState(false);
-    const [availableAssets, setAvailableAssets] = useState<AvailableAsset[]>(initialAssets);
+    const [availableAssets, setAvailableAssets] =
+        useState<AvailableAsset[]>(initialAssets);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -262,12 +295,12 @@ export default function LiveTracking({
             const data = await res.json();
 
             setAssignments(data.liveAssignments || []);
-            setStats(prev => ({ ...prev, ...(data.stats || {}) }));
+            setStats((prev) => ({ ...prev, ...(data.stats || {}) }));
             if (data.availableAssets) setAvailableAssets(data.availableAssets);
             setLastPoll(new Date());
             setOnline(true);
         } catch (err) {
-            console.error("Polling failed", err);
+            console.error('Polling failed', err);
             setOnline(false);
         } finally {
             setPolling(false);
@@ -281,47 +314,74 @@ export default function LiveTracking({
 
     // ── History Fetching ──────────────────────────────────────────────────
 
-    const fetchHistory = useCallback(async (page = 1, query = historySearch, start = startDate, end = endDate, userId = historyUserFilter) => {
-        setLoadingHistory(true);
-        try {
-            const params = new URLSearchParams({
-                page: String(page),
-                search: query,
-                start_date: start,
-                end_date: end,
-            });
-            if (userId !== 'all') params.set('user_id', userId);
-            const res = await fetch(`/api/live-tracking/history?${params.toString()}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
-            if (!res.ok) throw new Error('History fetch failed');
-            const data = await res.json();
+    const fetchHistory = useCallback(
+        async (
+            page = 1,
+            query = historySearch,
+            start = startDate,
+            end = endDate,
+            userId = historyUserFilter,
+        ) => {
+            setLoadingHistory(true);
+            try {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    search: query,
+                    start_date: start,
+                    end_date: end,
+                });
+                if (userId !== 'all') params.set('user_id', userId);
+                const res = await fetch(
+                    `/api/live-tracking/history?${params.toString()}`,
+                    {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    },
+                );
+                if (!res.ok) throw new Error('History fetch failed');
+                const data = await res.json();
 
-            if (data && Array.isArray(data.data)) {
-                setHistoryData(data.data);
-                setHistoryMeta(data.meta || { total: 0, per_page: 50, current_page: 1, last_page: 1 });
+                if (data && Array.isArray(data.data)) {
+                    setHistoryData(data.data);
+                    setHistoryMeta(
+                        data.meta || {
+                            total: 0,
+                            per_page: 50,
+                            current_page: 1,
+                            last_page: 1,
+                        },
+                    );
+                }
+            } catch (err) {
+                console.error('Failed to fetch history', err);
+            } finally {
+                setLoadingHistory(false);
             }
-        } catch (err) {
-            console.error("Failed to fetch history", err);
-        } finally {
-            setLoadingHistory(false);
-        }
-    }, [historySearch, startDate, endDate, historyUserFilter]);
+        },
+        [historySearch, startDate, endDate, historyUserFilter],
+    );
 
     useEffect(() => {
         if (activeTab === 'history') {
             const timer = setTimeout(() => fetchHistory(1), 300);
             return () => clearTimeout(timer);
         }
-    }, [activeTab, historySearch, startDate, endDate, historyUserFilter, fetchHistory]);
+    }, [
+        activeTab,
+        historySearch,
+        startDate,
+        endDate,
+        historyUserFilter,
+        fetchHistory,
+    ]);
 
     const handleExport = () => {
         const params = new URLSearchParams({
             search: historySearch,
             start_date: startDate,
-            end_date: endDate
+            end_date: endDate,
         });
-        if (historyUserFilter !== 'all') params.set('user_id', historyUserFilter);
+        if (historyUserFilter !== 'all')
+            params.set('user_id', historyUserFilter);
         window.location.href = `/api/live-tracking/report?${params.toString()}`;
     };
 
@@ -332,7 +392,11 @@ export default function LiveTracking({
         setSubmitting(true);
         router.post(
             '/live-tracking/checkout',
-            { asset_id: checkoutAssetId, user_id: checkoutUserId, remarks: checkoutRemarks },
+            {
+                asset_id: checkoutAssetId,
+                user_id: checkoutUserId,
+                remarks: checkoutRemarks,
+            },
             {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -365,90 +429,149 @@ export default function LiveTracking({
 
     // ── Filter ─────────────────────────────────────────────────────────────
 
-    const filtered = (assignments || []).filter(a => {
-        const matchesSearch = search === '' ||
-            (a.product_name || '').toLowerCase().includes(search.toLowerCase()) ||
+    const filtered = (assignments || []).filter((a) => {
+        const matchesSearch =
+            search === '' ||
+            (a.product_name || '')
+                .toLowerCase()
+                .includes(search.toLowerCase()) ||
             (a.user_name || '').toLowerCase().includes(search.toLowerCase()) ||
             (a.asset_id || '').toLowerCase().includes(search.toLowerCase());
 
-        const matchesSite = activeSiteFilter === 'all' || a.site === sites.find(s => String(s.id) === activeSiteFilter)?.name;
+        const matchesSite =
+            activeSiteFilter === 'all' ||
+            a.site ===
+                sites.find((s) => String(s.id) === activeSiteFilter)?.name;
 
-        const matchesUser = activeUserFilter === 'all' || a.user_name === users.find(u => String(u.id) === activeUserFilter)?.name;
+        const matchesUser =
+            activeUserFilter === 'all' ||
+            a.user_name ===
+                users.find((u) => String(u.id) === activeUserFilter)?.name;
 
-        const matchesDate = (!activeStartDate || a.assigned_at >= activeStartDate) &&
+        const matchesDate =
+            (!activeStartDate || a.assigned_at >= activeStartDate) &&
             (!activeEndDate || a.assigned_at <= activeEndDate + 'T23:59:59');
 
         return matchesSearch && matchesSite && matchesUser && matchesDate;
     });
 
-    const liveActiveFilterCount = (activeSiteFilter !== 'all' ? 1 : 0) + (activeUserFilter !== 'all' ? 1 : 0) + (activeStartDate || activeEndDate ? 1 : 0);
-    const historyActiveFilterCount = (historyUserFilter !== 'all' ? 1 : 0) + (startDate || endDate ? 1 : 0);
+    const liveActiveFilterCount =
+        (activeSiteFilter !== 'all' ? 1 : 0) +
+        (activeUserFilter !== 'all' ? 1 : 0) +
+        (activeStartDate || activeEndDate ? 1 : 0);
+    const historyActiveFilterCount =
+        (historyUserFilter !== 'all' ? 1 : 0) + (startDate || endDate ? 1 : 0);
 
     // ── Render ─────────────────────────────────────────────────────────────
 
     return (
-        <div className="p-6 w-full space-y-6">
+        <div className="w-full space-y-6 p-6">
             <Head title="Asset Tracking" />
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div className="flex items-center gap-3">
-
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Asset Withdrawal</h1>
-                        <p className="text-sm text-muted-foreground">Trace or view asset being used by</p>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Asset Withdrawal
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            Trace or view asset being used by
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-
-                    <Button size="sm" variant="outline" onClick={poll} disabled={polling}>
-                        <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${polling ? 'animate-spin' : ''}`} />
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={poll}
+                        disabled={polling}
+                    >
+                        <RefreshCw
+                            className={`mr-1.5 h-3.5 w-3.5 ${polling ? 'animate-spin' : ''}`}
+                        />
                         Refresh
                     </Button>
                     <Button size="sm" onClick={() => setCheckoutOpen(true)}>
-                        <LogIn className="w-3.5 h-3.5 mr-1.5" />
+                        <LogIn className="mr-1.5 h-3.5 w-3.5" />
                         Withdraw Asset
                     </Button>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex p-1 bg-muted rounded-lg w-fit">
+            <div className="flex w-fit rounded-lg bg-muted p-1">
                 <button
                     onClick={() => setActiveTab('live')}
-                    className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'live' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                        }`}
+                    className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
+                        activeTab === 'live'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
-                    <Activity className="w-4 h-4" />
+                    <Activity className="h-4 w-4" />
                     Active
-                    <Badge variant="secondary" className="ml-1 px-1.5 h-5">{stats?.in_use ?? 0}</Badge>
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                        {stats?.in_use ?? 0}
+                    </Badge>
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'history' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                        }`}
+                    className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
+                        activeTab === 'history'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
-                    <HistoryIcon className="w-4 h-4" />
+                    <HistoryIcon className="h-4 w-4" />
                     History Log
-                    <Badge variant="secondary" className="ml-1 px-1.5 h-5">{stats?.total_history ?? 0}</Badge>
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                        {stats?.total_history ?? 0}
+                    </Badge>
                 </button>
             </div>
 
             {activeTab === 'live' ? (
                 <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         {[
-                            { label: 'Total Assets', value: stats.total_assets, icon: Package, color: 'text-slate-600' },
-                            { label: 'In Use', value: stats.in_use, icon: User, color: 'text-blue-600' },
-                            { label: 'Available', value: stats.available, icon: CheckCircle2, color: 'text-emerald-600' },
-                            { label: 'Returned Today', value: stats.returned_today, icon: LogOut, color: 'text-amber-600' },
+                            {
+                                label: 'Total Assets',
+                                value: stats.total_assets,
+                                icon: Package,
+                                color: 'text-slate-600',
+                            },
+                            {
+                                label: 'In Use',
+                                value: stats.in_use,
+                                icon: User,
+                                color: 'text-blue-600',
+                            },
+                            {
+                                label: 'Available',
+                                value: stats.available,
+                                icon: CheckCircle2,
+                                color: 'text-emerald-600',
+                            },
+                            {
+                                label: 'Returned Today',
+                                value: stats.returned_today,
+                                icon: LogOut,
+                                color: 'text-amber-600',
+                            },
                         ].map(({ label, value, icon: Icon, color }) => (
                             <Card key={label} className="shadow-sm">
-                                <CardContent className="pt-4 pb-3 px-4 flex items-center gap-3">
-                                    <div className="p-2 bg-muted/50 rounded-lg"><Icon className={`h-5 w-5 ${color}`} /></div>
+                                <CardContent className="flex items-center gap-3 px-4 pt-4 pb-3">
+                                    <div className="rounded-lg bg-muted/50 p-2">
+                                        <Icon className={`h-5 w-5 ${color}`} />
+                                    </div>
                                     <div>
-                                        <p className="text-2xl font-bold">{value || 0}</p>
-                                        <p className="text-xs text-muted-foreground">{label}</p>
+                                        <p className="text-2xl font-bold">
+                                            {value || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {label}
+                                        </p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -456,76 +579,155 @@ export default function LiveTracking({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <div className="relative max-w-[300px] min-w-[200px] flex-1">
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Search by Asset ID, product, user..."
                                 value={search}
-                                onChange={e => setSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-9"
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="h-9 w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:ring-2 focus:ring-primary/30 focus:outline-none"
                             />
                         </div>
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 gap-1.5 border-dashed">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 gap-1.5 border-dashed"
+                                >
                                     <Filter className="h-3.5 w-3.5" />
                                     Filters
                                     {liveActiveFilterCount > 0 && (
-                                        <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                                        <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                                             {liveActiveFilterCount}
                                         </span>
                                     )}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[300px] p-0" align="start">
-                                <div className="p-3 border-b">
-                                    <p className="text-sm font-semibold">Filter Active Withdrawals</p>
+                            <PopoverContent
+                                className="w-[300px] p-0"
+                                align="start"
+                            >
+                                <div className="border-b p-3">
+                                    <p className="text-sm font-semibold">
+                                        Filter Active Withdrawals
+                                    </p>
                                 </div>
                                 {/* Site */}
-                                <div className="p-3 border-b">
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Site</p>
-                                    <div className="space-y-0.5 max-h-[140px] overflow-y-auto">
-                                        <button onClick={() => setActiveSiteFilter('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeSiteFilter === 'all' ? 'font-medium' : ''}`}>
+                                <div className="border-b p-3">
+                                    <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                        Site
+                                    </p>
+                                    <div className="max-h-[140px] space-y-0.5 overflow-y-auto">
+                                        <button
+                                            onClick={() =>
+                                                setActiveSiteFilter('all')
+                                            }
+                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${activeSiteFilter === 'all' ? 'font-medium' : ''}`}
+                                        >
                                             <span>All Sites</span>
-                                            {activeSiteFilter === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                            {activeSiteFilter === 'all' && (
+                                                <Check className="h-3.5 w-3.5 text-primary" />
+                                            )}
                                         </button>
-                                        {sites.map(s => (
-                                            <button key={s.id} onClick={() => setActiveSiteFilter(String(s.id))} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeSiteFilter === String(s.id) ? 'font-medium' : ''}`}>
+                                        {sites.map((s) => (
+                                            <button
+                                                key={s.id}
+                                                onClick={() =>
+                                                    setActiveSiteFilter(
+                                                        String(s.id),
+                                                    )
+                                                }
+                                                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${activeSiteFilter === String(s.id) ? 'font-medium' : ''}`}
+                                            >
                                                 <span>{s.name}</span>
-                                                {activeSiteFilter === String(s.id) && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                {activeSiteFilter ===
+                                                    String(s.id) && (
+                                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                                )}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                                 {/* User */}
-                                <div className="p-3 border-b">
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">User</p>
-                                    <div className="space-y-0.5 max-h-[140px] overflow-y-auto">
-                                        <button onClick={() => setActiveUserFilter('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeUserFilter === 'all' ? 'font-medium' : ''}`}>
+                                <div className="border-b p-3">
+                                    <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                        User
+                                    </p>
+                                    <div className="max-h-[140px] space-y-0.5 overflow-y-auto">
+                                        <button
+                                            onClick={() =>
+                                                setActiveUserFilter('all')
+                                            }
+                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${activeUserFilter === 'all' ? 'font-medium' : ''}`}
+                                        >
                                             <span>All Users</span>
-                                            {activeUserFilter === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                            {activeUserFilter === 'all' && (
+                                                <Check className="h-3.5 w-3.5 text-primary" />
+                                            )}
                                         </button>
-                                        {users.map(u => (
-                                            <button key={u.id} onClick={() => setActiveUserFilter(String(u.id))} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${activeUserFilter === String(u.id) ? 'font-medium' : ''}`}>
+                                        {users.map((u) => (
+                                            <button
+                                                key={u.id}
+                                                onClick={() =>
+                                                    setActiveUserFilter(
+                                                        String(u.id),
+                                                    )
+                                                }
+                                                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${activeUserFilter === String(u.id) ? 'font-medium' : ''}`}
+                                            >
                                                 <span>{u.name}</span>
-                                                {activeUserFilter === String(u.id) && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                {activeUserFilter ===
+                                                    String(u.id) && (
+                                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                                )}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                                 {/* Date Range */}
-                                <div className="p-3 border-b">
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Date Range</p>
+                                <div className="border-b p-3">
+                                    <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                        Date Range
+                                    </p>
                                     <div className="flex items-center gap-2">
-                                        <input type="date" value={activeStartDate} onChange={e => setActiveStartDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
-                                        <span className="text-muted-foreground text-xs">to</span>
-                                        <input type="date" value={activeEndDate} onChange={e => setActiveEndDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                                        <input
+                                            type="date"
+                                            value={activeStartDate}
+                                            onChange={(e) =>
+                                                setActiveStartDate(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                                        />
+                                        <span className="text-xs text-muted-foreground">
+                                            to
+                                        </span>
+                                        <input
+                                            type="date"
+                                            value={activeEndDate}
+                                            onChange={(e) =>
+                                                setActiveEndDate(e.target.value)
+                                            }
+                                            className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                                        />
                                     </div>
                                 </div>
                                 {liveActiveFilterCount > 0 && (
                                     <div className="p-2">
-                                        <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setActiveSiteFilter('all'); setActiveUserFilter('all'); setActiveStartDate(''); setActiveEndDate(''); }}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-full text-xs"
+                                            onClick={() => {
+                                                setActiveSiteFilter('all');
+                                                setActiveUserFilter('all');
+                                                setActiveStartDate('');
+                                                setActiveEndDate('');
+                                            }}
+                                        >
                                             Clear all filters
                                         </Button>
                                     </div>
@@ -534,25 +736,55 @@ export default function LiveTracking({
                         </Popover>
                         {/* Active filter badges */}
                         {activeSiteFilter !== 'all' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800">
-                                Site: {sites.find(s => String(s.id) === activeSiteFilter)?.name}
-                                <button onClick={() => setActiveSiteFilter('all')}><X className="h-3 w-3" /></button>
+                            <span className="inline-flex items-center gap-1 rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
+                                Site:{' '}
+                                {
+                                    sites.find(
+                                        (s) =>
+                                            String(s.id) === activeSiteFilter,
+                                    )?.name
+                                }
+                                <button
+                                    onClick={() => setActiveSiteFilter('all')}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
                             </span>
                         )}
                         {activeUserFilter !== 'all' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
-                                User: {users.find(u => String(u.id) === activeUserFilter)?.name}
-                                <button onClick={() => setActiveUserFilter('all')}><X className="h-3 w-3" /></button>
+                            <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                                User:{' '}
+                                {
+                                    users.find(
+                                        (u) =>
+                                            String(u.id) === activeUserFilter,
+                                    )?.name
+                                }
+                                <button
+                                    onClick={() => setActiveUserFilter('all')}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
                             </span>
                         )}
                         {(activeStartDate || activeEndDate) && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800">
-                                Date: {activeStartDate || '...'} → {activeEndDate || '...'}
-                                <button onClick={() => { setActiveStartDate(''); setActiveEndDate(''); }}><X className="h-3 w-3" /></button>
+                            <span className="inline-flex items-center gap-1 rounded-md border border-amber-100 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                                Date: {activeStartDate || '...'} →{' '}
+                                {activeEndDate || '...'}
+                                <button
+                                    onClick={() => {
+                                        setActiveStartDate('');
+                                        setActiveEndDate('');
+                                    }}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
                             </span>
                         )}
                         {liveActiveFilterCount > 0 && (
-                            <span className="text-xs text-muted-foreground">{filtered.length} of {assignments.length}</span>
+                            <span className="text-xs text-muted-foreground">
+                                {filtered.length} of {assignments.length}
+                            </span>
                         )}
                     </div>
 
@@ -560,41 +792,76 @@ export default function LiveTracking({
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-muted/30">
-                                    <TableHead className="w-[100px]">Asset ID</TableHead>
+                                    <TableHead className="w-[100px]">
+                                        Asset ID
+                                    </TableHead>
                                     <TableHead>Product Name</TableHead>
                                     <TableHead>User / Email</TableHead>
                                     <TableHead>Site</TableHead>
                                     <TableHead>Assigned At</TableHead>
                                     <TableHead>Duration</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filtered.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
-                                            <Activity className="h-8 w-8 mx-auto opacity-20 mb-2" />
-                                            <p>{search || activeSiteFilter !== 'all' || activeStartDate ? 'No Matching Data Found' : 'No Asset Currently Being Used'}</p>
+                                        <TableCell
+                                            colSpan={7}
+                                            className="h-32 text-center text-muted-foreground"
+                                        >
+                                            <Activity className="mx-auto mb-2 h-8 w-8 opacity-20" />
+                                            <p>
+                                                {search ||
+                                                activeSiteFilter !== 'all' ||
+                                                activeStartDate
+                                                    ? 'No Matching Data Found'
+                                                    : 'No Asset Currently Being Used'}
+                                            </p>
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filtered.map(a => (
-                                        <TableRow key={a.id} className="hover:bg-muted/10 transition-colors">
-                                            <TableCell className="font-mono text-[11px] font-bold text-primary">{a.asset_id}</TableCell>
-                                            <TableCell className="font-medium text-sm">{a.product_name}</TableCell>
+                                    filtered.map((a) => (
+                                        <TableRow
+                                            key={a.id}
+                                            className="transition-colors hover:bg-muted/10"
+                                        >
+                                            <TableCell className="font-mono text-[11px] font-bold text-primary">
+                                                {a.asset_id}
+                                            </TableCell>
+                                            <TableCell className="text-sm font-medium">
+                                                {a.product_name}
+                                            </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
-                                                    <div className={`w-6 h-6 rounded-full ${avatarColor(a.user_name)} flex items-center justify-center text-[10px] text-white font-bold`}>
+                                                    <div
+                                                        className={`h-6 w-6 rounded-full ${avatarColor(a.user_name)} flex items-center justify-center text-[10px] font-bold text-white`}
+                                                    >
                                                         {initials(a.user_name)}
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-semibold leading-none mb-1">{a.user_name}</p>
-                                                        <p className="text-[10px] text-muted-foreground">{a.user_email}</p>
+                                                        <p className="mb-1 text-xs leading-none font-semibold">
+                                                            {a.user_name}
+                                                        </p>
+                                                        <p className="text-[10px] text-muted-foreground">
+                                                            {a.user_email}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell><Badge variant="outline" className="bg-emerald-50/50 text-emerald-700 border-emerald-200">{a.site}</Badge></TableCell>
-                                            <TableCell className="text-xs text-muted-foreground">{formatDate(a.assigned_at)}</TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant="outline"
+                                                    className="border-emerald-200 bg-emerald-50/50 text-emerald-700"
+                                                >
+                                                    {a.site}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {formatDate(a.assigned_at)}
+                                            </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1.5 text-xs font-medium">
                                                     <Clock className="h-3 w-3 text-amber-500" />
@@ -602,7 +869,14 @@ export default function LiveTracking({
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button size="sm" variant="ghost" className="h-8 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50" onClick={() => setCheckinTarget(a)}>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                                                    onClick={() =>
+                                                        setCheckinTarget(a)
+                                                    }
+                                                >
                                                     Return
                                                 </Button>
                                             </TableCell>
@@ -616,60 +890,118 @@ export default function LiveTracking({
             ) : (
                 <div className="space-y-4">
                     <div className="flex flex-wrap items-center gap-2">
-                        <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <div className="relative max-w-[300px] min-w-[200px] flex-1">
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Search asset, user..."
                                 value={historySearch}
-                                onChange={e => setHistorySearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 h-9"
+                                onChange={(e) =>
+                                    setHistorySearch(e.target.value)
+                                }
+                                className="h-9 w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:ring-2 focus:ring-primary/30 focus:outline-none"
                             />
                         </div>
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 gap-1.5 border-dashed">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 gap-1.5 border-dashed"
+                                >
                                     <Filter className="h-3.5 w-3.5" />
                                     Filters
                                     {historyActiveFilterCount > 0 && (
-                                        <span className="ml-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                                        <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                                             {historyActiveFilterCount}
                                         </span>
                                     )}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[300px] p-0" align="start">
-                                <div className="p-3 border-b">
-                                    <p className="text-sm font-semibold">Filter History</p>
+                            <PopoverContent
+                                className="w-[300px] p-0"
+                                align="start"
+                            >
+                                <div className="border-b p-3">
+                                    <p className="text-sm font-semibold">
+                                        Filter History
+                                    </p>
                                 </div>
                                 {/* User */}
-                                <div className="p-3 border-b">
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">User</p>
-                                    <div className="space-y-0.5 max-h-[160px] overflow-y-auto">
-                                        <button onClick={() => setHistoryUserFilter('all')} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${historyUserFilter === 'all' ? 'font-medium' : ''}`}>
+                                <div className="border-b p-3">
+                                    <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                        User
+                                    </p>
+                                    <div className="max-h-[160px] space-y-0.5 overflow-y-auto">
+                                        <button
+                                            onClick={() =>
+                                                setHistoryUserFilter('all')
+                                            }
+                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${historyUserFilter === 'all' ? 'font-medium' : ''}`}
+                                        >
                                             <span>All Users</span>
-                                            {historyUserFilter === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                            {historyUserFilter === 'all' && (
+                                                <Check className="h-3.5 w-3.5 text-primary" />
+                                            )}
                                         </button>
-                                        {users.map(u => (
-                                            <button key={u.id} onClick={() => setHistoryUserFilter(String(u.id))} className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm hover:bg-muted transition-colors ${historyUserFilter === String(u.id) ? 'font-medium' : ''}`}>
+                                        {users.map((u) => (
+                                            <button
+                                                key={u.id}
+                                                onClick={() =>
+                                                    setHistoryUserFilter(
+                                                        String(u.id),
+                                                    )
+                                                }
+                                                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${historyUserFilter === String(u.id) ? 'font-medium' : ''}`}
+                                            >
                                                 <span>{u.name}</span>
-                                                {historyUserFilter === String(u.id) && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                {historyUserFilter ===
+                                                    String(u.id) && (
+                                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                                )}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                                 {/* Date Range */}
-                                <div className="p-3 border-b">
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Date Range</p>
+                                <div className="border-b p-3">
+                                    <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                        Date Range
+                                    </p>
                                     <div className="flex items-center gap-2">
-                                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
-                                        <span className="text-muted-foreground text-xs">to</span>
-                                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                                        <input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) =>
+                                                setStartDate(e.target.value)
+                                            }
+                                            className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                                        />
+                                        <span className="text-xs text-muted-foreground">
+                                            to
+                                        </span>
+                                        <input
+                                            type="date"
+                                            value={endDate}
+                                            onChange={(e) =>
+                                                setEndDate(e.target.value)
+                                            }
+                                            className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none"
+                                        />
                                     </div>
                                 </div>
                                 {historyActiveFilterCount > 0 && (
                                     <div className="p-2">
-                                        <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setHistoryUserFilter('all'); setStartDate(''); setEndDate(''); }}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-full text-xs"
+                                            onClick={() => {
+                                                setHistoryUserFilter('all');
+                                                setStartDate('');
+                                                setEndDate('');
+                                            }}
+                                        >
                                             Clear all filters
                                         </Button>
                                     </div>
@@ -678,24 +1010,41 @@ export default function LiveTracking({
                         </Popover>
                         {/* Active filter badges */}
                         {historyUserFilter !== 'all' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
-                                User: {users.find(u => String(u.id) === historyUserFilter)?.name}
-                                <button onClick={() => setHistoryUserFilter('all')}><X className="h-3 w-3" /></button>
+                            <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                                User:{' '}
+                                {
+                                    users.find(
+                                        (u) =>
+                                            String(u.id) === historyUserFilter,
+                                    )?.name
+                                }
+                                <button
+                                    onClick={() => setHistoryUserFilter('all')}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
                             </span>
                         )}
                         {(startDate || endDate) && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800">
+                            <span className="inline-flex items-center gap-1 rounded-md border border-amber-100 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
                                 Date: {startDate || '...'} → {endDate || '...'}
-                                <button onClick={() => { setStartDate(''); setEndDate(''); }}><X className="h-3 w-3" /></button>
+                                <button
+                                    onClick={() => {
+                                        setStartDate('');
+                                        setEndDate('');
+                                    }}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
                             </span>
                         )}
                         <div className="ml-auto">
                             <Button
                                 size="sm"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-4"
+                                className="h-9 bg-emerald-600 px-4 text-white hover:bg-emerald-700"
                                 onClick={handleExport}
                             >
-                                <FileText className="w-3.5 h-3.5 mr-1.5" />
+                                <FileText className="mr-1.5 h-3.5 w-3.5" />
                                 Export CSV
                             </Button>
                         </div>
@@ -717,31 +1066,75 @@ export default function LiveTracking({
                                     <TableHead>Assigned</TableHead>
                                     <TableHead>Returned</TableHead>
                                     <TableHead>Duration</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {historyData.length === 0 ? (
-                                    <TableRow><TableCell colSpan={6} className="h-24 text-center text-muted-foreground">No history found.</TableCell></TableRow>
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={6}
+                                            className="h-24 text-center text-muted-foreground"
+                                        >
+                                            No history found.
+                                        </TableCell>
+                                    </TableRow>
                                 ) : (
-                                    historyData.map(record => (
+                                    historyData.map((record) => (
                                         <TableRow key={record.id}>
                                             <TableCell>
-                                                <p className="font-medium text-sm">{record.product_name || '—'}</p>
-                                                <p className="text-xs text-muted-foreground font-mono">{record.asset_id || '—'}</p>
+                                                <p className="text-sm font-medium">
+                                                    {record.product_name || '—'}
+                                                </p>
+                                                <p className="font-mono text-xs text-muted-foreground">
+                                                    {record.asset_id || '—'}
+                                                </p>
                                             </TableCell>
                                             <TableCell>
-                                                <p className="font-medium text-sm">{record.user_name || 'Unknown'}</p>
-                                                <p className="text-[10px] text-muted-foreground">{record.user_email || '—'}</p>
+                                                <p className="text-sm font-medium">
+                                                    {record.user_name ||
+                                                        'Unknown'}
+                                                </p>
+                                                <p className="text-[10px] text-muted-foreground">
+                                                    {record.user_email || '—'}
+                                                </p>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 font-normal">{record.site || '—'}</Badge>
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="bg-slate-100 font-normal text-slate-700"
+                                                >
+                                                    {record.site || '—'}
+                                                </Badge>
                                             </TableCell>
-                                            <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">{formatDate(record.assigned_at)}</TableCell>
-                                            <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">{formatDate(record.returned_at)}</TableCell>
-                                            <TableCell><Badge variant="outline" className="font-normal">{record.duration || '—'}</Badge></TableCell>
+                                            <TableCell className="text-[11px] whitespace-nowrap text-muted-foreground">
+                                                {formatDate(record.assigned_at)}
+                                            </TableCell>
+                                            <TableCell className="text-[11px] whitespace-nowrap text-muted-foreground">
+                                                {formatDate(record.returned_at)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant="outline"
+                                                    className="font-normal"
+                                                >
+                                                    {record.duration || '—'}
+                                                </Badge>
+                                            </TableCell>
                                             <TableCell className="text-right">
-                                                <Button variant="ghost" size="sm" onClick={() => setSelectedHistory(record)}><FileText className="h-4 w-4" /></Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setSelectedHistory(
+                                                            record,
+                                                        )
+                                                    }
+                                                >
+                                                    <FileText className="h-4 w-4" />
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -754,24 +1147,51 @@ export default function LiveTracking({
                     {historyMeta.last_page > 1 && (
                         <div className="flex items-center justify-between px-2">
                             <p className="text-xs text-muted-foreground">
-                                Showing {(historyMeta.current_page - 1) * historyMeta.per_page + 1} to {Math.min(historyMeta.current_page * historyMeta.per_page, historyMeta.total)} of {historyMeta.total}
+                                Showing{' '}
+                                {(historyMeta.current_page - 1) *
+                                    historyMeta.per_page +
+                                    1}{' '}
+                                to{' '}
+                                {Math.min(
+                                    historyMeta.current_page *
+                                        historyMeta.per_page,
+                                    historyMeta.total,
+                                )}{' '}
+                                of {historyMeta.total}
                             </p>
                             <div className="flex items-center gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled={historyMeta.current_page === 1 || loadingHistory}
-                                    onClick={() => fetchHistory(historyMeta.current_page - 1)}
+                                    disabled={
+                                        historyMeta.current_page === 1 ||
+                                        loadingHistory
+                                    }
+                                    onClick={() =>
+                                        fetchHistory(
+                                            historyMeta.current_page - 1,
+                                        )
+                                    }
                                 >
-                                    <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+                                    <ChevronLeft className="mr-1 h-4 w-4" />{' '}
+                                    Previous
                                 </Button>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled={historyMeta.current_page === historyMeta.last_page || loadingHistory}
-                                    onClick={() => fetchHistory(historyMeta.current_page + 1)}
+                                    disabled={
+                                        historyMeta.current_page ===
+                                            historyMeta.last_page ||
+                                        loadingHistory
+                                    }
+                                    onClick={() =>
+                                        fetchHistory(
+                                            historyMeta.current_page + 1,
+                                        )
+                                    }
                                 >
-                                    Next <ChevronRight className="h-4 w-4 ml-1" />
+                                    Next{' '}
+                                    <ChevronRight className="ml-1 h-4 w-4" />
                                 </Button>
                             </div>
                         </div>
@@ -787,113 +1207,260 @@ export default function LiveTracking({
                     </DialogHeader>
                     <div className="space-y-6 py-4">
                         <div>
-                            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">1. Select Site</label>
-                            <Select value={selectedCheckoutSiteId} onValueChange={(val) => {
-                                setSelectedCheckoutSiteId(val);
-                                setCheckoutAssetId('');
-                                setCheckoutUserId('');
-                            }}>
-                                <SelectTrigger className="w-full h-11"><SelectValue placeholder="All Sites" /></SelectTrigger>
+                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                                1. Select Site
+                            </label>
+                            <Select
+                                value={selectedCheckoutSiteId}
+                                onValueChange={(val) => {
+                                    setSelectedCheckoutSiteId(val);
+                                    setCheckoutAssetId('');
+                                    setCheckoutUserId('');
+                                }}
+                            >
+                                <SelectTrigger className="h-11 w-full">
+                                    <SelectValue placeholder="All Sites" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map(s => (
-                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                    <SelectItem value="all">
+                                        All Sites
+                                    </SelectItem>
+                                    {sites.map((s) => (
+                                        <SelectItem
+                                            key={s.id}
+                                            value={String(s.id)}
+                                        >
+                                            {s.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div onMouseLeave={() => setShowAssetDropdown(false)}>
-                            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">2. Select Asset (Searchable)</label>
+                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                                2. Select Asset (Searchable)
+                            </label>
                             <div className="relative">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                                <Search className="absolute top-3 left-3 z-10 h-4 w-4 text-muted-foreground" />
                                 <input
                                     type="text"
                                     placeholder="Type to search asset..."
                                     value={assetSearch}
                                     onFocus={() => setShowAssetDropdown(true)}
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         setAssetSearch(e.target.value);
                                         setShowAssetDropdown(true);
                                     }}
-                                    className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 mb-1"
+                                    className="mb-1 w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                                 />
                                 {showAssetDropdown && (
-                                    <div className="absolute top-full left-0 right-0 z-[100] bg-background border rounded-lg shadow-2xl max-h-60 overflow-y-auto mt-1 p-1">
+                                    <div className="absolute top-full right-0 left-0 z-[100] mt-1 max-h-60 overflow-y-auto rounded-lg border bg-background p-1 shadow-2xl">
                                         {availableAssets
-                                            .filter(a => (selectedCheckoutSiteId === 'all' || a.site_id === Number(selectedCheckoutSiteId)))
-                                            .filter(a => assetSearch === '' || a.product_name.toLowerCase().includes(assetSearch.toLowerCase()) || a.asset_id.toLowerCase().includes(assetSearch.toLowerCase()))
-                                            .map(a => (
+                                            .filter(
+                                                (a) =>
+                                                    selectedCheckoutSiteId ===
+                                                        'all' ||
+                                                    a.site_id ===
+                                                        Number(
+                                                            selectedCheckoutSiteId,
+                                                        ),
+                                            )
+                                            .filter(
+                                                (a) =>
+                                                    assetSearch === '' ||
+                                                    a.product_name
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            assetSearch.toLowerCase(),
+                                                        ) ||
+                                                    a.asset_id
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            assetSearch.toLowerCase(),
+                                                        ),
+                                            )
+                                            .map((a) => (
                                                 <button
                                                     key={a.id}
                                                     type="button"
                                                     onClick={() => {
-                                                        setCheckoutAssetId(String(a.id));
-                                                        setAssetSearch(a.product_name + ' (' + a.asset_id + ')');
-                                                        setShowAssetDropdown(false);
+                                                        setCheckoutAssetId(
+                                                            String(a.id),
+                                                        );
+                                                        setAssetSearch(
+                                                            a.product_name +
+                                                                ' (' +
+                                                                a.asset_id +
+                                                                ')',
+                                                        );
+                                                        setShowAssetDropdown(
+                                                            false,
+                                                        );
                                                     }}
-                                                    className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex justify-between items-center ${checkoutAssetId === String(a.id) ? 'bg-primary/10' : ''}`}
+                                                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${checkoutAssetId === String(a.id) ? 'bg-primary/10' : ''}`}
                                                 >
                                                     <div>
-                                                        <p className="font-medium">{a.product_name}</p>
-                                                        <p className="text-[10px] text-muted-foreground">{a.asset_id} • {a.site_name}</p>
+                                                        <p className="font-medium">
+                                                            {a.product_name}
+                                                        </p>
+                                                        <p className="text-[10px] text-muted-foreground">
+                                                            {a.asset_id} •{' '}
+                                                            {a.site_name}
+                                                        </p>
                                                     </div>
-                                                    {checkoutAssetId === String(a.id) && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                                                    {checkoutAssetId ===
+                                                        String(a.id) && (
+                                                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                                                    )}
                                                 </button>
-                                            ))
-                                        }
-                                        {availableAssets.filter(a => (selectedCheckoutSiteId === 'all' || a.site_id === Number(selectedCheckoutSiteId))).filter(a => assetSearch === '' || a.product_name.toLowerCase().includes(assetSearch.toLowerCase()) || a.asset_id.toLowerCase().includes(assetSearch.toLowerCase())).length === 0 && (
-                                            <div className="p-3 text-center text-xs text-muted-foreground">No available assets match.</div>
+                                            ))}
+                                        {availableAssets
+                                            .filter(
+                                                (a) =>
+                                                    selectedCheckoutSiteId ===
+                                                        'all' ||
+                                                    a.site_id ===
+                                                        Number(
+                                                            selectedCheckoutSiteId,
+                                                        ),
+                                            )
+                                            .filter(
+                                                (a) =>
+                                                    assetSearch === '' ||
+                                                    a.product_name
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            assetSearch.toLowerCase(),
+                                                        ) ||
+                                                    a.asset_id
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            assetSearch.toLowerCase(),
+                                                        ),
+                                            ).length === 0 && (
+                                            <div className="p-3 text-center text-xs text-muted-foreground">
+                                                No available assets match.
+                                            </div>
                                         )}
                                     </div>
                                 )}
                             </div>
                             {checkoutAssetId && !assetSearch.includes('(') && (
-                                <p className="text-[10px] text-emerald-600 font-medium mt-1">✓ Selected: {availableAssets.find(a => String(a.id) === checkoutAssetId)?.product_name}</p>
+                                <p className="mt-1 text-[10px] font-medium text-emerald-600">
+                                    ✓ Selected:{' '}
+                                    {
+                                        availableAssets.find(
+                                            (a) =>
+                                                String(a.id) ===
+                                                checkoutAssetId,
+                                        )?.product_name
+                                    }
+                                </p>
                             )}
                         </div>
 
                         <div onMouseLeave={() => setShowUserDropdown(false)}>
-                            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">3. Assign To User (Searchable)</label>
+                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                                3. Assign To User (Searchable)
+                            </label>
                             <div className="relative">
-                                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                                <User className="absolute top-3 left-3 z-10 h-4 w-4 text-muted-foreground" />
                                 <input
                                     type="text"
                                     placeholder="Type to search user..."
                                     value={userSearch}
                                     onFocus={() => setShowUserDropdown(true)}
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         setUserSearch(e.target.value);
                                         setShowUserDropdown(true);
                                     }}
-                                    className="w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 mb-1"
+                                    className="mb-1 w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                                 />
                                 {showUserDropdown && (
-                                    <div className="absolute top-full left-0 right-0 z-[100] bg-background border rounded-lg shadow-2xl max-h-60 overflow-y-auto mt-1 p-1">
+                                    <div className="absolute top-full right-0 left-0 z-[100] mt-1 max-h-60 overflow-y-auto rounded-lg border bg-background p-1 shadow-2xl">
                                         {users
-                                            .filter(u => (selectedCheckoutSiteId === 'all' || u.site_ids.includes(Number(selectedCheckoutSiteId))))
-                                            .filter(u => userSearch === '' || u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase()))
-                                            .map(u => (
+                                            .filter(
+                                                (u) =>
+                                                    selectedCheckoutSiteId ===
+                                                        'all' ||
+                                                    u.site_ids.includes(
+                                                        Number(
+                                                            selectedCheckoutSiteId,
+                                                        ),
+                                                    ),
+                                            )
+                                            .filter(
+                                                (u) =>
+                                                    userSearch === '' ||
+                                                    u.name
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            userSearch.toLowerCase(),
+                                                        ) ||
+                                                    u.email
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            userSearch.toLowerCase(),
+                                                        ),
+                                            )
+                                            .map((u) => (
                                                 <button
                                                     key={u.id}
                                                     type="button"
                                                     onClick={() => {
-                                                        setCheckoutUserId(String(u.id));
+                                                        setCheckoutUserId(
+                                                            String(u.id),
+                                                        );
                                                         setUserSearch(u.name);
-                                                        setShowUserDropdown(false);
+                                                        setShowUserDropdown(
+                                                            false,
+                                                        );
                                                     }}
-                                                    className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex justify-between items-center ${checkoutUserId === String(u.id) ? 'bg-primary/10' : ''}`}
+                                                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${checkoutUserId === String(u.id) ? 'bg-primary/10' : ''}`}
                                                 >
                                                     <div>
-                                                        <p className="font-medium">{u.name}</p>
-                                                        <p className="text-[10px] text-muted-foreground">{u.email}</p>
+                                                        <p className="font-medium">
+                                                            {u.name}
+                                                        </p>
+                                                        <p className="text-[10px] text-muted-foreground">
+                                                            {u.email}
+                                                        </p>
                                                     </div>
-                                                    {checkoutUserId === String(u.id) && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                                                    {checkoutUserId ===
+                                                        String(u.id) && (
+                                                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                                                    )}
                                                 </button>
-                                            ))
-                                        }
-                                        {users.filter(u => (selectedCheckoutSiteId === 'all' || u.site_ids.includes(Number(selectedCheckoutSiteId)))).filter(u => userSearch === '' || u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase())).length === 0 && (
-                                            <div className="p-3 text-center text-xs text-muted-foreground">No users found.</div>
+                                            ))}
+                                        {users
+                                            .filter(
+                                                (u) =>
+                                                    selectedCheckoutSiteId ===
+                                                        'all' ||
+                                                    u.site_ids.includes(
+                                                        Number(
+                                                            selectedCheckoutSiteId,
+                                                        ),
+                                                    ),
+                                            )
+                                            .filter(
+                                                (u) =>
+                                                    userSearch === '' ||
+                                                    u.name
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            userSearch.toLowerCase(),
+                                                        ) ||
+                                                    u.email
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            userSearch.toLowerCase(),
+                                                        ),
+                                            ).length === 0 && (
+                                            <div className="p-3 text-center text-xs text-muted-foreground">
+                                                No users found.
+                                            </div>
                                         )}
                                     </div>
                                 )}
@@ -901,78 +1468,200 @@ export default function LiveTracking({
                         </div>
 
                         <div>
-                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Remarks</label>
+                            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                                Remarks
+                            </label>
                             <textarea
                                 value={checkoutRemarks}
-                                onChange={e => setCheckoutRemarks(e.target.value)}
+                                onChange={(e) =>
+                                    setCheckoutRemarks(e.target.value)
+                                }
                                 placeholder="Optional purpose..."
-                                className="w-full text-sm border rounded p-2 h-20 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-inner"
+                                className="h-20 w-full rounded border p-2 text-sm shadow-inner focus:ring-2 focus:ring-primary/30 focus:outline-none"
                             />
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setCheckoutOpen(false)}>Cancel</Button>
-                        <Button onClick={handleCheckout} disabled={!checkoutAssetId || !checkoutUserId || submitting}>
-                            {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        <Button
+                            variant="outline"
+                            onClick={() => setCheckoutOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleCheckout}
+                            disabled={
+                                !checkoutAssetId ||
+                                !checkoutUserId ||
+                                submitting
+                            }
+                        >
+                            {submitting && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
                             Confirm Check Out
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={!!checkinTarget} onOpenChange={open => !open && setCheckinTarget(null)}>
+            <Dialog
+                open={!!checkinTarget}
+                onOpenChange={(open) => !open && setCheckinTarget(null)}
+            >
                 <DialogContent>
-                    <DialogHeader><DialogTitle>Return Asset</DialogTitle></DialogHeader>
-                    <DialogDescription>Confirm return of <strong>{checkinTarget?.product_name}</strong> by <strong>{checkinTarget?.user_name}</strong>?</DialogDescription>
+                    <DialogHeader>
+                        <DialogTitle>Return Asset</DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription>
+                        Confirm return of{' '}
+                        <strong>{checkinTarget?.product_name}</strong> by{' '}
+                        <strong>{checkinTarget?.user_name}</strong>?
+                    </DialogDescription>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setCheckinTarget(null)}>Cancel</Button>
-                        <Button onClick={() => checkinTarget && handleCheckin(checkinTarget)}>Confirm Return</Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setCheckinTarget(null)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                checkinTarget && handleCheckin(checkinTarget)
+                            }
+                        >
+                            Confirm Return
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={!!selectedHistory} onOpenChange={open => !open && setSelectedHistory(null)}>
+            <Dialog
+                open={!!selectedHistory}
+                onOpenChange={(open) => !open && setSelectedHistory(null)}
+            >
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>{selectedHistory?.product_name}</DialogTitle>
-                        <DialogDescription>Asset ID: {selectedHistory?.asset_id}</DialogDescription>
+                        <DialogTitle>
+                            {selectedHistory?.product_name}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Asset ID: {selectedHistory?.asset_id}
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4 text-sm">
-                        <div className="col-span-2 pb-2 border-b">
-                            <p className="text-[10px] text-primary uppercase font-bold tracking-wider mb-1">Asset Information</p>
+                        <div className="col-span-2 border-b pb-2">
+                            <p className="mb-1 text-[10px] font-bold tracking-wider text-primary uppercase">
+                                Asset Information
+                            </p>
                             <div className="grid grid-cols-2 gap-2">
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Category / Type</p><p>{selectedHistory?.category} / {selectedHistory?.type}</p></div>
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Location</p><p>{selectedHistory?.site}</p></div>
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Serial Number</p><p>{selectedHistory?.serial_number}</p></div>
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Vendor</p><p>{selectedHistory?.vendor}</p></div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Category / Type
+                                    </p>
+                                    <p>
+                                        {selectedHistory?.category} /{' '}
+                                        {selectedHistory?.type}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Location
+                                    </p>
+                                    <p>{selectedHistory?.site}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Serial Number
+                                    </p>
+                                    <p>{selectedHistory?.serial_number}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Vendor
+                                    </p>
+                                    <p>{selectedHistory?.vendor}</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="col-span-2 pb-2 border-b">
-                            <p className="text-[10px] text-primary uppercase font-bold tracking-wider mb-1">User Assignment</p>
+                        <div className="col-span-2 border-b pb-2">
+                            <p className="mb-1 text-[10px] font-bold tracking-wider text-primary uppercase">
+                                User Assignment
+                            </p>
                             <div className="grid grid-cols-2 gap-2">
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Assigned To</p><p className="font-medium">{selectedHistory?.user_name}</p></div>
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Email</p><p>{selectedHistory?.user_email}</p></div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Assigned To
+                                    </p>
+                                    <p className="font-medium">
+                                        {selectedHistory?.user_name}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Email
+                                    </p>
+                                    <p>{selectedHistory?.user_email}</p>
+                                </div>
                             </div>
                         </div>
 
                         <div className="col-span-2">
-                            <p className="text-[10px] text-primary uppercase font-bold tracking-wider mb-1">Timeline</p>
+                            <p className="mb-1 text-[10px] font-bold tracking-wider text-primary uppercase">
+                                Timeline
+                            </p>
                             <div className="grid grid-cols-2 gap-2">
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Checked Out</p><p>{selectedHistory && formatDate(selectedHistory.assigned_at)}</p></div>
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Returned</p><p>{selectedHistory && formatDate(selectedHistory.returned_at)}</p></div>
-                                <div><p className="text-[10px] text-muted-foreground uppercase font-bold">Total Duration</p><p className="font-medium text-emerald-600">{selectedHistory?.duration}</p></div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Checked Out
+                                    </p>
+                                    <p>
+                                        {selectedHistory &&
+                                            formatDate(
+                                                selectedHistory.assigned_at,
+                                            )}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Returned
+                                    </p>
+                                    <p>
+                                        {selectedHistory &&
+                                            formatDate(
+                                                selectedHistory.returned_at,
+                                            )}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        Total Duration
+                                    </p>
+                                    <p className="font-medium text-emerald-600">
+                                        {selectedHistory?.duration}
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="col-span-2 bg-muted/30 p-3 rounded-lg border border-dashed">
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1 flex items-center gap-1.5">
-                                <FileText className="w-3 h-3" /> Remarks
+                        <div className="col-span-2 rounded-lg border border-dashed bg-muted/30 p-3">
+                            <p className="mb-1 flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
+                                <FileText className="h-3 w-3" /> Remarks
                             </p>
-                            <p className="text-xs italic text-foreground leading-relaxed">{selectedHistory?.remarks}</p>
+                            <p className="text-xs leading-relaxed text-foreground italic">
+                                {selectedHistory?.remarks}
+                            </p>
                         </div>
                     </div>
-                    <DialogFooter><Button onClick={() => setSelectedHistory(null)} className="w-full sm:w-auto">Close Details</Button></DialogFooter>
+                    <DialogFooter>
+                        <Button
+                            onClick={() => setSelectedHistory(null)}
+                            className="w-full sm:w-auto"
+                        >
+                            Close Details
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

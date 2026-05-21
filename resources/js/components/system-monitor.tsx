@@ -13,7 +13,7 @@ export function SystemMonitor() {
                     setStats(data);
                 }
             } catch (error) {
-                console.error("Failed to fetch system stats", error);
+                console.error('Failed to fetch system stats', error);
             }
         };
 
@@ -23,17 +23,17 @@ export function SystemMonitor() {
     }, []);
 
     return (
-        <div className="flex items-center space-x-4 text-[11px] font-medium text-muted-foreground ml-auto bg-muted/30 px-3 py-1 rounded-full border border-border/50">
+        <div className="ml-auto flex items-center space-x-4 rounded-full border border-border/50 bg-muted/30 px-3 py-1 text-[11px] font-medium text-muted-foreground">
             <div className="flex items-center" title="CPU Usage">
-                <Cpu className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
+                <Cpu className="mr-1.5 h-3.5 w-3.5 text-primary/70" />
                 <span className="w-9">{stats.cpu}%</span>
             </div>
             <div className="flex items-center" title="RAM Usage">
-                <MemoryStick className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
+                <MemoryStick className="mr-1.5 h-3.5 w-3.5 text-primary/70" />
                 <span className="w-9">{stats.ram}%</span>
             </div>
             <div className="flex items-center" title="Disk Usage">
-                <HardDrive className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
+                <HardDrive className="mr-1.5 h-3.5 w-3.5 text-primary/70" />
                 <span className="w-8">{stats.disk}%</span>
             </div>
         </div>

@@ -18,7 +18,6 @@ export function operationsMaintenance() {
     return '/operations-maintanance';
 }
 
-
 export function assetRegister() {
     return '/operations-maintanance';
 }
@@ -45,11 +44,13 @@ export function spareParts() {
 }
 export function documents() {
     return '/operations-maintanance';
-}export function userManagement() {
-    return '/operations-maintanance';
-}export function reports() {
-    return '/operations-maintanance';
-}export function systemSettings() {
+}
+export function userManagement() {
     return '/operations-maintanance';
 }
-
+export function reports() {
+    return '/operations-maintanance';
+}
+export function systemSettings() {
+    return '/operations-maintanance';
+}

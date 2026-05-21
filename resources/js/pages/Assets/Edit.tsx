@@ -1,13 +1,26 @@
-import { useForm, Link, Head } from "@inertiajs/react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save, Package } from "lucide-react";
+import { useForm, Link, Head } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Save, Package } from 'lucide-react';
 
-export default function Edit({ asset, categories, types, vendors, sites, locations }: any) {
+export default function Edit({
+    asset,
+    categories,
+    types,
+    vendors,
+    sites,
+    locations,
+}: any) {
     const { data, setData, put, processing, errors } = useForm({
         asset_id: asset.asset_id || '',
         serial_number: asset.serial_number || '',
@@ -29,7 +42,7 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
     };
 
     return (
-        <div className="p-8 w-full space-y-6">
+        <div className="w-full space-y-6 p-8">
             <Head title={`Edit Asset - ${asset.asset_id}`} />
 
             <div className="flex items-center justify-between">
@@ -40,19 +53,26 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Edit Asset</h1>
-                        <p className="text-muted-foreground">Update detailed information for this asset.</p>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Edit Asset
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Update detailed information for this asset.
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold flex items-center">
-                        <Package className="h-3 w-3 mr-1" />
+                    <div className="flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+                        <Package className="mr-1 h-3 w-3" />
                         ID: {asset.asset_id}
                     </div>
                 </div>
             </div>
 
-            <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <form
+                onSubmit={submit}
+                className="grid grid-cols-1 gap-6 md:grid-cols-3"
+            >
                 {/* Basic Information */}
                 <Card className="md:col-span-2">
                     <CardHeader>
@@ -65,38 +85,58 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                                 <Input
                                     id="asset_id"
                                     value={data.asset_id}
-                                    onChange={e => setData('asset_id', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('asset_id', e.target.value)
+                                    }
                                     required
                                 />
-                                {errors.asset_id && <p className="text-xs text-red-500">{errors.asset_id}</p>}
+                                {errors.asset_id && (
+                                    <p className="text-xs text-red-500">
+                                        {errors.asset_id}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="serial_number">Serial Number</Label>
+                                <Label htmlFor="serial_number">
+                                    Serial Number
+                                </Label>
                                 <Input
                                     id="serial_number"
                                     value={data.serial_number}
-                                    onChange={e => setData('serial_number', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('serial_number', e.target.value)
+                                    }
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="product_name">Product Name *</Label>
+                                <Label htmlFor="product_name">
+                                    Product Name *
+                                </Label>
                                 <Input
                                     id="product_name"
                                     value={data.product_name}
-                                    onChange={e => setData('product_name', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('product_name', e.target.value)
+                                    }
                                     required
                                 />
-                                {errors.product_name && <p className="text-xs text-red-500">{errors.product_name}</p>}
+                                {errors.product_name && (
+                                    <p className="text-xs text-red-500">
+                                        {errors.product_name}
+                                    </p>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="brand">Brand</Label>
                                 <Input
                                     id="brand"
                                     value={data.brand}
-                                    onChange={e => setData('brand', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('brand', e.target.value)
+                                    }
                                 />
                             </div>
                         </div>
@@ -104,26 +144,46 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Category</Label>
-                                <Select value={data.category_id} onValueChange={val => setData('category_id', val)}>
+                                <Select
+                                    value={data.category_id}
+                                    onValueChange={(val) =>
+                                        setData('category_id', val)
+                                    }
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select Category" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {categories.map((c: any) => (
-                                            <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                                            <SelectItem
+                                                key={c.id}
+                                                value={c.id.toString()}
+                                            >
+                                                {c.name}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
                                 <Label>Type</Label>
-                                <Select value={data.type_id} onValueChange={val => setData('type_id', val)}>
+                                <Select
+                                    value={data.type_id}
+                                    onValueChange={(val) =>
+                                        setData('type_id', val)
+                                    }
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select Type" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {types.map((t: any) => (
-                                            <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
+                                            <SelectItem
+                                                key={t.id}
+                                                value={t.id.toString()}
+                                            >
+                                                {t.name}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -135,7 +195,9 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                             <Textarea
                                 id="notes"
                                 value={data.notes}
-                                onChange={e => setData('notes', e.target.value)}
+                                onChange={(e) =>
+                                    setData('notes', e.target.value)
+                                }
                                 placeholder="Enter any maintenance notes or descriptions..."
                                 className="min-h-[100px]"
                             />
@@ -152,37 +214,77 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label>System Status</Label>
-                                <Select value={data.status} onValueChange={val => setData('status', val)}>
+                                <Select
+                                    value={data.status}
+                                    onValueChange={(val) =>
+                                        setData('status', val)
+                                    }
+                                >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="available">Available</SelectItem>
-                                        <SelectItem value="in_use">In Use</SelectItem>
-                                        <SelectItem value="maintenance">Maintenance</SelectItem>
-                                        <SelectItem value="faulty">Faulty Unit</SelectItem>
-                                        <SelectItem value="degraded">Degraded Unit</SelectItem>
-                                        <SelectItem value="new">New Unit</SelectItem>
-                                        <SelectItem value="retired">Retired</SelectItem>
+                                        <SelectItem value="available">
+                                            Available
+                                        </SelectItem>
+                                        <SelectItem value="in_use">
+                                            In Use
+                                        </SelectItem>
+                                        <SelectItem value="maintenance">
+                                            Maintenance
+                                        </SelectItem>
+                                        <SelectItem value="faulty">
+                                            Faulty Unit
+                                        </SelectItem>
+                                        <SelectItem value="degraded">
+                                            Degraded Unit
+                                        </SelectItem>
+                                        <SelectItem value="new">
+                                            New Unit
+                                        </SelectItem>
+                                        <SelectItem value="retired">
+                                            Retired
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
                                 <Label>Condition Status</Label>
-                                <Select value={data.condition_status} onValueChange={val => setData('condition_status', val)}>
+                                <Select
+                                    value={data.condition_status}
+                                    onValueChange={(val) =>
+                                        setData('condition_status', val)
+                                    }
+                                >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="new">Brand New</SelectItem>
-                                        <SelectItem value="excellent">Excellent</SelectItem>
-                                        <SelectItem value="good">Good</SelectItem>
-                                        <SelectItem value="fair">Fair</SelectItem>
-                                        <SelectItem value="degraded">Degraded</SelectItem>
-                                        <SelectItem value="poor">Poor</SelectItem>
-                                        <SelectItem value="faulty">Faulty</SelectItem>
-                                        <SelectItem value="damaged">Damaged</SelectItem>
+                                        <SelectItem value="new">
+                                            Brand New
+                                        </SelectItem>
+                                        <SelectItem value="excellent">
+                                            Excellent
+                                        </SelectItem>
+                                        <SelectItem value="good">
+                                            Good
+                                        </SelectItem>
+                                        <SelectItem value="fair">
+                                            Fair
+                                        </SelectItem>
+                                        <SelectItem value="degraded">
+                                            Degraded
+                                        </SelectItem>
+                                        <SelectItem value="poor">
+                                            Poor
+                                        </SelectItem>
+                                        <SelectItem value="faulty">
+                                            Faulty
+                                        </SelectItem>
+                                        <SelectItem value="damaged">
+                                            Damaged
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -196,32 +298,52 @@ export default function Edit({ asset, categories, types, vendors, sites, locatio
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label>Assigned Site</Label>
-                                <Select value={data.site_id} onValueChange={val => setData('site_id', val)}>
+                                <Select
+                                    value={data.site_id}
+                                    onValueChange={(val) =>
+                                        setData('site_id', val)
+                                    }
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select Site" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {sites.map((s: any) => (
-                                            <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                            <SelectItem
+                                                key={s.id}
+                                                value={s.id.toString()}
+                                            >
+                                                {s.name}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="purchase_year">Purchase Year</Label>
+                                <Label htmlFor="purchase_year">
+                                    Purchase Year
+                                </Label>
                                 <Input
                                     id="purchase_year"
                                     type="number"
                                     value={data.purchase_year}
-                                    onChange={e => setData('purchase_year', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('purchase_year', e.target.value)
+                                    }
                                 />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Button type="submit" className="w-full h-12" disabled={processing}>
-                        <Save className="h-4 w-4 mr-2" />
-                        {processing ? 'Saving Changes...' : 'Save Asset Details'}
+                    <Button
+                        type="submit"
+                        className="h-12 w-full"
+                        disabled={processing}
+                    >
+                        <Save className="mr-2 h-4 w-4" />
+                        {processing
+                            ? 'Saving Changes...'
+                            : 'Save Asset Details'}
                     </Button>
                 </div>
             </form>

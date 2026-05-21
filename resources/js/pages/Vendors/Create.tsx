@@ -40,29 +40,38 @@ export default function VendorCreate() {
     };
 
     return (
-        <div className="p-8 w-full space-y-6">
+        <div className="w-full space-y-6 p-8">
             <Head title="Add New Vendor" />
 
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-tight">Add New Vendor</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold tracking-tight">
+                    Add New Vendor
+                </h1>
                 <Link href="/vendors">
                     <Button variant="outline">Back to Vendors</Button>
                 </Link>
             </div>
 
-            <form onSubmit={submit} className="space-y-6 bg-card p-6 rounded-xl border shadow-sm">
+            <form
+                onSubmit={submit}
+                className="space-y-6 rounded-xl border bg-card p-6 shadow-sm"
+            >
                 {/* Logo Upload */}
                 <div className="space-y-3">
                     <Label>Company Logo</Label>
                     <div className="flex items-center gap-6">
-                        <div className="h-24 w-24 rounded-xl border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden relative">
+                        <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted">
                             {preview ? (
                                 <>
-                                    <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                                    <img
+                                        src={preview}
+                                        alt="Preview"
+                                        className="h-full w-full object-cover"
+                                    />
                                     <button
                                         type="button"
                                         onClick={removeLogo}
-                                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>
@@ -81,7 +90,9 @@ export default function VendorCreate() {
                             >
                                 <Upload className="h-4 w-4" /> Upload Logo
                             </Button>
-                            <p className="text-xs text-muted-foreground mt-1.5">PNG, JPG up to 2MB</p>
+                            <p className="mt-1.5 text-xs text-muted-foreground">
+                                PNG, JPG up to 2MB
+                            </p>
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -91,7 +102,11 @@ export default function VendorCreate() {
                             />
                         </div>
                     </div>
-                    {errors.logo && <div className="text-sm text-red-500">{errors.logo}</div>}
+                    {errors.logo && (
+                        <div className="text-sm text-red-500">
+                            {errors.logo}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -100,11 +115,15 @@ export default function VendorCreate() {
                         <Input
                             id="name"
                             value={data.name}
-                            onChange={e => setData('name', e.target.value)}
+                            onChange={(e) => setData('name', e.target.value)}
                             required
                             placeholder="e.g. Dell Technologies"
                         />
-                        {errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
+                        {errors.name && (
+                            <div className="text-sm text-red-500">
+                                {errors.name}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -112,10 +131,16 @@ export default function VendorCreate() {
                         <Input
                             id="contact_person"
                             value={data.contact_person}
-                            onChange={e => setData('contact_person', e.target.value)}
+                            onChange={(e) =>
+                                setData('contact_person', e.target.value)
+                            }
                             placeholder="e.g. John Doe"
                         />
-                        {errors.contact_person && <div className="text-sm text-red-500">{errors.contact_person}</div>}
+                        {errors.contact_person && (
+                            <div className="text-sm text-red-500">
+                                {errors.contact_person}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -123,10 +148,14 @@ export default function VendorCreate() {
                         <Input
                             id="phone"
                             value={data.phone}
-                            onChange={e => setData('phone', e.target.value)}
+                            onChange={(e) => setData('phone', e.target.value)}
                             placeholder="e.g. +60 12-345-6789"
                         />
-                        {errors.phone && <div className="text-sm text-red-500">{errors.phone}</div>}
+                        {errors.phone && (
+                            <div className="text-sm text-red-500">
+                                {errors.phone}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -135,10 +164,14 @@ export default function VendorCreate() {
                             id="email"
                             type="email"
                             value={data.email}
-                            onChange={e => setData('email', e.target.value)}
+                            onChange={(e) => setData('email', e.target.value)}
                             placeholder="e.g. contact@vendor.com"
                         />
-                        {errors.email && <div className="text-sm text-red-500">{errors.email}</div>}
+                        {errors.email && (
+                            <div className="text-sm text-red-500">
+                                {errors.email}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
@@ -146,10 +179,14 @@ export default function VendorCreate() {
                         <Input
                             id="address"
                             value={data.address}
-                            onChange={e => setData('address', e.target.value)}
+                            onChange={(e) => setData('address', e.target.value)}
                             placeholder="Full business address"
                         />
-                        {errors.address && <div className="text-sm text-red-500">{errors.address}</div>}
+                        {errors.address && (
+                            <div className="text-sm text-red-500">
+                                {errors.address}
+                            </div>
+                        )}
                     </div>
                 </div>
 

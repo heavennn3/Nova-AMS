@@ -18,7 +18,6 @@ export function operationsMaintenance() {
     return '/operations-maintanance';
 }
 
-
 export function assetRegister() {
     return '/assets';
 }
@@ -53,10 +52,10 @@ export function userManagement() {
 
 export function reports() {
     return '/operations-maintanance';
-}export function systemSettings() {
+}
+export function systemSettings() {
     return '/operations-maintanance';
 }
-
 
 export function login() {
     return '/login';
@@ -69,7 +68,6 @@ export function register() {
 export function logout() {
     return '/logout';
 }
-
 
 export function home() {
     return '/';

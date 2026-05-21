@@ -1,22 +1,32 @@
 import { Head } from '@inertiajs/react';
 import { History } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Audit() {
     return (
-        <div className="p-8 w-full space-y-6">
+        <div className="w-full space-y-6 p-8">
             <Head title="Audit Trail" />
             <div className="flex items-center">
-                <History className="h-8 w-8 mr-3 text-primary" />
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Audit Trail</h1>
+                <History className="mr-3 h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    Audit Trail
+                </h1>
             </div>
-            <p className="text-muted-foreground">Immutable log of all lifecycle events, from procurement to decommissioning.</p>
-            
-            <Card className="h-[400px] flex items-start justify-start p-8 bg-muted/10 border-dashed">
+            <p className="text-muted-foreground">
+                Immutable log of all lifecycle events, from procurement to
+                decommissioning.
+            </p>
+
+            <Card className="flex h-[400px] items-start justify-start border-dashed bg-muted/10 p-8">
                 <CardContent className="text-left">
-                    <History className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                    <p className="text-lg font-medium">No Recent Audit Events</p>
-                    <p className="text-muted-foreground text-sm mt-2">Any future modifications, lifecycle phase changes, or compliance updates will be logged here.</p>
+                    <History className="mb-4 h-16 w-16 text-muted-foreground/30" />
+                    <p className="text-lg font-medium">
+                        No Recent Audit Events
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Any future modifications, lifecycle phase changes, or
+                        compliance updates will be logged here.
+                    </p>
                 </CardContent>
             </Card>
         </div>

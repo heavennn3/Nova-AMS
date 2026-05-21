@@ -46,20 +46,20 @@ export function UserMenuContent({ user }: Props) {
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-         <DropdownMenuItem asChild>
-    <button
-        className="block w-full cursor-pointer"
-        type="button"
-        onClick={() => {
-            cleanup();
-            router.post(logout());
-        }}
-        data-test="logout-button"
-    >
-        <LogOut className="mr-2" />
-        Log out
-    </button>
-</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+                <button
+                    className="block w-full cursor-pointer"
+                    type="button"
+                    onClick={() => {
+                        cleanup();
+                        router.post(logout());
+                    }}
+                    data-test="logout-button"
+                >
+                    <LogOut className="mr-2" />
+                    Log out
+                </button>
+            </DropdownMenuItem>
         </>
     );
 }
