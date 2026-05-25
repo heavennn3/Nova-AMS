@@ -18,62 +18,110 @@ import {
     Filter,
     X,
     Check,
+    User,
+    UserCheck,
 } from 'lucide-react';
 
+interface UserRecord {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    site: string;
+    site_id: number | null;
+}
+
+interface Site {
+    id: number;
+    name: string;
+    code: string;
+    region?: string;
+}
+
 export default function Access({
-    sites,
-    users,
+    sites = [],
+    users = [],
 }: {
-    sites: any[];
-    users: any[];
+    sites: Site[];
+    users: UserRecord[];
 }) {
     const [search, setSearch] = useState('');
     const [selectedRole, setSelectedRole] = useState('all');
     const [selectedSite, setSelectedSite] = useState('all');
+    const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
 
+    // Combobox state for typing/filtering users inside the select dropdown
+    const [userComboOpen, setUserComboOpen] = useState(false);
+    const [comboSearch, setComboSearch] = useState('');
+
+    // Case-insensitive check to identify base users (excluding Admins if appropriate, but keeping it flexible)
+    const baseUsers = useMemo(() => {
+        return users.filter((u) => (u.role || '').toLowerCase() !== 'admin');
+    }, [users]);
+
+    // Unique options derived dynamically
     const allRoles = useMemo(
-        () => [...new Set(users.map((u) => u.role).filter(Boolean))].sort(),
-        [users],
+        () => [...new Set(baseUsers.map((u) => u.role).filter(Boolean))].sort(),
+        [baseUsers],
     );
     const allSites = useMemo(
-        () => [...new Set(users.map((u) => u.site).filter(Boolean))].sort(),
-        [users],
+        () => [...new Set(baseUsers.map((u) => u.site).filter(Boolean))].sort(),
+        [baseUsers],
     );
 
-    const baseUsers = users.filter((u) => u.role !== 'admin');
+    // Filter combo users list as they type in the combo dropdown
+    const comboFilteredUsers = useMemo(() => {
+        return baseUsers.filter((u) =>
+            u.name.toLowerCase().includes(comboSearch.toLowerCase()) ||
+            u.email.toLowerCase().includes(comboSearch.toLowerCase())
+        );
+    }, [baseUsers, comboSearch]);
 
+    // Apply all multi-layered filters to the main datatable
     const filteredUsers = useMemo(() => {
         return baseUsers.filter((u) => {
             const matchesRole =
                 selectedRole === 'all' || u.role === selectedRole;
             const matchesSite =
                 selectedSite === 'all' || u.site === selectedSite;
+            const matchesUser =
+                !selectedUser || u.id === selectedUser.id;
+            
             const q = search.toLowerCase();
             const matchesSearch =
                 !q ||
                 u.name.toLowerCase().includes(q) ||
                 u.email.toLowerCase().includes(q) ||
                 (u.site && u.site.toLowerCase().includes(q));
-            return matchesRole && matchesSite && matchesSearch;
+
+            return matchesRole && matchesSite && matchesUser && matchesSearch;
         });
-    }, [baseUsers, search, selectedRole, selectedSite]);
+    }, [baseUsers, search, selectedRole, selectedSite, selectedUser]);
 
     const activeFilterCount =
-        (selectedRole !== 'all' ? 1 : 0) + (selectedSite !== 'all' ? 1 : 0);
+        (selectedRole !== 'all' ? 1 : 0) + 
+        (selectedSite !== 'all' ? 1 : 0) +
+        (selectedUser ? 1 : 0);
 
     const columns = [
         {
             accessorKey: 'name',
             header: 'User Name',
             cell: ({ row }: any) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-foreground">
+                <button
+                    onClick={() => setSelectedUser(row.original)}
+                    className="flex flex-col text-left hover:text-primary transition-colors focus:outline-none group"
+                >
+                    <span className="font-semibold text-foreground group-hover:underline flex items-center gap-1">
                         {row.original.name}
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-muted-foreground font-normal ml-1">
+                            (filter)
+                        </span>
                     </span>
                     <span className="text-xs text-muted-foreground">
                         {row.original.email}
                     </span>
-                </div>
+                </button>
             ),
         },
         {
@@ -81,22 +129,24 @@ export default function Access({
             header: 'System Role',
             cell: ({ row }: any) => {
                 const role = row.original.role;
-                let colorClass = 'bg-slate-100 text-slate-800 border-slate-200';
+                let colorClass = 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200 dark:bg-slate-900/40 dark:text-slate-300';
 
                 if (role === 'Admin')
-                    colorClass = 'bg-rose-100 text-rose-800 border-rose-200';
+                    colorClass = 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-950/20 dark:text-rose-400';
                 if (role === 'Site Manager')
-                    colorClass = 'bg-amber-100 text-amber-800 border-amber-200';
+                    colorClass = 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-950/20 dark:text-amber-400';
                 if (role === 'Technician')
-                    colorClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                    colorClass = 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-950/20 dark:text-blue-400';
 
                 return (
-                    <span
-                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${colorClass} flex w-fit items-center`}
+                    <button
+                        onClick={() => setSelectedRole(role)}
+                        title={`Filter by role: ${role}`}
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${colorClass} flex w-fit items-center transition-colors focus:outline-none`}
                     >
-                        <Shield className="mr-1 h-3 w-3" />
+                        <Shield className="mr-1 h-3 w-3 animate-pulse" />
                         {role}
-                    </span>
+                    </button>
                 );
             },
         },
@@ -104,8 +154,12 @@ export default function Access({
             accessorKey: 'site',
             header: 'Site Access',
             cell: ({ row }: any) => (
-                <div className="flex items-center text-sm">
-                    <MapPin className="mr-1.5 h-3 w-3 text-muted-foreground" />
+                <button
+                    onClick={() => row.original.site && setSelectedSite(row.original.site)}
+                    title={`Filter by site: ${row.original.site}`}
+                    className="flex items-center text-sm hover:text-primary transition-colors focus:outline-none hover:underline text-left"
+                >
+                    <MapPin className="mr-1.5 h-3.5 w-3.5 text-zinc-400 group-hover:text-primary" />
                     <span
                         className={
                             row.original.site_id
@@ -115,7 +169,7 @@ export default function Access({
                     >
                         {row.original.site}
                     </span>
-                </div>
+                </button>
             ),
         },
         {
@@ -160,27 +214,96 @@ export default function Access({
                     <span>
                         <strong>Security Policy:</strong> Admins have global
                         access. Site Managers and Technicians are restricted to
-                        their assigned locations.
+                        their assigned locations. Click table rows or tags below to filter instantly.
                     </span>
                 </div>
 
                 {/* Search + Filter row */}
                 <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <div className="relative w-[260px]">
+                    {/* General Text Search */}
+                    <div className="relative w-[240px]">
                         <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Search user, email, site..."
+                            placeholder="Query name, email, base..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-8 pl-8 text-sm"
+                            className="h-8 pl-8 text-xs bg-background/50"
                         />
                     </div>
+
+                    {/* 1. Filter by User - Combo Search Combobox */}
+                    <Popover open={userComboOpen} onOpenChange={setUserComboOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-semibold border-dashed"
+                            >
+                                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                {selectedUser ? `User: ${selectedUser.name}` : 'Filter by User'}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[280px] p-0" align="start">
+                            <div className="p-2 border-b border-border/40 bg-muted/20">
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Type to search user..."
+                                        value={comboSearch}
+                                        onChange={(e) => setComboSearch(e.target.value)}
+                                        className="h-8 pl-8 text-xs bg-background"
+                                    />
+                                </div>
+                            </div>
+                            <div className="max-h-[200px] overflow-y-auto p-1 space-y-0.5 custom-scrollbar">
+                                <button
+                                    onClick={() => {
+                                        setSelectedUser(null);
+                                        setUserComboOpen(false);
+                                        setComboSearch('');
+                                    }}
+                                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs text-left hover:bg-muted font-bold transition-colors"
+                                >
+                                    <span>All Users</span>
+                                    {!selectedUser && <Check className="h-3 w-3 text-primary" />}
+                                </button>
+                                {comboFilteredUsers.map((u) => (
+                                    <button
+                                        key={u.id}
+                                        onClick={() => {
+                                            setSelectedUser(u);
+                                            setUserComboOpen(false);
+                                            setComboSearch('');
+                                        }}
+                                        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs text-left hover:bg-muted transition-colors"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-foreground">{u.name}</span>
+                                            <span className="text-[10px] text-muted-foreground font-medium">
+                                                {u.role} • {u.site}
+                                            </span>
+                                        </div>
+                                        {selectedUser?.id === u.id && (
+                                            <Check className="h-3.5 w-3.5 text-primary shrink-0 ml-2" />
+                                        )}
+                                    </button>
+                                ))}
+                                {comboFilteredUsers.length === 0 && (
+                                    <div className="p-3 text-center text-xs text-muted-foreground">
+                                        No matching users found.
+                                    </div>
+                                )}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* 2. Popover Filters (Role & Site) */}
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 gap-1.5 border-dashed"
+                                className="h-8 gap-1.5 border-dashed text-xs"
                             >
                                 <Filter className="h-3.5 w-3.5" /> Filters
                                 {activeFilterCount > 0 && (
@@ -191,9 +314,9 @@ export default function Access({
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-[260px] p-0" align="start">
-                            <div className="border-b p-3">
+                            <div className="border-b p-3 bg-muted/20">
                                 <p className="text-sm font-semibold">
-                                    Filter Access
+                                    Filter Access Rules
                                 </p>
                             </div>
                             <div className="border-b p-3">
@@ -203,18 +326,18 @@ export default function Access({
                                 <div className="space-y-0.5">
                                     <button
                                         onClick={() => setSelectedRole('all')}
-                                        className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedRole === 'all' ? 'font-medium' : ''}`}
+                                        className={`flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-colors hover:bg-muted ${selectedRole === 'all' ? 'font-bold' : ''}`}
                                     >
                                         <span>All Roles</span>
                                         {selectedRole === 'all' && (
-                                            <Check className="h-3.5 w-3.5 text-primary" />
+                                            <Check className="h-3 w-3 text-primary" />
                                         )}
                                     </button>
                                     {allRoles.map((r) => (
                                         <button
                                             key={r}
                                             onClick={() => setSelectedRole(r)}
-                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedRole === r ? 'font-medium' : ''}`}
+                                            className={`flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-colors hover:bg-muted ${selectedRole === r ? 'font-bold' : ''}`}
                                         >
                                             <span>{r}</span>
                                             <div className="flex items-center gap-1.5">
@@ -226,7 +349,7 @@ export default function Access({
                                                     }
                                                 </span>
                                                 {selectedRole === r && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                                    <Check className="h-3 w-3 text-primary" />
                                                 )}
                                             </div>
                                         </button>
@@ -237,21 +360,21 @@ export default function Access({
                                 <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                     Site
                                 </p>
-                                <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
+                                <div className="max-h-[150px] space-y-0.5 overflow-y-auto custom-scrollbar">
                                     <button
                                         onClick={() => setSelectedSite('all')}
-                                        className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedSite === 'all' ? 'font-medium' : ''}`}
+                                        className={`flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-colors hover:bg-muted ${selectedSite === 'all' ? 'font-bold' : ''}`}
                                     >
                                         <span>All Sites</span>
                                         {selectedSite === 'all' && (
-                                            <Check className="h-3.5 w-3.5 text-primary" />
+                                            <Check className="h-3 w-3 text-primary" />
                                         )}
                                     </button>
                                     {allSites.map((s) => (
                                         <button
                                             key={s}
                                             onClick={() => setSelectedSite(s)}
-                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedSite === s ? 'font-medium' : ''}`}
+                                            className={`flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-colors hover:bg-muted ${selectedSite === s ? 'font-bold' : ''}`}
                                         >
                                             <span>{s}</span>
                                             <div className="flex items-center gap-1.5">
@@ -263,7 +386,7 @@ export default function Access({
                                                     }
                                                 </span>
                                                 {selectedSite === s && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                                    <Check className="h-3 w-3 text-primary" />
                                                 )}
                                             </div>
                                         </button>
@@ -271,7 +394,7 @@ export default function Access({
                                 </div>
                             </div>
                             {activeFilterCount > 0 && (
-                                <div className="p-2">
+                                <div className="p-2 bg-muted/10">
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -279,6 +402,7 @@ export default function Access({
                                         onClick={() => {
                                             setSelectedRole('all');
                                             setSelectedSite('all');
+                                            setSelectedUser(null);
                                         }}
                                     >
                                         Clear all filters
@@ -287,30 +411,46 @@ export default function Access({
                             )}
                         </PopoverContent>
                     </Popover>
+
+                    {/* Filter Badges for active filters */}
+                    {selectedUser && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-amber-100 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/20 dark:border-amber-900/40 dark:text-amber-400">
+                            User: {selectedUser.name}
+                            <button
+                                onClick={() => setSelectedUser(null)}
+                                className="ml-0.5 focus:outline-none"
+                            >
+                                <X className="h-3 w-3" />
+                            </button>
+                        </span>
+                    )}
+
                     {selectedRole !== 'all' && (
-                        <span className="inline-flex items-center gap-1 rounded-md border border-purple-100 bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700">
+                        <span className="inline-flex items-center gap-1 rounded-md border border-purple-100 bg-purple-50 px-2 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/20 dark:border-purple-900/40 dark:text-purple-400">
                             Role: {selectedRole}
                             <button
                                 onClick={() => setSelectedRole('all')}
-                                className="ml-0.5"
+                                className="ml-0.5 focus:outline-none"
                             >
                                 <X className="h-3 w-3" />
                             </button>
                         </span>
                     )}
+
                     {selectedSite !== 'all' && (
-                        <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                        <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/20 dark:border-blue-900/40 dark:text-blue-400">
                             Site: {selectedSite}
                             <button
                                 onClick={() => setSelectedSite('all')}
-                                className="ml-0.5"
+                                className="ml-0.5 focus:outline-none"
                             >
                                 <X className="h-3 w-3" />
                             </button>
                         </span>
                     )}
+
                     {activeFilterCount > 0 && (
-                        <span className="ml-1 text-xs text-muted-foreground">
+                        <span className="ml-1 text-xs text-muted-foreground font-semibold">
                             {filteredUsers.length} of {baseUsers.length} users
                         </span>
                     )}

@@ -91,15 +91,11 @@ export default function Welcome({
                 <main className="mx-auto max-w-7xl space-y-24 px-6 py-12 lg:py-20">
                     {/* Hero Section */}
                     <section className="mx-auto max-w-3xl space-y-6 text-center">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
-                            <Shield className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
-                            <span>
-                                Enterprise-Grade Infrastructure Workspace
-                            </span>
-                        </div>
+
 
                         <h1 className="text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl dark:text-white">
-                            High-Precision Asset & Operational Infrastructure
+                            NOVA
+                            Asset Management System
                         </h1>
 
                         <p className="text-lg leading-relaxed font-normal text-zinc-600 dark:text-zinc-400">
