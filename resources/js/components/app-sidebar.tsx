@@ -76,6 +76,12 @@ const navSections: NavSection[] = [
                 icon: Activity,
                 module: 'Asset Inventory',
             },
+            {
+                title: 'Software Licenses',
+                href: '/licenses',
+                icon: FileText,
+                module: 'Asset Inventory',
+            },
             { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench },
             {
                 title: 'Master Data',
