@@ -133,7 +133,7 @@ export default function Welcome({
                         </div>
                     </section>
 
-                    {/* Interactive CSS Dashboard Mockup (Visual Evidence) */}
+
                     <section className="relative overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xl dark:border-zinc-800/80 dark:bg-zinc-950">
                         <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/50">
                             <div className="flex items-center space-x-2">
@@ -153,7 +153,7 @@ export default function Welcome({
                         </div>
 
                         <div className="grid h-[480px] grid-cols-1 lg:grid-cols-[240px_1fr]">
-                            {/* Mock Sidebar */}
+
                             <div className="hidden flex-col space-y-6 border-r border-zinc-200 bg-zinc-50/50 p-4 lg:flex dark:border-zinc-800 dark:bg-zinc-950/20">
                                 <div className="space-y-1.5">
                                     <p className="px-2 text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
@@ -196,7 +196,7 @@ export default function Welcome({
                                 </div>
                             </div>
 
-                            {/* Mock Workspace Content */}
+
                             <div className="space-y-6 overflow-y-auto bg-[#FDFDFC] p-6 dark:bg-[#0c0c0e]">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -213,7 +213,7 @@ export default function Welcome({
                                     </span>
                                 </div>
 
-                                {/* Mock Stats cards */}
+
                                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                                     <div className="space-y-1 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
                                         <p className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
