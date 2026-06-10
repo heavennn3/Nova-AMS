@@ -166,6 +166,52 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
     });
 
+    // Quick creation APIs for inline forms
+    Route::post('/api/quick/vendors', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate(['name' => 'required|string|unique:vendors,name']);
+        $vendor = \App\Models\Vendor::create($validated);
+        return response()->json($vendor);
+    });
+
+    Route::post('/api/quick/types', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate(['name' => 'required|string|unique:asset_types,name']);
+        $type = \App\Models\AssetType::create($validated);
+        return response()->json($type);
+    });
+
+    Route::post('/api/quick/status-labels', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'name' => 'required|string|unique:status_labels,name',
+            'type' => 'nullable|string'
+        ]);
+        $status = \App\Models\StatusLabel::create([
+            'name' => $validated['name'],
+            'type' => $validated['type'] ?? 'deployable'
+        ]);
+        return response()->json($status);
+    });
+
+    Route::post('/api/quick/sites', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate(['name' => 'required|string|unique:sites,name']);
+        $site = \App\Models\Site::create([
+            'name' => $validated['name'],
+            'code' => strtoupper(substr(trim($validated['name']), 0, 3)) . '-' . rand(1000, 9999)
+        ]);
+        return response()->json($site);
+    });
+
+    Route::post('/api/quick/locations', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate(['name' => 'required|string|unique:locations,name']);
+        $location = \App\Models\Location::create($validated);
+        return response()->json($location);
+    });
+
+    Route::post('/api/quick/suppliers', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate(['name' => 'required|string|unique:suppliers,name']);
+        $supplier = \App\Models\Supplier::create($validated);
+        return response()->json($supplier);
+    });
+
 });
 
 require __DIR__.'/settings.php';

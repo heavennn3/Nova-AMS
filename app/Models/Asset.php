@@ -26,6 +26,15 @@ class Asset extends Model implements Auditable
         'longitude',
         'quantity',
         'site_id',
+        'image_path',
+        'asset_name',
+        'warranty_months',
+        'order_number',
+        'purchase_date',
+        'eol_date',
+        'supplier_id',
+        'purchase_cost',
+        'status_label_id',
     ];
 
     public function category()
@@ -51,6 +60,16 @@ class Asset extends Model implements Auditable
     public function site()
     {
         return $this->belongsTo(Site::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function statusLabel()
+    {
+        return $this->belongsTo(StatusLabel::class);
     }
 
     /**

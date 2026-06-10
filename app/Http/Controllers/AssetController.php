@@ -57,6 +57,8 @@ class AssetController extends Controller
             'vendors' => \App\Models\Vendor::all(),
             'sites' => \App\Models\Site::all(),
             'locations' => \App\Models\Location::all(),
+            'suppliers' => \App\Models\Supplier::all(),
+            'statusLabels' => \App\Models\StatusLabel::all(),
         ]);
     }
 
@@ -66,16 +68,47 @@ class AssetController extends Controller
             'asset_id' => 'required|unique:assets',
             'serial_number' => 'nullable|string',
             'product_name' => 'required|string',
+            'asset_name' => 'nullable|string',
             'brand' => 'nullable|string',
             'category_id' => 'nullable|exists:asset_categories,id',
             'type_id' => 'nullable|exists:asset_types,id',
             'vendor_id' => 'nullable|exists:vendors,id',
             'site_id' => 'nullable|exists:sites,id',
+            'location_id' => 'nullable|exists:locations,id',
             'purchase_year' => 'nullable|integer',
             'status' => 'required|string',
-            'condition_status' => 'nullable|string',
+            'status_label_id' => 'nullable|exists:status_labels,id',
             'notes' => 'nullable|string',
+            'warranty_months' => 'nullable|integer',
+            'order_number' => 'nullable|string',
+            'purchase_date' => 'nullable|date',
+            'eol_date' => 'nullable|date',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'purchase_cost' => 'nullable|numeric',
         ]);
+
+        $request->validate([
+            'image' => 'nullable|image|max:4096',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('assets', 'public');
+            $validated['image_path'] = '/storage/' . $path;
+        }
+
+        // Map status label to standard status enum for compatibility
+        if (!empty($validated['status_label_id'])) {
+            $statusLabel = \App\Models\StatusLabel::find($validated['status_label_id']);
+            if ($statusLabel) {
+                if ($statusLabel->type === 'deployable') {
+                    $validated['status'] = 'available';
+                } elseif ($statusLabel->type === 'pending') {
+                    $validated['status'] = 'maintenance';
+                } elseif ($statusLabel->type === 'archived' || $statusLabel->type === 'undeployable') {
+                    $validated['status'] = 'retired';
+                }
+            }
+        }
 
         $asset = Asset::create($validated);
 

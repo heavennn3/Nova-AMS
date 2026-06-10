@@ -133,7 +133,7 @@ export default function UserCreate({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             required
-                            placeholder="e.g. Ahmad bin Abdullah"
+                           
                         />
                         {errors.name && (
                             <div className="text-sm text-red-500">
@@ -150,7 +150,7 @@ export default function UserCreate({
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             required
-                            placeholder="e.g. user@company.com"
+                            
                         />
                         {errors.email && (
                             <div className="text-sm text-red-500">
@@ -165,7 +165,7 @@ export default function UserCreate({
                             id="phone"
                             value={data.phone}
                             onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="e.g. +60 12-345-6789"
+                           
                         />
                         {errors.phone && (
                             <div className="text-sm text-red-500">
@@ -182,7 +182,7 @@ export default function UserCreate({
                             onChange={(e) =>
                                 setData('ic_number', e.target.value)
                             }
-                            placeholder="e.g. 900101-01-1234"
+                           
                         />
                         {errors.ic_number && (
                             <div className="text-sm text-red-500">
