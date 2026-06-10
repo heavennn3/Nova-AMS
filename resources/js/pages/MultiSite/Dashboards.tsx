@@ -119,9 +119,6 @@ export default function Dashboards({ sites = [] }: { sites: any[] }) {
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
                         Multi-Site Operational Dashboards
                     </h1>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                        Overview of all sites in west region
-                    </p>
                 </div>
 
             </div>

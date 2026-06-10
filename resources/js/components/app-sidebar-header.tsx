@@ -1,20 +1,25 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react'; // Added import
+import { usePage } from '@inertiajs/react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SystemMonitor } from '@/components/system-monitor';
 import { NotificationBell } from '@/components/notification-bell';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Added import
-import { Button } from '@/components/ui/button'; // Added import
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+
+import { Link } from '@inertiajs/react';
+
+
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'; // Added import
-import { UserMenuContent } from '@/components/user-menu-content'; // Added import
+} from '@/components/ui/dropdown-menu';
+import { UserMenuContent } from '@/components/user-menu-content';
 import { useAppearance } from '@/hooks/use-appearance';
-import { useInitials } from '@/hooks/use-initials'; // Added import
-import { Moon, Sun, Search, Plus, ChevronDown, Users, Package, Settings2 } from 'lucide-react';
+import { useInitials } from '@/hooks/use-initials';
+// Included 'Settings' in the lucide-react imports
+import { Moon, Sun, Search, Plus, ChevronDown, Users, Package, Settings2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
@@ -23,8 +28,8 @@ export function AppSidebarHeader({
 }: {
     breadcrumbs?: BreadcrumbItemType[];
 }) {
-    const { auth } = usePage().props; // Extract auth data
-    const getInitials = useInitials(); // Extract hook for initials fallback
+    const { auth } = usePage().props;
+    const getInitials = useInitials();
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const isDark = resolvedAppearance === 'dark';
 
@@ -44,21 +49,35 @@ export function AppSidebarHeader({
                     </div>
                 </div>
 
-                {/* Right Side: Search, Create Action, and System Overlay Utilities */}
+                {/* Right Side: Search, Create Action, and Utilities */}
                 <div className="flex items-center gap-4 ml-auto">
 
+                    {/* Top-level Left Nav Items */}
                     <nav className="hidden lg:flex items-center gap-1">
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+
+                        <Link href="/assets" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
                             <Package className="h-4 w-4 text-muted-foreground" />
                             <span>Assets</span>
-                        </button>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>Users</span>
-                        </button>
+                        </Link>
+
+                       <Link href="/users" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span>Users</span>
+                        </Link>
+
+                        {/* Moved Settings button here to align with Assets and Users nav tabs */}
+                       
                     </nav>
 
-                  
+                    {/* Compact Search Box */}
+                    <div className="relative w-40 sm:w-48 md:w-60">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            className="h-9 w-full rounded-md border border-input bg-muted/40 pl-9 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        />
+                    </div>
 
                     {/* "Create New" Action Dropdown */}
                     <div className="relative">
@@ -131,7 +150,7 @@ export function AppSidebarHeader({
 
                         <NotificationBell />
 
-                        {/* Profile Menu Dropdown (Moved here next to notifications) */}
+                        {/* Profile Menu Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -155,6 +174,10 @@ export function AppSidebarHeader({
                                 )}
                             </DropdownMenuContent>
                         </DropdownMenu>
+
+                         <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                            <Settings className="h-4 w-4 text-muted-foreground" />
+                        </button>
                     </div>
 
                 </div>

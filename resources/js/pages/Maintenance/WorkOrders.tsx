@@ -233,9 +233,7 @@ export default function WorkOrders({ workOrders, assets, technicians }: any) {
                         <FileText className="mr-3 h-7 w-7 text-primary" />
                         Maintenance Operations
                     </h1>
-                    <p className="mt-1 text-muted-foreground">
-                        Manage technical work orders and maintenance lifecycle.
-                    </p>
+                   
                 </div>
 
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

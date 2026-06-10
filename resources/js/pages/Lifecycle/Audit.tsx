@@ -12,10 +12,7 @@ export default function Audit() {
                     Audit Trail
                 </h1>
             </div>
-            <p className="text-muted-foreground">
-                Immutable log of all lifecycle events, from procurement to
-                decommissioning.
-            </p>
+           
 
             <Card className="flex h-[400px] items-start justify-start border-dashed bg-muted/10 p-8">
                 <CardContent className="text-left">

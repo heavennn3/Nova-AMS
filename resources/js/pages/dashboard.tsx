@@ -90,9 +90,6 @@ export default function Dashboard({
                     <h1 className="flex items-center text-3xl font-bold tracking-tight text-foreground">
                         Dashboard
                     </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        Overview of assets, maintenance, and site operations.
-                    </p>
                 </div>
                 <div className="flex space-x-3">
                     <Button

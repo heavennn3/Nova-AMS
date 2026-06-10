@@ -12,10 +12,7 @@ export default function Technicians() {
                     Technician Assignment
                 </h1>
             </div>
-            <p className="text-muted-foreground">
-                Manage personnel schedules, workload distribution, and skills
-                matrix.
-            </p>
+         
 
             <Card className="flex h-[400px] items-start justify-start border-dashed bg-muted/10 p-8">
                 <CardContent className="text-left">

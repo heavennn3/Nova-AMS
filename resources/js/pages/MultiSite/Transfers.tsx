@@ -161,9 +161,6 @@ export default function Transfers({
                         <ArrowRightLeft className="h-8 w-8 text-primary" />
                         Inter-Site Transfer Workflows
                     </h1>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                        Initiate, authorize, and log physical asset movements across your regional network base.
-                    </p>
                 </div>
             </div>
 

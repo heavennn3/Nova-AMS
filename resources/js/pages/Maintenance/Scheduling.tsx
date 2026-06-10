@@ -12,10 +12,7 @@ export default function Scheduling() {
                     Preventive Scheduling
                 </h1>
             </div>
-            <p className="text-muted-foreground">
-                Manage and automate routine maintenance checks across all
-                facilities.
-            </p>
+          
 
             <Card className="flex h-[400px] items-start justify-start border-dashed bg-muted/10 p-8">
                 <CardContent className="text-left">

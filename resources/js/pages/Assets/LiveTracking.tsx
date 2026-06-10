@@ -475,9 +475,7 @@ export default function LiveTracking({
                         <h1 className="text-2xl font-bold tracking-tight">
                             Asset Withdrawal
                         </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Trace or view asset being used by
-                        </p>
+                        
                     </div>
                 </div>
                 <div className="flex items-center gap-2">

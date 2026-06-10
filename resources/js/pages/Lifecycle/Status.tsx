@@ -72,10 +72,7 @@ export default function Status({ assets = [] }: { assets: any[] }) {
                     Asset Status Tracking
                 </h1>
             </div>
-            <p className="text-muted-foreground">
-                Monitor real-time operational states and historical transitions
-                for all assets.
-            </p>
+           
 
             <div className="overflow-hidden rounded-xl border border-border bg-card p-6 shadow-sm">
                 <DataTable

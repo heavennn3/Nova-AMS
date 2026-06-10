@@ -465,10 +465,6 @@ export default function MasterData({
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
                         Master Data
                     </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        Manage system reference data, classifications, and
-                        vendors.
-                    </p>
                 </div>
             </div>
 

@@ -48,10 +48,6 @@ export default function VendorsIndex({ vendors }: { vendors: Vendor[] }) {
                     <h1 className="text-2xl font-bold tracking-tight">
                         Vendor / Company Management
                     </h1>
-                    <p className="mt-1 text-muted-foreground">
-                        Manage vendor profiles, logos, and track assets by
-                        vendor.
-                    </p>
                 </div>
                 <Link href="/vendors/create">
                     <Button className="gap-2">

@@ -12,10 +12,7 @@ export default function Warranty() {
                     Warranty Management
                 </h1>
             </div>
-            <p className="text-muted-foreground">
-                Track coverage periods, vendor liabilities, and automate RMA
-                requests.
-            </p>
+           
 
             <Card className="flex h-[400px] items-start justify-start border-dashed bg-muted/10 p-8">
                 <CardContent className="text-left">

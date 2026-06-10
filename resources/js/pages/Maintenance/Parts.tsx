@@ -220,9 +220,6 @@ export default function Parts({ parts = [], sites = [] }: any) {
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
                             Spare Parts
                         </h1>
-                        <p className="text-muted-foreground">
-                            Manage NOVA spare parts inventory{' '}
-                        </p>
                     </div>
                 </div>
                 <Button
