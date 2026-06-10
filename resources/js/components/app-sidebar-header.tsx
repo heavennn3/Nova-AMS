@@ -1,9 +1,19 @@
 import { useState } from 'react';
+import { usePage } from '@inertiajs/react'; // Added import
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SystemMonitor } from '@/components/system-monitor';
 import { NotificationBell } from '@/components/notification-bell';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Added import
+import { Button } from '@/components/ui/button'; // Added import
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'; // Added import
+import { UserMenuContent } from '@/components/user-menu-content'; // Added import
 import { useAppearance } from '@/hooks/use-appearance';
+import { useInitials } from '@/hooks/use-initials'; // Added import
 import { Moon, Sun, Search, Plus, ChevronDown, Users, Package, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
@@ -13,21 +23,21 @@ export function AppSidebarHeader({
 }: {
     breadcrumbs?: BreadcrumbItemType[];
 }) {
+    const { auth } = usePage().props; // Extract auth data
+    const getInitials = useInitials(); // Extract hook for initials fallback
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const isDark = resolvedAppearance === 'dark';
-    
+
     // State to toggle the "Create New" dropdown
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     return (
         <header className="flex h-16 shrink-0 items-center border-b border-sidebar-border/50 bg-background px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4">
             <div className="flex w-full items-center justify-between gap-4">
-                
+
                 {/* Left Side: Brand, Trigger, and Navigation */}
                 <div className="flex items-center gap-4">
                     <SidebarTrigger className="-ml-1" />
-
-                   
 
                     <div className="hidden md:block">
                         <Breadcrumbs breadcrumbs={breadcrumbs} />
@@ -37,7 +47,7 @@ export function AppSidebarHeader({
                 {/* Right Side: Search, Create Action, and System Overlay Utilities */}
                 <div className="flex items-center gap-4 ml-auto">
 
-                     <nav className="hidden lg:flex items-center gap-1">
+                    <nav className="hidden lg:flex items-center gap-1">
                         <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
                             <Package className="h-4 w-4 text-muted-foreground" />
                             <span>Assets</span>
@@ -47,16 +57,8 @@ export function AppSidebarHeader({
                             <span>Users</span>
                         </button>
                     </nav>
-                    
-                    {/* Compact Search Box */}
-                    <div className="relative w-40 sm:w-48 md:w-60">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className="h-9 w-full rounded-md border border-input bg-muted/40 pl-9 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        />
-                    </div>
+
+                  
 
                     {/* "Create New" Action Dropdown */}
                     <div className="relative">
@@ -73,21 +75,21 @@ export function AppSidebarHeader({
                         {/* Dropdown Menu List */}
                         {isCreateOpen && (
                             <div className="absolute right-0 mt-1.5 w-48 z-50 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 slide-in-from-top-1">
-                                <button 
+                                <button
                                     onClick={() => console.log('Create Asset Triggered')}
                                     className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                 >
                                     <Package className="mr-2 h-4 w-4 opacity-70" />
                                     <span>Create Asset</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => console.log('Create User Triggered')}
                                     className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                 >
                                     <Users className="mr-2 h-4 w-4 opacity-70" />
                                     <span>Create User</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => console.log('Create Spare Part Triggered')}
                                     className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                 >
@@ -98,7 +100,7 @@ export function AppSidebarHeader({
                         )}
                     </div>
 
-                    {/* Neatly aligned alongside System Monitor & Core Utilities */}
+                    {/* System Monitor & Core Utilities */}
                     <div className="flex items-center gap-3 border-l border-border/60 pl-4">
                         <SystemMonitor />
 
@@ -128,6 +130,31 @@ export function AppSidebarHeader({
                         </button>
 
                         <NotificationBell />
+
+                        {/* Profile Menu Dropdown (Moved here next to notifications) */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="h-9 w-9 rounded-full p-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                    <Avatar className="h-7 w-7 overflow-hidden rounded-full">
+                                        <AvatarImage
+                                            src={auth.user?.avatar}
+                                            alt={auth.user?.name}
+                                        />
+                                        <AvatarFallback className="rounded-full bg-neutral-200 text-xs font-medium text-black dark:bg-neutral-700 dark:text-white">
+                                            {getInitials(auth.user?.name ?? '')}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 mt-1.5" align="end">
+                                {auth.user && (
+                                    <UserMenuContent user={auth.user} />
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
 
                 </div>
