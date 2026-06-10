@@ -57,6 +57,10 @@ export function systemSettings() {
     return '/operations-maintanance';
 }
 
+export function settings() {
+    return '/settings';
+}
+
 export function login() {
     return '/login';
 }

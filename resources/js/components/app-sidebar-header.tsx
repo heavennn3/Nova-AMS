@@ -21,6 +21,7 @@ import { useInitials } from '@/hooks/use-initials';
 // Included 'Settings' in the lucide-react imports
 import { Moon, Sun, Search, Plus, ChevronDown, Users, Package, Settings2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { settings } from '@/routes';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 export function AppSidebarHeader({
@@ -175,9 +176,11 @@ export function AppSidebarHeader({
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                         <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
-                            <Settings className="h-4 w-4 text-muted-foreground" />
-                        </button>
+                        <Link href={settings()}>
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <Settings className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                        </Link>
                     </div>
 
                 </div>
