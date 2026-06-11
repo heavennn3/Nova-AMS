@@ -135,7 +135,15 @@ export function DataTableToolbar<TData>({
 
         doc.save(`${exportFileName}.pdf`);
     };
-
+    const handleExportMySQL = () => {
+        // Trigger backend export of MySQL dump
+        const link = document.createElement('a');
+        link.href = '/assets/export-mysql';
+        link.download = `${exportFileName}.sql`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
     const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -309,6 +317,9 @@ export function DataTableToolbar<TData>({
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleExportPDF}>
                             <FileText className="mr-2 h-4 w-4" /> Export PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportMySQL}>
+                            <FileText className="mr-2 h-4 w-4" /> Export MySQL
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

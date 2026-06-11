@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::inertia('/asset-inventory', 'asset-inventory')->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
+        Route::get('/assets/export-mysql', [\App\Http\Controllers\AssetController::class, 'exportMySQL'])->name('assets.export-mysql');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
         
         // Software Licenses Module

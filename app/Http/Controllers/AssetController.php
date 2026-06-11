@@ -243,41 +243,39 @@ class AssetController extends Controller
         return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
     }
 
-    public function exportCsv()
+    public function exportMySQL()
     {
         $assets = Asset::with(['category', 'site', 'vendor'])->get();
-        $filename = "asset_inventory_" . date('Y-m-d') . ".csv";
-        
+        $filename = "asset_inventory_" . date('Y-m-d') . ".sql";
         $headers = [
-            "Content-type"        => "text/csv",
+            "Content-Type" => "application/sql",
             "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0",
         ];
 
-        $columns = ['Asset ID', 'Product Name', 'Category', 'Site', 'Status', 'Quantity', 'Purchase Year', 'Vendor'];
-
-        $callback = function() use($assets, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-
+        $callback = function() use ($assets) {
+            echo "-- Asset Inventory Export\n";
+            echo "SET foreign_key_checks = 0;\n";
             foreach ($assets as $asset) {
-                fputcsv($file, [
-                    $asset->asset_id,
-                    $asset->product_name,
-                    $asset->category?->name,
-                    $asset->site?->name,
-                    $asset->status,
-                    $asset->quantity,
-                    $asset->purchase_year,
-                    $asset->vendor?->name,
-                ]);
+                $fields = [
+                    $asset->id,
+                    "'" . addslashes($asset->asset_id) . "'",
+                    $asset->category_id ?? 'NULL',
+                    $asset->type_id ?? 'NULL',
+                    $asset->site_id ?? 'NULL',
+                    $asset->quantity ?? 0,
+                    "'" . addslashes($asset->vendor ? $asset->vendor->name : '') . "'",
+                    "'" . addslashes($asset->product_name) . "'",
+                    "'" . addslashes($asset->purchase_year) . "'",
+                    "'" . addslashes($asset->status) . "'",
+                ];
+                $values = implode(', ', $fields);
+                echo "INSERT INTO assets (id, asset_id, category_id, type_id, site_id, quantity, vendor, product_name, purchase_year, status) VALUES ($values);\n";
             }
-
-            fclose($file);
+            echo "SET foreign_key_checks = 1;\n";
         };
-
         return response()->stream($callback, 200, $headers);
     }
 
