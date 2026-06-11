@@ -49,6 +49,32 @@ class AssetController extends Controller
         ]);
     }
 
+    public function inventory()
+    {
+        $assets = Asset::with(['category', 'type', 'vendor', 'location', 'site'])
+            ->latest()
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'id' => $asset->id,
+                    'asset_id' => $asset->asset_id,
+                    'category' => $asset->category ? $asset->category->name : '',
+                    'type' => $asset->type ? $asset->type->name : '',
+                    'site' => $asset->site ? $asset->site->name : ($asset->location ? $asset->location->name : ''),
+                    'site_id' => $asset->site_id,
+                    'quantity' => $asset->quantity,
+                    'vendor' => $asset->vendor ? $asset->vendor->name : '',
+                    'product_name' => $asset->product_name,
+                    'purchase_year' => $asset->purchase_year,
+                    'status' => $asset->status,
+                ];
+            });
+
+        return Inertia::render('asset-inventory', [
+            'assets' => $assets,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('Assets/Create', [

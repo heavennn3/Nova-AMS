@@ -238,9 +238,6 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
                         System Activity Logs
                     </h1>
-                    <p className="mt-1 text-muted-foreground">
-                        Track & view all system activities and audit trails.
-                    </p>
                 </div>
             </div>
 

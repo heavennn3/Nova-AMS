@@ -27,6 +27,7 @@ import {
     Clock,
     Calendar,
     MessageSquare,
+    TrendingDown,
 } from 'lucide-react';
 import {
     Dialog,
@@ -462,11 +463,56 @@ export default function AssetIndex({
                     </p>
                 </div>
                 <div className="flex space-x-3">
+                    
+                            <Button
+                        variant="outline"
+                        onClick={() => {
+                            const headers = [
+                                'Asset ID',
+                                'Product Name',
+                                'Category',
+                                'Site',
+                                'Status',
+                                'Quantity',
+                                'Purchase Year',
+                                'Vendor',
+                            ];
+                            const rows = filteredAssets.map((a) => [
+                                a.asset_id,
+                                a.product_name,
+                                a.category,
+                                a.site,
+                                a.status,
+                                a.quantity,
+                                a.purchase_year,
+                                a.vendor,
+                            ]);
+                            const csvContent =
+                                'data:text/csv;charset=utf-8,' +
+                                [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+                            const encodedUri = encodeURI(csvContent);
+                            const link = document.createElement('a');
+                            link.setAttribute('href', encodedUri);
+                            link.setAttribute('download', 'asset_inventory.csv');
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }}
+                    >
+                        <TrendingDown className="mr-2 h-4 w-4" />
+                        Export Data
+                    </Button>
+
+
+
+
+
                     <Link href={`/assets/create?site_id=${selectedSiteId}`}>
                         <Button>
                             <Plus className="mr-2 h-4 w-4" /> Register New Asset
                         </Button>
                     </Link>
+                    
                 </div>
             </div>
 

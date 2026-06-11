@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Asset Inventory Module
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
-        Route::inertia('/asset-inventory', 'asset-inventory')->name('asset-inventory');
+        Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
         Route::get('/assets/export-mysql', [\App\Http\Controllers\AssetController::class, 'exportMySQL'])->name('assets.export-mysql');
