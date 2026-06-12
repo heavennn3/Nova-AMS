@@ -243,7 +243,7 @@ const navSections: NavSection[] = [
     },
 
     {
-        title: 'SUPPORT',
+        title: 'OTHERS',
         items: [
             {
                 title: 'Live Chat',

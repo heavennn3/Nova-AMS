@@ -498,7 +498,7 @@ export default function AssetIndex({
                             link.click();
                             document.body.removeChild(link);
                         }}
-                    >
+                    > 
                         <TrendingDown className="mr-2 h-4 w-4" />
                         Export Data
                     </Button>
