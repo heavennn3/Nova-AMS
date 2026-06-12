@@ -165,6 +165,50 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/security/recycle-bin', [\App\Http\Controllers\RecycleBinController::class, 'index'])->name('recycle-bin.index');
         Route::post('/security/recycle-bin/{id}/restore', [\App\Http\Controllers\RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
+
+        // Settings CRUD Routes
+        Route::get('/settings/custom-fields', [\App\Http\Controllers\SettingsController::class, 'customFields'])->name('settings.custom-fields');
+        Route::post('/settings/custom-fields', [\App\Http\Controllers\SettingsController::class, 'storeCustomField'])->name('settings.custom-fields.store');
+        Route::put('/settings/custom-fields/{id}', [\App\Http\Controllers\SettingsController::class, 'updateCustomField'])->name('settings.custom-fields.update');
+        Route::delete('/settings/custom-fields/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyCustomField'])->name('settings.custom-fields.destroy');
+
+        Route::get('/settings/status-labels', [\App\Http\Controllers\SettingsController::class, 'statusLabels'])->name('settings.status-labels');
+        Route::post('/settings/status-labels', [\App\Http\Controllers\SettingsController::class, 'storeStatusLabel'])->name('settings.status-labels.store');
+        Route::put('/settings/status-labels/{id}', [\App\Http\Controllers\SettingsController::class, 'updateStatusLabel'])->name('settings.status-labels.update');
+        Route::delete('/settings/status-labels/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyStatusLabel'])->name('settings.status-labels.destroy');
+
+        Route::get('/settings/asset-models', [\App\Http\Controllers\SettingsController::class, 'assetModels'])->name('settings.asset-models');
+        Route::post('/settings/asset-models', [\App\Http\Controllers\SettingsController::class, 'storeAssetModel'])->name('settings.asset-models.store');
+        Route::put('/settings/asset-models/{id}', [\App\Http\Controllers\SettingsController::class, 'updateAssetModel'])->name('settings.asset-models.update');
+        Route::delete('/settings/asset-models/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyAssetModel'])->name('settings.asset-models.destroy');
+
+        Route::get('/settings/categories', [\App\Http\Controllers\SettingsController::class, 'categories'])->name('settings.categories');
+        Route::post('/settings/categories', [\App\Http\Controllers\SettingsController::class, 'storeCategory'])->name('settings.categories.store');
+        Route::put('/settings/categories/{id}', [\App\Http\Controllers\SettingsController::class, 'updateCategory'])->name('settings.categories.update');
+        Route::delete('/settings/categories/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyCategory'])->name('settings.categories.destroy');
+
+        Route::get('/settings/manufacturers', [\App\Http\Controllers\SettingsController::class, 'manufacturers'])->name('settings.manufacturers');
+        Route::post('/settings/manufacturers', [\App\Http\Controllers\SettingsController::class, 'storeManufacturer'])->name('settings.manufacturers.store');
+        Route::put('/settings/manufacturers/{id}', [\App\Http\Controllers\SettingsController::class, 'updateManufacturer'])->name('settings.manufacturers.update');
+        Route::delete('/settings/manufacturers/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyManufacturer'])->name('settings.manufacturers.destroy');
+
+        Route::get('/settings/suppliers', [\App\Http\Controllers\SettingsController::class, 'suppliers'])->name('settings.suppliers');
+        Route::post('/settings/suppliers', [\App\Http\Controllers\SettingsController::class, 'storeSupplier'])->name('settings.suppliers.store');
+        Route::put('/settings/suppliers/{id}', [\App\Http\Controllers\SettingsController::class, 'updateSupplier'])->name('settings.suppliers.update');
+        Route::delete('/settings/suppliers/{id}', [\App\Http\Controllers\SettingsController::class, 'destroySupplier'])->name('settings.suppliers.destroy');
+        Route::post('/settings/vendors', [\App\Http\Controllers\SettingsController::class, 'storeVendor'])->name('settings.vendors.store');
+        Route::put('/settings/vendors/{id}', [\App\Http\Controllers\SettingsController::class, 'updateVendor'])->name('settings.vendors.update');
+        Route::delete('/settings/vendors/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyVendor'])->name('settings.vendors.destroy');
+
+        Route::get('/settings/departments', [\App\Http\Controllers\SettingsController::class, 'departments'])->name('settings.departments');
+        Route::post('/settings/departments', [\App\Http\Controllers\SettingsController::class, 'storeDepartment'])->name('settings.departments.store');
+        Route::put('/settings/departments/{id}', [\App\Http\Controllers\SettingsController::class, 'updateDepartment'])->name('settings.departments.update');
+        Route::delete('/settings/departments/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyDepartment'])->name('settings.departments.destroy');
+
+        Route::get('/settings/locations', [\App\Http\Controllers\SettingsController::class, 'locations'])->name('settings.locations');
+        Route::post('/settings/locations', [\App\Http\Controllers\SettingsController::class, 'storeLocation'])->name('settings.locations.store');
+        Route::put('/settings/locations/{id}', [\App\Http\Controllers\SettingsController::class, 'updateLocation'])->name('settings.locations.update');
+        Route::delete('/settings/locations/{id}', [\App\Http\Controllers\SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
     });
 
     // Quick creation APIs for inline forms

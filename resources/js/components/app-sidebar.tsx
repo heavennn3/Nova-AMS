@@ -12,6 +12,7 @@ import {
     Briefcase,
     Headset,
     Trash2,
+    Settings,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -256,6 +257,22 @@ const navSections: NavSection[] = [
                 href: '/security/logs',
                 icon: Headset,
                 module: 'System Settings',
+            },
+            {
+                title: 'Settings',
+                href: '#',
+                icon: Settings,
+                module: 'System Settings',
+                items: [
+                    { title: 'Custom Fields', href: '/settings/custom-fields' },
+                    { title: 'Status Labels', href: '/settings/status-labels' },
+                    { title: 'Asset Models', href: '/settings/asset-models' },
+                    { title: 'Categories', href: '/settings/categories' },
+                    { title: 'Manufacturers', href: '/settings/manufacturers' },
+                    { title: 'Suppliers/Vendors', href: '/settings/suppliers' },
+                    { title: 'Departments', href: '/settings/departments' },
+                    { title: 'Locations', href: '/settings/locations' },
+                ],
             },
         ],
     },
