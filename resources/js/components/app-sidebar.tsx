@@ -247,7 +247,7 @@ const navSections: NavSection[] = [
         title: 'OTHERS',
         items: [
             {
-                title: 'Live Chat',
+                title: 'Chat',
                 href: '/support/tickets',
                 icon: Headset,
                 module: 'Asset Inventory',
