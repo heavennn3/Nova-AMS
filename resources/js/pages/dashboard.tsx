@@ -32,6 +32,13 @@ import {
     YAxis,
     CartesianGrid,
 } from 'recharts';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 const WeatherIcon = ({ condition }: { condition: string }) => {
     switch (condition) {
@@ -63,6 +70,26 @@ export default function Dashboard({
         cpu: '0.0',
         ram: '0.0',
         disk: 0,
+    });
+
+    const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
+    const [selectedActionFilter, setSelectedActionFilter] = useState('all');
+
+    const filteredActivities = recentActivities.filter((activity: any) => {
+        const matchesSite = selectedSiteFilter === 'all' || activity.site_id?.toString() === selectedSiteFilter;
+
+        let matchesAction = true;
+        if (selectedActionFilter !== 'all') {
+            if (selectedActionFilter === 'create') {
+                matchesAction = activity.action === 'created';
+            } else if (selectedActionFilter === 'update') {
+                matchesAction = activity.action === 'updated';
+            } else if (selectedActionFilter === 'delete') {
+                matchesAction = activity.action === 'deleted' || activity.action === 'restored';
+            }
+        }
+
+        return matchesSite && matchesAction;
     });
 
     useEffect(() => {
@@ -224,65 +251,15 @@ export default function Dashboard({
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Asset Lifecycle & Registration Velocity</CardTitle>
-                            <p className="text-xs text-muted-foreground mt-1">Physical assets registered over the last 6 months.</p>
-                        </div>
-                        <span className="text-[10px] font-mono bg-muted/50 px-2 py-1 rounded border border-border">DATABASE_LOGS</span>
-                    </CardHeader>
-                    <CardContent className="h-[280px]">
-                        {charts.monthlyAssets && charts.monthlyAssets.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={charts.monthlyAssets} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorAssets" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
-                                    <RechartsTooltip
-                                        contentStyle={{
-                                            borderRadius: '8px',
-                                            border: '1px solid hsl(var(--border))',
-                                            backgroundColor: 'hsl(var(--background))',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                                        }}
-                                        labelStyle={{ fontWeight: 'bold', fontSize: 11 }}
-                                        itemStyle={{ fontSize: 11, color: 'hsl(var(--primary))' }}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="total"
-                                        name="Assets Registered"
-                                        stroke="hsl(var(--primary))"
-                                        strokeWidth={2}
-                                        fillOpacity={1}
-                                        fill="url(#colorAssets)"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex h-full items-center justify-center text-center text-xs text-muted-foreground">
-                                No registration logs recorded in the past 6 months.
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+              
 
                 <Card className="lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <div>
-                            <CardTitle>System Telemetry & Controls</CardTitle>
-                            <p className="text-xs text-muted-foreground mt-1">Live physical server load & quick dispatch.</p>
+                            <CardTitle>System Monitoring</CardTitle>
                         </div>
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            
                         </span>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -425,13 +402,51 @@ export default function Dashboard({
 
             {/* Recent Activities Section (All Users + DateTime + Location) */}
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 pb-4 border-b">
                     <div>
-                        <CardTitle>System Activity Logs</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Full operational log showing activities across all sites.</p>
+                        <CardTitle>Recent Activities</CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1">NOVA AMS System Activities</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Site Filter Select */}
+                        <div className="w-[180px]">
+                            <Select
+                                value={selectedSiteFilter}
+                                onValueChange={setSelectedSiteFilter}
+                            >
+                                <SelectTrigger className="h-8 text-xs bg-muted/40">
+                                    <SelectValue placeholder="All Sites" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {stats.sitesWithStats?.map((site: any) => (
+                                        <SelectItem key={site.id} value={site.id.toString()}>
+                                            {site.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* CRUD Filter Tabs */}
+                        <div className="flex bg-muted p-1 rounded-lg border">
+                            {(['all', 'create', 'update', 'delete'] as const).map((action) => (
+                                <button
+                                    key={action}
+                                    onClick={() => setSelectedActionFilter(action)}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-md uppercase transition-all ${
+                                        selectedActionFilter === action
+                                            ? 'bg-background text-foreground shadow-sm'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    {action === 'all' ? 'All' : action + 's'}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -443,7 +458,7 @@ export default function Dashboard({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/40 text-sm">
-                                {recentActivities.map((activity: any) => (
+                                {filteredActivities.map((activity: any) => (
                                     <tr key={activity.id} className="hover:bg-muted/10 transition-colors">
                                         <td className="py-3 pl-2">
                                             <div className="flex items-center space-x-2">
@@ -453,7 +468,7 @@ export default function Dashboard({
                                                 <span className="font-medium">{activity.user}</span>
                                             </div>
                                         </td>
-                                        <td className="py-3 text-foreground">{activity.action}</td>
+                                        <td className="py-3 text-foreground">{activity.details}</td>
                                         <td className="py-3">
                                             <span className="inline-flex items-center text-muted-foreground">
                                                 <MapPin className="h-3.5 w-3.5 mr-1 text-slate-400" />
@@ -466,10 +481,10 @@ export default function Dashboard({
                                         </td>
                                     </tr>
                                 ))}
-                                {recentActivities.length === 0 && (
+                                {filteredActivities.length === 0 && (
                                     <tr>
                                         <td colSpan={4} className="py-8 text-center text-muted-foreground text-xs">
-                                            No system logs recorded.
+                                            No system logs match the selected filters.
                                         </td>
                                     </tr>
                                 )}

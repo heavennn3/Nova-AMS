@@ -131,64 +131,22 @@ class DashboardController extends Controller
         ]);
 
         // Recent Activities (All users + Date Time + Location)
-        $recentActivities = DB::table('audit_logs')
-            ->leftJoin('users', 'audit_logs.user_id', '=', 'users.id')
-            ->leftJoin('sites', 'users.site_id', '=', 'sites.id')
-            ->select(
-                'audit_logs.id',
-                'users.name as user_name',
-                'audit_logs.action',
-                'audit_logs.auditable_type',
-                'sites.name as site_name',
-                'audit_logs.created_at'
-            )
-            ->latest('audit_logs.created_at')
-            ->limit(8)
+        $recentActivities = \OwenIt\Auditing\Models\Audit::with(['user.site'])
+            ->whereIn('event', ['created', 'updated', 'deleted', 'restored'])
+            ->latest()
+            ->limit(50)
             ->get()
-            ->map(function($log) {
-                $type = strtolower(class_basename($log->auditable_type));
+            ->map(function($audit) {
                 return [
-                    'id' => $log->id,
-                    'user' => $log->user_name ?? 'System Admin',
-                    'action' => ucfirst($log->action) . " {$type}",
-                    'location' => $log->site_name ?? 'HQ Terminal',
-                    'date_time' => $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s'),
+                    'id' => $audit->id,
+                    'user' => $audit->user ? $audit->user->name : 'System',
+                    'action' => $audit->event,
+                    'details' => ucfirst($audit->event) . " " . class_basename($audit->auditable_type),
+                    'location' => ($audit->user && $audit->user->site) ? $audit->user->site->name : 'Global/HQ',
+                    'site_id' => $audit->user ? $audit->user->site_id : null,
+                    'date_time' => $audit->created_at->format('Y-m-d H:i:s'),
                 ];
             });
-
-        // Fallback mock activities if audit log table is completely empty
-        if ($recentActivities->isEmpty()) {
-            $recentActivities = collect([
-                [
-                    'id' => 1,
-                    'user' => 'Alex Wong',
-                    'action' => 'Registered new Air Traffic Controller Console',
-                    'location' => 'Kota Kinabalu Tower',
-                    'date_time' => now()->subMinutes(12)->format('Y-m-d H:i:s'),
-                ],
-                [
-                    'id' => 2,
-                    'user' => 'Fatimah Ibrahim',
-                    'action' => 'Updated status of Radar Transceiver to Maintenance',
-                    'location' => 'Kuching FIR Centre',
-                    'date_time' => now()->subHours(2)->format('Y-m-d H:i:s'),
-                ],
-                [
-                    'id' => 3,
-                    'user' => 'System Auto-Scheduler',
-                    'action' => 'Generated monthly Preventive Maintenance routine',
-                    'location' => 'Miri Airport Radar',
-                    'date_time' => now()->subHours(6)->format('Y-m-d H:i:s'),
-                ],
-                [
-                    'id' => 4,
-                    'user' => 'Mohd Azlan',
-                    'action' => 'Transferred spare part monitor to standby rack',
-                    'location' => 'Kota Kinabalu Tower',
-                    'date_time' => now()->subDays(1)->format('Y-m-d H:i:s'),
-                ],
-            ]);
-        }
 
         return Inertia::render('dashboard', [
             'stats' => [
