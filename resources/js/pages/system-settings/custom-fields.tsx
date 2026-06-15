@@ -133,7 +133,7 @@ export default function CustomFields({ data = [] }: CustomFieldProps) {
                 </div>
 
                 <div className="p-4">
-                    <DataTable columns={columns} data={data} hideToolbar />
+                    <DataTable columns={columns} data={data} searchKey="name" />
                 </div>
             </div>
 

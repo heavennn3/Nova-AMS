@@ -215,7 +215,7 @@ class AssetController extends Controller
             }
 
             // Create or Update
-            Asset::updateOrCreate(
+            Asset::withoutGlobalScope('site_access')->updateOrCreate(
                 ['asset_id' => trim($assetId)],
                 [
                     'product_name' => trim($productName),

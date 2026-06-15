@@ -40,8 +40,12 @@ class HandleInertiaRequests extends Middleware
                 $modulePermissions = array_values(self::MODULE_PERMISSIONS);
             } else {
                 foreach (self::MODULE_PERMISSIONS as $slug => $label) {
-                    if ($user->hasPermissionTo($slug)) {
-                        $modulePermissions[] = $label;
+                    try {
+                        if ($user->hasPermissionTo($slug)) {
+                            $modulePermissions[] = $label;
+                        }
+                    } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+                        // Ignored if permissions are not seeded
                     }
                 }
             }

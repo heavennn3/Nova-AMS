@@ -217,7 +217,7 @@ export default function SuppliersVendors({ suppliers = [], vendors = [] }: Suppl
                     <DataTable
                         columns={activeTab === 'suppliers' ? supplierColumns : vendorColumns}
                         data={activeTab === 'suppliers' ? suppliers : vendors}
-                        hideToolbar
+                        searchKey="name"
                     />
                 </div>
             </div>

@@ -257,6 +257,242 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return response()->json($supplier);
     });
 
+    Route::post('/api/quick/bulk-import', function (\Illuminate\Http\Request $request) {
+        $type = $request->input('type');
+        $rows = $request->input('rows');
+        
+        if (empty($rows)) {
+            return response()->json(['message' => 'No rows to import.'], 400);
+        }
+        
+        $count = 0;
+        foreach ($rows as $row) {
+            $val = function($keys, $default = null) use ($row) {
+                foreach ($row as $k => $v) {
+                    $normK = strtolower(trim(str_replace(['_', ' '], '', $k)));
+                    foreach ((array)$keys as $searchKey) {
+                        $normSearch = strtolower(trim(str_replace(['_', ' '], '', $searchKey)));
+                        if ($normK === $normSearch) {
+                            return $v;
+                        }
+                    }
+                }
+                return $default;
+            };
+
+            switch ($type) {
+                case 'categories':
+                    $name = $val(['name', 'categoryname', 'tajuk', 'category']);
+                    if ($name) {
+                        \App\Models\AssetCategory::firstOrCreate(
+                            ['name' => trim($name)],
+                            ['description' => trim($val(['description', 'desc', 'keterangan'], ''))]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'departments':
+                    $name = $val(['name', 'departmentname', 'jabatan', 'department']);
+                    if ($name) {
+                        \App\Models\Department::firstOrCreate(
+                            ['name' => trim($name)],
+                            ['notes' => trim($val(['notes', 'catatan', 'description'], ''))]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'suppliers':
+                    $name = $val(['name', 'suppliername', 'pembekal', 'supplier']);
+                    if ($name) {
+                        \App\Models\Supplier::firstOrCreate(
+                            ['name' => trim($name)],
+                            [
+                                'email' => trim($val(['email', 'emel'], '')),
+                                'phone' => trim($val(['phone', 'tel', 'telefon'], '')),
+                                'address' => trim($val(['address', 'alamat'], ''))
+                            ]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'locations':
+                    $name = $val(['name', 'locationname', 'lokasi', 'location']);
+                    if ($name) {
+                        \App\Models\Location::firstOrCreate(
+                            ['name' => trim($name)],
+                            ['notes' => trim($val(['notes', 'catatan'], ''))]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'manufacturers':
+                    $name = $val(['name', 'manufacturername', 'pengilang', 'manufacturer']);
+                    if ($name) {
+                        \App\Models\Manufacturer::firstOrCreate(
+                            ['name' => trim($name)],
+                            ['notes' => trim($val(['notes', 'catatan'], ''))]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'status-labels':
+                    $name = $val(['name', 'statusname', 'label', 'status']);
+                    if ($name) {
+                        \App\Models\StatusLabel::firstOrCreate(
+                            ['name' => trim($name)],
+                            ['type' => trim($val(['type', 'status_type'], 'deployable'))]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'asset-models':
+                    $name = $val(['name', 'modelname', 'produk', 'model']);
+                    if ($name) {
+                        $mfgName = $val(['manufacturer', 'brand', 'pengilang']);
+                        $mfgId = null;
+                        if ($mfgName) {
+                            $mfg = \App\Models\Manufacturer::firstOrCreate(['name' => trim($mfgName)]);
+                            $mfgId = $mfg->id;
+                        }
+                        $catName = $val(['category', 'kategori']);
+                        $catId = null;
+                        if ($catName) {
+                            $cat = \App\Models\AssetCategory::firstOrCreate(['name' => trim($catName)]);
+                            $catId = $cat->id;
+                        }
+
+                        \App\Models\AssetModel::firstOrCreate(
+                            ['name' => trim($name)],
+                            [
+                                'model_number' => trim($val(['model_number', 'modelno', 'nomor'], '')),
+                                'manufacturer_id' => $mfgId,
+                                'category_id' => $catId
+                            ]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'users':
+                    $email = $val(['email', 'emel']);
+                    $name = $val(['name', 'username', 'nama', 'user']);
+                    if ($email && $name) {
+                        $statusVal = trim($val(['status', 'keadaan', 'active', 'is_active'], 'active'));
+                        $isActive = ($statusVal === 'active' || $statusVal === '1' || $statusVal === 'true' || $statusVal === true || $statusVal === 'yes');
+                        $user = \App\Models\User::firstOrCreate(
+                            ['email' => trim($email)],
+                            [
+                                'name' => trim($name),
+                                'password' => bcrypt(trim($val(['password', 'katalaluan'], 'password123'))),
+                                'is_active' => $isActive
+                            ]
+                        );
+                        $count++;
+                    }
+                    break;
+                case 'custom-fields':
+                    $name = $val(['name', 'fieldname', 'field_name', 'nama']);
+                    if ($name) {
+                        \App\Models\CustomField::firstOrCreate(
+                            ['name' => trim($name)],
+                            [
+                                'field_type' => trim($val(['field_type', 'type', 'jenis'], 'text')),
+                                'default_value' => trim($val(['default_value', 'value', 'default'], ''))
+                            ]
+                        );
+                        $count++;
+                    }
+                    break;
+            }
+        }
+        
+        return response()->json(['message' => "Successfully imported $count records!", 'count' => $count]);
+    });
+
+    Route::post('/api/quick/bulk-delete', function (\Illuminate\Http\Request $request) {
+        $type = $request->input('type');
+        $ids = $request->input('ids');
+        
+        if (empty($ids)) {
+            return response()->json(['message' => 'No records selected.'], 400);
+        }
+
+        $count = 0;
+        switch ($type) {
+            case 'assets':
+                $count = \App\Models\Asset::withoutGlobalScope('site_access')->whereIn('id', $ids)->delete();
+                break;
+            case 'categories':
+                $count = \App\Models\AssetCategory::whereIn('id', $ids)->delete();
+                break;
+            case 'departments':
+                $count = \App\Models\Department::whereIn('id', $ids)->delete();
+                break;
+            case 'suppliers':
+                $count = \App\Models\Supplier::whereIn('id', $ids)->delete();
+                break;
+            case 'locations':
+                $count = \App\Models\Location::whereIn('id', $ids)->delete();
+                break;
+            case 'manufacturers':
+                $count = \App\Models\Manufacturer::whereIn('id', $ids)->delete();
+                break;
+            case 'status-labels':
+                $count = \App\Models\StatusLabel::whereIn('id', $ids)->delete();
+                break;
+            case 'asset-models':
+                $count = \App\Models\AssetModel::whereIn('id', $ids)->delete();
+                break;
+            case 'users':
+                $count = \App\Models\User::whereIn('id', $ids)->delete();
+                break;
+            case 'spare-parts':
+                $count = \App\Models\SparePart::whereIn('id', $ids)->delete();
+                break;
+            case 'work-orders':
+                $count = \App\Models\WorkOrder::whereIn('id', $ids)->delete();
+                break;
+            case 'licenses':
+                $count = \App\Models\License::whereIn('id', $ids)->delete();
+                break;
+            case 'custom-fields':
+                $count = \App\Models\CustomField::whereIn('id', $ids)->delete();
+                break;
+        }
+
+        return response()->json(['message' => "Successfully deleted $count records!", 'count' => $count]);
+    });
+
+    Route::post('/api/quick/bulk-status', function (\Illuminate\Http\Request $request) {
+        $type = $request->input('type');
+        $ids = $request->input('ids');
+        $status = $request->input('status');
+        $statusLabelId = $request->input('status_label_id');
+        
+        if (empty($ids)) {
+            return response()->json(['message' => 'No records selected.'], 400);
+        }
+
+        $count = 0;
+        switch ($type) {
+            case 'assets':
+                $updateData = ['status' => $status];
+                if ($statusLabelId) {
+                    $updateData['status_label_id'] = $statusLabelId;
+                }
+                $count = \App\Models\Asset::withoutGlobalScope('site_access')->whereIn('id', $ids)->update($updateData);
+                break;
+            case 'work-orders':
+                $count = \App\Models\WorkOrder::whereIn('id', $ids)->update(['status' => $status]);
+                break;
+            case 'users':
+                $isActive = ($status === 'active' || $status === '1' || $status === true);
+                $count = \App\Models\User::whereIn('id', $ids)->update(['is_active' => $isActive]);
+                break;
+        }
+
+        return response()->json(['message' => "Successfully updated status of $count records!", 'count' => $count]);
+    });
+
 });
 
 require __DIR__.'/settings.php';

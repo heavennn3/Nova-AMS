@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
+import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -217,6 +218,12 @@ export default function Tracking({
                             )}
                         </PopoverContent>
                     </Popover>
+                    
+                    <DataTableActions
+                        data={filteredAssets}
+                        columns={columns}
+                        exportFileName="location_tracking_export"
+                    />
                     {selectedCategory !== 'all' && (
                         <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
                             Category: {selectedCategory}

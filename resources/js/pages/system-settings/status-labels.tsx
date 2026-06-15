@@ -146,7 +146,7 @@ export default function StatusLabels({ data = [] }: StatusLabelProps) {
                 </div>
 
                 <div className="p-4">
-                    <DataTable columns={columns} data={data} hideToolbar />
+                    <DataTable columns={columns} data={data} searchKey="name" />
                 </div>
             </div>
 

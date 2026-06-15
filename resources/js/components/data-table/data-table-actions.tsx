@@ -4,6 +4,8 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Papa from 'papaparse';
+import { router } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -60,6 +62,23 @@ export function DataTableActions({
     onImportCsv,
 }: DataTableActionsProps) {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const getResourceTypeFromUrl = () => {
+        if (typeof window === 'undefined') return undefined;
+        const path = window.location.pathname;
+        if (path.includes('/settings/categories')) return 'categories';
+        if (path.includes('/settings/departments')) return 'departments';
+        if (path.includes('/settings/custom-fields')) return 'custom-fields';
+        if (path.includes('/settings/status-labels')) return 'status-labels';
+        if (path.includes('/settings/asset-models')) return 'asset-models';
+        if (path.includes('/settings/locations')) return 'locations';
+        if (path.includes('/settings/suppliers')) return 'suppliers';
+        if (path.includes('/settings/manufacturers')) return 'manufacturers';
+        if (path.includes('/users')) return 'users';
+        return undefined;
+    };
+
+    const resourceType = getResourceTypeFromUrl();
 
     const handleExportExcel = () => {
         const formattedData = formatExportData(data, columns);
@@ -139,7 +158,9 @@ export function DataTableActions({
                                 typeof cell === 'string' &&
                                 (cell.trim().toLowerCase() === 'aset id' ||
                                     cell.trim().toLowerCase() === 'asset id' ||
-                                    cell.trim().toLowerCase() === 'asset_id'),
+                                    cell.trim().toLowerCase() === 'asset_id' ||
+                                    cell.trim().toLowerCase() === 'name' ||
+                                    cell.trim().toLowerCase() === 'nama'),
                         )
                     ) {
                         headerRowIndex = i;
@@ -165,6 +186,37 @@ export function DataTableActions({
 
                 if (onImportCsv) {
                     onImportCsv(parsedData);
+                } else if (resourceType) {
+                    toast.promise(
+                        fetch('/api/quick/bulk-import', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                type: resourceType,
+                                rows: parsedData
+                            })
+                        }).then(async (res) => {
+                            if (!res.ok) {
+                                const err = await res.json();
+                                throw new Error(err.message || 'Failed to import records.');
+                            }
+                            return res.json();
+                        }),
+                        {
+                            loading: `Importing ${parsedData.length} records into ${resourceType}...`,
+                            success: (res) => {
+                                router.reload();
+                                return res.message || 'Import successful!';
+                            },
+                            error: (err) => err.message || 'Import failed.'
+                        }
+                    );
+                } else {
+                    alert('Import functionality not configured for this table.');
                 }
 
                 if (fileInputRef.current) fileInputRef.current.value = '';
@@ -174,7 +226,7 @@ export function DataTableActions({
 
     return (
         <div className="flex items-center gap-2">
-            {onImportCsv && (
+            {(onImportCsv || resourceType) && (
                 <>
                     <input
                         type="file"

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
+import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -637,6 +638,12 @@ export default function UsersIndex({
                         )}
                     </PopoverContent>
                 </Popover>
+
+                <DataTableActions
+                    data={filteredUsers}
+                    columns={columns}
+                    exportFileName="users_export"
+                />
 
                 {/* Active filter badges */}
                 {selectedStatus !== 'all' && (

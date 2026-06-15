@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
+import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -733,6 +734,13 @@ export default function AssetIndex({
                                     )}
                                 </PopoverContent>
                             </Popover>
+                            
+                            <DataTableActions
+                                data={filteredAssets}
+                                columns={columns}
+                                exportFileName="asset_inventory_export"
+                                onImportCsv={handleImportCsv}
+                            />
                             {selectedStatus !== 'all' && (
                                 <span className="inline-flex items-center gap-1 rounded-md border border-green-100 bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
                                     Status: {selectedStatus}
