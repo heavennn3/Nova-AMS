@@ -15,10 +15,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { RefreshCcw, Trash2 } from 'lucide-react';
+import { RefreshCcw, Trash2, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { toast } from 'sonner';
 
 interface RecycleBinProps {
     items: any[];
@@ -30,6 +32,7 @@ interface RecycleBinProps {
 
 export default function RecycleBin({ items, filters }: RecycleBinProps) {
     const [type, setType] = useState(filters.type || 'users');
+    const [search, setSearch] = useState(filters.search || '');
 
     const handleFilterChange = (newType: string) => {
         setType(newType);
@@ -61,6 +64,89 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                 preserveScroll: true,
             });
         }
+    };
+
+    // Search functionality
+    const handleSearch = () => {
+        router.get(
+            '/security/recycle-bin',
+            { type, search },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
+
+    const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
+    // Batch restore functionality
+    const handleBatchRestore = (selectedRows: any[]) => {
+        if (!type) return;
+        const ids = selectedRows.map((r) => r.original?.id).filter(Boolean);
+        if (ids.length === 0) return;
+        if (!confirm(`Are you sure you want to restore these ${ids.length} items?`)) return;
+
+        toast.promise(
+            fetch('/api/recycle-bin/bulk-restore', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ type, ids }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Failed to restore records.');
+                }
+                return res.json();
+            }),
+            {
+                loading: `Restoring ${ids.length} items...`,
+                success: (res) => {
+                    router.reload();
+                    return res.message || 'Items restored successfully!';
+                },
+                error: (err) => err.message || 'Restoration failed.',
+            }
+        );
+    };
+
+    // Batch delete functionality
+    const handleBatchDelete = (selectedRows: any[]) => {
+        if (!type) return;
+        const ids = selectedRows.map((r) => r.original?.id).filter(Boolean);
+        if (ids.length === 0) return;
+        if (!confirm(`Are you sure you want to permanently delete these ${ids.length} items?`)) return;
+
+        toast.promise(
+            fetch('/api/recycle-bin/bulk-delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ type, ids }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Failed to delete records.');
+                }
+                return res.json();
+            }),
+            {
+                loading: `Deleting ${ids.length} items...`,
+                success: (res) => {
+                    router.reload();
+                    return res.message || 'Items deleted successfully!';
+                },
+                error: (err) => err.message || 'Deletion failed.',
+            }
+        );
     };
 
     const getTypeLabel = (t: string) => {
@@ -179,36 +265,53 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                 </CardHeader>
                 <CardContent>
                     <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-                        <div className="w-[200px]">
-                            <Select
-                                value={type}
-                                onValueChange={handleFilterChange}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Filter by type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="users">Users</SelectItem>
-                                    <SelectItem value="vendors">
-                                        Vendors
-                                    </SelectItem>
-                                    <SelectItem value="assets">
-                                        Assets
-                                    </SelectItem>
-                                    <SelectItem value="asset_categories">
-                                        Asset Categories
-                                    </SelectItem>
-                                    <SelectItem value="spareparts">
-                                        Spareparts
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="flex items-center gap-4">
+                            <div className="w-[200px]">
+                                <Select
+                                    value={type}
+                                    onValueChange={handleFilterChange}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Filter by type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="users">Users</SelectItem>
+                                        <SelectItem value="vendors">
+                                            Vendors
+                                        </SelectItem>
+                                        <SelectItem value="assets">
+                                            Assets
+                                        </SelectItem>
+                                        <SelectItem value="asset_categories">
+                                            Asset Categories
+                                        </SelectItem>
+                                        <SelectItem value="spareparts">
+                                            Spareparts
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="relative flex-1">
+                                <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search items..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    onKeyPress={handleSearchKeyPress}
+                                    className="h-8 pl-8 text-sm"
+                                />
+                            </div>
+                            <Button size="sm" onClick={handleSearch}>
+                                Search
+                            </Button>
                         </div>
                     </div>
 
                     <DataTable
                         columns={columns}
                         data={items || []}
+                        onBatchRestore={handleBatchRestore}
+                        onBatchDelete={handleBatchDelete}
                         hideToolbar
                     />
                 </CardContent>

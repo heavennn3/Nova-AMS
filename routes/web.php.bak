@@ -166,67 +166,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/security/recycle-bin/{id}/restore', [\App\Http\Controllers\RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
 
-        // Recycle bin bulk operations
-        Route::post('/api/recycle-bin/bulk-restore', function (\Illuminate\Http\Request $request) {
-            $type = $request->input('type');
-            $ids = $request->input('ids');
-
-            if (empty($ids)) {
-                return response()->json(['message' => 'No records selected.'], 400);
-            }
-
-            $count = 0;
-            switch ($type) {
-                case 'assets':
-                    $count = \App\Models\Asset::onlyTrashed()->whereIn('id', $ids)->restore();
-                    break;
-                case 'users':
-                    $count = \App\Models\User::onlyTrashed()->whereIn('id', $ids)->restore();
-                    break;
-                case 'vendors':
-                    $count = \App\Models\Vendor::onlyTrashed()->whereIn('id', $ids)->restore();
-                    break;
-                case 'asset_categories':
-                    $count = \App\Models\AssetCategory::onlyTrashed()->whereIn('id', $ids)->restore();
-                    break;
-                case 'spareparts':
-                    $count = \App\Models\SparePart::onlyTrashed()->whereIn('id', $ids)->restore();
-                    break;
-            }
-
-            return response()->json(['message' => "Successfully restored $count records!", 'count' => $count]);
-        });
-
-        Route::post('/api/recycle-bin/bulk-delete', function (\Illuminate\Http\Request $request) {
-            $type = $request->input('type');
-            $ids = $request->input('ids');
-
-            if (empty($ids)) {
-                return response()->json(['message' => 'No records selected.'], 400);
-            }
-
-            $count = 0;
-            switch ($type) {
-                case 'assets':
-                    $count = \App\Models\Asset::onlyTrashed()->whereIn('id', $ids)->forceDelete();
-                    break;
-                case 'users':
-                    $count = \App\Models\User::onlyTrashed()->whereIn('id', $ids)->forceDelete();
-                    break;
-                case 'vendors':
-                    $count = \App\Models\Vendor::onlyTrashed()->whereIn('id', $ids)->forceDelete();
-                    break;
-                case 'asset_categories':
-                    $count = \App\Models\AssetCategory::onlyTrashed()->whereIn('id', $ids)->forceDelete();
-                    break;
-                case 'spareparts':
-                    $count = \App\Models\SparePart::onlyTrashed()->whereIn('id', $ids)->forceDelete();
-                    break;
-            }
-
-            return response()->json(['message' => "Successfully deleted $count records!", 'count' => $count]);
-        });
-
         // Settings CRUD Routes
         Route::get('/settings/custom-fields', [\App\Http\Controllers\SettingsController::class, 'customFields'])->name('settings.custom-fields');
         Route::post('/settings/custom-fields', [\App\Http\Controllers\SettingsController::class, 'storeCustomField'])->name('settings.custom-fields.store');
@@ -517,6 +456,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 break;
             case 'custom-fields':
                 $count = \App\Models\CustomField::whereIn('id', $ids)->delete();
+                break;
+        }
+
+        return response()->json(['message' => "Successfully deleted $count records!", 'count' => $count]);
+    });
+
+    // Recycle bin bulk delete (permanent deletion)
+    Route::post('/api/recycle-bin/bulk-delete', function (\Illuminate\Http\Request $request) {
+        $type = $request->input('type');
+        $ids = $request->input('ids');
+
+        if (empty($ids)) {
+            return response()->json(['message' => 'No records selected.'], 400);
+        }
+
+        $count = 0;
+        switch ($type) {
+            case 'assets':
+                $count = \App\Models\Asset::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+                break;
+            case 'users':
+                $count = \App\Models\User::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+                break;
+            case 'vendors':
+                $count = \App\Models\Vendor::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+                break;
+            case 'asset_categories':
+                $count = \App\Models\AssetCategory::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+                break;
+            case 'spareparts':
+                $count = \App\Models\SparePart::onlyTrashed()->whereIn('id', $ids)->forceDelete();
                 break;
         }
 

@@ -13,6 +13,7 @@ import {
 import * as React from 'react';
 import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
+import { RefreshCcw } from 'lucide-react';
 
 import {
     Table,
@@ -41,6 +42,7 @@ interface DataTableProps<TData, TValue> {
     onImportCsv?: (data: any[]) => void;
     hideToolbar?: boolean;
     onBatchDelete?: (selectedRows: TData[]) => void;
+    onBatchRestore?: (selectedRows: TData[]) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -50,6 +52,7 @@ export function DataTable<TData, TValue>({
     onImportCsv,
     hideToolbar,
     onBatchDelete,
+    onBatchRestore,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] =
@@ -296,6 +299,21 @@ export function DataTable<TData, TValue>({
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
+                        {onBatchRestore ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    if (confirm(`Are you sure you want to restore these ${selectedRows.length} items?`)) {
+                                        onBatchRestore(selectedRows.map((r) => r.original));
+                                        table.resetRowSelection();
+                                    }
+                                }}
+                            >
+                                <RefreshCcw className="mr-2 h-4 w-4" />
+                                Restore Selected
+                            </Button>
+                        ) : null}
                         {onBatchDelete ? (
                             <Button
                                 variant="destructive"
