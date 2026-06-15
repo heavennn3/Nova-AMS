@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Activity } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -12,6 +12,14 @@ export default function Status({ assets = [] }: { assets: any[] }) {
             {
                 accessorKey: 'asset_id',
                 header: 'Asset ID',
+                cell: ({ row }: any) => (
+                    <Link
+                        href={`/assets/${row.original.id}`}
+                        className="text-primary hover:underline font-mono font-semibold"
+                    >
+                        {row.getValue('asset_id')}
+                    </Link>
+                ),
             },
             {
                 accessorKey: 'product_name',

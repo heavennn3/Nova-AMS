@@ -59,6 +59,14 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 <DataTableColumnHeader column={column} title="Asset ID" />
             ),
             headerText: 'Asset ID',
+            cell: ({ row }: any) => (
+                <Link
+                    href={`/assets/${row.original.id}`}
+                    className="text-primary hover:underline font-mono font-semibold"
+                >
+                    {row.getValue('asset_id')}
+                </Link>
+            ),
         },
         {
             accessorKey: 'category',

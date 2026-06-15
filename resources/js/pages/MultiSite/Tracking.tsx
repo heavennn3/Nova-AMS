@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,18 @@ export default function Tracking({
     );
 
     const columns = [
-        { accessorKey: 'asset_id', header: 'Asset ID' },
+        {
+            accessorKey: 'asset_id',
+            header: 'Asset ID',
+            cell: ({ row }: any) => (
+                <Link
+                    href={`/assets/${row.original.id}`}
+                    className="text-primary hover:underline font-mono font-semibold"
+                >
+                    {row.getValue('asset_id')}
+                </Link>
+            ),
+        },
         { accessorKey: 'product_name', header: 'Product Name' },
         { accessorKey: 'category', header: 'Category' },
         {

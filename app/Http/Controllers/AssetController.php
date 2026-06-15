@@ -235,6 +235,29 @@ class AssetController extends Controller
         return redirect()->back()->with('success', "Successfully imported $importedCount assets!");
     }
 
+    public function show(Asset $asset)
+    {
+        $asset->load([
+            'category', 
+            'type', 
+            'vendor', 
+            'location', 
+            'site', 
+            'supplier', 
+            'statusLabel', 
+            'assignments.user', 
+            'assignments.location', 
+            'audits.user'
+        ]);
+
+        $users = \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get();
+
+        return Inertia::render('Assets/Show', [
+            'asset' => $asset,
+            'users' => $users,
+        ]);
+    }
+
     public function edit(Asset $asset)
     {
         return Inertia::render('Assets/Edit', [
