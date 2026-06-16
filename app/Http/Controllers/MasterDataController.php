@@ -52,12 +52,12 @@ class MasterDataController extends Controller
     // Types
     public function storeType(Request $request)
     {
-        AssetType::create($request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string', 'asset_category_id' => 'required|exists:asset_categories,id']));
+        AssetType::create($request->validate(['name' => 'required|string|max:255', 'category_id' => 'required|exists:asset_categories,id']));
         return back()->with('success', 'Type created.');
     }
     public function updateType(Request $request, $id)
     {
-        AssetType::findOrFail($id)->update($request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string', 'asset_category_id' => 'required|exists:asset_categories,id']));
+        AssetType::findOrFail($id)->update($request->validate(['name' => 'required|string|max:255', 'category_id' => 'required|exists:asset_categories,id']));
         return back()->with('success', 'Type updated.');
     }
     public function destroyType($id)

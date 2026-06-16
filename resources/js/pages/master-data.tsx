@@ -242,15 +242,6 @@ export default function MasterData({
                         />
                     ),
                 },
-                {
-                    accessorKey: 'description',
-                    header: ({ column }: any) => (
-                        <DataTableColumnHeader
-                            column={column}
-                            title="Description"
-                        />
-                    ),
-                },
                 actionColumn,
             ],
             renderForm: () => (
@@ -271,11 +262,11 @@ export default function MasterData({
                     <div className="grid gap-2">
                         <Label>Category</Label>
                         <Select
-                            value={formData.asset_category_id || ''}
+                            value={formData.category_id || ''}
                             onValueChange={(val) =>
                                 setFormData({
                                     ...formData,
-                                    asset_category_id: val,
+                                    category_id: val,
                                 })
                             }
                         >
@@ -293,18 +284,6 @@ export default function MasterData({
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div className="grid gap-2">
-                        <Label>Description</Label>
-                        <Input
-                            value={formData.description || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    description: e.target.value,
-                                })
-                            }
-                        />
                     </div>
                 </>
             ),

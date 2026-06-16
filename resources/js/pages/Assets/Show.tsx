@@ -245,7 +245,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
 
             {/* Main Show Dashboard Page Content Layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                
+
                 {/* LEFT CARD - Main Stats Dashboard (2/3 width) */}
                 <div className="md:col-span-2 space-y-6 print:col-span-3">
                     <Card className="border border-border/45 bg-card/65 backdrop-blur-md shadow-lg overflow-hidden">
@@ -257,7 +257,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                     <span>{asset.statusLabel?.name || asset.status}</span>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                                 <div className="flex items-center space-x-1.5">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -273,12 +273,12 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 </div>
                             </div>
                         </CardHeader>
-                        
+
                         <CardContent className="pt-6 space-y-8">
-                            
+
                             {/* Top row: Specifications & EOL progress indicators */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-border/40">
-                                
+
                                 {/* Spec table list */}
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
@@ -341,7 +341,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
 
                             {/* Middle section: Cost allocation & stats */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                                
+
                                 {/* Cost breakdown list */}
                                 <div className="space-y-4">
                                     <h3 className="text-sm font-bold tracking-wide text-foreground uppercase border-b pb-2 mb-3">Cost Breakdown</h3>
@@ -380,7 +380,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 {/* Metadata / stats cards counters */}
                                 <div className="space-y-4">
                                     <h3 className="text-sm font-bold tracking-wide text-foreground uppercase border-b pb-2 mb-3">Operational Summary</h3>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="border border-border/30 bg-card p-4 rounded-xl text-center space-y-1 shadow-sm">
                                             <span className="text-xs text-muted-foreground font-medium block">Active Maintenances</span>
@@ -427,7 +427,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                 {/* RIGHT CARD - Metadata Details & Toolbar Sidebar (1/3 width) */}
                 <div className="space-y-6 print:hidden">
                     <Card className="border border-border/45 bg-card/65 backdrop-blur-md shadow-lg overflow-hidden">
-                        
+
                         {/* Quick Actions Toolbar */}
                         <div className="bg-slate-900/20 dark:bg-slate-950/40 p-4 border-b border-border/45 flex items-center justify-between gap-1.5">
                             <Link href="/assets">
@@ -435,13 +435,13 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                     <ArrowLeft className="h-4.5 w-4.5" />
                                 </Button>
                             </Link>
-                            
+
                             <Link href={`/assets/${asset.id}/edit`}>
                                 <Button variant="ghost" size="icon" title="Edit Asset" className="rounded-lg h-9 w-9 text-amber-500 hover:bg-amber-500/10">
                                     <Edit className="h-4.5 w-4.5" />
                                 </Button>
                             </Link>
-                            
+
                             {/* Toggle checkout/checkin based on active assignment */}
                             {activeAssignment ? (
                                 <Button
@@ -486,10 +486,10 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 <Trash2 className="h-4.5 w-4.5" />
                             </Button>
                         </div>
-                        
+
                         {/* Sidebar Details Metadata List */}
                         <CardContent className="p-6 space-y-6 text-sm">
-                            
+
                             {/* Text notes */}
                             <div className="space-y-1.5 border-b pb-4 border-border/20">
                                 <div className="flex items-center text-muted-foreground gap-2 font-medium">
@@ -633,7 +633,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                             <div className="space-y-3.5 text-xs">
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground flex items-center gap-1.5">
-                                        <User className="h-3.5 w-3.5 text-slate-400" /> Created By
+                                        <User className="h-3.5 w-3.5 text-slate-400" /> Added by
                                     </span>
                                     <span className="font-semibold text-foreground text-blue-500 hover:underline cursor-pointer">
                                         {creatorName}
@@ -662,7 +662,8 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
             </div>
 
             {/* Print Label Stylesheet Injection */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @media print {
                     body * {
                         visibility: hidden !important;
