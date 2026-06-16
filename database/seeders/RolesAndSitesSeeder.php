@@ -18,8 +18,25 @@ class RolesAndSitesSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create Permissions
-        $permissions = [
+        // Create Module Permissions
+        $modulePermissions = [
+            'module.asset-inventory',
+            'module.master-data',
+            'module.multi-site',
+            'module.operations',
+            'module.finance',
+            'module.analytics',
+            'module.documents',
+            'module.advanced',
+            'module.system-settings',
+        ];
+
+        foreach ($modulePermissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Create Basic Permissions (for backward compatibility)
+        $basicPermissions = [
             'manage assets',
             'view assets',
             'approve transfers',
@@ -27,7 +44,7 @@ class RolesAndSitesSeeder extends Seeder
             'manage sites'
         ];
 
-        foreach ($permissions as $permission) {
+        foreach ($basicPermissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
@@ -36,13 +53,33 @@ class RolesAndSitesSeeder extends Seeder
         $adminRole->givePermissionTo(Permission::all());
 
         $siteManagerRole = Role::firstOrCreate(['name' => 'Site Manager']);
-        $siteManagerRole->givePermissionTo(['manage assets', 'view assets', 'approve transfers']);
+        $siteManagerPermissions = [
+            'manage assets', 'view assets', 'approve transfers', // Basic permissions
+            'module.asset-inventory', // Full asset management within their site
+            'module.master-data', // Manage categories, vendors for their site
+            'module.operations', // Manage work orders and maintenance
+            'module.analytics', // Need reporting for their site
+            'module.documents', // Access to asset and maintenance docs
+        ];
+        $siteManagerRole->syncPermissions($siteManagerPermissions);
 
         $technicianRole = Role::firstOrCreate(['name' => 'Technician']);
-        $technicianRole->givePermissionTo(['view assets']);
+        $technicianPermissions = [
+            'view assets', // Basic permission
+            'module.asset-inventory', // View and update asset status
+            'module.operations', // Complete work orders
+            'module.analytics', // View basic operational reports
+            'module.documents', // Access maintenance documentation
+        ];
+        $technicianRole->syncPermissions($technicianPermissions);
 
         $viewerRole = Role::firstOrCreate(['name' => 'Viewer']);
-        $viewerRole->givePermissionTo(['view assets']);
+        $viewerPermissions = [
+            'view assets', // Basic permission
+            'module.asset-inventory', // View-only access to assets
+            'module.analytics', // View reports and dashboards
+        ];
+        $viewerRole->syncPermissions($viewerPermissions);
 
         // Insert the 7 KK FIR Sites
         $sites = [
