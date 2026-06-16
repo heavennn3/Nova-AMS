@@ -84,9 +84,8 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
     // Batch restore functionality
     const handleBatchRestore = (selectedRows: any[]) => {
         if (!type) return;
-        const ids = selectedRows.map((r) => r.original?.id).filter(Boolean);
+        const ids = selectedRows.map((r) => r.id).filter(Boolean);
         if (ids.length === 0) return;
-        if (!confirm(`Are you sure you want to restore these ${ids.length} items?`)) return;
 
         toast.promise(
             fetch('/api/recycle-bin/bulk-restore', {
@@ -118,9 +117,8 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
     // Batch delete functionality
     const handleBatchDelete = (selectedRows: any[]) => {
         if (!type) return;
-        const ids = selectedRows.map((r) => r.original?.id).filter(Boolean);
+        const ids = selectedRows.map((r) => r.id).filter(Boolean);
         if (ids.length === 0) return;
-        if (!confirm(`Are you sure you want to permanently delete these ${ids.length} items?`)) return;
 
         toast.promise(
             fetch('/api/recycle-bin/bulk-delete', {

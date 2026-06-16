@@ -319,7 +319,7 @@ export function DataTable<TData, TValue>({
                                 variant="destructive"
                                 size="sm"
                                 onClick={() => {
-                                    if (confirm(`Are you sure you want to delete these ${selectedRows.length} items?`)) {
+                                    if (confirm(`Are you sure you want to permanently delete these ${selectedRows.length} items? This action cannot be undone.`)) {
                                         onBatchDelete(selectedRows.map((r) => r.original));
                                         table.resetRowSelection();
                                     }
