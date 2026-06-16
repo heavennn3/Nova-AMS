@@ -23,6 +23,7 @@ import {
     Info,
     Check,
     X,
+    MapPin,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -97,6 +98,15 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
             color: 'text-cyan-500',
             bg: 'bg-cyan-500/10',
             link: '/security/roles',
+        },
+        {
+            id: 'sites',
+            title: 'Sites',
+            description: 'Manage sites, locations, and site administrators',
+            icon: MapPin,
+            color: 'text-green-500',
+            bg: 'bg-green-500/10',
+            link: '/admin/sites',
         },
         {
             id: 'localization',

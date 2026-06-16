@@ -11,7 +11,7 @@ class Site extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'region', 'latitude', 'longitude'];
+    protected $fillable = ['name', 'code', 'region', 'latitude', 'longitude', 'contact_email', 'contact_phone', 'operational_hours', 'address', 'site_admin_id'];
 
     public function users()
     {
@@ -21,6 +21,11 @@ class Site extends Model implements Auditable
     public function assets()
     {
         return $this->hasMany(Asset::class);
+    }
+
+    public function siteAdmin()
+    {
+        return $this->belongsTo(User::class, 'site_admin_id');
     }
 
     /**

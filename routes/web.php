@@ -166,6 +166,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/security/recycle-bin/{id}/restore', [\App\Http\Controllers\RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
 
+        // Admin Site Management Routes
+        Route::prefix('admin')->group(function () {
+            Route::get('/sites', [\App\Http\Controllers\AdminSiteManagementController::class, 'index'])->name('admin.sites');
+            Route::post('/sites', [\App\Http\Controllers\AdminSiteManagementController::class, 'store'])->name('admin.sites.store');
+            Route::put('/sites/{id}', [\App\Http\Controllers\AdminSiteManagementController::class, 'update'])->name('admin.sites.update');
+            Route::delete('/sites/{id}', [\App\Http\Controllers\AdminSiteManagementController::class, 'destroy'])->name('admin.sites.destroy');
+            Route::get('/sites/{id}/users', [\App\Http\Controllers\AdminSiteManagementController::class, 'getSiteUsers'])->name('admin.sites.users');
+            Route::post('/sites/{id}/admin', [\App\Http\Controllers\AdminSiteManagementController::class, 'assignSiteAdmin'])->name('admin.sites.assign-admin');
+        });
+
         // Recycle bin bulk operations
         Route::post('/api/recycle-bin/bulk-restore', function (\Illuminate\Http\Request $request) {
             $type = $request->input('type');

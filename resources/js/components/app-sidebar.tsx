@@ -164,7 +164,7 @@ const navSections: NavSection[] = [
                 ],
             },
             {
-                title: 'Vendor & Contract',
+                title: 'Vendor',
                 href: '#',
                 icon: Briefcase,
                 module: 'Operations & Maintenance',
