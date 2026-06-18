@@ -72,6 +72,7 @@ export default function Dashboard({
         disk: 0,
     });
 
+    const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
     const [selectedActionFilter, setSelectedActionFilter] = useState('all');
 
@@ -114,6 +115,13 @@ export default function Dashboard({
         };
     }, []);
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentDateTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
     return (
         <div className="w-full space-y-8 p-8">
             <Head title="Nova AMS Dashboard" />
@@ -124,7 +132,26 @@ export default function Dashboard({
                         Dashboard
                     </h1>
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                        <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            {currentDateTime.toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            })}
+                        </div>
+                        <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                            {currentDateTime.toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
+                            })}
+                        </div>
+                    </div>
+                    <div className="flex space-x-3">
                     <Button
                         variant="outline"
                         onClick={() => {
@@ -155,6 +182,7 @@ export default function Dashboard({
                     <Button onClick={() => window.location.reload()}>
                         Refresh Data
                     </Button>
+                </div>
                 </div>
             </div>
 
@@ -458,7 +486,7 @@ export default function Dashboard({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/40 text-sm">
-                                {filteredActivities.map((activity: any) => (
+                                {filteredActivities.slice(0, 5).map((activity: any) => (
                                     <tr key={activity.id} className="hover:bg-muted/10 transition-colors">
                                         <td className="py-3 pl-2">
                                             <div className="flex items-center space-x-2">
@@ -491,11 +519,20 @@ export default function Dashboard({
                             </tbody>
                         </table>
                     </div>
-                    <div className="mt-4 flex justify-end">
-                        <Button variant="ghost" className="text-xs" asChild>
-                            <Link href="/security/logs">View All Audit Logs</Link>
-                        </Button>
-                    </div>
+                    {filteredActivities.length > 5 && (
+                        <div className="mt-4 flex justify-end">
+                            <Button variant="ghost" className="text-xs" asChild>
+                                <Link href="/security/logs">Show More Audit Logs</Link>
+                            </Button>
+                        </div>
+                    )}
+                    {filteredActivities.length > 0 && filteredActivities.length <= 5 && (
+                        <div className="mt-4 flex justify-center">
+                            <Button variant="ghost" className="text-xs" asChild>
+                                <Link href="/security/logs">View All Audit Logs</Link>
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
