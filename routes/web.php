@@ -45,11 +45,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
         Route::get('/assets/export-mysql', [\App\Http\Controllers\AssetController::class, 'exportMySQL'])->name('assets.export-mysql');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
+
+        // Asset Registration Workflows
+        Route::get('/assets/scan', function () {
+            return Inertia::render('Assets/Scan', [
+                'site_id' => request()->query('site_id')
+            ]);
+        })->name('assets.scan');
+
+        Route::get('/assets/upload', function () {
+            return Inertia::render('Assets/Upload', [
+                'site_id' => request()->query('site_id'),
+                'sites' => \App\Models\Site::all()
+            ]);
+        })->name('assets.upload');
+
+        // QR/Barcode Scanning routes
+        Route::post('/api/assets/scan', [\App\Http\Controllers\AssetController::class, 'processScan']);
+        Route::post('/api/assets/scan-bulk', [\App\Http\Controllers\AssetController::class, 'processBulkScan']);
+        Route::get('/api/assets/validate-scan/{scannedValue}', [\App\Http\Controllers\AssetController::class, 'validateScan']);
+        Route::get('/api/assets/lookup/{scannedValue}', [\App\Http\Controllers\AssetController::class, 'lookupAsset']);
         
         // Software Licenses Module
         Route::resource('licenses', \App\Http\Controllers\LicenseController::class);
         Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
         Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
+        Route::get('/licenses/usage-report', [\App\Http\Controllers\LicenseController::class, 'usageReport'])->name('licenses.usage-report');
+        Route::get('/licenses/renewals', [\App\Http\Controllers\LicenseController::class, 'renewals'])->name('licenses.renewals');
+        Route::post('/licenses/{license}/record-renewal', [\App\Http\Controllers\LicenseController::class, 'recordRenewal'])->name('licenses.record-renewal');
 
         Route::get('/live-tracking', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('live-tracking');
         Route::get('/api/live-tracking/poll', [\App\Http\Controllers\AssetTrackingController::class, 'poll'])->name('live-tracking.poll');

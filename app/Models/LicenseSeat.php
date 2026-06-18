@@ -9,14 +9,20 @@ class LicenseSeat extends Model
     protected $fillable = [
         'license_id',
         'seat_number',
+        'seat_status',
+        'assignment_type',
         'assigned_to_user_id',
         'assigned_to_asset_id',
         'assigned_at',
+        'last_used',
+        'revoked_at',
         'notes',
     ];
 
     protected $casts = [
         'assigned_at' => 'datetime',
+        'last_used' => 'datetime',
+        'revoked_at' => 'datetime',
     ];
 
     public function license()

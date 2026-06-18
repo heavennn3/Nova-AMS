@@ -77,12 +77,6 @@ const navSections: NavSection[] = [
                 icon: Activity,
                 module: 'Asset Inventory',
             },
-            {
-                title: 'Software Licenses',
-                href: '/licenses',
-                icon: FileText,
-                module: 'Asset Inventory',
-            },
             { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench },
             {
                 title: 'Master Data',
@@ -135,6 +129,17 @@ const navSections: NavSection[] = [
                         href: '/lifecycle/end-of-life',
                     },
                     { title: 'Audit Trail', href: '/lifecycle/audit' },
+                ],
+            },
+            {
+                title: 'Software License Management',
+                href: '/licenses',
+                icon: FileText,
+                module: 'Asset Inventory',
+                items: [
+                    { title: 'License Inventory', href: '/licenses' },
+                    { title: 'Usage Report', href: '/licenses/usage-report' },
+                    { title: 'Renewals', href: '/licenses/renewals' },
                 ],
             },
         ],

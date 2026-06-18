@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import {
     FileKey,
@@ -45,7 +45,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const form = useForm({
         name: '',
         product_key: '',
-        seats: 1,
+        seats: 1, // This will be mapped to total_seats in backend
         purchase_cost: '',
         purchase_date: '',
         expiration_date: '',
@@ -63,6 +63,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
             site_id: form.data.site_id === 'all' ? null : Number(form.data.site_id),
             purchase_cost: form.data.purchase_cost ? Number(form.data.purchase_cost) : null,
+            total_seats: form.data.seats,
+            license_type: 'perpetual',
+            pricing_model: 'one_time',
+            auto_renew: false,
+            notification_days: 30,
         };
 
         router.post('/licenses', data, {
@@ -84,6 +89,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
             site_id: form.data.site_id === 'all' ? null : Number(form.data.site_id),
             purchase_cost: form.data.purchase_cost ? Number(form.data.purchase_cost) : null,
+            total_seats: form.data.seats,
+            license_type: 'perpetual',
+            pricing_model: 'one_time',
+            auto_renew: false,
+            notification_days: 30,
         };
 
         router.put(`/licenses/${selectedLicense.id}`, data, {
@@ -94,8 +104,8 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             },
             onError: (err) => {
                 // If standard validation error or custom warning
-                if (err.seats) {
-                    toast.error(err.seats);
+                if (err.total_seats) {
+                    toast.error(err.total_seats);
                 } else {
                     toast.error('Failed to update license.');
                 }
@@ -116,13 +126,13 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         });
     };
 
-    const openEdit = React.useCallback(
+    const openEdit = useCallback(
         (license: any) => {
             setSelectedLicense(license);
             form.setData({
                 name: license.name || '',
                 product_key: license.product_key || '',
-                seats: license.seats || 1,
+                seats: license.total_seats || 1,
                 purchase_cost: license.purchase_cost ? String(license.purchase_cost) : '',
                 purchase_date: license.purchase_date || '',
                 expiration_date: license.expiration_date || '',
@@ -141,7 +151,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const columns = React.useMemo(
+    const columns = useMemo(
         () => [
             {
                 accessorKey: 'name',
@@ -186,8 +196,8 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                     <DataTableColumnHeader column={column} title="Seat Allocation" />
                 ),
                 cell: ({ row }: any) => {
-                    const total = row.original.seats;
-                    const assigned = row.original.assigned_seats_count;
+                    const total = row.original.total_seats;
+                    const assigned = row.original.used_seats;
                     const percent = total > 0 ? (assigned / total) * 100 : 0;
                     return (
                         <div className="w-[160px] space-y-1.5">
@@ -292,8 +302,8 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
     // Calc Summary Stats
     const totalLicenses = licenses.length;
-    const totalSeats = licenses.reduce((sum: number, lic: any) => sum + lic.seats, 0);
-    const totalAssignedSeats = licenses.reduce((sum: number, lic: any) => sum + lic.assigned_seats_count, 0);
+    const totalSeats = licenses.reduce((sum: number, lic: any) => sum + lic.total_seats, 0);
+    const totalAssignedSeats = licenses.reduce((sum: number, lic: any) => sum + lic.used_seats, 0);
     const totalAvailableSeats = totalSeats - totalAssignedSeats;
 
     const expiringSoonCount = licenses.filter((lic: any) => {

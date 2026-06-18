@@ -6,6 +6,7 @@ import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import RegistrationChoiceModal from '@/components/scanner/registration-choice-modal';
 import {
     Popover,
     PopoverContent,
@@ -66,6 +67,22 @@ export default function AssetIndex({
     const [search, setSearch] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedVendor, setSelectedVendor] = useState('all');
+    const [choiceModalOpen, setChoiceModalOpen] = useState(false);
+
+    const handleRegistrationChoice = (choice: 'manual' | 'scan' | 'upload') => {
+        switch (choice) {
+            case 'manual':
+                router.get(`/assets/create?site_id=${selectedSiteId}`);
+                break;
+            case 'scan':
+                router.get(`/assets/scan?site_id=${selectedSiteId}`);
+                break;
+            case 'upload':
+                router.get(`/assets/upload?site_id=${selectedSiteId}`);
+                break;
+        }
+        setChoiceModalOpen(false);
+    };
 
     const columns = React.useMemo(
         () => [
@@ -516,11 +533,9 @@ export default function AssetIndex({
 
 
 
-                    <Link href={`/assets/create?site_id=${selectedSiteId}`}>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" /> Register New Asset
-                        </Button>
-                    </Link>
+                    <Button onClick={() => setChoiceModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Register New Asset
+                    </Button>
                     
                 </div>
             </div>
@@ -830,6 +845,13 @@ export default function AssetIndex({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Registration Choice Modal */}
+            <RegistrationChoiceModal
+                open={choiceModalOpen}
+                onClose={() => setChoiceModalOpen(false)}
+                onSelect={handleRegistrationChoice}
+            />
         </div>
     );
 }

@@ -383,4 +383,183 @@ public function dashboard()
         'recentActivities' => $recentActivities,
     ]);
 }
+
+/**
+ * Process single asset scan - supports both new registration and existing lookup
+ */
+public function processScan(Request $request)
+{
+    $validated = $request->validate([
+        'scanned_data' => 'required|string',
+        'scan_type' => 'required|in:asset_id,serial_number,barcode',
+        'site_id' => 'nullable|exists:sites,id',
+    ]);
+
+    $scannedValue = trim($validated['scanned_data']);
+    $scanType = $validated['scan_type'];
+
+    // Try to find existing asset
+    $asset = Asset::withTrashed()
+        ->where('asset_id', $scannedValue)
+        ->orWhere('serial_number', $scannedValue)
+        ->first();
+
+    if ($asset) {
+        return response()->json([
+            'exists' => true,
+            'deleted' => $asset->trashed(),
+            'asset' => $asset->load(['category', 'type', 'vendor', 'site', 'location']),
+            'message' => $asset->trashed() ? 'Asset exists but is deleted' : 'Asset already registered'
+        ]);
+    }
+
+    // Parse JSON data if available
+    $parsedData = $this->parseScannedData($scannedValue);
+
+    return response()->json([
+        'exists' => false,
+        'scanned_data' => $parsedData,
+        'message' => 'Valid scan - ready for registration'
+    ]);
+}
+
+/**
+ * Process bulk asset registration from scanned items
+ */
+public function processBulkScan(Request $request)
+{
+    $validated = $request->validate([
+        'scanned_items' => 'required|array',
+        'site_id' => 'nullable|exists:sites,id',
+        'category_id' => 'nullable|exists:asset_categories,id',
+        'status' => 'required|string',
+    ]);
+
+    $results = [
+        'registered' => [],
+        'duplicates' => [],
+        'errors' => []
+    ];
+
+    foreach ($validated['scanned_items'] as $item) {
+        try {
+            $scannedData = is_string($item) ? $this->parseScannedData($item) : $item;
+            $assetId = $scannedData['asset_id'] ?? null;
+
+            if (!$assetId) {
+                $results['errors'][] = ['item' => $item, 'message' => 'Missing asset_id'];
+                continue;
+            }
+
+            // Check for existing asset
+            $existing = Asset::where('asset_id', $assetId)->first();
+            if ($existing) {
+                $results['duplicates'][] = ['asset_id' => $assetId, 'asset' => $existing];
+                continue;
+            }
+
+            // Create new asset
+            $asset = Asset::create([
+                'asset_id' => $assetId,
+                'serial_number' => $scannedData['serial'] ?? null,
+                'product_name' => $scannedData['name'] ?? 'Unknown',
+                'category_id' => $scannedData['category_id'] ?? $validated['category_id'],
+                'site_id' => $scannedData['site_id'] ?? $validated['site_id'],
+                'status' => $validated['status'],
+            ]);
+
+            $results['registered'][] = $asset;
+
+        } catch (\Exception $e) {
+            $results['errors'][] = ['item' => $item, 'message' => $e->getMessage()];
+        }
+    }
+
+    return response()->json([
+        'message' => 'Processed ' . count($validated['scanned_items']) . ' items',
+        'results' => $results
+    ]);
+}
+
+/**
+ * Validate scanned data format
+ */
+public function validateScan(Request $request, $scannedValue)
+{
+    $asset = Asset::withTrashed()
+        ->where('asset_id', $scannedValue)
+        ->orWhere('serial_number', $scannedValue)
+        ->first();
+
+    if ($asset) {
+        return response()->json([
+            'exists' => true,
+            'deleted' => $asset->trashed(),
+            'asset' => $asset,
+            'message' => $asset->trashed() ? 'Asset exists but is deleted' : 'Asset already registered'
+        ]);
+    }
+
+    // Validate format
+    if (!preg_match('/^[A-Z]{3}-\d{6}$/', $scannedValue)) {
+        return response()->json([
+            'valid' => false,
+            'message' => 'Invalid asset ID format. Expected format: ATM-123456'
+        ]);
+    }
+
+    return response()->json([
+        'valid' => true,
+        'message' => 'Valid asset ID - ready for registration'
+    ]);
+}
+
+/**
+ * Lookup existing asset by scanned value
+ */
+public function lookupAsset(Request $request, $scannedValue)
+{
+    $asset = Asset::with(['category', 'type', 'vendor', 'site', 'location', 'activeAssignment.user'])
+        ->where('asset_id', $scannedValue)
+        ->orWhere('serial_number', $scannedValue)
+        ->first();
+
+    if (!$asset) {
+        return response()->json([
+            'found' => false,
+            'message' => 'Asset not found'
+        ], 404);
+    }
+
+    return response()->json([
+        'found' => true,
+        'asset' => $asset,
+        'message' => 'Asset found successfully'
+    ]);
+}
+
+/**
+ * Parse scanned data - handles both simple strings and JSON data
+ */
+private function parseScannedData($scannedValue)
+{
+    // Try to parse as JSON first
+    $decoded = json_decode($scannedValue, true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        return [
+            'asset_id' => $decoded['asset_id'] ?? null,
+            'name' => $decoded['name'] ?? null,
+            'serial' => $decoded['serial'] ?? null,
+            'category' => $decoded['category'] ?? null,
+        ];
+    }
+
+    // Treat as simple asset_id or serial_number
+    return [
+        'asset_id' => $scannedValue,
+        'name' => null,
+        'serial' => null,
+        'category' => null,
+    ];
+}
 }
