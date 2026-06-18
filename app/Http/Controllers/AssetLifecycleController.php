@@ -50,6 +50,82 @@ class AssetLifecycleController extends Controller
         ]); 
     }
 
-    public function warranty() { return Inertia::render('Lifecycle/Warranty'); }
-    public function audit() { return Inertia::render('Lifecycle/Audit'); }
+    public function warranty()
+    {
+        $assets = Asset::with(['supplier', 'site'])
+            ->where(function($query) {
+                $query->whereNotNull('warranty_months')
+                    ->where('warranty_months', '>', 0)
+                    ->orWhereNotNull('purchase_date');
+            })
+            ->get();
+
+        return Inertia::render('Lifecycle/Warranty', [
+            'assets' => $assets
+        ]);
+    }
+    public function audit()
+    {
+        $audits = \OwenIt\Auditing\Models\Audit::with(['user', 'auditable'])
+            ->where('auditable_type', 'like', '%Asset%')
+            ->orderBy('created_at', 'desc')
+            ->limit(500)
+            ->get();
+
+        return Inertia::render('Lifecycle/Audit', [
+            'audits' => $audits
+        ]);
+    }
+
+    public function procurement()
+    {
+        $assets = Asset::with(['supplier', 'site', 'category'])
+            ->where(function($query) {
+                $query->whereNotNull('purchase_cost')
+                    ->orWhereNotNull('order_number');
+            })
+            ->orderBy('purchase_date', 'desc')
+            ->get();
+
+        $totalCost = $assets->sum(function($asset) {
+            return floatval($asset->purchase_cost ?? 0);
+        });
+
+        $averageCost = $assets->count() > 0 ? $totalCost / $assets->count() : 0;
+
+        $costBySupplier = $assets->groupBy('supplier_id')->map(function($group) {
+            return [
+                'supplier_id' => $group->first()->supplier_id,
+                'supplier_name' => $group->first()->supplier->name ?? 'Unknown',
+                'total_cost' => $group->sum(function($asset) {
+                    return floatval($asset->purchase_cost ?? 0);
+                }),
+                'count' => $group->count()
+            ];
+        })->sortByDesc('total_cost')->values()->toArray();
+
+        return Inertia::render('Lifecycle/Procurement', [
+            'assets' => $assets,
+            'summary' => [
+                'total_cost' => $totalCost,
+                'total_assets' => $assets->count(),
+                'average_cost' => $averageCost,
+                'cost_by_supplier' => $costBySupplier,
+            ]
+        ]);
+    }
+
+    public function endOfLife()
+    {
+        $assets = Asset::with(['site', 'category'])
+            ->where(function($query) {
+                $query->whereNotNull('eol_date')
+                    ->orWhereNotNull('purchase_date');
+            })
+            ->get();
+
+        return Inertia::render('Lifecycle/EndOfLife', [
+            'assets' => $assets
+        ]);
+    }
 }

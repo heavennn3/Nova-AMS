@@ -126,7 +126,14 @@ const navSections: NavSection[] = [
                         title: 'Warranty Management',
                         href: '/lifecycle/warranty',
                     },
-
+                    {
+                        title: 'Procurement Tracking',
+                        href: '/lifecycle/procurement',
+                    },
+                    {
+                        title: 'End of Life',
+                        href: '/lifecycle/end-of-life',
+                    },
                     { title: 'Audit Trail', href: '/lifecycle/audit' },
                 ],
             },

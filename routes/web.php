@@ -123,6 +123,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/lifecycle/warranty', [\App\Http\Controllers\AssetLifecycleController::class, 'warranty']);
         Route::get('/lifecycle/health', [\App\Http\Controllers\AssetLifecycleController::class, 'health']);
         Route::get('/lifecycle/audit', [\App\Http\Controllers\AssetLifecycleController::class, 'audit']);
+        Route::get('/lifecycle/procurement', [\App\Http\Controllers\AssetLifecycleController::class, 'procurement']);
+        Route::get('/lifecycle/end-of-life', [\App\Http\Controllers\AssetLifecycleController::class, 'endOfLife']);
     });
 
     // Analytics Module
