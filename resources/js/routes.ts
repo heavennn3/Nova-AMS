@@ -6,10 +6,6 @@ export function assetInventory() {
     return '/assets';
 }
 
-export function geographicView() {
-    return '/geographic-view';
-}
-
 export function masterData() {
     return '/master-data';
 }

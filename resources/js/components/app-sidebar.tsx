@@ -31,7 +31,6 @@ import {
 import {
     dashboard,
     assetInventory,
-    geographicView,
     masterData,
     operationsMaintenance,
     userManagement,
@@ -50,16 +49,6 @@ const navSections: NavSection[] = [
         title: 'NOVA AMS',
         items: [
             { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
-            {
-                title: 'Geographic & Mapping',
-                href: '#',
-                icon: Map,
-                module: 'Asset Inventory',
-                items: [
-                    { title: 'View Site ', href: geographicView() },
-                    { title: 'Site Floor Plans', href: '/mapping/floor-plans' },
-                ],
-            },
         ],
     },
     {

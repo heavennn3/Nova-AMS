@@ -82,12 +82,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/live-tracking/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('live-tracking.checkin');
     });
 
-    Route::middleware(['permission:module.asset-inventory'])->group(function () {
-        Route::get('/geographic-view', [\App\Http\Controllers\MappingController::class, 'geographicView'])->name('geographic-view');
-        Route::patch('/sites/{site}/location', [\App\Http\Controllers\MappingController::class, 'updateSiteLocation'])->name('sites.update-location');
-        Route::get('/mapping/floor-plans', [\App\Http\Controllers\MappingController::class, 'floorPlans'])->name('mapping.floor-plans');
-    });
-
     // Master Data Module
     Route::middleware(['permission:module.master-data'])->group(function () {
         Route::get('/master-data', [\App\Http\Controllers\MasterDataController::class, 'index'])->name('master-data');

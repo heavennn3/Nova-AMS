@@ -168,10 +168,6 @@ export default function Welcome({
                                             <Package className="h-4 w-4" />
                                             <span>Asset Register</span>
                                         </div>
-                                        <div className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
-                                            <Map className="h-4 w-4" />
-                                            <span>Geographic Maps</span>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -485,22 +481,6 @@ export default function Welcome({
                                     control incident work order cycles. Ensure
                                     minor faults are mitigated before causing
                                     core system downtime.
-                                </p>
-                            </div>
-
-                            <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-                                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white">
-                                    <Map className="h-5 w-5" />
-                                </div>
-                                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                                    Geographic Mapping & Spatial Coordination
-                                </h3>
-                                <p className="text-sm leading-relaxed text-zinc-500">
-                                    Maps coordinate positions and visualizes
-                                    custom facility floor plans. Easily assign
-                                    physical location nodes to each piece of
-                                    hardware, eliminating coordinate confusion
-                                    in physical deployments.
                                 </p>
                             </div>
 
