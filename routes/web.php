@@ -137,6 +137,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/vendors/performance', [\App\Http\Controllers\OperationsController::class, 'performance']);
         Route::get('/vendors/alerts', [\App\Http\Controllers\OperationsController::class, 'alerts']);
+
+        // Spare Parts Module
+        Route::prefix('spare-parts')->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\SparePartController::class, 'dashboard'])->name('spare-parts.dashboard');
+            Route::get('/', [\App\Http\Controllers\SparePartController::class, 'index'])->name('spare-parts.index');
+            Route::post('/', [\App\Http\Controllers\SparePartController::class, 'store'])->name('spare-parts.store');
+            Route::put('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'update'])->name('spare-parts.update');
+            Route::delete('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'destroy'])->name('spare-parts.destroy');
+            Route::post('/{sparePart}/checkout', [\App\Http\Controllers\SparePartController::class, 'checkout'])->name('spare-parts.checkout');
+            Route::post('/checkouts/{checkout}/return', [\App\Http\Controllers\SparePartController::class, 'returnCheckout'])->name('spare-parts.return');
+            Route::get('/export', [\App\Http\Controllers\SparePartController::class, 'exportCsv'])->name('spare-parts.export');
+        });
         Route::get('/vendors/slas', [\App\Http\Controllers\OperationsController::class, 'slas']);
         Route::get('/vendors/po', [\App\Http\Controllers\OperationsController::class, 'po']);
         Route::get('/vendors/portal', [\App\Http\Controllers\OperationsController::class, 'portal']);
