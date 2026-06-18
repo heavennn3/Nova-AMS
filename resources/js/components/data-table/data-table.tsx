@@ -246,7 +246,7 @@ export function DataTable<TData, TValue>({
                                     columns
                                         .map((col: any) => {
                                             if (!col.accessorKey) return null;
-                                            const val = row.original[col.accessorKey];
+                                            const val = (row.original as any)[col.accessorKey];
                                             return typeof val === 'object' ? JSON.stringify(val) : val;
                                         })
                                         .filter((v) => v !== null)

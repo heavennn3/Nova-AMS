@@ -67,12 +67,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/assets/lookup/{scannedValue}', [\App\Http\Controllers\AssetController::class, 'lookupAsset']);
         
         // Software Licenses Module
-        Route::resource('licenses', \App\Http\Controllers\LicenseController::class);
-        Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
-        Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
         Route::get('/licenses/usage-report', [\App\Http\Controllers\LicenseController::class, 'usageReport'])->name('licenses.usage-report');
         Route::get('/licenses/renewals', [\App\Http\Controllers\LicenseController::class, 'renewals'])->name('licenses.renewals');
+        Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
+        Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
         Route::post('/licenses/{license}/record-renewal', [\App\Http\Controllers\LicenseController::class, 'recordRenewal'])->name('licenses.record-renewal');
+        Route::resource('licenses', \App\Http\Controllers\LicenseController::class);
 
         Route::get('/live-tracking', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('live-tracking');
         Route::get('/api/live-tracking/poll', [\App\Http\Controllers\AssetTrackingController::class, 'poll'])->name('live-tracking.poll');
@@ -80,6 +80,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/live-tracking/report', [\App\Http\Controllers\AssetTrackingController::class, 'report'])->name('live-tracking.report');
         Route::post('/live-tracking/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('live-tracking.checkout');
         Route::patch('/live-tracking/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('live-tracking.checkin');
+
+        // Asset Withdrawals Module
+        Route::prefix('withdrawals')->group(function () {
+            Route::get('/', [\App\Http\Controllers\WithdrawalController::class, 'index'])->name('withdrawals.index');
+            Route::get('/create', [\App\Http\Controllers\WithdrawalController::class, 'create'])->name('withdrawals.create');
+            Route::post('/', [\App\Http\Controllers\WithdrawalController::class, 'store'])->name('withdrawals.store');
+            Route::get('/{withdrawal}', [\App\Http\Controllers\WithdrawalController::class, 'show'])->name('withdrawals.show');
+            Route::put('/{withdrawal}', [\App\Http\Controllers\WithdrawalController::class, 'update'])->name('withdrawals.update');
+            Route::delete('/{withdrawal}', [\App\Http\Controllers\WithdrawalController::class, 'destroy'])->name('withdrawals.destroy');
+            Route::post('/{withdrawal}/return', [\App\Http\Controllers\WithdrawalController::class, 'returnAsset'])->name('withdrawals.return');
+            Route::post('/{withdrawal}/approve', [\App\Http\Controllers\WithdrawalController::class, 'approve'])->name('withdrawals.approve');
+            Route::post('/{withdrawal}/reject', [\App\Http\Controllers\WithdrawalController::class, 'reject'])->name('withdrawals.reject');
+            Route::get('/dashboard', [\App\Http\Controllers\WithdrawalController::class, 'dashboard'])->name('withdrawals.dashboard');
+        });
     });
 
     // Master Data Module

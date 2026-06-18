@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import {
     FileKey,
@@ -36,11 +36,29 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
 export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], vendors = [] }: any) {
+    // Error boundary - if data is not in expected format, show simple version
+    const [error, setError] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedLicense, setSelectedLicense] = useState<any>(null);
     const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
+
+    // Validate data format
+    useEffect(() => {
+        try {
+            if (!Array.isArray(licenses)) {
+                console.error('Licenses is not an array:', typeof licenses);
+                setError('Invalid data format received from server');
+            } else {
+                console.log('Licenses data loaded successfully:', licenses.length, 'licenses');
+                setError(null); // Clear any previous errors
+            }
+        } catch (e) {
+            console.error('Error validating data:', e);
+            setError('Error processing license data');
+        }
+    }, [licenses]);
 
     const form = useForm({
         name: '',
@@ -325,6 +343,15 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         <div className="w-full space-y-6 p-8">
             <Head title="Software Licenses Dashboard" />
 
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded mb-4">
+                    <strong>Error:</strong> {error}
+                    <div className="mt-2 text-sm">
+                        Please check the browser console for more details and refresh the page.
+                    </div>
+                </div>
+            )}
+
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
                     <FileKey className="mr-3 h-8 w-8 text-primary" />
@@ -435,7 +462,24 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             </div>
 
             <div className="rounded-lg border bg-card shadow-sm">
-                <DataTable columns={columns} data={licenses} searchKey="name" />
+                {error ? (
+                    <div className="p-8 text-center text-red-600">
+                        <p className="font-semibold">Unable to display licenses</p>
+                        <p className="text-sm mt-2">{error}</p>
+                        <p className="text-xs mt-4 text-muted-foreground">Please refresh the page or contact support if the problem persists.</p>
+                    </div>
+                ) : licenses.length > 0 ? (
+                    <DataTable columns={columns} data={licenses} searchKey="name" />
+                ) : (
+                    <div className="p-8 text-center text-muted-foreground">
+                        <FileKey className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-lg font-medium mb-2">No licenses found</p>
+                        <p className="text-sm mb-4">Create your first software license to get started tracking compliance and seats.</p>
+                        <Button onClick={() => setIsCreateOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" /> Add Your First License
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Create License Modal */}

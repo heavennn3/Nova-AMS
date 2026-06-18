@@ -163,8 +163,53 @@ class LicenseController extends Controller
             $license->load(['vendor', 'site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset']);
             $license->updateComplianceStatus();
 
+            $formattedLicense = [
+                'id' => $license->id,
+                'name' => $license->name,
+                'product_key' => $license->product_key,
+                'version' => $license->version,
+                'category' => $license->category,
+                'license_type' => $license->license_type,
+                'pricing_model' => $license->pricing_model,
+                'purchase_cost' => $license->purchase_cost,
+                'purchase_date' => $license->purchase_date ? $license->purchase_date->format('Y-m-d') : null,
+                'expiration_date' => $license->expiration_date ? $license->expiration_date->format('Y-m-d') : null,
+                'support_expiry' => $license->support_expiry ? $license->support_expiry->format('Y-m-d') : null,
+                'renewal_date' => $license->renewal_date ? $license->renewal_date->format('Y-m-d') : null,
+                'auto_renew' => $license->auto_renew,
+                'subscription_id' => $license->subscription_id,
+                'billing_cycle' => $license->billing_cycle,
+                'compliance_status' => $license->compliance_status,
+                'license_email' => $license->license_email,
+                'license_name' => $license->license_name,
+                'vendor' => $license->vendor ? $license->vendor->name : null,
+                'vendor_id' => $license->vendor_id,
+                'site' => $license->site ? $license->site->name : null,
+                'site_id' => $license->site_id,
+                'notes' => $license->notes,
+                'seats' => $license->total_seats,
+                'assigned_seats_count' => $license->used_seats,
+                'available_seats_count' => $license->available_seats,
+                'seats_list' => $license->licenseSeats->map(function ($seat) {
+                    return [
+                        'id' => $seat->id,
+                        'seat_number' => $seat->seat_number,
+                        'seat_status' => $seat->seat_status,
+                        'assignment_type' => $seat->assignment_type,
+                        'assigned_to_user_id' => $seat->assigned_to_user_id,
+                        'assigned_to_asset_id' => $seat->assigned_to_asset_id,
+                        'assigned_user_name' => $seat->assignedUser?->name,
+                        'assigned_user_email' => $seat->assignedUser?->email,
+                        'assigned_asset_name' => $seat->assignedAsset?->product_name,
+                        'assigned_asset_serial' => $seat->assignedAsset?->serial_number,
+                        'assigned_at' => $seat->assigned_at ? $seat->assigned_at->format('Y-m-d H:i:s') : null,
+                        'notes' => $seat->notes,
+                    ];
+                })->values()->toArray(),
+            ];
+
             return Inertia::render('Licenses/Show', [
-                'license' => $license,
+                'license' => $formattedLicense,
                 'users' => User::orderBy('name')->get(['id', 'name', 'email']),
                 'assets' => Asset::with('site')->orderBy('product_name')->get()
                     ->map(function($asset) {
@@ -468,5 +513,15 @@ class LicenseController extends Controller
         });
 
         return redirect()->back()->with('success', 'License renewal recorded successfully.');
+    }
+
+    public function create()
+    {
+        return redirect()->route('licenses.index');
+    }
+
+    public function edit(License $license)
+    {
+        return redirect()->route('licenses.index');
     }
 }

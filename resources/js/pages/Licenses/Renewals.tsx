@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Calendar, RefreshCw, DollarSign, Clock, AlertTriangle, CheckCircle, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +21,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import * as React from 'react';
 
 type RenewalsProps = {
     licenses: any[];
@@ -68,7 +68,7 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
                                 {dateObj.toLocaleDateString()}
                             </span>
                             {isExpiringSoon && !isExpired && (
-                                <Badge variant="warning" className="text-xs">Expiring Soon</Badge>
+                                <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/20 dark:text-amber-300 dark:border-amber-900/30 text-xs">Expiring Soon</Badge>
                             )}
                             {isExpired && (
                                 <Badge variant="destructive" className="text-xs">Expired</Badge>
@@ -83,7 +83,7 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
                 cell: ({ row }: any) => {
                     const autoRenew = row.original.auto_renew;
                     return (
-                        <Badge variant={autoRenew ? 'success' : 'outline'}>
+                        <Badge variant="secondary" className={autoRenew ? "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-300 dark:border-emerald-900/30" : ""}>
                             {autoRenew ? 'Enabled' : 'Disabled'}
                         </Badge>
                     );
