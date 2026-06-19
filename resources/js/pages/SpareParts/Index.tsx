@@ -203,6 +203,11 @@ export default function SparePartsIndex({
 
     const handleCheckout = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!selectedPart) {
+            toast.error('No spare part selected');
+            return;
+        }
+
         const formData = new FormData(e.currentTarget as HTMLFormElement);
 
         router.post(`/spare-parts/${selectedPart.id}/checkout`, formData, {
