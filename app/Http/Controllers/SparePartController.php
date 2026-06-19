@@ -77,7 +77,7 @@ class SparePartController extends Controller
 
     public function index()
     {
-        $spareParts = SparePart::with(['site'])
+        $spareParts = SparePart::with(['site', 'assetType'])
             ->latest()
             ->get()
             ->map(function ($part) {
@@ -94,6 +94,8 @@ class SparePartController extends Controller
                     'status' => $part->status,
                     'availability' => $part->availability,
                     'total_value' => number_format($part->total_value, 2),
+                    'asset_type' => $part->assetType?->name ?? '—',
+                    'asset_type_id' => $part->asset_type_id,
                 ];
             });
 
@@ -104,9 +106,14 @@ class SparePartController extends Controller
             ->sort()
             ->values();
 
+        $assetTypes = \App\Models\AssetType::orderBy('name')->get();
+        $sites = \App\Models\Site::orderBy('name')->get();
+
         return Inertia::render('SpareParts/Index', [
             'spareParts' => $spareParts,
             'categories' => $categories,
+            'assetTypes' => $assetTypes,
+            'sites' => $sites,
         ]);
     }
 
@@ -121,8 +128,10 @@ class SparePartController extends Controller
             'unit_cost' => 'required|numeric|min:0',
             'location' => 'nullable|string',
             'site_id' => 'nullable|exists:sites,id',
+            'status' => 'required|string',
             'specifications' => 'nullable|array',
             'compatibility' => 'nullable|array',
+            'asset_type_id' => 'nullable|exists:asset_types,id',
         ]);
 
         $validated['specifications'] = $validated['specifications'] ?? [];
@@ -147,6 +156,7 @@ class SparePartController extends Controller
             'status' => 'required|string',
             'specifications' => 'nullable|array',
             'compatibility' => 'nullable|array',
+            'asset_type_id' => 'nullable|exists:asset_types,id',
         ]);
 
         $validated['specifications'] = $validated['specifications'] ?? [];

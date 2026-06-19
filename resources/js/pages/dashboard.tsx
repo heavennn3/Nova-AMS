@@ -152,37 +152,37 @@ export default function Dashboard({
                         </div>
                     </div>
                     <div className="flex space-x-3">
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            const csvContent =
-                                'data:text/csv;charset=utf-8,' +
-                                'Metric,Value\n' +
-                                `Total Assets,${stats.totalAssets}\n` +
-                                `Sites Managed,${stats.totalSites}\n` +
-                                `Total Users,${stats.totalUsers}\n` +
-                                `Active Work Orders,${stats.activeWorkOrders}\n` +
-                                `Open Tickets,${stats.openTickets}`;
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                const csvContent =
+                                    'data:text/csv;charset=utf-8,' +
+                                    'Metric,Value\n' +
+                                    `Total Assets,${stats.totalAssets}\n` +
+                                    `Sites Managed,${stats.totalSites}\n` +
+                                    `Total Users,${stats.totalUsers}\n` +
+                                    `Active Work Orders,${stats.activeWorkOrders}\n` +
+                                    `Open Tickets,${stats.openTickets}`;
 
-                            const encodedUri = encodeURI(csvContent);
-                            const link = document.createElement('a');
-                            link.setAttribute('href', encodedUri);
-                            link.setAttribute(
-                                'download',
-                                'dashboard_summary.csv',
-                            );
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        }}
-                    >
-                        <TrendingDown className="mr-2 h-4 w-4" />
-                        Export Data
-                    </Button>
-                    <Button onClick={() => window.location.reload()}>
-                        Refresh Data
-                    </Button>
-                </div>
+                                const encodedUri = encodeURI(csvContent);
+                                const link = document.createElement('a');
+                                link.setAttribute('href', encodedUri);
+                                link.setAttribute(
+                                    'download',
+                                    'dashboard_summary.csv',
+                                );
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                        >
+                            <TrendingDown className="mr-2 h-4 w-4" />
+                            Export Data
+                        </Button>
+                        <Button onClick={() => window.location.reload()}>
+                            Refresh Data
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -279,7 +279,7 @@ export default function Dashboard({
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              
+
 
                 <Card className="lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -287,7 +287,7 @@ export default function Dashboard({
                             <CardTitle>System Monitoring</CardTitle>
                         </div>
                         <span className="relative flex h-2 w-2">
-                            
+
                         </span>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -397,8 +397,8 @@ export default function Dashboard({
                 {/* Site managed with Live Weather */}
                 <Card>
                     <CardHeader pb-2>
-                        <CardTitle>Site Meteorological Monitoring</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Current local conditions for site asset operations.</p>
+                        <CardTitle>Weather</CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1">Current site weather conditions</p>
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -462,11 +462,10 @@ export default function Dashboard({
                                 <button
                                     key={action}
                                     onClick={() => setSelectedActionFilter(action)}
-                                    className={`px-3 py-1 text-xs font-semibold rounded-md uppercase transition-all ${
-                                        selectedActionFilter === action
-                                            ? 'bg-background text-foreground shadow-sm'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-md uppercase transition-all ${selectedActionFilter === action
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                        }`}
                                 >
                                     {action === 'all' ? 'All' : action + 's'}
                                 </button>

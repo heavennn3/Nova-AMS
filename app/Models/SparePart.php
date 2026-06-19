@@ -22,12 +22,14 @@ class SparePart extends Model
         'status',
         'specifications',
         'compatibility',
+        'asset_type_id',
     ];
 
     protected $casts = [
         'unit_cost' => 'decimal:2',
         'specifications' => 'array',
         'compatibility' => 'array',
+        'asset_type_id' => 'integer',
     ];
 
     public function site()
@@ -38,6 +40,11 @@ class SparePart extends Model
     public function checkout()
     {
         return $this->hasMany(Checkout::class);
+    }
+
+    public function assetType()
+    {
+        return $this->belongsTo(AssetType::class, 'asset_type_id');
     }
 
     public function getAvailabilityAttribute()

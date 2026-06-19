@@ -30,11 +30,19 @@ import {
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default function Parts({ parts = [], sites = [] }: any) {
+export default function Parts({ parts = [], sites = [], assetTypes = [] }: any) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedPart, setSelectedPart] = useState<any>(null);
+    const [selectedAssetType, setSelectedAssetType] = useState('all');
+
+    const filteredParts = React.useMemo(() => {
+        return parts.filter((part: any) => {
+            if (selectedAssetType === 'all') return true;
+            return String(part.asset_type_id) === selectedAssetType;
+        });
+    }, [parts, selectedAssetType]);
 
     const form = useForm({
         part_number: '',
@@ -43,6 +51,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
         minimum_stock_level: 0,
         unit_cost: '',
         site_id: 'all',
+        asset_type_id: 'none',
     });
 
     const handleCreate = (e: React.FormEvent) => {
@@ -50,6 +59,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
         const data = {
             ...form.data,
             site_id: form.data.site_id === 'all' ? null : form.data.site_id,
+            asset_type_id: form.data.asset_type_id === 'none' ? null : form.data.asset_type_id,
         };
         router.post('/maintenance/parts', data, {
             onSuccess: () => {
@@ -65,6 +75,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
         const data = {
             ...form.data,
             site_id: form.data.site_id === 'all' ? null : form.data.site_id,
+            asset_type_id: form.data.asset_type_id === 'none' ? null : form.data.asset_type_id,
         };
         router.put(`/maintenance/parts/${selectedPart.id}`, data, {
             onSuccess: () => {
@@ -95,6 +106,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
                 minimum_stock_level: part.minimum_stock_level || 0,
                 unit_cost: part.unit_cost || '',
                 site_id: part.site_id ? String(part.site_id) : 'all',
+                asset_type_id: part.asset_type_id ? String(part.asset_type_id) : 'none',
             });
             setIsEditOpen(true);
         },
@@ -135,6 +147,14 @@ export default function Parts({ parts = [], sites = [] }: any) {
                 cell: ({ row }: any) => row.original.site?.name || 'Global',
             },
             {
+                id: 'asset_type',
+                accessorFn: (row: any) => row.asset_type?.name || '—',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Asset Type" />
+                ),
+                cell: ({ row }: any) => row.original.asset_type?.name || '—',
+            },
+            {
                 accessorKey: 'stock_level',
                 header: ({ column }: any) => (
                     <DataTableColumnHeader column={column} title="Stock" />
@@ -164,7 +184,7 @@ export default function Parts({ parts = [], sites = [] }: any) {
                 ),
                 cell: ({ row }: any) =>
                     row.getValue('unit_cost')
-                        ? `$${Number(row.getValue('unit_cost')).toFixed(2)}`
+                        ? `RM${Number(row.getValue('unit_cost')).toFixed(2)}`
                         : '—',
             },
             {
@@ -271,9 +291,9 @@ export default function Parts({ parts = [], sites = [] }: any) {
                     <CardContent className="pt-6">
                         <div className="flex items-start justify-between">
                             <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase"></p>
+                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">Total Value</p>
                                 <p className="text-3xl font-bold text-foreground">
-                                    ${totalValue.toFixed(2)}
+                                    RM{totalValue.toFixed(2)}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-emerald-50 p-3 text-emerald-600">
@@ -284,8 +304,35 @@ export default function Parts({ parts = [], sites = [] }: any) {
                 </Card>
             </div>
 
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-lg border shadow-xs">
+                <div className="flex items-center gap-2 flex-1 w-full md:max-w-xs">
+                    <Select value={selectedAssetType} onValueChange={setSelectedAssetType}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Filter by Asset Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Asset Types</SelectItem>
+                            {assetTypes.map((type: any) => (
+                                <SelectItem key={type.id} value={String(type.id)}>
+                                    {type.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {selectedAssetType !== 'all' && (
+                        <Button
+                            variant="ghost"
+                            onClick={() => setSelectedAssetType('all')}
+                            className="h-9 px-2 text-muted-foreground"
+                        >
+                            Reset
+                        </Button>
+                    )}
+                </div>
+            </div>
+
             <div className="rounded-lg border bg-card shadow-sm">
-                <DataTable columns={columns} data={parts} searchKey="name" />
+                <DataTable columns={columns} data={filteredParts} searchKey="name" />
             </div>
 
             {/* Create Modal */}
@@ -398,6 +445,34 @@ export default function Parts({ parts = [], sites = [] }: any) {
                                                     value={String(s.id)}
                                                 >
                                                     {s.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">
+                                        Asset Type
+                                    </label>
+                                    <Select
+                                        value={form.data.asset_type_id}
+                                        onValueChange={(v) =>
+                                            form.setData('asset_type_id', v)
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Asset Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">
+                                                None (Unassociated)
+                                            </SelectItem>
+                                            {assetTypes.map((type: any) => (
+                                                <SelectItem
+                                                    key={type.id}
+                                                    value={String(type.id)}
+                                                >
+                                                    {type.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -531,6 +606,34 @@ export default function Parts({ parts = [], sites = [] }: any) {
                                                     value={String(s.id)}
                                                 >
                                                     {s.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">
+                                        Asset Type
+                                    </label>
+                                    <Select
+                                        value={form.data.asset_type_id}
+                                        onValueChange={(v) =>
+                                            form.setData('asset_type_id', v)
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Asset Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">
+                                                None (Unassociated)
+                                            </SelectItem>
+                                            {assetTypes.map((type: any) => (
+                                                <SelectItem
+                                                    key={type.id}
+                                                    value={String(type.id)}
+                                                >
+                                                    {type.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

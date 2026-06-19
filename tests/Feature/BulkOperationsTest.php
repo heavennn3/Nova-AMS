@@ -131,3 +131,39 @@ test('authenticated users can bulk activate/deactivate users', function () {
     $this->assertDatabaseHas('users', ['id' => $u1->id, 'is_active' => true]);
     $this->assertDatabaseHas('users', ['id' => $u2->id, 'is_active' => true]);
 });
+
+test('authenticated users can bulk delete spare parts', function () {
+    $user = User::factory()->create(['is_active' => true]);
+    $this->actingAs($user);
+
+    $part1 = \App\Models\SparePart::create([
+        'name' => 'Part 1',
+        'part_number' => 'P1-' . uniqid(),
+        'category' => 'Test',
+        'stock_level' => 10,
+        'minimum_stock_level' => 5,
+        'unit_cost' => 10.00,
+    ]);
+    $part2 = \App\Models\SparePart::create([
+        'name' => 'Part 2',
+        'part_number' => 'P2-' . uniqid(),
+        'category' => 'Test',
+        'stock_level' => 20,
+        'minimum_stock_level' => 5,
+        'unit_cost' => 15.00,
+    ]);
+
+    $response = $this->postJson('/api/quick/bulk-delete', [
+        'type' => 'spare-parts',
+        'ids' => [$part1->id, $part2->id]
+    ]);
+
+    $response->assertOk();
+    $response->assertJson([
+        'message' => 'Successfully deleted 2 records!',
+        'count' => 2
+    ]);
+
+    $this->assertSoftDeleted('spare_parts', ['id' => $part1->id]);
+    $this->assertSoftDeleted('spare_parts', ['id' => $part2->id]);
+});

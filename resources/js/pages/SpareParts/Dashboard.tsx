@@ -34,7 +34,7 @@ export default function SparePartsDashboard({
         },
         {
             title: 'Total Value',
-            value: `$${totalValue}`,
+            value: `RM${totalValue}`,
             icon: DollarSign,
             color: 'text-green-600',
             bgColor: 'bg-green-100',
@@ -166,7 +166,7 @@ export default function SparePartsDashboard({
                                         <p className="text-sm text-muted-foreground">{cat.count} items</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-semibold">${cat.value}</p>
+                                        <p className="font-semibold">RM{cat.value}</p>
                                     </div>
                                 </div>
                             ))}

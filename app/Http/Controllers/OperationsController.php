@@ -92,8 +92,9 @@ class OperationsController extends Controller
     public function parts() 
     { 
         return Inertia::render('Maintenance/Parts', [
-            'parts' => \App\Models\SparePart::with('site')->latest()->get(),
+            'parts' => \App\Models\SparePart::with(['site', 'assetType'])->latest()->get(),
             'sites' => \App\Models\Site::all(),
+            'assetTypes' => \App\Models\AssetType::orderBy('name')->get(),
         ]); 
     }
 
@@ -106,6 +107,7 @@ class OperationsController extends Controller
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'nullable|numeric|min:0',
             'site_id' => 'nullable|exists:sites,id',
+            'asset_type_id' => 'nullable|exists:asset_types,id',
         ]);
 
         \App\Models\SparePart::create($validated);
@@ -123,6 +125,7 @@ class OperationsController extends Controller
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'nullable|numeric|min:0',
             'site_id' => 'nullable|exists:sites,id',
+            'asset_type_id' => 'nullable|exists:asset_types,id',
         ]);
 
         $part->update($validated);

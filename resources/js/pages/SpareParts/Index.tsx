@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableActions } from '@/components/data-table/data-table-actions';
@@ -21,32 +21,71 @@ import { toast } from 'sonner';
 export default function SparePartsIndex({
     spareParts = [],
     categories = [],
+    assetTypes = [],
+    sites = [],
 }: {
     spareParts: any[];
     categories: string[];
+    assetTypes?: any[];
+    sites?: any[];
 }) {
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [selectedAssetType, setSelectedAssetType] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [selectedPart, setSelectedPart] = useState<any>(null);
+
+    const form = useForm({
+        name: '',
+        part_number: '',
+        category: '',
+        stock_level: 0,
+        minimum_stock_level: 0,
+        unit_cost: '',
+        location: '',
+        site_id: 'all',
+        asset_type_id: 'none',
+        status: 'available',
+    });
 
     const filteredParts = useMemo(() => {
         return spareParts.filter((part: any) => {
             const matchesSearch = !search ||
-                part.name.toLowerCase().includes(search.toLowerCase()) ||
-                part.part_number.toLowerCase().includes(search.toLowerCase()) ||
-                part.category.toLowerCase().includes(search.toLowerCase());
+                (part.name && part.name.toLowerCase().includes(search.toLowerCase())) ||
+                (part.part_number && part.part_number.toLowerCase().includes(search.toLowerCase())) ||
+                (part.category && part.category.toLowerCase().includes(search.toLowerCase()));
 
             const matchesCategory = selectedCategory === 'all' || part.category === selectedCategory;
+            const matchesAssetType = selectedAssetType === 'all' || String(part.asset_type_id) === selectedAssetType;
             const matchesStatus = selectedStatus === 'all' ||
                 (selectedStatus === 'available' && part.availability === 'available') ||
                 (selectedStatus === 'low' && part.availability === 'low') ||
                 (selectedStatus === 'out' && part.stock_level === 0);
 
-            return matchesSearch && matchesCategory && matchesStatus;
+            return matchesSearch && matchesCategory && matchesAssetType && matchesStatus;
         });
-    }, [spareParts, search, selectedCategory, selectedStatus]);
+    }, [spareParts, search, selectedCategory, selectedAssetType, selectedStatus]);
+
+    const handleCreate = (e: React.FormEvent) => {
+        e.preventDefault();
+        const data = {
+            ...form.data,
+            site_id: form.data.site_id === 'all' ? null : form.data.site_id,
+            asset_type_id: form.data.asset_type_id === 'none' ? null : form.data.asset_type_id,
+        };
+        router.post('/spare-parts', data, {
+            onSuccess: () => {
+                setCreateDialogOpen(false);
+                form.reset();
+                toast.success('Spare part added successfully');
+            },
+            onError: () => {
+                toast.error('Failed to add spare part');
+            }
+        });
+    };
 
     const columns = useMemo(() => [
         {
@@ -57,7 +96,7 @@ export default function SparePartsIndex({
             cell: ({ row }: any) => (
                 <div>
                     <p className="font-medium">{row.getValue('name')}</p>
-                    <p className="text-xs text-muted-foreground">{row.getValue('part_number')}</p>
+                    <p className="text-xs text-muted-foreground">{row.original.part_number}</p>
                 </div>
             ),
         },
@@ -69,6 +108,17 @@ export default function SparePartsIndex({
             cell: ({ row }: any) => (
                 <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                     {row.getValue('category')}
+                </span>
+            ),
+        },
+        {
+            accessorKey: 'asset_type',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Asset Type" />
+            ),
+            cell: ({ row }: any) => (
+                <span className="text-sm">
+                    {row.getValue('asset_type')}
                 </span>
             ),
         },
@@ -101,14 +151,14 @@ export default function SparePartsIndex({
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Unit Cost" />
             ),
-            cell: ({ row }: any) => `$${row.getValue('unit_cost')}`,
+            cell: ({ row }: any) => `RM${row.getValue('unit_cost')}`,
         },
         {
             accessorKey: 'total_value',
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Total Value" />
             ),
-            cell: ({ row }: any) => `$${row.getValue('total_value')}`,
+            cell: ({ row }: any) => `RM${row.getValue('total_value')}`,
         },
         {
             accessorKey: 'location',
@@ -153,7 +203,7 @@ export default function SparePartsIndex({
 
     const handleCheckout = (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
 
         router.post(`/spare-parts/${selectedPart.id}/checkout`, formData, {
             onSuccess: () => {
@@ -194,7 +244,10 @@ export default function SparePartsIndex({
                             Dashboard
                         </Button>
                     </Link>
-                    <Button>
+                    <Button onClick={() => {
+                        form.reset();
+                        setCreateDialogOpen(true);
+                    }}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Part
                     </Button>
@@ -269,6 +322,17 @@ export default function SparePartsIndex({
                                 ))}
                             </SelectContent>
                         </Select>
+                        <Select value={selectedAssetType} onValueChange={setSelectedAssetType}>
+                            <SelectTrigger className="w-full md:w-48">
+                                <SelectValue placeholder="Asset Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Asset Types</SelectItem>
+                                {assetTypes.map((type: any) => (
+                                    <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                             <SelectTrigger className="w-full md:w-48">
                                 <SelectValue placeholder="Status" />
@@ -290,7 +354,6 @@ export default function SparePartsIndex({
                     <DataTable
                         columns={columns}
                         data={filteredParts}
-                        exportFileName="spare_parts_inventory"
                     />
                 </CardContent>
             </Card>
@@ -347,6 +410,142 @@ export default function SparePartsIndex({
                             </DialogFooter>
                         </form>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Create Spare Part Dialog */}
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <form onSubmit={handleCreate}>
+                        <DialogHeader>
+                            <DialogTitle>Add New Spare Part</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Part Name *</Label>
+                                    <Input
+                                        required
+                                        value={form.data.name}
+                                        onChange={(e) => form.setData('name', e.target.value)}
+                                        placeholder="Enter part name"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Part Number *</Label>
+                                    <Input
+                                        required
+                                        value={form.data.part_number}
+                                        onChange={(e) => form.setData('part_number', e.target.value)}
+                                        placeholder="e.g., SP-2024-001"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Category *</Label>
+                                    <Input
+                                        required
+                                        value={form.data.category}
+                                        onChange={(e) => form.setData('category', e.target.value)}
+                                        placeholder="e.g., Electrical Components"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Stock Level *</Label>
+                                    <Input
+                                        required
+                                        type="number"
+                                        min="0"
+                                        value={form.data.stock_level}
+                                        onChange={(e) => form.setData('stock_level', parseInt(e.target.value) || 0)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Minimum Stock Level *</Label>
+                                    <Input
+                                        required
+                                        type="number"
+                                        min="0"
+                                        value={form.data.minimum_stock_level}
+                                        onChange={(e) => form.setData('minimum_stock_level', parseInt(e.target.value) || 0)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Unit Cost (RM) *</Label>
+                                    <Input
+                                        required
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={form.data.unit_cost}
+                                        onChange={(e) => form.setData('unit_cost', e.target.value)}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Location</Label>
+                                    <Input
+                                        value={form.data.location}
+                                        onChange={(e) => form.setData('location', e.target.value)}
+                                        placeholder="e.g., Warehouse A - Shelf 12"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Site</Label>
+                                    <Select
+                                        value={form.data.site_id}
+                                        onValueChange={(v) => form.setData('site_id', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Site" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">
+                                                Global (All Sites)
+                                            </SelectItem>
+                                            {sites.map((site: any) => (
+                                                <SelectItem key={site.id} value={String(site.id)}>
+                                                    {site.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <Label>Asset Type</Label>
+                                    <Select
+                                        value={form.data.asset_type_id}
+                                        onValueChange={(v) => form.setData('asset_type_id', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Asset Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">
+                                                None (Unassociated)
+                                            </SelectItem>
+                                            {assetTypes.map((type: any) => (
+                                                <SelectItem key={type.id} value={String(type.id)}>
+                                                    {type.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setCreateDialogOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={form.processing}>
+                                {form.processing ? 'Saving...' : 'Save Part'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>

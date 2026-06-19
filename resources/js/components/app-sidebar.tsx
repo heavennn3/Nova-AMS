@@ -13,6 +13,7 @@ import {
     Headset,
     Trash2,
     Settings,
+    History,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -66,7 +67,7 @@ const navSections: NavSection[] = [
                 icon: Activity,
                 module: 'Asset Inventory',
             },
-            { title: 'Spare Parts', href: '/maintenance/parts', icon: Wrench },
+            { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
             {
                 title: 'Master Data',
                 href: masterData(),
@@ -256,7 +257,7 @@ const navSections: NavSection[] = [
             {
                 title: 'System Activity Logs',
                 href: '/security/logs',
-                icon: Headset,
+                icon: History,
                 module: 'System Settings',
             },
             {

@@ -88,7 +88,7 @@ export default function OperationsMaintenance() {
                             </div>
                         </Link>
                         <Link
-                            href="/maintenance/parts"
+                            href="/spare-parts/dashboard"
                             className="flex items-center rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
                         >
                             <Package className="mr-3 h-8 w-8 rounded-md bg-indigo-100 p-1.5 text-indigo-500" />
