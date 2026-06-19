@@ -219,6 +219,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/sites/{id}', [\App\Http\Controllers\AdminSiteManagementController::class, 'destroy'])->name('admin.sites.destroy');
             Route::get('/sites/{id}/users', [\App\Http\Controllers\AdminSiteManagementController::class, 'getSiteUsers'])->name('admin.sites.users');
             Route::post('/sites/{id}/admin', [\App\Http\Controllers\AdminSiteManagementController::class, 'assignSiteAdmin'])->name('admin.sites.assign-admin');
+
+            // Page Permissions Management Routes
+            Route::get('/page-permissions', [\App\Http\Controllers\PagePermissionController::class, 'index'])->name('admin.page-permissions');
+            Route::get('/page-permissions/user/{user}', [\App\Http\Controllers\PagePermissionController::class, 'getUserPermissions'])->name('admin.page-permissions.user');
+            Route::post('/page-permissions/user/{user}', [\App\Http\Controllers\PagePermissionController::class, 'updateUserPermissions'])->name('admin.page-permissions.user.update');
+            Route::post('/page-permissions/bulk', [\App\Http\Controllers\PagePermissionController::class, 'bulkUpdatePermissions'])->name('admin.page-permissions.bulk');
+            Route::post('/page-permissions/copy', [\App\Http\Controllers\PagePermissionController::class, 'copyPermissions'])->name('admin.page-permissions.copy');
+            Route::get('/page-permissions/stats', [\App\Http\Controllers\PagePermissionController::class, 'getStatistics'])->name('admin.page-permissions.stats');
         });
 
         // Recycle bin bulk operations

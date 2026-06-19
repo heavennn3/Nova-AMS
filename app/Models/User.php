@@ -57,4 +57,94 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(SupportTicket::class, 'assigned_to');
     }
+
+    /**
+     * Get all page permissions for this user
+     */
+    public function pagePermissions()
+    {
+        return $this->hasMany(UserPagePermission::class);
+    }
+
+    /**
+     * Get all pages this user has permissions for
+     */
+    public function pages()
+    {
+        return $this->belongsToMany(PagePermission::class, 'user_page_permissions')
+            ->withPivot('can_create', 'can_read', 'can_update', 'can_delete')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if user has specific CRUD permission on a page
+     */
+    public function hasPagePermission(string $pageName, string $permission): bool
+    {
+        // First check if super admin
+        if ($this->hasRole('Admin')) {
+            return true;
+        }
+
+        $pagePermission = $this->pagePermissions()
+            ->whereHas('pagePermission', function ($query) use ($pageName) {
+                $query->where('name', $pageName)->active();
+            })
+            ->first();
+
+        if (!$pagePermission) {
+            return false;
+        }
+
+        return $pagePermission->hasPermission($permission);
+    }
+
+    /**
+     * Get all granted permissions for a specific page
+     */
+    public function getPagePermissions(string $pageName): array
+    {
+        if ($this->hasRole('Admin')) {
+            return ['create', 'read', 'update', 'delete'];
+        }
+
+        $pagePermission = $this->pagePermissions()
+            ->whereHas('pagePermission', function ($query) use ($pageName) {
+                $query->where('name', $pageName)->active();
+            })
+            ->first();
+
+        return $pagePermission ? $pagePermission->granted_permissions : [];
+    }
+
+    /**
+     * Grant or revoke specific CRUD permission on a page
+     */
+    public function setPagePermission(string $pageName, string $permission, bool $grant): bool
+    {
+        $page = PagePermission::where('name', $pageName)->active()->first();
+
+        if (!$page) {
+            return false;
+        }
+
+        $userPagePerm = UserPagePermission::firstOrCreate(
+            [
+                'user_id' => $this->id,
+                'page_permission_id' => $page->id,
+            ],
+            [
+                'can_create' => false,
+                'can_read' => false,
+                'can_update' => false,
+                'can_delete' => false,
+            ]
+        );
+
+        $permissionField = "can_{$permission}";
+        $userPagePerm->$permissionField = $grant;
+        $userPagePerm->save();
+
+        return true;
+    }
 }

@@ -100,6 +100,15 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
             link: '/security/roles',
         },
         {
+            id: 'page-permissions',
+            title: 'Page Permissions',
+            description: 'User CRUD permissions per page',
+            icon: ShieldCheck,
+            color: 'text-purple-500',
+            bg: 'bg-purple-500/10',
+            link: '/admin/page-permissions',
+        },
+        {
             id: 'sites',
             title: 'Sites',
             description: 'Manage sites, locations, and site administrators',
