@@ -7,7 +7,7 @@ import { NotificationBell } from '@/components/notification-bell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 
 import {
@@ -96,21 +96,21 @@ export function AppSidebarHeader({
                         {isCreateOpen && (
                             <div className="absolute right-0 mt-1.5 w-48 z-50 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 slide-in-from-top-1">
                                 <button
-                                    onClick={() => console.log('Create Asset Triggered')}
+                                    onClick={() => router.visit('/assets/create')}
                                     className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                 >
                                     <Package className="mr-2 h-4 w-4 opacity-70" />
                                     <span>Create Asset</span>
                                 </button>
                                 <button
-                                    onClick={() => console.log('Create User Triggered')}
+                                    onClick={() => router.visit('/users/create')}
                                     className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                 >
                                     <Users className="mr-2 h-4 w-4 opacity-70" />
                                     <span>Create User</span>
                                 </button>
                                 <button
-                                    onClick={() => console.log('Create Spare Part Triggered')}
+                                    onClick={() => router.visit('/spare-parts')}
                                     className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                 >
                                     <Settings2 className="mr-2 h-4 w-4 opacity-70" />
