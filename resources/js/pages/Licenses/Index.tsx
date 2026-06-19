@@ -102,6 +102,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
     const handleEdit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!selectedLicense) {
+            toast.error('No license selected');
+            return;
+        }
+
         const data = {
             ...form.data,
             vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
@@ -132,6 +137,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     };
 
     const handleDelete = () => {
+        if (!selectedLicense) {
+            toast.error('No license selected');
+            return;
+        }
+
         router.delete(`/licenses/${selectedLicense.id}`, {
             onSuccess: () => {
                 setIsDeleteOpen(false);
