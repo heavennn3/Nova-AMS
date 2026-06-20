@@ -8,8 +8,10 @@ use App\Models\Asset;
 use App\Models\Site;
 use App\Models\WorkOrder;
 use App\Models\SupportTicket;
+use App\Models\Withdrawal;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -148,6 +150,27 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Overdue Checkouts (Withdrawals) — 5 latest
+        $overdueCheckouts = Withdrawal::with(['asset', 'user'])
+            ->where('status', 'active')
+            ->whereNotNull('expected_return_date')
+            ->where('expected_return_date', '<', Carbon::today())
+            ->latest('expected_return_date')
+            ->limit(5)
+            ->get()
+            ->map(function ($w) {
+                $daysLate = Carbon::parse($w->expected_return_date)->diffInDays(Carbon::today());
+                return [
+                    'id' => $w->id,
+                    'asset_id' => $w->asset?->asset_id ?? '—',
+                    'asset_name' => $w->asset?->product_name ?? $w->asset?->asset_name ?? '—',
+                    'user_name' => $w->user?->name ?? 'Unknown',
+                    'checkout_date' => $w->withdrawal_date?->format('Y-m-d'),
+                    'expected_return_date' => $w->expected_return_date?->format('Y-m-d'),
+                    'days_late' => (int) $daysLate,
+                ];
+            });
+
         return Inertia::render('dashboard', [
             'stats' => [
                 'totalAssets' => $totalAssets,
@@ -164,6 +187,7 @@ class DashboardController extends Controller
                 'monthlyAssets' => $monthlyAssets,
             ],
             'recentActivities' => $recentActivities,
+            'overdueCheckouts' => $overdueCheckouts,
         ]);
     }
 }

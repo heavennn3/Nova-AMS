@@ -29,7 +29,7 @@ export default function OperationsMaintenance() {
                     <Wrench className="mr-3 h-8 w-8 text-primary" />
                     Operations & Maintenance Dashboard
                 </h1>
-             
+
             </div>
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -110,11 +110,14 @@ export default function OperationsMaintenance() {
                                 <h3 className="text-sm font-semibold">
                                     Technician Assignment
                                 </h3>
-                               
+
                             </div>
                         </Link>
                     </CardContent>
                 </Card>
+
+
+
 
                 <Card className="border-t-4 border-t-amber-500">
                     <CardHeader>
