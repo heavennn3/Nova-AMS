@@ -249,8 +249,8 @@ const navSections: NavSection[] = [
         title: 'OTHERS',
         items: [
             {
-                title: 'Chat',
-                href: '/support/tickets',
+                title: 'Requests',
+                href: '/requests',
                 icon: Headset,
                 module: 'Asset Inventory',
             },
@@ -295,30 +295,24 @@ export function AppSidebar() {
 
     const filteredNavSections = navSections
         .map((section) => {
-            // Remove entire OPERATIONS & MAINTENANCE section for normal user
-            if (!isAdmin && section.title === 'OPERATIONS & MAINTENANCE') {
-                return null;
-            }
-
             return {
                 ...section,
                 items: section.items.filter((item) => {
-                    // Standard module access check
-                    if (!canAccess((item as any).module)) return false;
-
-                    // Normal user restrictions
                     if (!isAdmin) {
-                        const title = item.title;
-                        if (
-                            title === 'Spare Parts' ||
-                            title === 'Asset Lifecycle' ||
-                            title === 'Software License Management'
-                        ) {
-                            return false;
-                        }
+                        // Explicitly allowed items for normal users
+                        const allowedForNormalUser = [
+                            'Dashboard',
+                            'Asset Inventory',
+                            'Asset Withdrawal', // checkin / out
+                            'Maintenance Operations', // maintence
+                            'Requests', // request
+                            'System Activity Logs', // transaction(every trans history)
+                        ];
+                        return allowedForNormalUser.includes(item.title);
                     }
 
-                    return true;
+                    // Standard module access check for Admins or users with specific roles
+                    return canAccess((item as any).module);
                 }),
             };
         })
