@@ -43,9 +43,19 @@ class AssetController extends Controller
             return $data;
         });
 
+        $user = auth()->user();
+        if ($user && $user->hasRole('Admin')) {
+            $sites = \App\Models\Site::all();
+        } else {
+            $sites = $user->sites;
+            if ($sites->isEmpty() && $user->site_id) {
+                $sites = \App\Models\Site::where('id', $user->site_id)->get();
+            }
+        }
+
         return Inertia::render('Assets/Index', [
             'assets' => $assets,
-            'sites' => \App\Models\Site::all()
+            'sites' => $sites
         ]);
     }
 

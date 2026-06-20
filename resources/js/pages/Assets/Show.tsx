@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Edit,
@@ -53,6 +53,9 @@ import {
 import { toast } from 'sonner';
 
 export default function Show({ asset, users = [] }: { asset: any; users?: any[] }) {
+    const { auth } = usePage<any>().props;
+    const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
+
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -436,34 +439,38 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 </Button>
                             </Link>
 
-                            <Link href={`/assets/${asset.id}/edit`}>
-                                <Button variant="ghost" size="icon" title="Edit Asset" className="rounded-lg h-9 w-9 text-amber-500 hover:bg-amber-500/10">
-                                    <Edit className="h-4.5 w-4.5" />
-                                </Button>
-                            </Link>
+                            {isAdmin && (
+                                <>
+                                    <Link href={`/assets/${asset.id}/edit`}>
+                                        <Button variant="ghost" size="icon" title="Edit Asset" className="rounded-lg h-9 w-9 text-amber-500 hover:bg-amber-500/10">
+                                            <Edit className="h-4.5 w-4.5" />
+                                        </Button>
+                                    </Link>
 
-                            {/* Toggle checkout/checkin based on active assignment */}
-                            {activeAssignment ? (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsCheckinOpen(true)}
-                                    title="Check In Asset"
-                                    className="rounded-lg h-9 w-9 text-blue-500 hover:bg-blue-500/10"
-                                >
-                                    <UserMinus className="h-4.5 w-4.5" />
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsCheckoutOpen(true)}
-                                    title="Check Out Asset"
-                                    className="rounded-lg h-9 w-9 text-green-500 hover:bg-green-500/10"
-                                    disabled={asset.status === 'retired' || asset.status === 'maintenance'}
-                                >
-                                    <UserPlus className="h-4.5 w-4.5" />
-                                </Button>
+                                    {/* Toggle checkout/checkin based on active assignment */}
+                                    {activeAssignment ? (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setIsCheckinOpen(true)}
+                                            title="Check In Asset"
+                                            className="rounded-lg h-9 w-9 text-blue-500 hover:bg-blue-500/10"
+                                        >
+                                            <UserMinus className="h-4.5 w-4.5" />
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setIsCheckoutOpen(true)}
+                                            title="Check Out Asset"
+                                            className="rounded-lg h-9 w-9 text-green-500 hover:bg-green-500/10"
+                                            disabled={asset.status === 'retired' || asset.status === 'maintenance'}
+                                        >
+                                            <UserPlus className="h-4.5 w-4.5" />
+                                        </Button>
+                                    )}
+                                </>
                             )}
 
                             <Button
@@ -476,15 +483,17 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 <Printer className="h-4.5 w-4.5" />
                             </Button>
 
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setIsDeleteOpen(true)}
-                                title="Delete Asset"
-                                className="rounded-lg h-9 w-9 text-red-500 hover:bg-red-500/10"
-                            >
-                                <Trash2 className="h-4.5 w-4.5" />
-                            </Button>
+                            {isAdmin && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsDeleteOpen(true)}
+                                    title="Delete Asset"
+                                    className="rounded-lg h-9 w-9 text-red-500 hover:bg-red-500/10"
+                                >
+                                    <Trash2 className="h-4.5 w-4.5" />
+                                </Button>
+                            )}
                         </div>
 
                         {/* Sidebar Details Metadata List */}
