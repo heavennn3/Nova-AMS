@@ -14,6 +14,8 @@ import {
     Trash2,
     Settings,
     History,
+    MessageSquare,
+    ClipboardList,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -251,7 +253,13 @@ const navSections: NavSection[] = [
             {
                 title: 'Requests',
                 href: '/requests',
-                icon: Headset,
+                icon: ClipboardList,
+                module: 'Asset Inventory',
+            },
+            {
+                title: 'Chat',
+                href: '/support/tickets',
+                icon: MessageSquare,
                 module: 'Asset Inventory',
             },
             {
@@ -306,6 +314,7 @@ export function AppSidebar() {
                             'Asset Withdrawal', // checkin / out
                             'Maintenance Operations', // maintence
                             'Requests', // request
+                            'Chat', // live chat
                             'System Activity Logs', // transaction(every trans history)
                         ];
                         return allowedForNormalUser.includes(item.title);
