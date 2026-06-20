@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
