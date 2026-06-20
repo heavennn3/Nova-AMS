@@ -23,6 +23,7 @@ import {
     Clock,
     MapPin,
     CalendarClock,
+    ShieldAlert,
 } from 'lucide-react';
 import {
     ResponsiveContainer,
@@ -67,6 +68,7 @@ export default function Dashboard({
     charts = { assetsByStatus: [], assetsBySite: [], monthlyAssets: [] },
     recentActivities = [],
     overdueCheckouts = [],
+    warrantyExpiring = [],
 }: any) {
     const [telemetry, setTelemetry] = useState({
         cpu: '0.0',
@@ -430,84 +432,166 @@ export default function Dashboard({
                 </Card>
             </div>
 
-            {/* Overdue Checkouts Section */}
-            <Card className="border border-orange-200 dark:border-orange-900/30">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <div>
-                        <CardTitle className="text-orange-600 dark:text-orange-400 flex items-center">
-                            <CalendarClock className="mr-2 h-5 w-5" /> Overdue Checkouts
-                        </CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Assets checked out past their expected return date.</p>
-                    </div>
-                    <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
-                        {overdueCheckouts.length} Overdue
-                    </span>
-                </CardHeader>
-                <CardContent>
-                    {overdueCheckouts.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                        <th className="pb-3 pl-2">Asset</th>
-                                        <th className="pb-3">Person</th>
-                                        <th className="pb-3">Checkout Date</th>
-                                        <th className="pb-3 pr-2 text-right">Days Late</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border/40 text-sm">
-                                    {overdueCheckouts.map((item: any) => (
-                                        <tr key={item.id} className="hover:bg-muted/10 transition-colors">
-                                            <td className="py-3 pl-2">
-                                                <Link
-                                                    href={`/withdrawals/${item.id}`}
-                                                    className="font-semibold text-primary hover:underline hover:text-primary/80 transition-colors cursor-pointer"
-                                                >
-                                                    {item.asset_name}
-                                                </Link>
-                                                <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.asset_id}</p>
-                                            </td>
-                                            <td className="py-3">
-                                                <div className="flex items-center space-x-2">
-                                                    <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">
-                                                        {item.user_name.substring(0, 2)}
-                                                    </div>
-                                                    <span className="font-medium text-foreground">{item.user_name}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-3 font-mono text-xs text-muted-foreground">
-                                                {item.checkout_date}
-                                            </td>
-                                            <td className="py-3 pr-2 text-right">
-                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${
-                                                    item.days_late > 14
-                                                        ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
-                                                        : item.days_late > 7
-                                                        ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
-                                                }`}>
-                                                    {item.days_late}d late
-                                                </span>
-                                            </td>
+            {/* Overdue Checkouts & Warranty Expiring Grid */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {/* Overdue Checkouts Section */}
+                <Card className="border border-orange-200 dark:border-orange-900/30">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <div>
+                            <CardTitle className="text-orange-600 dark:text-orange-400 flex items-center">
+                                <CalendarClock className="mr-2 h-5 w-5" /> Overdue Checkouts
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground mt-1">Assets checked out past their expected return date.</p>
+                        </div>
+                        <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                            {overdueCheckouts.length} Overdue
+                        </span>
+                    </CardHeader>
+                    <CardContent>
+                        {overdueCheckouts.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            <th className="pb-3 pl-2">Asset</th>
+                                            <th className="pb-3">Person</th>
+                                            <th className="pb-3">Checkout Date</th>
+                                            <th className="pb-3 pr-2 text-right">Days Late</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/40 text-sm">
+                                        {overdueCheckouts.map((item: any) => (
+                                            <tr key={item.id} className="hover:bg-muted/10 transition-colors">
+                                                <td className="py-3 pl-2">
+                                                    <Link
+                                                        href={`/withdrawals/${item.id}`}
+                                                        className="font-semibold text-primary hover:underline hover:text-primary/80 transition-colors cursor-pointer"
+                                                    >
+                                                        {item.asset_name}
+                                                    </Link>
+                                                    <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.asset_id}</p>
+                                                </td>
+                                                <td className="py-3">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">
+                                                            {item.user_name.substring(0, 2)}
+                                                        </div>
+                                                        <span className="font-medium text-foreground">{item.user_name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 font-mono text-xs text-muted-foreground">
+                                                    {item.checkout_date}
+                                                </td>
+                                                <td className="py-3 pr-2 text-right">
+                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${
+                                                        item.days_late > 14
+                                                            ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
+                                                            : item.days_late > 7
+                                                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                                                    }`}>
+                                                        {item.days_late}d late
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="py-8 text-center text-muted-foreground text-xs">
+                                No overdue checkouts. All assets returned on time.
+                            </div>
+                        )}
+                        {overdueCheckouts.length > 0 && (
+                            <div className="mt-4 flex justify-center">
+                                <Button variant="ghost" className="text-xs" asChild>
+                                    <Link href="/withdrawals">View All Withdrawals</Link>
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Warranty Expiring Soon Section */}
+                <Card className="border border-purple-200 dark:border-purple-900/30">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <div>
+                            <CardTitle className="text-purple-600 dark:text-purple-400 flex items-center">
+                                <ShieldAlert className="mr-2 h-5 w-5" /> Warranty Expiring Soon
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground mt-1">Assets with warranty expiring within the next 90 days.</p>
                         </div>
-                    ) : (
-                        <div className="py-8 text-center text-muted-foreground text-xs">
-                            No overdue checkouts. All assets returned on time.
-                        </div>
-                    )}
-                    {overdueCheckouts.length > 0 && (
-                        <div className="mt-4 flex justify-center">
-                            <Button variant="ghost" className="text-xs" asChild>
-                                <Link href="/withdrawals">View All Withdrawals</Link>
-                            </Button>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                            {warrantyExpiring.length} Expiring
+                        </span>
+                    </CardHeader>
+                    <CardContent>
+                        {warrantyExpiring.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            <th className="pb-3 pl-2">Asset</th>
+                                            <th className="pb-3">Category</th>
+                                            <th className="pb-3">Expiry Date</th>
+                                            <th className="pb-3 pr-2 text-right">Remaining</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/40 text-sm">
+                                        {warrantyExpiring.map((item: any) => (
+                                            <tr key={item.id} className="hover:bg-muted/10 transition-colors">
+                                                <td className="py-3 pl-2">
+                                                    <Link
+                                                        href={`/assets/${item.id}`}
+                                                        className="font-semibold text-primary hover:underline hover:text-primary/80 transition-colors cursor-pointer"
+                                                    >
+                                                        {item.asset_name}
+                                                    </Link>
+                                                    <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.asset_id}</p>
+                                                </td>
+                                                <td className="py-3">
+                                                    <span className="inline-flex items-center text-xs text-muted-foreground">
+                                                        {item.category}
+                                                    </span>
+                                                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                                                        <MapPin className="inline h-3 w-3 mr-0.5" />{item.site}
+                                                    </p>
+                                                </td>
+                                                <td className="py-3 font-mono text-xs text-muted-foreground">
+                                                    {item.expiry_date}
+                                                </td>
+                                                <td className="py-3 pr-2 text-right">
+                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${
+                                                        item.days_remaining <= 7
+                                                            ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
+                                                            : item.days_remaining <= 30
+                                                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                                                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                                                    }`}>
+                                                        {item.days_remaining}d left
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="py-8 text-center text-muted-foreground text-xs">
+                                No warranties expiring in the next 90 days.
+                            </div>
+                        )}
+                        {warrantyExpiring.length > 0 && (
+                            <div className="mt-4 flex justify-center">
+                                <Button variant="ghost" className="text-xs" asChild>
+                                    <Link href="/assets">View All Assets</Link>
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Recent Activities Section (All Users + DateTime + Location) */}
             <Card>

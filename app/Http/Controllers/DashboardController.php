@@ -171,6 +171,56 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Warranty Expiring Soon — 5 soonest within 90 days
+        $today = Carbon::today();
+        $ninetyDaysLater = Carbon::today()->addDays(90);
+
+        $warrantyExpiring = Asset::with(['category', 'site'])
+            ->where(function ($query) use ($today, $ninetyDaysLater) {
+                // Assets with explicit warranty_expiry_date
+                $query->where(function ($q) use ($today, $ninetyDaysLater) {
+                    $q->whereNotNull('warranty_expiry_date')
+                      ->whereBetween('warranty_expiry_date', [$today, $ninetyDaysLater]);
+                })
+                // OR assets with purchase_date + warranty_months
+                ->orWhere(function ($q) use ($today, $ninetyDaysLater) {
+                    $q->whereNotNull('purchase_date')
+                      ->whereNotNull('warranty_months')
+                      ->where('warranty_months', '>', 0)
+                      ->whereRaw(
+                          'DATE_ADD(purchase_date, INTERVAL warranty_months MONTH) BETWEEN ? AND ?',
+                          [$today->toDateString(), $ninetyDaysLater->toDateString()]
+                      );
+                });
+            })
+            ->get()
+            ->map(function ($asset) use ($today) {
+                // Determine expiry date
+                $expiryDate = $asset->warranty_expiry_date
+                    ? Carbon::parse($asset->warranty_expiry_date)
+                    : ($asset->purchase_date && $asset->warranty_months
+                        ? Carbon::parse($asset->purchase_date)->addMonths($asset->warranty_months)
+                        : null);
+
+                if (!$expiryDate) return null;
+
+                $daysRemaining = (int) $today->diffInDays($expiryDate, false);
+
+                return [
+                    'id' => $asset->id,
+                    'asset_id' => $asset->asset_id,
+                    'asset_name' => $asset->product_name ?? $asset->asset_name ?? '—',
+                    'category' => $asset->category?->name ?? '—',
+                    'site' => $asset->site?->name ?? '—',
+                    'expiry_date' => $expiryDate->format('Y-m-d'),
+                    'days_remaining' => max(0, $daysRemaining),
+                ];
+            })
+            ->filter()
+            ->sortBy('days_remaining')
+            ->take(5)
+            ->values();
+
         return Inertia::render('dashboard', [
             'stats' => [
                 'totalAssets' => $totalAssets,
@@ -188,6 +238,7 @@ class DashboardController extends Controller
             ],
             'recentActivities' => $recentActivities,
             'overdueCheckouts' => $overdueCheckouts,
+            'warrantyExpiring' => $warrantyExpiring,
         ]);
     }
 }
