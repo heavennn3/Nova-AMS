@@ -26,10 +26,15 @@ import {
     Check,
     Info,
     User,
-    Clock,
     Calendar,
     MessageSquare,
     TrendingDown,
+    Eye,
+    Copy,
+    Printer,
+    Upload,
+    Download,
+    ScanLine,
 } from 'lucide-react';
 import {
     Dialog,
@@ -57,6 +62,8 @@ export default function AssetIndex({
     assets: any[];
     sites?: any[];
 }) {
+    const { auth } = usePage<any>().props;
+    const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
     const [selectedSiteId, setSelectedSiteId] = useState<string>(() => {
         return sites && sites.length > 0 ? sites[0]?.id?.toString() || '' : '';
     });
@@ -89,60 +96,72 @@ export default function AssetIndex({
             {
                 accessorKey: 'asset_id',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Asset ID" />
+                    <DataTableColumnHeader column={column} title="Asset Tag" />
                 ),
                 cell: ({ row }: any) => (
                     <Link
                         href={`/assets/${row.original.id}`}
-                        className="text-primary hover:underline font-mono font-semibold"
+                        className="text-emerald-600 hover:underline font-mono font-medium text-sm"
                     >
                         {row.getValue('asset_id')}
                     </Link>
                 ),
             },
             {
-                accessorKey: 'category',
+                id: 'name',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Category" />
+                    <DataTableColumnHeader column={column} title="Name" />
+                ),
+                cell: ({ row }: any) => (
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground">
+                                {row.original.product_name || row.original.asset_name || 'Unnamed Asset'}
+                            </span>
+                            {row.original.quantity > 1 && (
+                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800">
+                                    Batch ×{row.original.quantity} pcs
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                            {row.original.brand || row.original.vendor || 'Unknown Brand'}
+                        </span>
+                    </div>
                 ),
             },
             {
-                accessorKey: 'type',
+                accessorKey: 'category',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Type" />
+                    <DataTableColumnHeader column={column} title="CATEGORY" />
+                ),
+                cell: ({ row }: any) => (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+                        <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0"></span>
+                        {row.original.category || '—'}
+                    </div>
                 ),
             },
             {
                 accessorKey: 'site',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Location" />
+                    <DataTableColumnHeader column={column} title="DEPARTMENT" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="text-muted-foreground text-sm font-medium">
+                        {row.original.site || '—'}
+                    </span>
                 ),
             },
             {
-                accessorKey: 'quantity',
+                id: 'assigned_to',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Quantity" />
+                    <DataTableColumnHeader column={column} title="ASSIGNED TO" />
                 ),
-            },
-            {
-                accessorKey: 'vendor',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Vendor" />
-                ),
-            },
-            {
-                accessorKey: 'product_name',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Product" />
-                ),
-            },
-            {
-                accessorKey: 'purchase_year',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader
-                        column={column}
-                        title="Purchase Year"
-                    />
+                cell: ({ row }: any) => (
+                    <span className="text-muted-foreground text-sm font-medium">
+                        {row.original.assignment?.user_name || '—'}
+                    </span>
                 ),
             },
             {
@@ -155,21 +174,21 @@ export default function AssetIndex({
                     const assignment = row.original.assignment;
                     const statusColors: Record<string, string> = {
                         available:
-                            'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                        in_use: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                            'border-green-200 bg-green-50 text-green-700 dark:border-green-900/30 dark:bg-green-900/10 dark:text-green-400',
+                        in_use: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400',
                         maintenance:
-                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-                        faulty: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                            'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-900/30 dark:bg-yellow-900/10 dark:text-yellow-400',
+                        faulty: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400',
                         degraded:
-                            'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-                        new: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+                            'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/30 dark:bg-orange-900/10 dark:text-orange-400',
+                        new: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-400',
                         retired:
-                            'bg-slate-100 text-slate-800 dark:bg-slate-800/50 dark:text-slate-300',
+                            'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800/50 dark:bg-slate-800/10 dark:text-slate-400',
                     };
 
                     const labels: Record<string, string> = {
                         available: 'Available',
-                        in_use: 'In Use',
+                        in_use: 'Assigned',
                         maintenance: 'Maintenance',
                         faulty: 'Faulty',
                         degraded: 'Degraded',
@@ -179,12 +198,12 @@ export default function AssetIndex({
 
                     const colorClass =
                         statusColors[status] ||
-                        'bg-secondary text-secondary-foreground';
+                        'border-secondary bg-secondary/50 text-secondary-foreground';
 
                     return (
                         <div className="flex items-center gap-1.5">
                             <span
-                                className={`rounded px-2 py-1 text-[10px] font-bold tracking-wider uppercase ${colorClass}`}
+                                className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${colorClass}`}
                             >
                                 {labels[status] || status || 'Unknown'}
                             </span>
@@ -207,7 +226,7 @@ export default function AssetIndex({
                                                 Asset In Use
                                             </DialogTitle>
                                             <DialogDescription>
-                                                {row.original.product_name} (
+                                                {row.original.product_name || row.original.asset_name} (
                                                 {row.original.asset_id})
                                             </DialogDescription>
                                         </DialogHeader>
@@ -274,53 +293,56 @@ export default function AssetIndex({
                 },
             },
             {
+                id: 'condition',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="CONDITION" />
+                ),
+                cell: ({ row }: any) => {
+                    const condition = row.original.condition_status || 'good';
+                    const colorClass = condition.toLowerCase() === 'good'
+                        ? 'border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400'
+                        : 'border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-900/30 dark:bg-orange-900/10 dark:text-orange-400';
+                    return (
+                        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${colorClass}`}>
+                            {condition}
+                        </span>
+                    );
+                },
+            },
+            {
                 id: 'actions',
-                header: 'Actions',
+                header: 'ACTIONS',
                 cell: ({ row }: any) => {
                     const asset = row.original;
                     return (
-                        <div className="flex items-center space-x-2">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-8 px-2 text-amber-600 hover:text-amber-700"
-                                    >
-                                        <Wrench className="mr-1 h-4 w-4" />{' '}
-                                        Maint.
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <MaintenanceRequestForm asset={asset} />
-                                </DialogContent>
-                            </Dialog>
-
-                            <Link href={`/assets/${asset.id}/edit`}>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 px-2 text-blue-600"
-                                >
-                                    <Edit className="mr-1 h-4 w-4" /> Edit
-                                </Button>
+                        <div className="flex items-center space-x-1 text-muted-foreground">
+                            <Link href={`/assets/${asset.id}`} className="p-1.5 hover:text-primary transition-colors" title="View">
+                                <Eye className="h-4 w-4" />
                             </Link>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2 text-red-600 hover:bg-red-50"
-                                onClick={() => {
-                                    if (
-                                        confirm(
-                                            'Are you sure you want to delete this asset?',
-                                        )
-                                    ) {
-                                        router.delete(`/assets/${asset.id}`);
-                                    }
-                                }}
-                            >
-                                <Trash2 className="mr-1 h-4 w-4" /> Delete
-                            </Button>
+                            {isAdmin && (
+                                <>
+                                    <Link href={`/assets/${asset.id}/edit`} className="p-1.5 hover:text-blue-600 transition-colors" title="Edit">
+                                        <Edit className="h-4 w-4" />
+                                    </Link>
+                                    <button className="p-1.5 hover:text-amber-600 transition-colors" title="Duplicate">
+                                        <Copy className="h-4 w-4" />
+                                    </button>
+                                    <button className="p-1.5 hover:text-slate-800 transition-colors" title="Print Label">
+                                        <Printer className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                                        onClick={() => {
+                                            if (confirm('Are you sure you want to delete this asset?')) {
+                                                router.delete(`/assets/${asset.id}`);
+                                            }
+                                        }}
+                                        title="Delete"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </>
+                            )}
                         </div>
                     );
                 },
@@ -479,19 +501,26 @@ export default function AssetIndex({
 
             <div className="flex items-center justify-between pt-4">
                 <div className="space-y-1">
-                    <h2 className="text-lg font-semibold tracking-tight">
-                        NRSB Asset List
+                    <h2 className="text-2xl font-bold tracking-tight">
+                        Assets
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                        Maintenance Services for Air Traffic Management Systems
-                        in Kota Kinabalu Flight Information Region (KK FIR)
-                        Encompassing Sabah and Sarawak (CAAM.BKP.400-5/8/24)
+                        Manage your IT assets and equipment
                     </p>
                 </div>
                 <div className="flex space-x-3">
-                    
-                            <Button
+                    {isAdmin && (
+                        <Button
+                            variant="outline"
+                            className="text-muted-foreground shadow-sm"
+                            onClick={() => router.get(`/assets/upload?site_id=${selectedSiteId}`)}
+                        >
+                            <Upload className="mr-2 h-4 w-4" /> Import
+                        </Button>
+                    )}
+                    <Button
                         variant="outline"
+                        className="text-muted-foreground shadow-sm"
                         onClick={() => {
                             const headers = [
                                 'Asset ID',
@@ -524,19 +553,26 @@ export default function AssetIndex({
                             link.click();
                             document.body.removeChild(link);
                         }}
-                    > 
-                        <TrendingDown className="mr-2 h-4 w-4" />
-                        Export Data
+                    >
+                        <Download className="mr-2 h-4 w-4" /> Export
                     </Button>
-
-
-
-
-
-                    <Button onClick={() => setChoiceModalOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" /> Register New Asset
-                    </Button>
-                    
+                    {isAdmin && (
+                        <>
+                            <Button
+                                variant="outline"
+                                className="text-muted-foreground shadow-sm"
+                                onClick={() => router.get(`/assets/scan?site_id=${selectedSiteId}`)}
+                            >
+                                <ScanLine className="mr-2 h-4 w-4" /> Scan QR
+                            </Button>
+                            <Button 
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                                onClick={() => router.get(`/assets/create?site_id=${selectedSiteId}`)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" /> New Asset
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -613,7 +649,7 @@ export default function AssetIndex({
                             <div className="relative w-[280px]">
                                 <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                                 <Input
-                                    placeholder="Search asset ID, product, vendor..."
+                                    placeholder="Search by name, tag, serial..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="h-8 pl-8 text-sm"

@@ -286,6 +286,7 @@ export function AppSidebar() {
     const { auth } = usePage<any>().props;
 
     const modulePermissions: string[] = auth.user?.modulePermissions ?? [];
+    const isAdmin = auth.user?.roles?.includes('Admin') ?? false;
 
     const canAccess = (module?: string) => {
         if (!module) return true; // No restriction (e.g. Dashboard)
@@ -293,13 +294,35 @@ export function AppSidebar() {
     };
 
     const filteredNavSections = navSections
-        .map((section) => ({
-            ...section,
-            items: section.items.filter((item) =>
-                canAccess((item as any).module),
-            ),
-        }))
-        .filter((section) => section.items.length > 0);
+        .map((section) => {
+            // Remove entire OPERATIONS & MAINTENANCE section for normal user
+            if (!isAdmin && section.title === 'OPERATIONS & MAINTENANCE') {
+                return null;
+            }
+
+            return {
+                ...section,
+                items: section.items.filter((item) => {
+                    // Standard module access check
+                    if (!canAccess((item as any).module)) return false;
+
+                    // Normal user restrictions
+                    if (!isAdmin) {
+                        const title = item.title;
+                        if (
+                            title === 'Spare Parts' ||
+                            title === 'Asset Lifecycle' ||
+                            title === 'Software License Management'
+                        ) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }),
+            };
+        })
+        .filter((section): section is NavSection => section !== null && section.items.length > 0);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
