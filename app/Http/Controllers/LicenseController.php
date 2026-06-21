@@ -210,7 +210,15 @@ class LicenseController extends Controller
 
             return Inertia::render('Licenses/Show', [
                 'license' => $formattedLicense,
-                'users' => User::orderBy('name')->get(['id', 'name', 'email']),
+                'users' => User::with('site')->orderBy('name')->get(['id', 'name', 'email', 'site_id'])
+                    ->map(function ($u) {
+                        return [
+                            'id' => $u->id,
+                            'name' => $u->name,
+                            'email' => $u->email,
+                            'site' => $u->site ? $u->site->name : 'No Site',
+                        ];
+                    }),
                 'assets' => Asset::with('site')->orderBy('product_name')->get()
                     ->map(function($asset) {
                         return [
@@ -302,8 +310,12 @@ class LicenseController extends Controller
         return redirect()->route('licenses.index')->with('success', 'License updated successfully.');
     }
 
-    public function destroy(License $license)
+    public function destroy(Request $request, License $license)
     {
+        $validated = $request->validate([
+            'delete_reason' => 'required|string|max:1000',
+        ]);
+
         $assignedSeatsCount = $license->licenseSeats()
             ->where('seat_status', 'assigned')
             ->count();
@@ -312,9 +324,55 @@ class LicenseController extends Controller
             return redirect()->back()->with('error', "Cannot delete license. There are currently {$assignedSeatsCount} active assignments.");
         }
 
+        $license->delete_reason = $validated['delete_reason'];
+        $license->save();
         $license->delete();
 
         return redirect()->route('licenses.index')->with('success', 'License deleted successfully.');
+    }
+
+    public function trash()
+    {
+        $licenses = License::onlyTrashed()->with(['vendor', 'site'])->get()->map(function ($license) {
+            return [
+                'id' => $license->id,
+                'name' => $license->name,
+                'product_key' => $license->product_key,
+                'total_seats' => $license->total_seats,
+                'purchase_cost' => $license->purchase_cost,
+                'vendor' => $license->vendor ? $license->vendor->name : null,
+                'site' => $license->site ? $license->site->name : null,
+                'deleted_at' => $license->deleted_at->format('Y-m-d H:i:s'),
+                'delete_reason' => $license->delete_reason,
+            ];
+        });
+
+        return Inertia::render('Licenses/Trash', [
+            'licenses' => $licenses,
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $license = License::onlyTrashed()->findOrFail($id);
+        $license->delete_reason = null;
+        $license->save();
+        $license->restore();
+
+        return redirect()->route('licenses.trash')->with('success', 'License restored successfully.');
+    }
+
+    public function forceDelete($id)
+    {
+        $license = License::onlyTrashed()->findOrFail($id);
+
+        // Optional: you might want to force delete associated seats as well
+        $license->licenseSeats()->forceDelete();
+        $license->assignments()->forceDelete();
+
+        $license->forceDelete();
+
+        return redirect()->route('licenses.trash')->with('success', 'License permanently deleted.');
     }
 
     public function checkout(Request $request, LicenseSeat $seat)
@@ -331,6 +389,17 @@ class LicenseController extends Controller
         }
 
         $license = $seat->license;
+
+        if ($validated['target_type'] === 'user') {
+            $existing = LicenseSeat::where('license_id', $license->id)
+                ->where('seat_status', 'assigned')
+                ->where('assigned_to_user_id', $validated['user_id'])
+                ->exists();
+
+            if ($existing) {
+                return redirect()->back()->with('error', 'This user already has a seat assigned for this license.');
+            }
+        }
 
         DB::transaction(function () use ($seat, $validated, $license) {
             $assignmentType = $validated['target_type'] === 'user' ? 'user' : 'device';

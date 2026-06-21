@@ -35,6 +35,7 @@ class License extends Model
         'vendor_id',
         'site_id',
         'notes',
+        'delete_reason',
     ];
 
     protected $casts = [

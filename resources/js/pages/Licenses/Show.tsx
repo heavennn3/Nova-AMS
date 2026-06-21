@@ -13,6 +13,8 @@ import {
     Eye,
     EyeOff,
     Clipboard,
+    Check,
+    ChevronsUpDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/data-table/data-table';
@@ -35,11 +37,30 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 export default function LicenseShow({ license, users = [], assets = [] }: any) {
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [selectedSeat, setSelectedSeat] = useState<any>(null);
     const [keyVisible, setKeyVisible] = useState(false);
+    const [userComboboxOpen, setUserComboboxOpen] = useState(false);
+
+    const usersBySite = React.useMemo(() => {
+        const groups: Record<string, any[]> = {};
+        users.forEach((u: any) => {
+            const site = u.site || 'Global / Unassigned';
+            if (!groups[site]) groups[site] = [];
+            groups[site].push(u);
+        });
+        
+        const sortedKeys = Object.keys(groups).sort();
+        return sortedKeys.map(key => ({
+            site: key,
+            users: groups[key].sort((a, b) => a.name.localeCompare(b.name))
+        }));
+    }, [users]);
 
     const checkoutForm = useForm({
         target_type: 'user',
@@ -403,23 +424,56 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                             </div>
 
                             {checkoutForm.data.target_type === 'user' ? (
-                                <div className="space-y-2">
+                                <div className="space-y-2 flex flex-col">
                                     <label className="text-sm font-medium">Select User *</label>
-                                    <Select
-                                        value={checkoutForm.data.user_id}
-                                        onValueChange={(v) => checkoutForm.setData('user_id', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Search / Select User" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {users.map((u: any) => (
-                                                <SelectItem key={u.id} value={String(u.id)}>
-                                                    {u.name} ({u.email})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Popover open={userComboboxOpen} onOpenChange={setUserComboboxOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={userComboboxOpen}
+                                                className="justify-between w-full font-normal"
+                                            >
+                                                {checkoutForm.data.user_id
+                                                    ? users.find((u: any) => String(u.id) === checkoutForm.data.user_id)?.name || "User Selected"
+                                                    : "Search user by name..."}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[400px] p-0" align="start">
+                                            <Command>
+                                                <CommandInput placeholder="Search user..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No user found.</CommandEmpty>
+                                                    {usersBySite.map((group) => (
+                                                        <CommandGroup key={group.site} heading={group.site}>
+                                                            {group.users.map((user) => (
+                                                                <CommandItem
+                                                                    key={user.id}
+                                                                    value={`${user.name} ${user.email}`} // include both for searching
+                                                                    onSelect={() => {
+                                                                        checkoutForm.setData('user_id', String(user.id));
+                                                                        setUserComboboxOpen(false);
+                                                                    }}
+                                                                >
+                                                                    <Check
+                                                                        className={cn(
+                                                                            "mr-2 h-4 w-4",
+                                                                            checkoutForm.data.user_id === String(user.id) ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    <div className="flex flex-col">
+                                                                        <span>{user.name}</span>
+                                                                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                                                                    </div>
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    ))}
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
                             ) : (
                                 <div className="space-y-2">

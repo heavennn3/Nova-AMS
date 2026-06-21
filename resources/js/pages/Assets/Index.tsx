@@ -91,8 +91,8 @@ export default function AssetIndex({
         setChoiceModalOpen(false);
     };
 
-    const columns = React.useMemo(
-        () => [
+    const columns = React.useMemo(() => {
+        const baseColumns = [
             {
                 accessorKey: 'asset_id',
                 header: ({ column }: any) => (
@@ -124,16 +124,24 @@ export default function AssetIndex({
                                 </span>
                             )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                            {row.original.brand || row.original.vendor || 'Unknown Brand'}
-                        </span>
                     </div>
+                ),
+            },
+            {
+                accessorKey: 'type',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Asset Type" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="text-muted-foreground text-sm font-medium">
+                        {row.original.type || '—'}
+                    </span>
                 ),
             },
             {
                 accessorKey: 'category',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="CATEGORY" />
+                    <DataTableColumnHeader column={column} title="Category" />
                 ),
                 cell: ({ row }: any) => (
                     <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
@@ -143,47 +151,20 @@ export default function AssetIndex({
                 ),
             },
             {
-                accessorKey: 'site',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="DEPARTMENT" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="text-muted-foreground text-sm font-medium">
-                        {row.original.site || '—'}
-                    </span>
-                ),
-            },
-            {
-                id: 'assigned_to',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="ASSIGNED TO" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="text-muted-foreground text-sm font-medium">
-                        {row.original.assignment?.user_name || '—'}
-                    </span>
-                ),
-            },
-            {
                 accessorKey: 'status',
                 header: ({ column }: any) => (
                     <DataTableColumnHeader column={column} title="Status" />
                 ),
                 cell: ({ row }: any) => {
                     const status = row.original.status;
-                    const assignment = row.original.assignment;
                     const statusColors: Record<string, string> = {
-                        available:
-                            'border-green-200 bg-green-50 text-green-700 dark:border-green-900/30 dark:bg-green-900/10 dark:text-green-400',
+                        available: 'border-green-200 bg-green-50 text-green-700 dark:border-green-900/30 dark:bg-green-900/10 dark:text-green-400',
                         in_use: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400',
-                        maintenance:
-                            'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-900/30 dark:bg-yellow-900/10 dark:text-yellow-400',
+                        maintenance: 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-900/30 dark:bg-yellow-900/10 dark:text-yellow-400',
                         faulty: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400',
-                        degraded:
-                            'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/30 dark:bg-orange-900/10 dark:text-orange-400',
+                        degraded: 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/30 dark:bg-orange-900/10 dark:text-orange-400',
                         new: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-400',
-                        retired:
-                            'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800/50 dark:bg-slate-800/10 dark:text-slate-400',
+                        retired: 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800/50 dark:bg-slate-800/10 dark:text-slate-400',
                     };
 
                     const labels: Record<string, string> = {
@@ -196,98 +177,13 @@ export default function AssetIndex({
                         retired: 'Retired',
                     };
 
-                    const colorClass =
-                        statusColors[status] ||
-                        'border-secondary bg-secondary/50 text-secondary-foreground';
+                    const colorClass = statusColors[status] || 'border-secondary bg-secondary/50 text-secondary-foreground';
 
                     return (
                         <div className="flex items-center gap-1.5">
-                            <span
-                                className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${colorClass}`}
-                            >
+                            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${colorClass}`}>
                                 {labels[status] || status || 'Unknown'}
                             </span>
-                            {status === 'in_use' && assignment && (
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <button
-                                            className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/15 transition-colors hover:bg-blue-500/25"
-                                            title="View usage details"
-                                        >
-                                            <Info className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                                        </button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[420px]">
-                                        <DialogHeader>
-                                            <DialogTitle className="flex items-center gap-2">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                                                    <Info className="h-4 w-4 text-blue-500" />
-                                                </div>
-                                                Asset In Use
-                                            </DialogTitle>
-                                            <DialogDescription>
-                                                {row.original.product_name || row.original.asset_name} (
-                                                {row.original.asset_id})
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className="space-y-3 pt-2">
-                                            <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-3">
-                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600">
-                                                    <User className="h-4 w-4 text-white" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Checked out by
-                                                    </p>
-                                                    <p className="text-sm font-semibold">
-                                                        {assignment.user_name}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {assignment.user_email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="rounded-lg border bg-muted/50 p-3">
-                                                    <div className="mb-1 flex items-center gap-1.5">
-                                                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Assigned
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-sm font-medium">
-                                                        {assignment.assigned_at}
-                                                    </p>
-                                                </div>
-                                                <div className="rounded-lg border bg-muted/50 p-3">
-                                                    <div className="mb-1 flex items-center gap-1.5">
-                                                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Duration
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-sm font-medium">
-                                                        {assignment.duration}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            {assignment.remarks && (
-                                                <div className="rounded-lg border bg-muted/50 p-3">
-                                                    <div className="mb-1 flex items-center gap-1.5">
-                                                        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Remarks
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-sm">
-                                                        {assignment.remarks}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-                            )}
                         </div>
                     );
                 },
@@ -295,7 +191,7 @@ export default function AssetIndex({
             {
                 id: 'condition',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="CONDITION" />
+                    <DataTableColumnHeader column={column} title="Condition" />
                 ),
                 cell: ({ row }: any) => {
                     const condition = row.original.condition_status || 'good';
@@ -310,8 +206,22 @@ export default function AssetIndex({
                 },
             },
             {
+                accessorKey: 'vendor',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Vendor" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="text-muted-foreground text-sm font-medium">
+                        {row.original.vendor || '—'}
+                    </span>
+                ),
+            },
+        ];
+
+        if (isAdmin) {
+            baseColumns.push({
                 id: 'actions',
-                header: 'ACTIONS',
+                header: 'Actions',
                 cell: ({ row }: any) => {
                     const asset = row.original;
                     return (
@@ -319,37 +229,34 @@ export default function AssetIndex({
                             <Link href={`/assets/${asset.id}`} className="p-1.5 hover:text-primary transition-colors" title="View">
                                 <Eye className="h-4 w-4" />
                             </Link>
-                            {isAdmin && (
-                                <>
-                                    <Link href={`/assets/${asset.id}/edit`} className="p-1.5 hover:text-blue-600 transition-colors" title="Edit">
-                                        <Edit className="h-4 w-4" />
-                                    </Link>
-                                    <button className="p-1.5 hover:text-amber-600 transition-colors" title="Duplicate">
-                                        <Copy className="h-4 w-4" />
-                                    </button>
-                                    <button className="p-1.5 hover:text-slate-800 transition-colors" title="Print Label">
-                                        <Printer className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
-                                        onClick={() => {
-                                            if (confirm('Are you sure you want to delete this asset?')) {
-                                                router.delete(`/assets/${asset.id}`);
-                                            }
-                                        }}
-                                        title="Delete"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                </>
-                            )}
+                            <Link href={`/assets/${asset.id}/edit`} className="p-1.5 hover:text-blue-600 transition-colors" title="Edit">
+                                <Edit className="h-4 w-4" />
+                            </Link>
+                            <button className="p-1.5 hover:text-amber-600 transition-colors" title="Duplicate">
+                                <Copy className="h-4 w-4" />
+                            </button>
+                            <button className="p-1.5 hover:text-slate-800 transition-colors" title="Print Label">
+                                <Printer className="h-4 w-4" />
+                            </button>
+                            <button
+                                className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                                onClick={() => {
+                                    if (confirm('Are you sure you want to delete this asset?')) {
+                                        router.delete(`/assets/${asset.id}`);
+                                    }
+                                }}
+                                title="Delete"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
                         </div>
                     );
                 },
-            },
-        ],
-        [],
-    );
+            });
+        }
+
+        return baseColumns;
+    }, [isAdmin]);
 
     function MaintenanceRequestForm({ asset }: { asset: any }) {
         const { data, setData, post, processing, reset } = useForm({

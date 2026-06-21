@@ -23,6 +23,7 @@ class AssetController extends Controller
                 'product_name' => $asset->product_name,
                 'purchase_year' => $asset->purchase_year,
                 'status' => $asset->status,
+                'condition_status' => $asset->condition_status,
                 'assignment' => null,
             ];
 

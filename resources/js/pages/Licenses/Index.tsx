@@ -43,6 +43,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedLicense, setSelectedLicense] = useState<any>(null);
     const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
+    const [deleteReason, setDeleteReason] = useState('');
 
     // Validate data format
     useEffect(() => {
@@ -141,11 +142,17 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             toast.error('No license selected');
             return;
         }
+        if (!deleteReason.trim()) {
+            toast.error('Please provide a reason for deletion');
+            return;
+        }
 
         router.delete(`/licenses/${selectedLicense.id}`, {
+            data: { delete_reason: deleteReason },
             onSuccess: () => {
                 setIsDeleteOpen(false);
                 setSelectedLicense(null);
+                setDeleteReason('');
                 toast.success('Software license deleted successfully');
             },
             onError: (err) => {
@@ -374,14 +381,21 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         </p>
                     </div>
                 </div>
-                <Button
-                    onClick={() => {
-                        form.reset();
-                        setIsCreateOpen(true);
-                    }}
-                >
-                    <Plus className="mr-2 h-4 w-4" /> Add Software License
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Link href="/licenses/trash">
+                        <Button variant="outline">
+                            <Trash2 className="mr-2 h-4 w-4" /> Trash Bin
+                        </Button>
+                    </Link>
+                    <Button
+                        onClick={() => {
+                            form.reset();
+                            setIsCreateOpen(true);
+                        }}
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> Add Software License
+                    </Button>
+                </div>
             </div>
 
             {/* Metrics cards */}
@@ -814,16 +828,24 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Software License</DialogTitle>
+                        <DialogTitle className="text-rose-600 flex items-center gap-2">
+                            <Trash2 className="h-5 w-5" /> Delete License
+                        </DialogTitle>
                     </DialogHeader>
-                    <div className="py-4">
-                        <p>
-                            Are you sure you want to delete{' '}
-                            <strong>{selectedLicense?.name}</strong>?
+                    <div className="py-4 space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Are you sure you want to delete the license <strong>{selectedLicense?.name}</strong>? 
+                            This will move the license to the trash bin.
                         </p>
-                        <p className="mt-2 text-sm text-rose-600 font-medium">
-                            Warning: This will permanently remove the license. You can only delete licenses that have all seats checked in.
-                        </p>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Reason for deletion *</label>
+                            <Textarea 
+                                required
+                                placeholder="Please provide a reason for deleting this license..."
+                                value={deleteReason}
+                                onChange={(e) => setDeleteReason(e.target.value)}
+                            />
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button
@@ -832,7 +854,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         >
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={handleDelete}>
+                        <Button variant="destructive" onClick={handleDelete} disabled={!deleteReason.trim()}>
                             Confirm Delete
                         </Button>
                     </DialogFooter>
