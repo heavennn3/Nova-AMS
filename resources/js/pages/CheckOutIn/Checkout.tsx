@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Select,
     SelectContent,
@@ -17,11 +18,10 @@ import {
     ArrowDownToLine,
     Search,
     Package,
-    CheckCircle2,
     User,
-    Calendar,
-    Monitor,
     MapPin,
+    ChevronDown,
+    ChevronsDown,
 } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,6 @@ export default function Checkout({
     currentUser: { id: number; name: string; email: string };
 }) {
     const { data, setData, processing, errors } = useForm({
-        asset_id: '',
         reason: '',
         expected_return: '',
         checkout_date: new Date().toISOString().split('T')[0],
@@ -46,6 +45,8 @@ export default function Checkout({
 
     const [selectedCategoryId, setSelectedCategoryId] = useState('');
     const [assetSearch, setAssetSearch] = useState('');
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [visibleCount, setVisibleCount] = useState(10);
 
     const filteredAssets = useMemo(() => {
         let list = assets;
@@ -64,12 +65,41 @@ export default function Checkout({
         return list;
     }, [assets, selectedCategoryId, assetSearch]);
 
-    const selectedAsset = assets.find(a => a.id.toString() === data.asset_id);
+    const visibleAssets = filteredAssets.slice(0, visibleCount);
+    const hasMore = visibleCount < filteredAssets.length;
+
+    const toggleAsset = (id: number) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const toggleAll = () => {
+        const visibleIds = visibleAssets.map(a => a.id);
+        const allSelected = visibleIds.every(id => selectedIds.has(id));
+        if (allSelected) {
+            setSelectedIds(prev => {
+                const next = new Set(prev);
+                visibleIds.forEach(id => next.delete(id));
+                return next;
+            });
+        } else {
+            setSelectedIds(prev => {
+                const next = new Set(prev);
+                visibleIds.forEach(id => next.add(id));
+                return next;
+            });
+        }
+    };
+
+    const selectedAssets = assets.filter(a => selectedIds.has(a.id));
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         router.post('/checkout', {
-            asset_id: data.asset_id,
+            asset_ids: [...selectedIds],
             reason: data.reason,
             expected_return: data.expected_return || null,
         });
@@ -87,7 +117,7 @@ export default function Checkout({
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Check Out Asset</h1>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                            Select a category, choose an asset, then confirm checkout
+                            Select a category, choose assets, then confirm checkout
                         </p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => router.get('/checkout')}>
@@ -118,8 +148,9 @@ export default function Checkout({
                                 value={selectedCategoryId}
                                 onValueChange={(val) => {
                                     setSelectedCategoryId(val);
-                                    setData('asset_id', '');
+                                    setSelectedIds(new Set());
                                     setAssetSearch('');
+                                    setVisibleCount(10);
                                 }}
                             >
                                 <SelectTrigger className="w-full max-w-sm">
@@ -136,13 +167,16 @@ export default function Checkout({
                         </div>
                     </div>
 
-                    {/* Step 2: Choose Asset */}
+                    {/* Step 2: Choose Assets */}
                     {selectedCategoryId && (
                         <div className="rounded-lg border bg-card overflow-hidden">
                             <div className="border-b px-5 py-3 flex items-center gap-2 bg-muted/30">
                                 <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-foreground text-background text-[10px] font-bold">2</span>
-                                <h2 className="font-semibold text-sm">Choose Asset</h2>
-                                <span className="text-xs text-muted-foreground ml-auto">{filteredAssets.length} available</span>
+                                <h2 className="font-semibold text-sm">Choose Assets</h2>
+                                <span className="text-xs text-muted-foreground ml-auto">
+                                    {selectedIds.size > 0 && <span className="font-semibold text-foreground mr-2">{selectedIds.size} selected</span>}
+                                    {filteredAssets.length} available
+                                </span>
                             </div>
                             <div className="p-5 space-y-3">
                                 <div className="relative max-w-sm">
@@ -151,7 +185,7 @@ export default function Checkout({
                                         placeholder="Search name, tag, brand, serial..."
                                         className="pl-8 h-9"
                                         value={assetSearch}
-                                        onChange={(e) => setAssetSearch(e.target.value)}
+                                        onChange={(e) => { setAssetSearch(e.target.value); setVisibleCount(10); }}
                                     />
                                 </div>
 
@@ -159,7 +193,12 @@ export default function Checkout({
                                     <table className="w-full text-sm">
                                         <thead className="bg-muted/40 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
                                             <tr>
-                                                <th className="px-4 py-2.5 text-left w-10"></th>
+                                                <th className="px-4 py-2.5 text-left w-10">
+                                                    <Checkbox
+                                                        checked={visibleAssets.length > 0 && visibleAssets.every(a => selectedIds.has(a.id))}
+                                                        onCheckedChange={toggleAll}
+                                                    />
+                                                </th>
                                                 <th className="px-4 py-2.5 text-left">Asset Tag</th>
                                                 <th className="px-4 py-2.5 text-left">Name</th>
                                                 <th className="px-4 py-2.5 text-left">Brand</th>
@@ -169,22 +208,16 @@ export default function Checkout({
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y">
-                                            {filteredAssets.map(asset => {
-                                                const isSelected = data.asset_id === asset.id.toString();
+                                            {visibleAssets.map(asset => {
+                                                const isSelected = selectedIds.has(asset.id);
                                                 return (
                                                     <tr
                                                         key={asset.id}
-                                                        onClick={() => setData('asset_id', asset.id.toString())}
-                                                        className={`cursor-pointer transition-colors ${
-                                                            isSelected ? 'bg-primary/5' : 'hover:bg-muted/30'
-                                                        }`}
+                                                        onClick={() => toggleAsset(asset.id)}
+                                                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-muted/30'}`}
                                                     >
                                                         <td className="px-4 py-2.5">
-                                                            <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
-                                                                isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
-                                                            }`}>
-                                                                {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                                                            </div>
+                                                            <Checkbox checked={isSelected} onCheckedChange={() => toggleAsset(asset.id)} />
                                                         </td>
                                                         <td className="px-4 py-2.5 font-mono text-xs font-medium text-emerald-700">{asset.asset_id}</td>
                                                         <td className="px-4 py-2.5 font-medium">{asset.product_name}</td>
@@ -207,28 +240,60 @@ export default function Checkout({
                                         </tbody>
                                     </table>
                                 </div>
-                                <InputError message={errors.asset_id} />
+
+                                {/* Pagination */}
+                                {filteredAssets.length > 0 && (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span>Showing {Math.min(visibleCount, filteredAssets.length)} of {filteredAssets.length}</span>
+                                        {hasMore && (
+                                            <>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-7 text-xs"
+                                                    onClick={() => setVisibleCount(prev => prev + 10)}
+                                                >
+                                                    <ChevronDown className="mr-1 h-3 w-3" /> Show more
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 text-xs"
+                                                    onClick={() => setVisibleCount(filteredAssets.length)}
+                                                >
+                                                    <ChevronsDown className="mr-1 h-3 w-3" /> Show all
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                <InputError message={errors.asset_ids} />
                             </div>
                         </div>
                     )}
 
                     {/* Step 3: Details */}
-                    {data.asset_id && (
+                    {selectedIds.size > 0 && (
                         <div className="rounded-lg border bg-card overflow-hidden">
                             <div className="border-b px-5 py-3 flex items-center gap-2 bg-muted/30">
                                 <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-foreground text-background text-[10px] font-bold">3</span>
                                 <h2 className="font-semibold text-sm">Checkout Details</h2>
+                                <Badge variant="secondary" className="ml-auto text-xs">{selectedIds.size} asset(s)</Badge>
                             </div>
                             <div className="p-5 space-y-4">
-                                {/* Selected asset */}
-                                {selectedAsset && (
-                                    <div className="rounded-lg border bg-muted/20 p-3 text-sm flex items-center gap-3">
-                                        <Package className="h-4 w-4 text-muted-foreground shrink-0" />
-                                        <span className="font-medium">{selectedAsset.product_name}</span>
-                                        <span className="font-mono text-xs text-emerald-700">{selectedAsset.asset_id}</span>
-                                        {selectedAsset.brand && <span className="text-muted-foreground">• {selectedAsset.brand}</span>}
-                                    </div>
-                                )}
+                                {/* Selected assets summary */}
+                                <div className="rounded-lg border bg-muted/20 p-3 space-y-1 text-sm">
+                                    {selectedAssets.map(a => (
+                                        <div key={a.id} className="flex items-center gap-2">
+                                            <Package className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                            <span className="font-medium">{a.product_name}</span>
+                                            <span className="font-mono text-xs text-emerald-700">{a.asset_id}</span>
+                                        </div>
+                                    ))}
+                                </div>
 
                                 {/* Dates */}
                                 <div className="grid grid-cols-2 gap-4 max-w-lg">
@@ -270,10 +335,10 @@ export default function Checkout({
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={processing || !data.asset_id || !data.reason.trim()}
+                                        disabled={processing || selectedIds.size === 0 || !data.reason.trim()}
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                     >
-                                        <ArrowDownToLine className="mr-2 h-4 w-4" /> Confirm Checkout
+                                        <ArrowDownToLine className="mr-2 h-4 w-4" /> Checkout {selectedIds.size} Asset(s)
                                     </Button>
                                 </div>
                             </div>

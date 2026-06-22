@@ -37,8 +37,7 @@ class CheckOutInController extends Controller
 
         $categories = \App\Models\AssetCategory::select('id', 'name')->get();
         $assetTypes = AssetType::select('id', 'name')->get();
-        $assets = Asset::withoutGlobalScope('site_access')
-            ->select('id', 'asset_id', 'product_name', 'type_id', 'category_id', 'status', 'brand', 'serial_number', 'site_id')
+        $assets = Asset::select('id', 'asset_id', 'product_name', 'type_id', 'category_id', 'status', 'brand', 'serial_number', 'site_id')
             ->with(['site:id,name'])
             ->where('status', 'Available')
             ->get();
@@ -64,46 +63,49 @@ class CheckOutInController extends Controller
         }
 
         $validated = $request->validate([
-            'asset_id' => 'required|exists:assets,id',
+            'asset_ids' => 'required|array|min:1',
+            'asset_ids.*' => 'exists:assets,id',
             'reason' => 'required|string|max:500',
             'expected_return' => 'nullable|date|after:today',
         ]);
 
-        $asset = Asset::withoutGlobalScope('site_access')->findOrFail($validated['asset_id']);
+        $assets = Asset::withoutGlobalScope('site_access')
+            ->whereIn('id', $validated['asset_ids'])
+            ->where('status', 'Available')
+            ->get();
 
-        if ($asset->status !== 'Available') {
-            return back()->withErrors(['asset_id' => 'This asset is no longer available.']);
+        if ($assets->isEmpty()) {
+            return back()->withErrors(['asset_ids' => 'No available assets found.']);
         }
 
-        // Create assignment
-        AssetAssignment::create([
-            'asset_id' => $asset->id,
-            'user_id' => $request->user()->id,
-            'site_id' => $asset->site_id,
-            'assigned_at' => now(),
-            'status' => 'active',
-            'remarks' => $validated['reason'] . ($validated['expected_return'] ? ' | Expected return: ' . $validated['expected_return'] : ''),
-        ]);
+        foreach ($assets as $asset) {
+            AssetAssignment::create([
+                'asset_id' => $asset->id,
+                'user_id' => $request->user()->id,
+                'site_id' => $asset->site_id,
+                'assigned_at' => now(),
+                'status' => 'active',
+                'remarks' => $validated['reason'] . ($validated['expected_return'] ? ' | Expected return: ' . $validated['expected_return'] : ''),
+            ]);
 
-        // Mark asset as in_use
-        $asset->update(['status' => 'in_use']);
+            $asset->update(['status' => 'in_use']);
 
-        // Also create a request record for tracking
-        \App\Models\AssetRequest::create([
-            'request_number' => 'CO-' . date('Ymd') . '-' . strtoupper(Str::random(6)),
-            'user_id' => $request->user()->id,
-            'asset_id' => $asset->id,
-            'request_type' => 'Checkout',
-            'priority' => 'Normal',
-            'status' => 'Fulfilled',
-            'reason' => $validated['reason'],
-            'required_from' => now(),
-            'required_until' => $validated['expected_return'] ?? null,
-            'approved_at' => now(),
-            'fulfilled_at' => now(),
-        ]);
+            \App\Models\AssetRequest::create([
+                'request_number' => 'CO-' . date('Ymd') . '-' . strtoupper(Str::random(6)),
+                'user_id' => $request->user()->id,
+                'asset_id' => $asset->id,
+                'request_type' => 'Checkout',
+                'priority' => 'Normal',
+                'status' => 'Fulfilled',
+                'reason' => $validated['reason'],
+                'required_from' => now(),
+                'required_until' => $validated['expected_return'] ?? null,
+                'approved_at' => now(),
+                'fulfilled_at' => now(),
+            ]);
+        }
 
-        return redirect()->route('checkout.index')->with('success', 'Asset checked out successfully.');
+        return redirect()->route('checkout.index')->with('success', $assets->count() . ' asset(s) checked out successfully.');
     }
 
     public function checkin(Request $request, $assignmentId)
