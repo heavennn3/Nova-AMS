@@ -95,6 +95,16 @@ export default function AssetIndex({
     const columns = React.useMemo(() => {
         const baseColumns = [
             {
+                id: 'rowNumber',
+                header: '#',
+                cell: ({ row }: any) => (
+                    <span className="text-muted-foreground text-xs font-medium tabular-nums">
+                        {row.index + 1}
+                    </span>
+                ),
+                enableSorting: false,
+            },
+            {
                 accessorKey: 'asset_id',
                 header: ({ column }: any) => (
                     <DataTableColumnHeader column={column} title="Asset Tag" />

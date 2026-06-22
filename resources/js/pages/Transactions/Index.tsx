@@ -149,7 +149,7 @@ export default function TransactionsIndex({ transactions = [] }: { transactions:
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search transactions..."
+                            placeholder="Search "
                             className="pl-8 h-9"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}

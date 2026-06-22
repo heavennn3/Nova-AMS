@@ -304,22 +304,20 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                         <div className="flex w-full rounded-lg bg-muted p-1">
                             <button
                                 onClick={() => setActiveTab('active')}
-                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-bold transition-all ${
-                                    activeTab === 'active'
+                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-bold transition-all ${activeTab === 'active'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
-                                }`}
+                                    }`}
                             >
                                 <Activity className="h-3.5 w-3.5" />
                                 Active
                             </button>
                             <button
                                 onClick={() => setActiveTab('past')}
-                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-bold transition-all ${
-                                    activeTab === 'past'
+                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-bold transition-all ${activeTab === 'past'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
-                                }`}
+                                    }`}
                             >
                                 <History className="h-3.5 w-3.5" />
                                 Past
@@ -328,7 +326,7 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                         <div className="relative">
                             <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search tickets..."
+                                placeholder="Search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="h-9 pl-9 text-xs"
@@ -371,17 +369,16 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
 
                                     <div className="flex items-center gap-2">
                                         <Badge
-                                            className={`border-0 px-1.5 py-0 text-[9px] font-bold uppercase ${
-                                                ticket.status === 'open'
+                                            className={`border-0 px-1.5 py-0 text-[9px] font-bold uppercase ${ticket.status === 'open'
                                                     ? 'bg-amber-100 text-amber-700'
                                                     : ticket.status ===
                                                         'in_progress'
-                                                      ? 'bg-blue-100 text-blue-700'
-                                                      : ticket.status ===
-                                                          'resolved'
-                                                        ? 'bg-emerald-100 text-emerald-700'
-                                                        : 'bg-slate-100 text-slate-600'
-                                            }`}
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : ticket.status ===
+                                                            'resolved'
+                                                            ? 'bg-emerald-100 text-emerald-700'
+                                                            : 'bg-slate-100 text-slate-600'
+                                                }`}
                                         >
                                             {(ticket.status || 'open').replace(
                                                 '_',
@@ -390,13 +387,12 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                                         </Badge>
                                         <Badge
                                             variant="outline"
-                                            className={`border-border px-1.5 py-0 text-[9px] font-medium uppercase ${
-                                                ticket.priority === 'urgent'
+                                            className={`border-border px-1.5 py-0 text-[9px] font-medium uppercase ${ticket.priority === 'urgent'
                                                     ? 'bg-red-50 text-red-600'
                                                     : ticket.priority === 'high'
-                                                      ? 'bg-orange-50 text-orange-600'
-                                                      : 'text-muted-foreground'
-                                            }`}
+                                                        ? 'bg-orange-50 text-orange-600'
+                                                        : 'text-muted-foreground'
+                                                }`}
                                         >
                                             {ticket.priority}
                                         </Badge>
@@ -414,19 +410,17 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                             <div className="z-10 flex items-center justify-between border-b border-border bg-muted/5 p-4 shadow-sm">
                                 <div className="flex items-center gap-4">
                                     <div
-                                        className={`rounded-lg p-2 ${
-                                            selectedTicket.status === 'resolved'
+                                        className={`rounded-lg p-2 ${selectedTicket.status === 'resolved'
                                                 ? 'bg-emerald-100'
                                                 : 'bg-primary/10'
-                                        }`}
+                                            }`}
                                     >
                                         <MessageSquare
-                                            className={`h-5 w-5 ${
-                                                selectedTicket.status ===
-                                                'resolved'
+                                            className={`h-5 w-5 ${selectedTicket.status ===
+                                                    'resolved'
                                                     ? 'text-emerald-600'
                                                     : 'text-primary'
-                                            }`}
+                                                }`}
                                         />
                                     </div>
                                     <div>
@@ -444,12 +438,11 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                                             </span>
                                             <span>•</span>
                                             <span
-                                                className={`uppercase ${
-                                                    selectedTicket.status ===
-                                                    'resolved'
+                                                className={`uppercase ${selectedTicket.status ===
+                                                        'resolved'
                                                         ? 'text-emerald-600'
                                                         : 'text-primary'
-                                                }`}
+                                                    }`}
                                             >
                                                 Status:{' '}
                                                 {(
@@ -463,9 +456,9 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                                 <div className="flex gap-2">
                                     {(isAdmin ||
                                         selectedTicket.user_id ===
-                                            auth.user.id) &&
+                                        auth.user.id) &&
                                         selectedTicket.status !==
-                                            'resolved' && (
+                                        'resolved' && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -512,16 +505,15 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                                                 >
                                                     <div className="flex-shrink-0">
                                                         <div
-                                                            className={`flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold shadow-sm ${
-                                                                isMe
+                                                            className={`flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold shadow-sm ${isMe
                                                                     ? 'bg-primary text-white'
                                                                     : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {initials(
                                                                 msg.user
                                                                     ?.name ||
-                                                                    'Unknown',
+                                                                'Unknown',
                                                             )}
                                                         </div>
                                                     </div>
@@ -536,11 +528,10 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                                                             </span>
                                                         )}
                                                         <div
-                                                            className={`relative rounded-2xl px-4 py-2.5 shadow-sm ${
-                                                                isMe
+                                                            className={`relative rounded-2xl px-4 py-2.5 shadow-sm ${isMe
                                                                     ? 'rounded-tr-none bg-primary text-primary-foreground'
                                                                     : 'rounded-tl-none border border-border bg-background'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             <p className="text-sm leading-relaxed whitespace-pre-wrap">
                                                                 {msg.message}
@@ -575,7 +566,7 @@ export default function Tickets({ tickets = [], isAdmin }: Props) {
                                         placeholder={
                                             selectedTicket.status ===
                                                 'resolved' ||
-                                            selectedTicket.status === 'closed'
+                                                selectedTicket.status === 'closed'
                                                 ? 'This ticket is resolved. Reply to reopen.'
                                                 : 'Type your response...'
                                         }
