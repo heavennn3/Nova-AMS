@@ -196,6 +196,11 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
                                             </div>
                                         ) : r.category ? (
                                             <div className="font-medium">{r.category.name}</div>
+                                        ) : r.request_type === 'Software License' && r.reason?.match(/\[License: (.+?)\]/) ? (
+                                            <div>
+                                                <div className="font-medium">{r.reason.match(/\[License: (.+?)\]/)?.[1]}</div>
+                                                <div className="text-xs text-muted-foreground">Software License</div>
+                                            </div>
                                         ) : (
                                             <span className="text-muted-foreground">—</span>
                                         )}
@@ -264,3 +269,9 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
         </>
     );
 }
+
+RequestsIndex.layout = {
+    breadcrumbs: [
+        { title: 'Requests', href: '/requests' },
+    ],
+};

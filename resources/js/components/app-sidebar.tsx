@@ -16,6 +16,7 @@ import {
     History,
     MessageSquare,
     ClipboardList,
+    ArrowRightLeft,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -243,6 +244,18 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
             {
+                title: 'Check Out / Check In',
+                href: '/checkout',
+                icon: ArrowRightLeft,
+                module: 'Asset Inventory',
+            },
+            {
+                title: 'Transactions',
+                href: '/transactions',
+                icon: History,
+                module: 'Asset Inventory',
+            },
+            {
                 title: 'Chat',
                 href: '/support/tickets',
                 icon: MessageSquare,
@@ -300,8 +313,9 @@ export function AppSidebar() {
                             'Asset Withdrawal', // checkin / out
                             'Maintenance Operations', // maintence
                             'Requests', // request
+                            'Check Out / Check In', // checkout/checkin
+                            'Transactions', // transaction history
                             'Chat', // live chat
-                            'System Activity Logs', // transaction(every trans history)
                         ];
                         return allowedForNormalUser.includes(item.title);
                     }

@@ -23,7 +23,12 @@ class AssetRequestController extends Controller
             return redirect()->route('requests.admin');
         }
 
-        $requests = AssetRequest::with(['user', 'asset', 'category', 'approver'])
+        $requests = AssetRequest::with([
+                'user',
+                'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
+                'category',
+                'approver',
+            ])
             ->where('user_id', $request->user()->id)
             ->latest()
             ->get();
@@ -39,11 +44,18 @@ class AssetRequestController extends Controller
             abort(403, 'Admins cannot create requests.');
         }
 
-        $assets = Asset::withoutGlobalScope('site_access')->select('id', 'asset_id', 'product_name')->get();
+        $assetTypes = \App\Models\AssetType::select('id', 'name')->get();
+        $assets = Asset::withoutGlobalScope('site_access')
+            ->select('id', 'asset_id', 'product_name', 'type_id', 'status')
+            ->where('status', 'Available')
+            ->get();
         $categories = AssetCategory::select('id', 'name')->get();
-        $licenses = License::select('id', 'name')->get();
+        $licenses = License::select('id', 'name', 'category', 'available_seats')
+            ->where('available_seats', '>', 0)
+            ->get();
 
         return Inertia::render('Requests/Create', [
+            'assetTypes' => $assetTypes,
             'assets' => $assets,
             'categories' => $categories,
             'licenses' => $licenses,
@@ -92,18 +104,31 @@ class AssetRequestController extends Controller
 
     public function adminIndex()
     {
-        $requests = AssetRequest::with(['user', 'asset', 'category', 'approver'])
+        $requests = AssetRequest::with([
+                'user.site',
+                'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
+                'category',
+                'approver',
+            ])
             ->latest()
             ->get();
 
+        $sites = \App\Models\Site::select('id', 'name')->get();
+
         return Inertia::render('Requests/AdminIndex', [
             'requests' => $requests,
+            'sites' => $sites,
         ]);
     }
 
     public function show($id)
     {
-        $assetRequest = AssetRequest::with(['user', 'asset', 'category', 'approver'])->findOrFail($id);
+        $assetRequest = AssetRequest::with([
+            'user',
+            'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
+            'category',
+            'approver',
+        ])->findOrFail($id);
 
         return Inertia::render('Requests/Show', [
             'assetRequest' => $assetRequest,
@@ -167,5 +192,41 @@ class AssetRequestController extends Controller
         ]);
 
         return back()->with('success', 'Asset marked as returned.');
+    }
+
+    public function batchApprove(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+
+        $count = AssetRequest::whereIn('id', $request->ids)
+            ->where('status', 'Pending')
+            ->update([
+                'status' => 'Approved',
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+                'admin_notes' => $request->input('admin_notes'),
+            ]);
+
+        return back()->with('success', "$count request(s) approved.");
+    }
+
+    public function batchReject(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+            'admin_notes' => 'required|string',
+        ]);
+
+        $count = AssetRequest::whereIn('id', $request->ids)
+            ->where('status', 'Pending')
+            ->update([
+                'status' => 'Rejected',
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+                'admin_notes' => $request->input('admin_notes'),
+            ]);
+
+        return back()->with('success', "$count request(s) rejected.");
     }
 }

@@ -266,3 +266,10 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
         </>
     );
 }
+
+RequestShow.layout = {
+    breadcrumbs: [
+        { title: 'Requests', href: '/requests' },
+        { title: 'Request Details', href: '#' },
+    ],
+};
