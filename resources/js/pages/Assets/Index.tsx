@@ -472,7 +472,7 @@ export default function AssetIndex({
                             >
                                 <ScanLine className="mr-2 h-4 w-4" /> Scan QR
                             </Button>
-                            <Button 
+                            <Button
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                                 onClick={() => router.get(`/assets/create?site_id=${selectedSiteId}`)}
                             >
@@ -494,20 +494,18 @@ export default function AssetIndex({
                             onClick={() =>
                                 setSelectedSiteId(site.id?.toString() || '')
                             }
-                            className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${
-                                selectedSiteId === (site.id?.toString() || '')
+                            className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${selectedSiteId === (site.id?.toString() || '')
                                     ? 'border-primary bg-primary/5 font-bold text-primary'
                                     : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
-                            }`}
+                                }`}
                         >
                             <span>{site.name}</span>
                             <span
-                                className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                                    selectedSiteId ===
-                                    (site.id?.toString() || '')
+                                className={`rounded-full px-1.5 py-0.5 text-[10px] ${selectedSiteId ===
+                                        (site.id?.toString() || '')
                                         ? 'bg-primary text-primary-foreground'
                                         : 'bg-muted text-muted-foreground'
-                                }`}
+                                    }`}
                             >
                                 {count}
                             </span>
@@ -624,8 +622,8 @@ export default function AssetIndex({
                                                         </span>
                                                         {selectedStatus ===
                                                             s && (
-                                                            <Check className="h-3.5 w-3.5 text-primary" />
-                                                        )}
+                                                                <Check className="h-3.5 w-3.5 text-primary" />
+                                                            )}
                                                     </div>
                                                 </button>
                                             ))}
@@ -668,8 +666,8 @@ export default function AssetIndex({
                                                         </span>
                                                         {selectedVendor ===
                                                             v && (
-                                                            <Check className="h-3.5 w-3.5 text-primary" />
-                                                        )}
+                                                                <Check className="h-3.5 w-3.5 text-primary" />
+                                                            )}
                                                     </div>
                                                 </button>
                                             ))}
@@ -692,7 +690,7 @@ export default function AssetIndex({
                                     )}
                                 </PopoverContent>
                             </Popover>
-                            
+
                             <DataTableActions
                                 data={filteredAssets}
                                 columns={columns}

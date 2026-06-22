@@ -124,6 +124,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateVendor'])->name('vendors.update.master');
         Route::delete('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyVendor'])->name('vendors.destroy.master');
 
+        Route::post('/master-data/custom-types', [\App\Http\Controllers\MasterDataController::class, 'storeCustomType'])->name('custom-types.store');
+        Route::put('/master-data/custom-types/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateCustomType'])->name('custom-types.update');
+        Route::delete('/master-data/custom-types/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyCustomType'])->name('custom-types.destroy');
+
+        Route::post('/master-data/custom-values', [\App\Http\Controllers\MasterDataController::class, 'storeCustomValue'])->name('custom-values.store');
+        Route::put('/master-data/custom-values/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateCustomValue'])->name('custom-values.update');
+        Route::delete('/master-data/custom-values/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyCustomValue'])->name('custom-values.destroy');
+
+        Route::post('/master-data/custom-columns', [\App\Http\Controllers\MasterDataController::class, 'storeColumn'])->name('custom-columns.store');
+        Route::put('/master-data/custom-columns/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateColumn'])->name('custom-columns.update');
+        Route::delete('/master-data/custom-columns/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyColumn'])->name('custom-columns.destroy');
+
+        Route::post('/master-data/custom-values/batch-delete', [\App\Http\Controllers\MasterDataController::class, 'batchDeleteValues'])->name('custom-values.batch-delete');
+        Route::post('/master-data/custom-values/batch-update', [\App\Http\Controllers\MasterDataController::class, 'batchUpdateValues'])->name('custom-values.batch-update');
+
         Route::resource('vendors', \App\Http\Controllers\VendorController::class);
     });
 

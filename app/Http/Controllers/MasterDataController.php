@@ -8,6 +8,10 @@ use App\Models\AssetCategory;
 use App\Models\AssetType;
 use App\Models\Site;
 use App\Models\Vendor;
+use App\Models\CustomMasterDataType;
+use App\Models\CustomMasterDataValue;
+use App\Models\CustomMasterDataColumn;
+use Illuminate\Support\Str;
 
 class MasterDataController extends Controller
 {
@@ -29,6 +33,7 @@ class MasterDataController extends Controller
                     'assets_count' => $vendor->assets_count,
                 ];
             }),
+            'customTypes' => CustomMasterDataType::with(['values', 'columns'])->get(),
         ]);
     }
 
@@ -98,5 +103,147 @@ class MasterDataController extends Controller
     {
         Vendor::findOrFail($id)->delete();
         return back()->with('success', 'Vendor deleted.');
+    }
+
+    // Custom Master Data Types
+    public function storeCustomType(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:custom_master_data_types,name',
+            'description' => 'nullable|string',
+        ]);
+        
+        $validated['slug'] = Str::slug($validated['name']);
+        CustomMasterDataType::create($validated);
+        
+        return back()->with('success', 'Custom Master Data Type created.');
+    }
+
+    public function updateCustomType(Request $request, $id)
+    {
+        $type = CustomMasterDataType::findOrFail($id);
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:custom_master_data_types,name,' . $id,
+            'description' => 'nullable|string',
+        ]);
+        
+        $validated['slug'] = Str::slug($validated['name']);
+        $type->update($validated);
+        
+        return back()->with('success', 'Custom Master Data Type updated.');
+    }
+
+    public function destroyCustomType($id)
+    {
+        CustomMasterDataType::findOrFail($id)->delete();
+        return back()->with('success', 'Custom Master Data Type deleted.');
+    }
+
+    // Custom Master Data Columns
+    public function storeColumn(Request $request)
+    {
+        $validated = $request->validate([
+            'custom_master_data_type_id' => 'required|exists:custom_master_data_types,id',
+            'name' => 'required|string|max:255',
+            'data_type' => 'required|in:text,number,date,boolean,select',
+            'is_required' => 'boolean',
+            'sort_order' => 'integer',
+            'options' => 'nullable|array',
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name'], '_');
+        $validated['is_required'] = $request->boolean('is_required', false);
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
+
+        CustomMasterDataColumn::create($validated);
+        return back()->with('success', 'Column added.');
+    }
+
+    public function updateColumn(Request $request, $id)
+    {
+        $column = CustomMasterDataColumn::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'data_type' => 'required|in:text,number,date,boolean,select',
+            'is_required' => 'boolean',
+            'sort_order' => 'integer',
+            'options' => 'nullable|array',
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name'], '_');
+        $validated['is_required'] = $request->boolean('is_required', false);
+
+        $column->update($validated);
+        return back()->with('success', 'Column updated.');
+    }
+
+    public function destroyColumn($id)
+    {
+        CustomMasterDataColumn::findOrFail($id)->delete();
+        return back()->with('success', 'Column deleted.');
+    }
+
+    // Custom Master Data Values (JSON-based)
+    public function storeCustomValue(Request $request)
+    {
+        $validated = $request->validate([
+            'custom_master_data_type_id' => 'required|exists:custom_master_data_types,id',
+            'data' => 'required|array',
+        ]);
+
+        CustomMasterDataValue::create($validated);
+        return back()->with('success', 'Record added.');
+    }
+
+    public function updateCustomValue(Request $request, $id)
+    {
+        $value = CustomMasterDataValue::findOrFail($id);
+
+        $validated = $request->validate([
+            'data' => 'required|array',
+        ]);
+
+        $value->update($validated);
+        return back()->with('success', 'Record updated.');
+    }
+
+    public function destroyCustomValue($id)
+    {
+        CustomMasterDataValue::findOrFail($id)->delete();
+        return back()->with('success', 'Record deleted.');
+    }
+
+    // Batch Operations
+    public function batchDeleteValues(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:custom_master_data_values,id',
+        ]);
+
+        CustomMasterDataValue::whereIn('id', $validated['ids'])->delete();
+        return back()->with('success', count($validated['ids']) . ' records deleted.');
+    }
+
+    public function batchUpdateValues(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:custom_master_data_values,id',
+            'field' => 'required|string',
+            'value' => 'nullable',
+        ]);
+
+        $values = CustomMasterDataValue::whereIn('id', $validated['ids'])->get();
+        foreach ($values as $val) {
+            $data = $val->data ?? [];
+            $data[$validated['field']] = $validated['value'];
+            $val->data = $data;
+            $val->save();
+        }
+
+        return back()->with('success', count($validated['ids']) . ' records updated.');
     }
 }
