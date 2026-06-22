@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export default function CheckOutInIndex({ assignments = [] }: { assignments: any[] }) {
+export default function CheckOutInIndex({ assignments = [], pendingRequests = [] }: { assignments: any[]; pendingRequests: any[] }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [checkinId, setCheckinId] = useState<number | null>(null);
@@ -49,6 +49,7 @@ export default function CheckOutInIndex({ assignments = [] }: { assignments: any
 
     const activeCount = assignments.filter(a => a.status === 'active').length;
     const returnedCount = assignments.filter(a => a.status === 'returned').length;
+    const pendingCount = pendingRequests.length;
 
     const handleCheckin = () => {
         if (!checkinId) return;
@@ -75,13 +76,13 @@ export default function CheckOutInIndex({ assignments = [] }: { assignments: any
             <div className="flex flex-col space-y-6 p-8">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">Check Out / Check In</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Check Out / Check In</h1>
                         <p className="text-sm text-muted-foreground mt-1">
                             Manage your asset checkouts and returns
                         </p>
                     </div>
                     <Button
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
                         onClick={() => router.get('/checkout/new')}
                     >
                         <Plus className="mr-2 h-4 w-4" /> Check Out Asset
@@ -89,17 +90,17 @@ export default function CheckOutInIndex({ assignments = [] }: { assignments: any
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="rounded-xl border p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 flex items-center gap-3">
-                        <div className="rounded-lg p-2.5 bg-slate-100">
-                            <Package className="h-5 w-5 text-slate-600" />
+                <div className="grid grid-cols-4 gap-4">
+                    <div className="rounded-lg border p-4 flex items-center gap-3">
+                        <div className="rounded-lg p-2.5 bg-amber-100">
+                            <Clock className="h-5 w-5 text-amber-600" />
                         </div>
                         <div>
-                            <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total</div>
-                            <div className="text-2xl font-bold">{assignments.length}</div>
+                            <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Pending</div>
+                            <div className="text-2xl font-bold text-amber-700">{pendingCount}</div>
                         </div>
                     </div>
-                    <div className="rounded-xl border p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 flex items-center gap-3">
+                    <div className="rounded-lg border p-4 flex items-center gap-3">
                         <div className="rounded-lg p-2.5 bg-emerald-100">
                             <ArrowDownToLine className="h-5 w-5 text-emerald-600" />
                         </div>
@@ -108,7 +109,7 @@ export default function CheckOutInIndex({ assignments = [] }: { assignments: any
                             <div className="text-2xl font-bold text-emerald-700">{activeCount}</div>
                         </div>
                     </div>
-                    <div className="rounded-xl border p-4 bg-gradient-to-br from-violet-50 to-violet-100/50 flex items-center gap-3">
+                    <div className="rounded-lg border p-4 flex items-center gap-3">
                         <div className="rounded-lg p-2.5 bg-violet-100">
                             <ArrowUpFromLine className="h-5 w-5 text-violet-600" />
                         </div>
@@ -117,7 +118,63 @@ export default function CheckOutInIndex({ assignments = [] }: { assignments: any
                             <div className="text-2xl font-bold text-violet-700">{returnedCount}</div>
                         </div>
                     </div>
+                    <div className="rounded-lg border p-4 flex items-center gap-3">
+                        <div className="rounded-lg p-2.5 bg-slate-100">
+                            <Package className="h-5 w-5 text-slate-600" />
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total</div>
+                            <div className="text-2xl font-bold">{assignments.length}</div>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Pending Requests */}
+                {pendingRequests.length > 0 && (
+                    <div className="rounded-lg border bg-card overflow-hidden">
+                        <div className="border-b px-5 py-3 bg-amber-50/50 flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-amber-600" />
+                            <h2 className="font-semibold text-sm">Pending Checkout Requests</h2>
+                            <span className="text-xs text-muted-foreground ml-auto">{pendingRequests.length} awaiting approval</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-muted/30 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
+                                    <tr>
+                                        <th className="px-4 py-2.5 text-left">Ref</th>
+                                        <th className="px-4 py-2.5 text-left">Asset</th>
+                                        <th className="px-4 py-2.5 text-left">Tag</th>
+                                        <th className="px-4 py-2.5 text-left">Submitted</th>
+                                        <th className="px-4 py-2.5 text-left">Expected Return</th>
+                                        <th className="px-4 py-2.5 text-left">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {pendingRequests.map((r: any) => (
+                                        <tr key={r.id} className="hover:bg-muted/30">
+                                            <td className="px-4 py-2.5 font-mono text-xs font-medium">{r.request_number}</td>
+                                            <td className="px-4 py-2.5 font-medium">{r.asset?.product_name || '—'}</td>
+                                            <td className="px-4 py-2.5 font-mono text-xs text-emerald-700">{r.asset?.asset_id || '—'}</td>
+                                            <td className="px-4 py-2.5 text-xs text-muted-foreground">{formatDateTime(r.created_at)}</td>
+                                            <td className="px-4 py-2.5 text-xs text-muted-foreground">{r.required_until ? formatDate(r.required_until) : 'Indefinite'}</td>
+                                            <td className="px-4 py-2.5">
+                                                {r.status === 'Pending' ? (
+                                                    <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50 gap-1">
+                                                        <Clock className="h-3 w-3" /> Pending
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 gap-1">
+                                                        <CheckCircle2 className="h-3 w-3" /> Approved
+                                                    </Badge>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
 
                 {/* Filters */}
                 <div className="flex items-center gap-3">

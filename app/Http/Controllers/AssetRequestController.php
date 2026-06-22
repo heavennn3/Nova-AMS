@@ -177,6 +177,24 @@ class AssetRequestController extends Controller
             'admin_notes' => $request->input('admin_notes') ?: $assetRequest->admin_notes,
         ]);
 
+        // For Checkout / Borrow: create the actual assignment and mark asset in_use
+        if (in_array($assetRequest->request_type, ['Checkout', 'Borrow']) && $assetRequest->asset_id) {
+            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
+
+            if ($asset) {
+                \App\Models\AssetAssignment::create([
+                    'asset_id' => $asset->id,
+                    'user_id' => $assetRequest->user_id,
+                    'site_id' => $asset->site_id,
+                    'assigned_at' => now(),
+                    'status' => 'active',
+                    'remarks' => $assetRequest->reason . ($assetRequest->required_until ? ' | Expected return: ' . $assetRequest->required_until->format('Y-m-d') : ''),
+                ]);
+
+                $asset->update(['status' => 'in_use']);
+            }
+        }
+
         return back()->with('success', 'Request fulfilled.');
     }
 

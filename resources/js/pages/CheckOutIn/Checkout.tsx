@@ -346,7 +346,7 @@ export default function Checkout({
                                         disabled={processing || selectedIds.size === 0 || !data.reason.trim()}
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                     >
-                                        <ArrowDownToLine className="mr-2 h-4 w-4" /> Checkout {selectedIds.size} Asset(s)
+                                        <ArrowDownToLine className="mr-2 h-4 w-4" /> Submit Checkout Request ({selectedIds.size})
                                     </Button>
                                 </div>
                             </div>

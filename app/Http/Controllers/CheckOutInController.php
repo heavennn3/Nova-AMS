@@ -24,8 +24,19 @@ class CheckOutInController extends Controller
             ->latest()
             ->get();
 
+        // Pending / Approved checkout requests (not yet fulfilled)
+        $pendingRequests = \App\Models\AssetRequest::with([
+                'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
+            ])
+            ->where('user_id', $user->id)
+            ->where('request_type', 'Checkout')
+            ->whereIn('status', ['Pending', 'Approved'])
+            ->latest()
+            ->get();
+
         return Inertia::render('CheckOutIn/Index', [
             'assignments' => $assignments,
+            'pendingRequests' => $pendingRequests,
         ]);
     }
 
@@ -79,33 +90,21 @@ class CheckOutInController extends Controller
         }
 
         foreach ($assets as $asset) {
-            AssetAssignment::create([
-                'asset_id' => $asset->id,
-                'user_id' => $request->user()->id,
-                'site_id' => $asset->site_id,
-                'assigned_at' => now(),
-                'status' => 'active',
-                'remarks' => $validated['reason'] . ($validated['expected_return'] ? ' | Expected return: ' . $validated['expected_return'] : ''),
-            ]);
-
-            $asset->update(['status' => 'in_use']);
-
+            // Only create a Pending request — admin must approve & fulfill
             \App\Models\AssetRequest::create([
                 'request_number' => 'CO-' . date('Ymd') . '-' . strtoupper(Str::random(6)),
                 'user_id' => $request->user()->id,
                 'asset_id' => $asset->id,
                 'request_type' => 'Checkout',
                 'priority' => 'Normal',
-                'status' => 'Fulfilled',
+                'status' => 'Pending',
                 'reason' => $validated['reason'],
                 'required_from' => now(),
                 'required_until' => $validated['expected_return'] ?? null,
-                'approved_at' => now(),
-                'fulfilled_at' => now(),
             ]);
         }
 
-        return redirect()->route('checkout.index')->with('success', $assets->count() . ' asset(s) checked out successfully.');
+        return redirect()->route('checkout.index')->with('success', $assets->count() . ' checkout request(s) submitted. Awaiting admin approval.');
     }
 
     public function checkin(Request $request, $assignmentId)
