@@ -74,6 +74,7 @@ export default function AssetIndex({
     const [search, setSearch] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedVendor, setSelectedVendor] = useState('all');
+    const [selectedCategory, setSelectedCategory] = useState('all');
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);
 
     const handleRegistrationChoice = (choice: 'manual' | 'scan' | 'upload') => {
@@ -528,14 +529,22 @@ export default function AssetIndex({
                         siteFilteredAssets.map((a) => a.vendor).filter(Boolean),
                     ),
                 ].sort() as string[];
+                const allCategories = [
+                    ...new Set(
+                        siteFilteredAssets.map((a) => a.category).filter(Boolean),
+                    ),
+                ].sort() as string[];
                 const activeFilterCount =
                     (selectedStatus !== 'all' ? 1 : 0) +
-                    (selectedVendor !== 'all' ? 1 : 0);
+                    (selectedVendor !== 'all' ? 1 : 0) +
+                    (selectedCategory !== 'all' ? 1 : 0);
                 const filteredAssets = siteFilteredAssets.filter((a) => {
                     const matchesStatus =
                         selectedStatus === 'all' || a.status === selectedStatus;
                     const matchesVendor =
                         selectedVendor === 'all' || a.vendor === selectedVendor;
+                    const matchesCategory =
+                        selectedCategory === 'all' || a.category === selectedCategory;
                     const q = search.toLowerCase();
                     const matchesSearch =
                         !q ||
@@ -544,7 +553,7 @@ export default function AssetIndex({
                             a.product_name.toLowerCase().includes(q)) ||
                         (a.vendor && a.vendor.toLowerCase().includes(q)) ||
                         (a.category && a.category.toLowerCase().includes(q));
-                    return matchesStatus && matchesVendor && matchesSearch;
+                    return matchesStatus && matchesVendor && matchesCategory && matchesSearch;
                 });
 
                 return (
@@ -560,136 +569,156 @@ export default function AssetIndex({
                                     className="h-8 pl-8 text-sm"
                                 />
                             </div>
+                            {/* Status Filter */}
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-8 gap-1.5 border-dashed"
+                                        className={`h-8 gap-1.5 border-dashed ${selectedStatus !== 'all' ? 'border-green-300 bg-green-50 text-green-700' : ''}`}
                                     >
-                                        <Filter className="h-3.5 w-3.5" />{' '}
-                                        Filters
-                                        {activeFilterCount > 0 && (
-                                            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                                                {activeFilterCount}
-                                            </span>
+                                        Status
+                                        {selectedStatus !== 'all' && (
+                                            <span className="ml-0.5 text-xs font-normal">: {selectedStatus}</span>
                                         )}
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent
-                                    className="w-[260px] p-0"
-                                    align="start"
-                                >
-                                    <div className="border-b p-3">
-                                        <p className="text-sm font-semibold">
-                                            Filter Assets
-                                        </p>
+                                <PopoverContent className="w-[220px] p-0" align="start">
+                                    <div className="border-b p-2.5">
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</p>
                                     </div>
-                                    <div className="border-b p-3">
-                                        <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                                            Status
-                                        </p>
-                                        <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
+                                    <div className="max-h-[250px] overflow-y-auto p-1">
+                                        <button
+                                            onClick={() => setSelectedStatus('all')}
+                                            className={`flex w-full items-center justify-between rounded px-2.5 py-1.5 text-sm transition-colors hover:bg-muted ${selectedStatus === 'all' ? 'font-medium' : ''}`}
+                                        >
+                                            <span>All</span>
+                                            {selectedStatus === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </button>
+                                        {allStatuses.map((s) => (
                                             <button
-                                                onClick={() =>
-                                                    setSelectedStatus('all')
-                                                }
-                                                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedStatus === 'all' ? 'font-medium' : ''}`}
+                                                key={s}
+                                                onClick={() => setSelectedStatus(s)}
+                                                className={`flex w-full items-center justify-between rounded px-2.5 py-1.5 text-sm capitalize transition-colors hover:bg-muted ${selectedStatus === s ? 'font-medium' : ''}`}
                                             >
-                                                <span>All</span>
-                                                {selectedStatus === 'all' && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                                )}
+                                                <span>{s}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {siteFilteredAssets.filter((a) => a.status === s).length}
+                                                    </span>
+                                                    {selectedStatus === s && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                </div>
                                             </button>
-                                            {allStatuses.map((s) => (
-                                                <button
-                                                    key={s}
-                                                    onClick={() =>
-                                                        setSelectedStatus(s)
-                                                    }
-                                                    className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm capitalize transition-colors hover:bg-muted ${selectedStatus === s ? 'font-medium' : ''}`}
-                                                >
-                                                    <span>{s}</span>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-muted-foreground">
-                                                            {
-                                                                siteFilteredAssets.filter(
-                                                                    (a) =>
-                                                                        a.status ===
-                                                                        s,
-                                                                ).length
-                                                            }
-                                                        </span>
-                                                        {selectedStatus ===
-                                                            s && (
-                                                                <Check className="h-3.5 w-3.5 text-primary" />
-                                                            )}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
+                                        ))}
                                     </div>
-                                    <div className="border-b p-3">
-                                        <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                                            Vendor
-                                        </p>
-                                        <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
-                                            <button
-                                                onClick={() =>
-                                                    setSelectedVendor('all')
-                                                }
-                                                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedVendor === 'all' ? 'font-medium' : ''}`}
-                                            >
-                                                <span>All</span>
-                                                {selectedVendor === 'all' && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                                )}
-                                            </button>
-                                            {allVendors.map((v) => (
-                                                <button
-                                                    key={v}
-                                                    onClick={() =>
-                                                        setSelectedVendor(v)
-                                                    }
-                                                    className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedVendor === v ? 'font-medium' : ''}`}
-                                                >
-                                                    <span>{v}</span>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-muted-foreground">
-                                                            {
-                                                                siteFilteredAssets.filter(
-                                                                    (a) =>
-                                                                        a.vendor ===
-                                                                        v,
-                                                                ).length
-                                                            }
-                                                        </span>
-                                                        {selectedVendor ===
-                                                            v && (
-                                                                <Check className="h-3.5 w-3.5 text-primary" />
-                                                            )}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    {activeFilterCount > 0 && (
-                                        <div className="p-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 w-full text-xs"
-                                                onClick={() => {
-                                                    setSelectedStatus('all');
-                                                    setSelectedVendor('all');
-                                                }}
-                                            >
-                                                Clear all filters
-                                            </Button>
-                                        </div>
-                                    )}
                                 </PopoverContent>
                             </Popover>
+
+                            {/* Vendor Filter */}
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className={`h-8 gap-1.5 border-dashed ${selectedVendor !== 'all' ? 'border-blue-300 bg-blue-50 text-blue-700' : ''}`}
+                                    >
+                                        Vendor
+                                        {selectedVendor !== 'all' && (
+                                            <span className="ml-0.5 text-xs font-normal">: {selectedVendor}</span>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[220px] p-0" align="start">
+                                    <div className="border-b p-2.5">
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vendor</p>
+                                    </div>
+                                    <div className="max-h-[250px] overflow-y-auto p-1">
+                                        <button
+                                            onClick={() => setSelectedVendor('all')}
+                                            className={`flex w-full items-center justify-between rounded px-2.5 py-1.5 text-sm transition-colors hover:bg-muted ${selectedVendor === 'all' ? 'font-medium' : ''}`}
+                                        >
+                                            <span>All</span>
+                                            {selectedVendor === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </button>
+                                        {allVendors.map((v) => (
+                                            <button
+                                                key={v}
+                                                onClick={() => setSelectedVendor(v)}
+                                                className={`flex w-full items-center justify-between rounded px-2.5 py-1.5 text-sm transition-colors hover:bg-muted ${selectedVendor === v ? 'font-medium' : ''}`}
+                                            >
+                                                <span>{v}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {siteFilteredAssets.filter((a) => a.vendor === v).length}
+                                                    </span>
+                                                    {selectedVendor === v && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+
+                            {/* Category Filter */}
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className={`h-8 gap-1.5 border-dashed ${selectedCategory !== 'all' ? 'border-violet-300 bg-violet-50 text-violet-700' : ''}`}
+                                    >
+                                        Category
+                                        {selectedCategory !== 'all' && (
+                                            <span className="ml-0.5 text-xs font-normal">: {selectedCategory}</span>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[220px] p-0" align="start">
+                                    <div className="border-b p-2.5">
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</p>
+                                    </div>
+                                    <div className="max-h-[250px] overflow-y-auto p-1">
+                                        <button
+                                            onClick={() => setSelectedCategory('all')}
+                                            className={`flex w-full items-center justify-between rounded px-2.5 py-1.5 text-sm transition-colors hover:bg-muted ${selectedCategory === 'all' ? 'font-medium' : ''}`}
+                                        >
+                                            <span>All</span>
+                                            {selectedCategory === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
+                                        </button>
+                                        {allCategories.map((c) => (
+                                            <button
+                                                key={c}
+                                                onClick={() => setSelectedCategory(c)}
+                                                className={`flex w-full items-center justify-between rounded px-2.5 py-1.5 text-sm transition-colors hover:bg-muted ${selectedCategory === c ? 'font-medium' : ''}`}
+                                            >
+                                                <span>{c}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {siteFilteredAssets.filter((a) => a.category === c).length}
+                                                    </span>
+                                                    {selectedCategory === c && <Check className="h-3.5 w-3.5 text-primary" />}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+
+                            {/* Clear all */}
+                            {activeFilterCount > 0 && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 text-xs text-muted-foreground"
+                                    onClick={() => {
+                                        setSelectedStatus('all');
+                                        setSelectedVendor('all');
+                                        setSelectedCategory('all');
+                                    }}
+                                >
+                                    <X className="mr-1 h-3 w-3" /> Clear
+                                </Button>
+                            )}
 
                             <DataTableActions
                                 data={filteredAssets}
@@ -700,10 +729,7 @@ export default function AssetIndex({
                             {selectedStatus !== 'all' && (
                                 <span className="inline-flex items-center gap-1 rounded-md border border-green-100 bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
                                     Status: {selectedStatus}
-                                    <button
-                                        onClick={() => setSelectedStatus('all')}
-                                        className="ml-0.5"
-                                    >
+                                    <button onClick={() => setSelectedStatus('all')} className="ml-0.5">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -711,10 +737,15 @@ export default function AssetIndex({
                             {selectedVendor !== 'all' && (
                                 <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
                                     Vendor: {selectedVendor}
-                                    <button
-                                        onClick={() => setSelectedVendor('all')}
-                                        className="ml-0.5"
-                                    >
+                                    <button onClick={() => setSelectedVendor('all')} className="ml-0.5">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </span>
+                            )}
+                            {selectedCategory !== 'all' && (
+                                <span className="inline-flex items-center gap-1 rounded-md border border-violet-100 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">
+                                    Category: {selectedCategory}
+                                    <button onClick={() => setSelectedCategory('all')} className="ml-0.5">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
