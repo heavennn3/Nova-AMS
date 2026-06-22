@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, Settings, Columns } from 'lucide-react';
+import { Plus, Edit, Trash2, Settings, Columns, Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -29,9 +29,48 @@ type MasterDataProps = {
     sites: any[];
     vendors: any[];
     customTypes: any[];
+    licenses: any[];
 };
 
 type TabType = string;
+
+const LICENSE_COL_KEYS = [
+    'name', 'product_key', 'version', 'category', 'license_type',
+    'pricing_model', 'seats', 'purchase_cost', 'vendor', 'site',
+    'expiration_date', 'compliance_status', 'license_email', 'notes',
+] as const;
+
+const LICENSE_COL_LABELS: Record<string, string> = {
+    name: 'Name',
+    product_key: 'Product Key',
+    version: 'Version',
+    category: 'Category',
+    license_type: 'License Type',
+    pricing_model: 'Pricing Model',
+    seats: 'Seats',
+    purchase_cost: 'Cost',
+    vendor: 'Vendor',
+    site: 'Site',
+    expiration_date: 'Expiry Date',
+    compliance_status: 'Status',
+    license_email: 'License Email',
+    notes: 'Notes',
+};
+
+function loadLicenseColVisibility(): Record<string, boolean> {
+    try {
+        const saved = localStorage.getItem('masterdata_license_cols');
+        if (saved) return JSON.parse(saved);
+    } catch {}
+    // Default: show key columns, hide less important ones
+    return {
+        name: true, product_key: true, version: true, category: true,
+        license_type: true, pricing_model: false, seats: true,
+        purchase_cost: true, vendor: true, site: true,
+        expiration_date: true, compliance_status: true,
+        license_email: false, notes: false,
+    };
+}
 
 export default function MasterData({
     categories = [],
@@ -39,6 +78,7 @@ export default function MasterData({
     sites = [],
     vendors = [],
     customTypes = [],
+    licenses = [],
 }: MasterDataProps) {
     const [activeTab, setActiveTab] = useState<TabType>('sites');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,6 +99,18 @@ export default function MasterData({
     // Batch operations
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const [isBatchEditOpen, setIsBatchEditOpen] = useState(false);
+
+    // License column visibility
+    const [licenseColVisibility, setLicenseColVisibility] = useState<Record<string, boolean>>(loadLicenseColVisibility);
+    const [isLicenseColsOpen, setIsLicenseColsOpen] = useState(false);
+
+    const toggleLicenseCol = (key: string) => {
+        setLicenseColVisibility(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            localStorage.setItem('masterdata_license_cols', JSON.stringify(next));
+            return next;
+        });
+    };
     const [batchField, setBatchField] = useState('');
     const [batchValue, setBatchValue] = useState('');
 
@@ -76,14 +128,15 @@ export default function MasterData({
     };
 
     const handleDelete = (id: number) => {
-        const typeName = ['sites', 'categories', 'types', 'vendors'].includes(activeTab) 
+        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses'];
+        const typeName = builtinTabs.includes(activeTab) 
             ? activeTab.slice(0, -1) 
             : 'item';
             
         if (!confirm(`Are you sure you want to delete this ${typeName}?`)) return;
         
         let url = `/master-data/${activeTab}/${id}`;
-        if (!['sites', 'categories', 'types', 'vendors'].includes(activeTab)) {
+        if (!builtinTabs.includes(activeTab)) {
             url = `/master-data/custom-values/${id}`;
         }
         
@@ -95,8 +148,9 @@ export default function MasterData({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
+        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses'];
         let url = `/master-data/${activeTab}`;
-        if (!['sites', 'categories', 'types', 'vendors'].includes(activeTab)) {
+        if (!builtinTabs.includes(activeTab)) {
             url = `/master-data/custom-values`;
         }
 
@@ -542,6 +596,242 @@ export default function MasterData({
                 </>
             ),
         },
+        licenses: {
+            title: 'Software License',
+            data: licenses,
+            isLicenseTab: true,
+            columns: (() => {
+                const cols: any[] = [];
+
+                if (licenseColVisibility.name) cols.push({
+                    accessorKey: 'name',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
+                    cell: ({ row }: any) => <span className="font-medium">{row.original.name}</span>,
+                });
+                if (licenseColVisibility.product_key) cols.push({
+                    accessorKey: 'product_key',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Product Key" />,
+                    cell: ({ row }: any) => (
+                        <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
+                            {row.original.product_key ? '••••' + row.original.product_key.slice(-4) : '—'}
+                        </span>
+                    ),
+                });
+                if (licenseColVisibility.version) cols.push({
+                    accessorKey: 'version',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Version" />,
+                    cell: ({ row }: any) => <span className="text-sm">{row.original.version || '—'}</span>,
+                });
+                if (licenseColVisibility.category) cols.push({
+                    accessorKey: 'category',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
+                    cell: ({ row }: any) => <span className="text-sm">{row.original.category || '—'}</span>,
+                });
+                if (licenseColVisibility.license_type) cols.push({
+                    accessorKey: 'license_type',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Type" />,
+                    cell: ({ row }: any) => {
+                        const t = row.original.license_type;
+                        const labels: Record<string, string> = {
+                            per_user: 'Per User', per_device: 'Per Device',
+                            concurrent: 'Concurrent', subscription: 'Subscription', perpetual: 'Perpetual',
+                        };
+                        return <span className="rounded-full border px-2 py-0.5 text-[11px] font-medium capitalize">{labels[t] || t || '—'}</span>;
+                    },
+                });
+                if (licenseColVisibility.pricing_model) cols.push({
+                    accessorKey: 'pricing_model',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Pricing" />,
+                    cell: ({ row }: any) => <span className="text-sm capitalize">{(row.original.pricing_model || '').replace('_', ' ') || '—'}</span>,
+                });
+                if (licenseColVisibility.seats) cols.push({
+                    id: 'seats',
+                    header: 'Seats',
+                    cell: ({ row }: any) => (
+                        <span className="text-sm tabular-nums">
+                            <span className="font-semibold">{row.original.used_seats ?? 0}</span>
+                            <span className="text-muted-foreground"> / {row.original.total_seats ?? 0}</span>
+                        </span>
+                    ),
+                });
+                if (licenseColVisibility.purchase_cost) cols.push({
+                    accessorKey: 'purchase_cost',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Cost" />,
+                    cell: ({ row }: any) => {
+                        const c = row.original.purchase_cost;
+                        return <span className="text-sm tabular-nums">{c ? `$${Number(c).toLocaleString()}` : '—'}</span>;
+                    },
+                });
+                if (licenseColVisibility.vendor) cols.push({
+                    accessorKey: 'vendor',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Vendor" />,
+                    cell: ({ row }: any) => <span className="text-sm">{row.original.vendor || '—'}</span>,
+                });
+                if (licenseColVisibility.site) cols.push({
+                    accessorKey: 'site',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Site" />,
+                    cell: ({ row }: any) => <span className="text-sm">{row.original.site || '—'}</span>,
+                });
+                if (licenseColVisibility.expiration_date) cols.push({
+                    accessorKey: 'expiration_date',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Expiry" />,
+                    cell: ({ row }: any) => {
+                        const d = row.original.expiration_date;
+                        if (!d) return <span className="text-sm text-muted-foreground">—</span>;
+                        const isExpired = new Date(d) < new Date();
+                        return <span className={`text-sm ${isExpired ? 'text-red-600 font-medium' : ''}`}>{d}</span>;
+                    },
+                });
+                if (licenseColVisibility.compliance_status) cols.push({
+                    accessorKey: 'compliance_status',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
+                    cell: ({ row }: any) => {
+                        const s = row.original.compliance_status;
+                        const colors: Record<string, string> = {
+                            compliant: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            over_licensed: 'bg-amber-50 text-amber-700 border-amber-200',
+                            under_licensed: 'bg-red-50 text-red-700 border-red-200',
+                            expired: 'bg-slate-50 text-slate-700 border-slate-200',
+                        };
+                        return <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium capitalize ${colors[s] || ''}`}>{(s || '').replace('_', ' ') || '—'}</span>;
+                    },
+                });
+                if (licenseColVisibility.license_email) cols.push({
+                    accessorKey: 'license_email',
+                    header: ({ column }: any) => <DataTableColumnHeader column={column} title="Email" />,
+                    cell: ({ row }: any) => <span className="text-sm">{row.original.license_email || '—'}</span>,
+                });
+                if (licenseColVisibility.notes) cols.push({
+                    accessorKey: 'notes',
+                    header: 'Notes',
+                    cell: ({ row }: any) => <span className="text-sm text-muted-foreground truncate max-w-[200px] block">{row.original.notes || '—'}</span>,
+                });
+
+                cols.push(actionColumn);
+                return cols;
+            })(),
+            renderForm: () => (
+                <div className="grid gap-3 max-h-[60vh] overflow-y-auto pr-2">
+                    <div className="grid gap-2">
+                        <Label>Name <span className="text-rose-500">*</span></Label>
+                        <Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>Product Key</Label>
+                            <Input value={formData.product_key || ''} onChange={(e) => setFormData({ ...formData, product_key: e.target.value })} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Version</Label>
+                            <Input value={formData.version || ''} onChange={(e) => setFormData({ ...formData, version: e.target.value })} />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>Category</Label>
+                            <Input value={formData.category || ''} onChange={(e) => setFormData({ ...formData, category: e.target.value })} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>License Type <span className="text-rose-500">*</span></Label>
+                            <Select value={formData.license_type || ''} onValueChange={(v) => setFormData({ ...formData, license_type: v })}>
+                                <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="per_user">Per User</SelectItem>
+                                    <SelectItem value="per_device">Per Device</SelectItem>
+                                    <SelectItem value="concurrent">Concurrent</SelectItem>
+                                    <SelectItem value="subscription">Subscription</SelectItem>
+                                    <SelectItem value="perpetual">Perpetual</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>Pricing Model <span className="text-rose-500">*</span></Label>
+                            <Select value={formData.pricing_model || ''} onValueChange={(v) => setFormData({ ...formData, pricing_model: v })}>
+                                <SelectTrigger><SelectValue placeholder="Select pricing" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="one_time">One Time</SelectItem>
+                                    <SelectItem value="annual">Annual</SelectItem>
+                                    <SelectItem value="monthly">Monthly</SelectItem>
+                                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Total Seats <span className="text-rose-500">*</span></Label>
+                            <Input type="number" min={1} max={500} value={formData.total_seats || ''} onChange={(e) => setFormData({ ...formData, total_seats: e.target.value })} required />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>Purchase Cost</Label>
+                            <Input type="number" min={0} step="0.01" value={formData.purchase_cost || ''} onChange={(e) => setFormData({ ...formData, purchase_cost: e.target.value })} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Billing Cycle</Label>
+                            <Select value={formData.billing_cycle || ''} onValueChange={(v) => setFormData({ ...formData, billing_cycle: v })}>
+                                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="monthly">Monthly</SelectItem>
+                                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                                    <SelectItem value="annual">Annual</SelectItem>
+                                    <SelectItem value="custom">Custom</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>Purchase Date</Label>
+                            <Input type="date" value={formData.purchase_date || ''} onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Expiration Date</Label>
+                            <Input type="date" value={formData.expiration_date || ''} onChange={(e) => setFormData({ ...formData, expiration_date: e.target.value })} />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>Vendor</Label>
+                            <Select value={formData.vendor_id?.toString() || ''} onValueChange={(v) => setFormData({ ...formData, vendor_id: v })}>
+                                <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
+                                <SelectContent>
+                                    {vendors.map((v) => <SelectItem key={v.id} value={v.id.toString()}>{v.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Site</Label>
+                            <Select value={formData.site_id?.toString() || ''} onValueChange={(v) => setFormData({ ...formData, site_id: v })}>
+                                <SelectTrigger><SelectValue placeholder="Select Site" /></SelectTrigger>
+                                <SelectContent>
+                                    {sites.map((s) => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-2">
+                            <Label>License Email</Label>
+                            <Input type="email" value={formData.license_email || ''} onChange={(e) => setFormData({ ...formData, license_email: e.target.value })} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>License Name</Label>
+                            <Input value={formData.license_name || ''} onChange={(e) => setFormData({ ...formData, license_name: e.target.value })} />
+                        </div>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label>Notes</Label>
+                        <Textarea value={formData.notes || ''} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox checked={!!formData.auto_renew} onCheckedChange={(v) => setFormData({ ...formData, auto_renew: !!v })} />
+                        <Label className="text-sm">Auto Renew</Label>
+                    </div>
+                </div>
+            ),
+        },
     };
 
     // Dynamically inject custom types with dynamic columns
@@ -727,6 +1017,11 @@ export default function MasterData({
                                 setIsColumnsOpen(true);
                             }}>
                                 <Columns className="mr-2 h-4 w-4" /> Manage Columns
+                            </Button>
+                        )}
+                        {currentTab?.isLicenseTab && (
+                            <Button variant="outline" size="sm" onClick={() => setIsLicenseColsOpen(true)}>
+                                <Eye className="mr-2 h-4 w-4" /> Manage Columns
                             </Button>
                         )}
                         <Button onClick={() => handleOpenDialog()} size="sm">
@@ -993,6 +1288,52 @@ export default function MasterData({
                             <Button type="submit" disabled={!batchField}>Apply to {selectedRows.size} Row(s)</Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* License Column Visibility Dialog */}
+            <Dialog open={isLicenseColsOpen} onOpenChange={setIsLicenseColsOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Manage License Table Columns</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        Toggle columns to show or hide them in the Software License table.
+                    </p>
+                    <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
+                        {LICENSE_COL_KEYS.map((key) => (
+                            <button
+                                key={key}
+                                type="button"
+                                className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
+                                    licenseColVisibility[key]
+                                        ? 'bg-primary/5 border-primary/20 text-foreground'
+                                        : 'bg-muted/30 border-border text-muted-foreground'
+                                }`}
+                                onClick={() => toggleLicenseCol(key)}
+                            >
+                                <span className="font-medium">{LICENSE_COL_LABELS[key]}</span>
+                                {licenseColVisibility[key] ? (
+                                    <Eye className="h-4 w-4 text-primary" />
+                                ) : (
+                                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <Button variant="outline" size="sm" onClick={() => {
+                            const allVisible: Record<string, boolean> = {};
+                            LICENSE_COL_KEYS.forEach(k => allVisible[k] = true);
+                            setLicenseColVisibility(allVisible);
+                            localStorage.setItem('masterdata_license_cols', JSON.stringify(allVisible));
+                        }}>
+                            Show All
+                        </Button>
+                        <Button size="sm" onClick={() => setIsLicenseColsOpen(false)}>
+                            Done
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

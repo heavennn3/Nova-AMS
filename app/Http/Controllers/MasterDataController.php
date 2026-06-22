@@ -8,9 +8,12 @@ use App\Models\AssetCategory;
 use App\Models\AssetType;
 use App\Models\Site;
 use App\Models\Vendor;
+use App\Models\License;
+use App\Models\LicenseSeat;
 use App\Models\CustomMasterDataType;
 use App\Models\CustomMasterDataValue;
 use App\Models\CustomMasterDataColumn;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class MasterDataController extends Controller
@@ -34,6 +37,35 @@ class MasterDataController extends Controller
                 ];
             }),
             'customTypes' => CustomMasterDataType::with(['values', 'columns'])->get(),
+            'licenses' => License::with(['vendor', 'site'])->get()->map(function ($license) {
+                return [
+                    'id' => $license->id,
+                    'name' => $license->name,
+                    'product_key' => $license->product_key,
+                    'version' => $license->version,
+                    'category' => $license->category,
+                    'license_type' => $license->license_type,
+                    'pricing_model' => $license->pricing_model,
+                    'total_seats' => $license->total_seats,
+                    'used_seats' => $license->used_seats,
+                    'available_seats' => $license->available_seats,
+                    'purchase_cost' => $license->purchase_cost,
+                    'purchase_date' => $license->purchase_date ? $license->purchase_date->format('Y-m-d') : null,
+                    'expiration_date' => $license->expiration_date ? $license->expiration_date->format('Y-m-d') : null,
+                    'support_expiry' => $license->support_expiry ? $license->support_expiry->format('Y-m-d') : null,
+                    'renewal_date' => $license->renewal_date ? $license->renewal_date->format('Y-m-d') : null,
+                    'auto_renew' => $license->auto_renew,
+                    'billing_cycle' => $license->billing_cycle,
+                    'compliance_status' => $license->compliance_status,
+                    'license_email' => $license->license_email,
+                    'license_name' => $license->license_name,
+                    'vendor' => $license->vendor ? $license->vendor->name : null,
+                    'vendor_id' => $license->vendor_id,
+                    'site' => $license->site ? $license->site->name : null,
+                    'site_id' => $license->site_id,
+                    'notes' => $license->notes,
+                ];
+            }),
         ]);
     }
 
@@ -245,5 +277,121 @@ class MasterDataController extends Controller
         }
 
         return back()->with('success', count($validated['ids']) . ' records updated.');
+    }
+
+    // Software Licenses
+    public function storeLicense(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'product_key' => 'nullable|string',
+            'version' => 'nullable|string',
+            'category' => 'nullable|string',
+            'license_type' => 'required|in:per_user,per_device,concurrent,subscription,perpetual',
+            'pricing_model' => 'required|in:one_time,annual,monthly,quarterly',
+            'total_seats' => 'required|integer|min:1|max:500',
+            'purchase_cost' => 'nullable|numeric|min:0',
+            'purchase_date' => 'nullable|date',
+            'expiration_date' => 'nullable|date',
+            'support_expiry' => 'nullable|date',
+            'renewal_date' => 'nullable|date',
+            'auto_renew' => 'boolean',
+            'billing_cycle' => 'nullable|in:monthly,quarterly,annual,custom',
+            'license_email' => 'nullable|email|max:255',
+            'license_name' => 'nullable|string|max:255',
+            'vendor_id' => 'nullable|exists:vendors,id',
+            'site_id' => 'nullable|exists:sites,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            $licenseData = array_merge($validated, [
+                'used_seats' => 0,
+                'available_seats' => $validated['total_seats'],
+                'compliance_status' => 'compliant',
+            ]);
+
+            $license = License::create($licenseData);
+
+            for ($i = 1; $i <= $validated['total_seats']; $i++) {
+                LicenseSeat::create([
+                    'license_id' => $license->id,
+                    'seat_number' => $i,
+                    'seat_status' => 'available',
+                ]);
+            }
+        });
+
+        return back()->with('success', 'License created.');
+    }
+
+    public function updateLicense(Request $request, $id)
+    {
+        $license = License::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'product_key' => 'nullable|string',
+            'version' => 'nullable|string',
+            'category' => 'nullable|string',
+            'license_type' => 'required|in:per_user,per_device,concurrent,subscription,perpetual',
+            'pricing_model' => 'required|in:one_time,annual,monthly,quarterly',
+            'total_seats' => 'required|integer|min:1|max:500',
+            'purchase_cost' => 'nullable|numeric|min:0',
+            'purchase_date' => 'nullable|date',
+            'expiration_date' => 'nullable|date',
+            'support_expiry' => 'nullable|date',
+            'renewal_date' => 'nullable|date',
+            'auto_renew' => 'boolean',
+            'billing_cycle' => 'nullable|in:monthly,quarterly,annual,custom',
+            'license_email' => 'nullable|email|max:255',
+            'license_name' => 'nullable|string|max:255',
+            'vendor_id' => 'nullable|exists:vendors,id',
+            'site_id' => 'nullable|exists:sites,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($license, $validated) {
+            $oldSeats = $license->licenseSeats()->count();
+            $newSeats = (int)$validated['total_seats'];
+
+            if ($newSeats > $oldSeats) {
+                for ($i = $oldSeats + 1; $i <= $newSeats; $i++) {
+                    LicenseSeat::create([
+                        'license_id' => $license->id,
+                        'seat_number' => $i,
+                        'seat_status' => 'available',
+                    ]);
+                }
+                $validated['available_seats'] = $license->available_seats + ($newSeats - $oldSeats);
+            } elseif ($newSeats < $oldSeats) {
+                $assigned = $license->licenseSeats()->where('seat_status', 'assigned')->count();
+                if ($assigned > $newSeats) {
+                    return;
+                }
+                $license->licenseSeats()
+                    ->where('seat_status', 'available')
+                    ->orderBy('seat_number', 'desc')
+                    ->limit($oldSeats - $newSeats)
+                    ->delete();
+                $validated['available_seats'] = $newSeats - $assigned;
+            }
+
+            $license->update($validated);
+        });
+
+        return back()->with('success', 'License updated.');
+    }
+
+    public function destroyLicense($id)
+    {
+        $license = License::findOrFail($id);
+        $assigned = $license->licenseSeats()->where('seat_status', 'assigned')->count();
+        if ($assigned > 0) {
+            return back()->with('error', "Cannot delete: {$assigned} seat(s) are currently assigned.");
+        }
+        $license->licenseSeats()->delete();
+        $license->delete();
+        return back()->with('success', 'License deleted.');
     }
 }

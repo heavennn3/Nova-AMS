@@ -159,6 +159,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/master-data/custom-values/batch-delete', [\App\Http\Controllers\MasterDataController::class, 'batchDeleteValues'])->name('custom-values.batch-delete');
         Route::post('/master-data/custom-values/batch-update', [\App\Http\Controllers\MasterDataController::class, 'batchUpdateValues'])->name('custom-values.batch-update');
 
+        // Software Licenses (Master Data)
+        Route::post('/master-data/licenses', [\App\Http\Controllers\MasterDataController::class, 'storeLicense'])->name('master-data.licenses.store');
+        Route::put('/master-data/licenses/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateLicense'])->name('master-data.licenses.update');
+        Route::delete('/master-data/licenses/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyLicense'])->name('master-data.licenses.destroy');
 
     });
 
