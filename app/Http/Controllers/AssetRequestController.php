@@ -5,52 +5,60 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\AssetRequest;
+use App\Models\License;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
 class AssetRequestController extends Controller
 {
+    // ──────────────────────────────
+    //  Normal User endpoints
+    // ──────────────────────────────
+
     public function index(Request $request)
     {
-        $query = AssetRequest::with(['user', 'asset', 'category'])
-            ->where('user_id', $request->user()->id);
-
-        if ($request->has('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
+        // Admins should use the admin dashboard
+        if ($request->user()->hasRole('Admin')) {
+            return redirect()->route('requests.admin');
         }
 
-        if ($request->has('priority') && $request->priority !== 'all') {
-            $query->where('priority', $request->priority);
-        }
-
-        if ($request->has('search') && $request->search !== '') {
-            $query->where('request_number', 'like', '%' . $request->search . '%');
-        }
-
-        $requests = $query->latest()->get();
+        $requests = AssetRequest::with(['user', 'asset', 'category', 'approver'])
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->get();
 
         return Inertia::render('Requests/Index', [
             'requests' => $requests,
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->user()->hasRole('Admin')) {
+            abort(403, 'Admins cannot create requests.');
+        }
+
         $assets = Asset::withoutGlobalScope('site_access')->select('id', 'asset_id', 'product_name')->get();
         $categories = AssetCategory::select('id', 'name')->get();
+        $licenses = License::select('id', 'name')->get();
 
         return Inertia::render('Requests/Create', [
             'assets' => $assets,
             'categories' => $categories,
+            'licenses' => $licenses,
         ]);
     }
 
     public function store(Request $request)
     {
+        if ($request->user()->hasRole('Admin')) {
+            abort(403, 'Admins cannot create requests.');
+        }
+
         $validated = $request->validate([
-            'request_type' => 'required|string',
-            'priority' => 'required|string',
+            'request_type' => 'required|string|in:Borrow,Checkout,Software License,Maintenance Request,Purchase Request',
+            'priority' => 'required|string|in:Normal,High,Urgent',
             'asset_id' => 'nullable|exists:assets,id',
             'asset_category_id' => 'nullable|exists:asset_categories,id',
             'required_from' => 'nullable|date',
@@ -65,5 +73,99 @@ class AssetRequestController extends Controller
         AssetRequest::create($validated);
 
         return redirect()->route('requests.index')->with('success', 'Request submitted successfully.');
+    }
+
+    public function cancel(Request $request, $id)
+    {
+        $assetRequest = AssetRequest::where('user_id', $request->user()->id)
+            ->where('status', 'Pending')
+            ->findOrFail($id);
+
+        $assetRequest->update(['status' => 'Cancelled']);
+
+        return back()->with('success', 'Request cancelled.');
+    }
+
+    // ──────────────────────────────
+    //  Admin endpoints
+    // ──────────────────────────────
+
+    public function adminIndex()
+    {
+        $requests = AssetRequest::with(['user', 'asset', 'category', 'approver'])
+            ->latest()
+            ->get();
+
+        return Inertia::render('Requests/AdminIndex', [
+            'requests' => $requests,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $assetRequest = AssetRequest::with(['user', 'asset', 'category', 'approver'])->findOrFail($id);
+
+        return Inertia::render('Requests/Show', [
+            'assetRequest' => $assetRequest,
+        ]);
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $assetRequest = AssetRequest::where('status', 'Pending')->findOrFail($id);
+
+        $assetRequest->update([
+            'status' => 'Approved',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+            'admin_notes' => $request->input('admin_notes'),
+        ]);
+
+        return back()->with('success', 'Request approved.');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $assetRequest = AssetRequest::where('status', 'Pending')->findOrFail($id);
+
+        $request->validate([
+            'admin_notes' => 'required|string',
+        ]);
+
+        $assetRequest->update([
+            'status' => 'Rejected',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+            'admin_notes' => $request->input('admin_notes'),
+        ]);
+
+        return back()->with('success', 'Request rejected.');
+    }
+
+    public function fulfill(Request $request, $id)
+    {
+        $assetRequest = AssetRequest::where('status', 'Approved')->findOrFail($id);
+
+        $assetRequest->update([
+            'status' => 'Fulfilled',
+            'fulfilled_at' => now(),
+            'admin_notes' => $request->input('admin_notes') ?: $assetRequest->admin_notes,
+        ]);
+
+        return back()->with('success', 'Request fulfilled.');
+    }
+
+    public function markReturned(Request $request, $id)
+    {
+        $assetRequest = AssetRequest::where('status', 'Fulfilled')
+            ->whereIn('request_type', ['Borrow', 'Checkout'])
+            ->findOrFail($id);
+
+        $assetRequest->update([
+            'status' => 'Returned',
+            'returned_at' => now(),
+        ]);
+
+        return back()->with('success', 'Asset marked as returned.');
     }
 }

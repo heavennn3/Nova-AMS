@@ -231,6 +231,12 @@ const navSections: NavSection[] = [
         title: 'OTHERS',
         items: [
             {
+                title: 'Manage Requests',
+                href: '/requests/admin',
+                icon: ClipboardList,
+                module: 'Asset Inventory',
+            },
+            {
                 title: 'Requests',
                 href: '/requests',
                 icon: ClipboardList,
@@ -299,6 +305,10 @@ export function AppSidebar() {
                         ];
                         return allowedForNormalUser.includes(item.title);
                     }
+
+                    // Admin-only: hide user "Requests" page (admins use "Manage Requests")
+                    const hiddenForAdmin = ['Requests'];
+                    if (hiddenForAdmin.includes(item.title)) return false;
 
                     // Standard module access check for Admins or users with specific roles
                     return canAccess((item as any).module);

@@ -22,16 +22,29 @@ class AssetRequest extends Model
         'required_from',
         'required_until',
         'reason',
+        'approved_by',
+        'approved_at',
+        'admin_notes',
+        'fulfilled_at',
+        'returned_at',
     ];
 
     protected $casts = [
         'required_from' => 'date',
         'required_until' => 'date',
+        'approved_at' => 'datetime',
+        'fulfilled_at' => 'datetime',
+        'returned_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function asset(): BelongsTo

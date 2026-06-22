@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,18 +11,20 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
 import InputError from '@/components/input-error';
 
 export default function RequestsCreate({
     assets = [],
     categories = [],
+    licenses = [],
 }: {
     assets: any[];
     categories: any[];
+    licenses: any[];
 }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        request_type: 'Borrow',
+    const { data, setData, post, processing, errors } = useForm({
+        request_type: '',
         priority: 'Normal',
         asset_id: '',
         asset_category_id: '',
@@ -33,27 +35,38 @@ export default function RequestsCreate({
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         const postData = {
             ...data,
-            asset_id: data.asset_id === 'none' ? null : data.asset_id,
-            asset_category_id: data.asset_category_id === 'none' ? null : data.asset_category_id,
+            asset_id: data.asset_id === 'none' || data.asset_id === '' ? null : data.asset_id,
+            asset_category_id: data.asset_category_id === 'none' || data.asset_category_id === '' ? null : data.asset_category_id,
         };
-        
-        // Use Inertia router instead of post from useForm since we are transforming data
+
         router.post(route('requests.store'), postData);
+    };
+
+    const needsAsset = ['Borrow', 'Checkout'].includes(data.request_type);
+    const needsDuration = ['Borrow', 'Checkout'].includes(data.request_type);
+    const needsCategory = ['Maintenance Request', 'Purchase Request'].includes(data.request_type);
+
+    const requestTypeDescriptions: Record<string, string> = {
+        'Borrow': 'Temporarily borrow an asset. You must return it by the end date.',
+        'Checkout': 'Check out an asset for use. You must return it when done.',
+        'Software License': 'Request a software license key or subscription.',
+        'Maintenance Request': 'Request maintenance or repair for an asset.',
+        'Purchase Request': 'Request the purchase of a new asset or equipment.',
     };
 
     return (
         <>
             <Head title="New Request" />
 
-            <div className="flex flex-col space-y-6 max-w-4xl">
+            <div className="flex flex-col space-y-6 max-w-3xl mx-auto p-8">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">New Request</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Submit a request for an asset
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">New Request</h1>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Submit a request for an asset, software, or service
                         </p>
                     </div>
                     <Button variant="outline" onClick={() => window.history.back()}>
@@ -61,35 +74,44 @@ export default function RequestsCreate({
                     </Button>
                 </div>
 
-                <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-                    <form onSubmit={submit} className="p-6 space-y-8">
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="request_type" className="text-sm font-semibold text-slate-700">Request Type <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={data.request_type}
-                                    onValueChange={(val) => setData('request_type', val)}
-                                >
-                                    <SelectTrigger id="request_type" className="w-full bg-slate-50 border-slate-200 focus:bg-white transition-colors">
-                                        <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Borrow">Borrow</SelectItem>
-                                        <SelectItem value="Maintenance Request">Maintenance Request</SelectItem>
-                                        <SelectItem value="Purchase Request">Purchase Request</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={errors.request_type} />
+                <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+                    <div className="bg-muted/30 border-b px-6 py-4">
+                        <h2 className="text-lg font-semibold">Request Details</h2>
+                    </div>
+                    <form onSubmit={submit} className="p-6 space-y-6">
+                        {/* Request Type */}
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Request Type <span className="text-red-500">*</span></Label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {['Borrow', 'Checkout', 'Software License', 'Maintenance Request', 'Purchase Request'].map(type => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        onClick={() => setData('request_type', type)}
+                                        className={`border rounded-lg p-3 text-left transition-all text-sm ${
+                                            data.request_type === type
+                                                ? 'border-primary bg-primary/5 ring-2 ring-primary/20 font-semibold text-primary'
+                                                : 'border-border hover:border-muted-foreground hover:bg-muted/30 text-foreground'
+                                        }`}
+                                    >
+                                        {type}
+                                    </button>
+                                ))}
                             </div>
+                            {data.request_type && (
+                                <p className="text-xs text-muted-foreground mt-1 pl-1">
+                                    {requestTypeDescriptions[data.request_type]}
+                                </p>
+                            )}
+                            <InputError message={errors.request_type} />
+                        </div>
 
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Priority */}
                             <div className="space-y-2">
-                                <Label htmlFor="priority" className="text-sm font-semibold text-slate-700">Priority <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={data.priority}
-                                    onValueChange={(val) => setData('priority', val)}
-                                >
-                                    <SelectTrigger id="priority" className="w-full bg-slate-50 border-slate-200 focus:bg-white transition-colors">
+                                <Label className="text-sm font-semibold">Priority <span className="text-red-500">*</span></Label>
+                                <Select value={data.priority} onValueChange={(val) => setData('priority', val)}>
+                                    <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select priority" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -101,102 +123,100 @@ export default function RequestsCreate({
                                 <InputError message={errors.priority} />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="asset_id" className="text-sm font-semibold text-slate-700">Specific Asset (optional)</Label>
-                                <Select
-                                    value={data.asset_id}
-                                    onValueChange={(val) => setData('asset_id', val)}
-                                >
-                                    <SelectTrigger id="asset_id" className="w-full bg-slate-50 border-slate-200 focus:bg-white transition-colors">
-                                        <SelectValue placeholder="— Any —" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">— Any —</SelectItem>
-                                        {assets.map((asset) => (
-                                            <SelectItem key={asset.id} value={asset.id.toString()}>
-                                                {asset.product_name} ({asset.asset_id})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <p className="text-xs text-muted-foreground mt-1">Leave empty if requesting from a category</p>
-                                <InputError message={errors.asset_id} />
-                            </div>
+                            {/* Specific Asset — show for Borrow/Checkout */}
+                            {needsAsset && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold">Select Asset</Label>
+                                    <Select value={data.asset_id} onValueChange={(val) => setData('asset_id', val)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Choose an asset..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">— Any Available —</SelectItem>
+                                            {assets.map((asset) => (
+                                                <SelectItem key={asset.id} value={asset.id.toString()}>
+                                                    {asset.product_name} ({asset.asset_id})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-xs text-muted-foreground">Leave empty if you don't need a specific asset</p>
+                                    <InputError message={errors.asset_id} />
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="asset_category_id" className="text-sm font-semibold text-slate-700">Category (optional)</Label>
-                                <Select
-                                    value={data.asset_category_id}
-                                    onValueChange={(val) => setData('asset_category_id', val)}
-                                >
-                                    <SelectTrigger id="asset_category_id" className="w-full bg-slate-50 border-slate-200 focus:bg-white transition-colors">
-                                        <SelectValue placeholder="— Any —" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">— Any —</SelectItem>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id.toString()}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={errors.asset_category_id} />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="required_from" className="text-sm font-semibold text-slate-700">Required From</Label>
-                                <Input
-                                    id="required_from"
-                                    type="date"
-                                    value={data.required_from}
-                                    onChange={(e) => setData('required_from', e.target.value)}
-                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                />
-                                <InputError message={errors.required_from} />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="required_until" className="text-sm font-semibold text-slate-700">Required Until</Label>
-                                <Input
-                                    id="required_until"
-                                    type="date"
-                                    value={data.required_until}
-                                    onChange={(e) => setData('required_until', e.target.value)}
-                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                />
-                                <InputError message={errors.required_until} />
-                            </div>
+                            {/* Category — show for Maintenance/Purchase */}
+                            {needsCategory && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold">Category</Label>
+                                    <Select value={data.asset_category_id} onValueChange={(val) => setData('asset_category_id', val)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select a category..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">— Any —</SelectItem>
+                                            {categories.map((cat) => (
+                                                <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                    {cat.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.asset_category_id} />
+                                </div>
+                            )}
                         </div>
 
+                        {/* Duration — show for Borrow/Checkout */}
+                        {needsDuration && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold">Required From <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        type="date"
+                                        value={data.required_from}
+                                        onChange={(e) => setData('required_from', e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                    <InputError message={errors.required_from} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold">Required Until <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        type="date"
+                                        value={data.required_until}
+                                        onChange={(e) => setData('required_until', e.target.value)}
+                                        min={data.required_from || new Date().toISOString().split('T')[0]}
+                                    />
+                                    <InputError message={errors.required_until} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Reason */}
                         <div className="space-y-2">
-                            <Label htmlFor="reason" className="text-sm font-semibold text-slate-700">Reason <span className="text-red-500">*</span></Label>
+                            <Label className="text-sm font-semibold">Reason / Justification <span className="text-red-500">*</span></Label>
                             <Textarea
-                                id="reason"
-                                placeholder="Explain why you need this asset..."
+                                placeholder="Explain why you need this..."
                                 value={data.reason}
                                 onChange={(e) => setData('reason', e.target.value)}
-                                className="min-h-[120px] bg-slate-50 border-slate-200 focus:bg-white transition-colors resize-y"
+                                className="min-h-[120px] resize-y"
                                 required
                             />
                             <InputError message={errors.reason} />
                         </div>
 
-                        <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => router.get('/requests')}
-                                className="px-6"
-                            >
+                        {/* Submit */}
+                        <div className="flex justify-end space-x-3 pt-4 border-t">
+                            <Button type="button" variant="outline" onClick={() => router.get('/requests')}>
                                 Cancel
                             </Button>
-                            <Button 
-                                type="submit" 
-                                disabled={processing} 
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 shadow-sm"
+                            <Button
+                                type="submit"
+                                disabled={processing || !data.request_type}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                             >
-                                Submit Request
+                                <Send className="mr-2 h-4 w-4" /> Submit Request
                             </Button>
                         </div>
                     </form>

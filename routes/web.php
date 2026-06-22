@@ -12,10 +12,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
-    // Asset Requests
+    // Asset Requests (User)
     Route::get('/requests', [\App\Http\Controllers\AssetRequestController::class, 'index'])->name('requests.index');
     Route::get('/requests/create', [\App\Http\Controllers\AssetRequestController::class, 'create'])->name('requests.create');
     Route::post('/requests', [\App\Http\Controllers\AssetRequestController::class, 'store'])->name('requests.store');
+    Route::post('/requests/{id}/cancel', [\App\Http\Controllers\AssetRequestController::class, 'cancel'])->name('requests.cancel');
+
+    // Asset Requests (Admin)
+    Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');
+    Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
+    Route::post('/requests/{id}/approve', [\App\Http\Controllers\AssetRequestController::class, 'approve'])->name('requests.approve');
+    Route::post('/requests/{id}/reject', [\App\Http\Controllers\AssetRequestController::class, 'reject'])->name('requests.reject');
+    Route::post('/requests/{id}/fulfill', [\App\Http\Controllers\AssetRequestController::class, 'fulfill'])->name('requests.fulfill');
+    Route::post('/requests/{id}/return', [\App\Http\Controllers\AssetRequestController::class, 'markReturned'])->name('requests.return');
 
     // Support Tickets
     Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets');
