@@ -310,7 +310,6 @@ export function AppSidebar() {
                         const allowedForNormalUser = [
                             'Dashboard',
                             'Asset Inventory',
-                            'Asset Withdrawal', // checkin / out
                             'Maintenance Operations', // maintence
                             'Requests', // request
                             'Check Out / Check In', // checkout/checkin

@@ -149,7 +149,7 @@ export default function WithdrawalsIndex({ withdrawals = [] }: { withdrawals: an
             <div className="flex gap-4">
                 <div className="flex-1">
                     <Input
-                        placeholder="Search by asset, user..."
+                        placeholder="Search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="max-w-sm"

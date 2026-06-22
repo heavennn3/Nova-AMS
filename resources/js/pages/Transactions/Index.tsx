@@ -114,13 +114,13 @@ export default function TransactionsIndex({ transactions = [] }: { transactions:
 
     return (
         <>
-            <Head title="My Transactions" />
+            <Head title="Transactions Logs" />
 
             <div className="flex flex-col space-y-6 p-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">My Transactions</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        View your complete activity history — requests, checkouts, returns, and more
+                        View complete activity history — requests, checkouts, returns, and more
                     </p>
                 </div>
 

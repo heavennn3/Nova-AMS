@@ -16,6 +16,9 @@ import {
     Calendar,
     FileText,
     AlertTriangle,
+    Key,
+    Copy,
+    Shield,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -23,6 +26,15 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
     const { auth } = usePage().props as any;
     const isAdmin = auth?.user?.roles?.includes('Admin') || false;
     const [adminNotes, setAdminNotes] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    const copyKey = () => {
+        if (r.license?.product_key) {
+            navigator.clipboard.writeText(r.license.product_key);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     const r = assetRequest;
 
@@ -116,6 +128,41 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                             <span className="text-muted-foreground">Category</span>
                                             <div className="font-semibold mt-0.5">{r.category.name}</div>
                                         </div>
+                                    )}
+                                    {r.license && (
+                                        <>
+                                            <div className="col-span-2">
+                                                <span className="text-muted-foreground">Software License</span>
+                                                <div className="font-semibold mt-0.5 text-violet-700">{r.license.name}</div>
+                                            </div>
+                                            {r.license.version && (
+                                                <div>
+                                                    <span className="text-muted-foreground">Version</span>
+                                                    <div className="font-semibold mt-0.5">{r.license.version}</div>
+                                                </div>
+                                            )}
+                                            {r.license.license_type && (
+                                                <div>
+                                                    <span className="text-muted-foreground">License Type</span>
+                                                    <div className="font-semibold mt-0.5 capitalize">{r.license.license_type.replace('_', ' ')}</div>
+                                                </div>
+                                            )}
+                                            {r.license.category && (
+                                                <div>
+                                                    <span className="text-muted-foreground">Software Category</span>
+                                                    <div className="font-semibold mt-0.5">{r.license.category}</div>
+                                                </div>
+                                            )}
+                                            {r.license.expiration_date && (
+                                                <div>
+                                                    <span className="text-muted-foreground">Expires</span>
+                                                    <div className="font-semibold mt-0.5 flex items-center gap-1">
+                                                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                                        {new Date(r.license.expiration_date).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                     {r.required_from && (
                                         <div>
@@ -228,6 +275,57 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                             {r.approved_at && new Date(r.approved_at).toLocaleDateString()}
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* License Key Card — shown when approved */}
+                        {r.license && ['Approved', 'Fulfilled'].includes(r.status) && r.license.product_key && (
+                            <div className="rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50 shadow-sm p-5">
+                                <h3 className="text-sm font-semibold text-emerald-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    <Key className="h-4 w-4" />
+                                    Product Key
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <code className="flex-1 text-sm font-mono bg-white/80 text-emerald-800 px-3 py-2.5 rounded-lg border border-emerald-200 select-all break-all">
+                                        {r.license.product_key}
+                                    </code>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className={`h-10 w-10 shrink-0 transition-colors ${
+                                            copied
+                                                ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
+                                                : 'hover:bg-emerald-50 border-emerald-200'
+                                        }`}
+                                        onClick={copyKey}
+                                        title="Copy key"
+                                    >
+                                        {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                                <p className="text-[11px] text-emerald-600 mt-2">Click the key to select it, or use the copy button.</p>
+                                {r.license.license_email && (
+                                    <div className="mt-3 pt-3 border-t border-emerald-200/50 text-sm">
+                                        <span className="text-emerald-600">Licensed to: </span>
+                                        <span className="font-medium text-emerald-800">{r.license.license_email}</span>
+                                    </div>
+                                )}
+                                {r.license.license_name && (
+                                    <div className="text-sm mt-1">
+                                        <span className="text-emerald-600">License Name: </span>
+                                        <span className="font-medium text-emerald-800">{r.license.license_name}</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* License pending notice */}
+                        {r.license && r.status === 'Pending' && (
+                            <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5">
+                                <div className="flex items-center gap-2 text-sm text-amber-700">
+                                    <Shield className="h-4 w-4" />
+                                    <span className="font-medium">License key will be revealed once your request is approved.</span>
                                 </div>
                             </div>
                         )}

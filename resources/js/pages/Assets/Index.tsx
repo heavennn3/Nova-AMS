@@ -413,19 +413,11 @@ export default function AssetIndex({
                         Assets
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                        Manage your IT assets and equipment
+                        Manage IT assets and equipment
                     </p>
                 </div>
                 <div className="flex space-x-3">
-                    {isAdmin && (
-                        <Button
-                            variant="outline"
-                            className="text-muted-foreground shadow-sm"
-                            onClick={() => router.get(`/assets/upload?site_id=${selectedSiteId}`)}
-                        >
-                            <Upload className="mr-2 h-4 w-4" /> Import
-                        </Button>
-                    )}
+
 
                     {isAdmin && (
                         <>
@@ -526,7 +518,7 @@ export default function AssetIndex({
                             <div className="relative w-[280px]">
                                 <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                                 <Input
-                                    placeholder="Search by name, tag, serial..."
+                                    placeholder="Search "
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="h-8 pl-8 text-sm"

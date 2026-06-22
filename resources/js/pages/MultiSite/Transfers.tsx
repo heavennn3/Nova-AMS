@@ -76,7 +76,7 @@ export default function Transfers({
     // 2. Filter assets that are available for transfer
     const [assetSearch, setAssetSearch] = useState('');
     const filteredAssets = useMemo(() => {
-        return assets.filter(asset => 
+        return assets.filter(asset =>
             (asset.product_name || '').toLowerCase().includes(assetSearch.toLowerCase()) ||
             (asset.asset_id || '').toLowerCase().includes(assetSearch.toLowerCase())
         );
@@ -95,7 +95,7 @@ export default function Transfers({
     // 4. Filter Transfer Records
     const filteredTransfers = useMemo(() => {
         return transfers.filter(transfer => {
-            const matchesSearch = 
+            const matchesSearch =
                 (transfer.asset_tag || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (transfer.asset_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (transfer.from_site || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -234,8 +234,8 @@ export default function Transfers({
                                 <div className="space-y-2">
                                     <div className="relative">
                                         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                                        <Input 
-                                            placeholder="Search asset catalog..." 
+                                        <Input
+                                            placeholder="Search asset catalog..."
                                             className="h-8.5 pl-8.5 text-xs"
                                             value={assetSearch}
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssetSearch(e.target.value)}
@@ -294,9 +294,9 @@ export default function Transfers({
                             </div>
 
                             {/* Submit */}
-                            <Button 
-                                type="submit" 
-                                className="w-full text-xs font-bold h-9" 
+                            <Button
+                                type="submit"
+                                className="w-full text-xs font-bold h-9"
                                 disabled={processing || !data.asset_id || !data.to_site_id}
                             >
                                 <ArrowRightLeft className="mr-2 h-3.5 w-3.5" />
@@ -337,8 +337,8 @@ export default function Transfers({
                         {/* Search workflow input */}
                         <div className="p-4 border-b border-border/40 relative">
                             <Search className="absolute left-7 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                                placeholder="Search by asset tag, product name, route locations..." 
+                            <Input
+                                placeholder="Search "
                                 className="pl-9 h-8 text-xs max-w-md bg-background/50 border-input"
                                 value={searchQuery}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
@@ -412,17 +412,17 @@ export default function Transfers({
                                         {/* Workflow Buttons */}
                                         {transfer.status === 'pending' && (
                                             <div className="flex gap-1.5">
-                                                <Button 
-                                                    variant="outline" 
-                                                    size="sm" 
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
                                                     className="h-7 text-[10px] font-bold border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
                                                     onClick={() => handleUpdateStatus(transfer.id, 'approved')}
                                                 >
                                                     Approve
                                                 </Button>
-                                                <Button 
-                                                    variant="outline" 
-                                                    size="sm" 
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
                                                     className="h-7 text-[10px] font-bold border-destructive/30 text-destructive hover:bg-destructive/5 dark:hover:bg-destructive/20"
                                                     onClick={() => handleUpdateStatus(transfer.id, 'rejected')}
                                                 >
@@ -432,9 +432,9 @@ export default function Transfers({
                                         )}
 
                                         {transfer.status === 'approved' && (
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
                                                 className="h-7 text-[10px] font-bold border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
                                                 onClick={() => handleUpdateStatus(transfer.id, 'completed')}
                                             >

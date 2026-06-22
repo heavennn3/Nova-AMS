@@ -32,6 +32,7 @@ export default function RequestsCreate({
         priority: 'Normal',
         asset_id: '',
         asset_category_id: '',
+        license_id: '',
         required_from: '',
         required_until: '',
         reason: '',
@@ -40,8 +41,6 @@ export default function RequestsCreate({
     // For asset type filtering
     const [selectedAssetTypeId, setSelectedAssetTypeId] = useState('');
     const [assetSearch, setAssetSearch] = useState('');
-    // For license selection
-    const [selectedLicenseId, setSelectedLicenseId] = useState('');
 
     // Filter assets by selected type and search
     const filteredAssets = useMemo(() => {
@@ -65,15 +64,8 @@ export default function RequestsCreate({
             ...data,
             asset_id: data.asset_id === 'none' || data.asset_id === '' ? null : data.asset_id,
             asset_category_id: data.asset_category_id === 'none' || data.asset_category_id === '' ? null : data.asset_category_id,
+            license_id: data.license_id || null,
         };
-
-        // Include license info in reason if software license
-        if (data.request_type === 'Software License' && selectedLicenseId) {
-            const lic = licenses.find(l => l.id.toString() === selectedLicenseId);
-            if (lic) {
-                postData.reason = `[License: ${lic.name}] ${data.reason}`;
-            }
-        }
 
         router.post('/requests', postData);
     };
@@ -249,9 +241,9 @@ export default function RequestsCreate({
                                                     <button
                                                         key={lic.id}
                                                         type="button"
-                                                        onClick={() => setSelectedLicenseId(lic.id.toString())}
+                                                        onClick={() => setData('license_id', lic.id.toString())}
                                                         className={`w-full flex items-center justify-between p-3 text-left text-sm transition-colors ${
-                                                            selectedLicenseId === lic.id.toString()
+                                                            data.license_id === lic.id.toString()
                                                                 ? 'bg-violet-50 border-l-2 border-l-violet-500'
                                                                 : 'hover:bg-muted/30'
                                                         }`}
@@ -362,7 +354,7 @@ export default function RequestsCreate({
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={processing || !data.request_type || (needsAsset && !data.asset_id) || (isLicense && !selectedLicenseId)}
+                                        disabled={processing || !data.request_type || (needsAsset && !data.asset_id) || (isLicense && !data.license_id)}
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                                     >
                                         <Send className="mr-2 h-4 w-4" /> Submit Request

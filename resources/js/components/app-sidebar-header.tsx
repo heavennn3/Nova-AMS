@@ -61,13 +61,13 @@ export function AppSidebarHeader({
                             <span>Assets</span>
                         </Link>
 
-                       <Link href="/users" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>Users</span>
+                        <Link href="/users" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>Users</span>
                         </Link>
 
                         {/* Moved Settings button here to align with Assets and Users nav tabs */}
-                       
+
                     </nav>
 
                     {/* Compact Search Box */}
@@ -75,7 +75,7 @@ export function AppSidebarHeader({
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <input
                             type="text"
-                            placeholder="Search..."
+                            placeholder="Search"
                             className="h-9 w-full rounded-md border border-input bg-muted/40 pl-9 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         />
                     </div>

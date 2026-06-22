@@ -127,7 +127,7 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search requests..."
+                            placeholder="Search"
                             className="pl-8"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -169,7 +169,7 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
                             <tr>
                                 <th className="px-4 py-3 text-left">Request #</th>
                                 <th className="px-4 py-3 text-left">Type</th>
-                                <th className="px-4 py-3 text-left">Asset / Category</th>
+                                <th className="px-4 py-3 text-left">Asset / License</th>
                                 <th className="px-4 py-3 text-left">Duration</th>
                                 <th className="px-4 py-3 text-left">Priority</th>
                                 <th className="px-4 py-3 text-left">Status</th>
@@ -194,13 +194,20 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
                                                 <div className="font-medium">{r.asset.product_name}</div>
                                                 <div className="text-xs text-muted-foreground font-mono">{r.asset.asset_id}</div>
                                             </div>
+                                        ) : r.license ? (
+                                            <div>
+                                                <div className="font-medium text-violet-700">{r.license.name}</div>
+                                                {['Approved', 'Fulfilled'].includes(r.status) && r.license.product_key ? (
+                                                    <div className="flex items-center gap-1 mt-0.5">
+                                                        <span className="text-[11px] text-muted-foreground">Key:</span>
+                                                        <code className="text-[11px] font-mono bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200 select-all">{r.license.product_key}</code>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-xs text-muted-foreground">Software License</div>
+                                                )}
+                                            </div>
                                         ) : r.category ? (
                                             <div className="font-medium">{r.category.name}</div>
-                                        ) : r.request_type === 'Software License' && r.reason?.match(/\[License: (.+?)\]/) ? (
-                                            <div>
-                                                <div className="font-medium">{r.reason.match(/\[License: (.+?)\]/)?.[1]}</div>
-                                                <div className="text-xs text-muted-foreground">Software License</div>
-                                            </div>
                                         ) : (
                                             <span className="text-muted-foreground">—</span>
                                         )}

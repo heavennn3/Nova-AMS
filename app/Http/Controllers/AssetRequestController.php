@@ -28,6 +28,7 @@ class AssetRequestController extends Controller
                 'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
                 'category',
                 'approver',
+                'license',
             ])
             ->where('user_id', $request->user()->id)
             ->latest()
@@ -73,6 +74,7 @@ class AssetRequestController extends Controller
             'priority' => 'required|string|in:Normal,High,Urgent',
             'asset_id' => 'nullable|exists:assets,id',
             'asset_category_id' => 'nullable|exists:asset_categories,id',
+            'license_id' => 'nullable|exists:licenses,id',
             'required_from' => 'nullable|date',
             'required_until' => 'nullable|date|after_or_equal:required_from',
             'reason' => 'required|string',
@@ -109,6 +111,7 @@ class AssetRequestController extends Controller
                 'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
                 'category',
                 'approver',
+                'license',
             ])
             ->latest()
             ->get();
@@ -128,6 +131,7 @@ class AssetRequestController extends Controller
             'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
             'category',
             'approver',
+            'license',
         ])->findOrFail($id);
 
         return Inertia::render('Requests/Show', [
@@ -145,6 +149,26 @@ class AssetRequestController extends Controller
             'approved_at' => now(),
             'admin_notes' => $request->input('admin_notes'),
         ]);
+
+        // For Software License: assign seat + notify user with product key on approval
+        if ($assetRequest->request_type === 'Software License' && $assetRequest->license_id) {
+            $license = \App\Models\License::withoutGlobalScope('site_access')->find($assetRequest->license_id);
+            $user = \App\Models\User::find($assetRequest->user_id);
+
+            if ($license && $user && $license->available_seats > 0) {
+                try {
+                    $license->assignTo($user, 'user', $assetRequest->reason);
+
+                    $user->notify(new \App\Notifications\LicenseFulfilledNotification(
+                        $license->name,
+                        $license->product_key,
+                        $assetRequest->request_number,
+                    ));
+                } catch (\Exception $e) {
+                    return back()->with('warning', 'Request approved but license seat assignment failed: ' . $e->getMessage());
+                }
+            }
+        }
 
         return back()->with('success', 'Request approved.');
     }

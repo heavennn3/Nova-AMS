@@ -441,12 +441,12 @@ export default function LiveTracking({
         const matchesSite =
             activeSiteFilter === 'all' ||
             a.site ===
-                sites.find((s) => String(s.id) === activeSiteFilter)?.name;
+            sites.find((s) => String(s.id) === activeSiteFilter)?.name;
 
         const matchesUser =
             activeUserFilter === 'all' ||
             a.user_name ===
-                users.find((u) => String(u.id) === activeUserFilter)?.name;
+            users.find((u) => String(u.id) === activeUserFilter)?.name;
 
         const matchesDate =
             (!activeStartDate || a.assigned_at >= activeStartDate) &&
@@ -475,7 +475,7 @@ export default function LiveTracking({
                         <h1 className="text-2xl font-bold tracking-tight">
                             Asset Withdrawal
                         </h1>
-                        
+
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -501,11 +501,10 @@ export default function LiveTracking({
             <div className="flex w-fit rounded-lg bg-muted p-1">
                 <button
                     onClick={() => setActiveTab('live')}
-                    className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-                        activeTab === 'live'
+                    className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${activeTab === 'live'
                             ? 'bg-background text-foreground shadow-sm'
                             : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                        }`}
                 >
                     <Activity className="h-4 w-4" />
                     Active
@@ -515,11 +514,10 @@ export default function LiveTracking({
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-                        activeTab === 'history'
+                    className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${activeTab === 'history'
                             ? 'bg-background text-foreground shadow-sm'
                             : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                        }`}
                 >
                     <HistoryIcon className="h-4 w-4" />
                     History Log
@@ -581,7 +579,7 @@ export default function LiveTracking({
                             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type="text"
-                                placeholder="Search by Asset ID, product, user..."
+                                placeholder="Search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="h-9 w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:ring-2 focus:ring-primary/30 focus:outline-none"
@@ -642,8 +640,8 @@ export default function LiveTracking({
                                                 <span>{s.name}</span>
                                                 {activeSiteFilter ===
                                                     String(s.id) && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                                )}
+                                                        <Check className="h-3.5 w-3.5 text-primary" />
+                                                    )}
                                             </button>
                                         ))}
                                     </div>
@@ -678,8 +676,8 @@ export default function LiveTracking({
                                                 <span>{u.name}</span>
                                                 {activeUserFilter ===
                                                     String(u.id) && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                                )}
+                                                        <Check className="h-3.5 w-3.5 text-primary" />
+                                                    )}
                                             </button>
                                         ))}
                                     </div>
@@ -813,8 +811,8 @@ export default function LiveTracking({
                                             <Activity className="mx-auto mb-2 h-8 w-8 opacity-20" />
                                             <p>
                                                 {search ||
-                                                activeSiteFilter !== 'all' ||
-                                                activeStartDate
+                                                    activeSiteFilter !== 'all' ||
+                                                    activeStartDate
                                                     ? 'No Matching Data Found'
                                                     : 'No Asset Currently Being Used'}
                                             </p>
@@ -955,8 +953,8 @@ export default function LiveTracking({
                                                 <span>{u.name}</span>
                                                 {historyUserFilter ===
                                                     String(u.id) && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                                )}
+                                                        <Check className="h-3.5 w-3.5 text-primary" />
+                                                    )}
                                             </button>
                                         ))}
                                     </div>
@@ -1152,7 +1150,7 @@ export default function LiveTracking({
                                 to{' '}
                                 {Math.min(
                                     historyMeta.current_page *
-                                        historyMeta.per_page,
+                                    historyMeta.per_page,
                                     historyMeta.total,
                                 )}{' '}
                                 of {historyMeta.total}
@@ -1179,7 +1177,7 @@ export default function LiveTracking({
                                     size="sm"
                                     disabled={
                                         historyMeta.current_page ===
-                                            historyMeta.last_page ||
+                                        historyMeta.last_page ||
                                         loadingHistory
                                     }
                                     onClick={() =>
@@ -1258,11 +1256,11 @@ export default function LiveTracking({
                                             .filter(
                                                 (a) =>
                                                     selectedCheckoutSiteId ===
-                                                        'all' ||
+                                                    'all' ||
                                                     a.site_id ===
-                                                        Number(
-                                                            selectedCheckoutSiteId,
-                                                        ),
+                                                    Number(
+                                                        selectedCheckoutSiteId,
+                                                    ),
                                             )
                                             .filter(
                                                 (a) =>
@@ -1288,9 +1286,9 @@ export default function LiveTracking({
                                                         );
                                                         setAssetSearch(
                                                             a.product_name +
-                                                                ' (' +
-                                                                a.asset_id +
-                                                                ')',
+                                                            ' (' +
+                                                            a.asset_id +
+                                                            ')',
                                                         );
                                                         setShowAssetDropdown(
                                                             false,
@@ -1309,19 +1307,19 @@ export default function LiveTracking({
                                                     </div>
                                                     {checkoutAssetId ===
                                                         String(a.id) && (
-                                                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                                                    )}
+                                                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                                                        )}
                                                 </button>
                                             ))}
                                         {availableAssets
                                             .filter(
                                                 (a) =>
                                                     selectedCheckoutSiteId ===
-                                                        'all' ||
+                                                    'all' ||
                                                     a.site_id ===
-                                                        Number(
-                                                            selectedCheckoutSiteId,
-                                                        ),
+                                                    Number(
+                                                        selectedCheckoutSiteId,
+                                                    ),
                                             )
                                             .filter(
                                                 (a) =>
@@ -1337,10 +1335,10 @@ export default function LiveTracking({
                                                             assetSearch.toLowerCase(),
                                                         ),
                                             ).length === 0 && (
-                                            <div className="p-3 text-center text-xs text-muted-foreground">
-                                                No available assets match.
-                                            </div>
-                                        )}
+                                                <div className="p-3 text-center text-xs text-muted-foreground">
+                                                    No available assets match.
+                                                </div>
+                                            )}
                                     </div>
                                 )}
                             </div>
@@ -1381,7 +1379,7 @@ export default function LiveTracking({
                                             .filter(
                                                 (u) =>
                                                     selectedCheckoutSiteId ===
-                                                        'all' ||
+                                                    'all' ||
                                                     u.site_ids.includes(
                                                         Number(
                                                             selectedCheckoutSiteId,
@@ -1427,15 +1425,15 @@ export default function LiveTracking({
                                                     </div>
                                                     {checkoutUserId ===
                                                         String(u.id) && (
-                                                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                                                    )}
+                                                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                                                        )}
                                                 </button>
                                             ))}
                                         {users
                                             .filter(
                                                 (u) =>
                                                     selectedCheckoutSiteId ===
-                                                        'all' ||
+                                                    'all' ||
                                                     u.site_ids.includes(
                                                         Number(
                                                             selectedCheckoutSiteId,
@@ -1456,10 +1454,10 @@ export default function LiveTracking({
                                                             userSearch.toLowerCase(),
                                                         ),
                                             ).length === 0 && (
-                                            <div className="p-3 text-center text-xs text-muted-foreground">
-                                                No users found.
-                                            </div>
-                                        )}
+                                                <div className="p-3 text-center text-xs text-muted-foreground">
+                                                    No users found.
+                                                </div>
+                                            )}
                                     </div>
                                 )}
                             </div>

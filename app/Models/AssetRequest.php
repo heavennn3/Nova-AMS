@@ -16,6 +16,7 @@ class AssetRequest extends Model
         'user_id',
         'asset_id',
         'asset_category_id',
+        'license_id',
         'request_type',
         'priority',
         'status',
@@ -55,5 +56,10 @@ class AssetRequest extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(AssetCategory::class, 'asset_category_id');
+    }
+
+    public function license(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\License::class);
     }
 }

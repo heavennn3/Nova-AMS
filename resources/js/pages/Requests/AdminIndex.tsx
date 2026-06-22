@@ -247,7 +247,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         <div className="relative col-span-2 md:col-span-1">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search..."
+                                placeholder="Search"
                                 className="pl-8 h-9 text-sm"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -355,7 +355,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     <th className="px-4 py-3 text-left">Requester</th>
                                     <th className="px-4 py-3 text-left">Site</th>
                                     <th className="px-4 py-3 text-left">Type</th>
-                                    <th className="px-4 py-3 text-left">Asset / Category</th>
+                                    <th className="px-4 py-3 text-left">Asset / License</th>
                                     <th className="px-4 py-3 text-left">Priority</th>
                                     <th className="px-4 py-3 text-left">Status</th>
                                     <th className="px-4 py-3 text-left">Submitted</th>
@@ -370,12 +370,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     return (
                                         <tr
                                             key={r.id}
-                                            className={`transition-colors ${
-                                                isUrgent ? 'bg-rose-50/50 hover:bg-rose-50' :
-                                                isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50' :
-                                                isPending ? 'bg-amber-50/20 hover:bg-amber-50/30' :
-                                                'hover:bg-muted/30'
-                                            }`}
+                                            className={`transition-colors ${isUrgent ? 'bg-rose-50/50 hover:bg-rose-50' :
+                                                    isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50' :
+                                                        isPending ? 'bg-amber-50/20 hover:bg-amber-50/30' :
+                                                            'hover:bg-muted/30'
+                                                }`}
                                         >
                                             <td className="px-3 py-3.5 w-10">
                                                 {isPending ? (
@@ -417,6 +416,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     <div>
                                                         <div className="font-medium text-foreground text-xs">{r.asset.product_name}</div>
                                                         <div className="text-[11px] text-muted-foreground font-mono">{r.asset.asset_id}</div>
+                                                    </div>
+                                                ) : r.license ? (
+                                                    <div>
+                                                        <div className="font-medium text-xs text-violet-700">{r.license.name}</div>
+                                                        <div className="text-[11px] text-muted-foreground">{r.license.available_seats ?? '?'} seat(s) available</div>
                                                     </div>
                                                 ) : r.category ? (
                                                     <div className="font-medium text-xs">{r.category.name}</div>
@@ -511,6 +515,25 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     <div className="pt-2 border-t mt-2">
                                         <span className="text-muted-foreground text-xs block mb-1">Reason:</span>
                                         <p className="text-sm bg-white/60 rounded p-2">{actionRequest.reason}</p>
+                                    </div>
+                                )}
+                                {actionRequest.license && (
+                                    <div className="pt-2 border-t mt-2">
+                                        <span className="text-muted-foreground text-xs block mb-1">License:</span>
+                                        <div className="flex items-center justify-between bg-violet-50 rounded p-2">
+                                            <div>
+                                                <div className="text-sm font-medium text-violet-700">{actionRequest.license.name}</div>
+                                                {actionRequest.license.product_key && (
+                                                    <div className="text-[11px] font-mono text-muted-foreground mt-0.5">Key: {actionRequest.license.product_key}</div>
+                                                )}
+                                            </div>
+                                            <Badge variant="outline" className="text-violet-600 border-violet-200 bg-violet-50 text-xs">
+                                                {actionRequest.license.available_seats ?? '?'} seat(s) left
+                                            </Badge>
+                                        </div>
+                                        {actionType === 'fulfill' && (
+                                            <p className="text-[11px] text-emerald-600 mt-1.5">A license seat will be automatically assigned to {actionRequest.user?.name} upon fulfillment.</p>
+                                        )}
                                     </div>
                                 )}
                             </div>
