@@ -36,6 +36,7 @@ export function AppSidebarHeader({
 
     // State to toggle the "Create New" dropdown
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const isAdmin = (auth as any)?.user?.roles?.includes('Admin') ?? false;
 
     return (
         <header className="flex h-16 shrink-0 items-center border-b border-sidebar-border/50 bg-background px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4">
@@ -60,12 +61,12 @@ export function AppSidebarHeader({
                             <Package className="h-4 w-4 text-muted-foreground" />
                             <span>Assets</span>
                         </Link>
-
-                        <Link href="/users" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>Users</span>
-                        </Link>
-
+                        {isAdmin && (
+                            <Link href="/users" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                                <span>Users</span>
+                            </Link>
+                        )}
                         {/* Moved Settings button here to align with Assets and Users nav tabs */}
 
                     </nav>
@@ -80,45 +81,47 @@ export function AppSidebarHeader({
                         />
                     </div>
 
-                    {/* "Create New" Action Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsCreateOpen(!isCreateOpen)}
-                            onBlur={() => setTimeout(() => setIsCreateOpen(false), 200)}
-                            className="flex h-9 items-center gap-1 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <Plus className="h-4 w-4" />
-                            <span className="hidden sm:inline">Create New</span>
-                            <ChevronDown className={cn("h-3.5 w-3.5 opacity-70 transition-transform duration-200", isCreateOpen && "rotate-180")} />
-                        </button>
+                    {/* "Create New" Action Dropdown — Admin only */}
+                    {isAdmin && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsCreateOpen(!isCreateOpen)}
+                                onBlur={() => setTimeout(() => setIsCreateOpen(false), 200)}
+                                className="flex h-9 items-center gap-1 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <Plus className="h-4 w-4" />
+                                <span className="hidden sm:inline">Create New</span>
+                                <ChevronDown className={cn("h-3.5 w-3.5 opacity-70 transition-transform duration-200", isCreateOpen && "rotate-180")} />
+                            </button>
 
-                        {/* Dropdown Menu List */}
-                        {isCreateOpen && (
-                            <div className="absolute right-0 mt-1.5 w-48 z-50 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 slide-in-from-top-1">
-                                <button
-                                    onClick={() => router.visit('/assets/create')}
-                                    className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
-                                >
-                                    <Package className="mr-2 h-4 w-4 opacity-70" />
-                                    <span>Create Asset</span>
-                                </button>
-                                <button
-                                    onClick={() => router.visit('/users/create')}
-                                    className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
-                                >
-                                    <Users className="mr-2 h-4 w-4 opacity-70" />
-                                    <span>Create User</span>
-                                </button>
-                                <button
-                                    onClick={() => router.visit('/spare-parts')}
-                                    className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
-                                >
-                                    <Settings2 className="mr-2 h-4 w-4 opacity-70" />
-                                    <span>Create Spare Part</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                            {/* Dropdown Menu List */}
+                            {isCreateOpen && (
+                                <div className="absolute right-0 mt-1.5 w-48 z-50 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 slide-in-from-top-1">
+                                    <button
+                                        onClick={() => router.visit('/assets/create')}
+                                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+                                    >
+                                        <Package className="mr-2 h-4 w-4 opacity-70" />
+                                        <span>Create Asset</span>
+                                    </button>
+                                    <button
+                                        onClick={() => router.visit('/users/create')}
+                                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+                                    >
+                                        <Users className="mr-2 h-4 w-4 opacity-70" />
+                                        <span>Create User</span>
+                                    </button>
+                                    <button
+                                        onClick={() => router.visit('/spare-parts')}
+                                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+                                    >
+                                        <Settings2 className="mr-2 h-4 w-4 opacity-70" />
+                                        <span>Create Spare Part</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* System Monitor & Core Utilities */}
                     <div className="flex items-center gap-3 border-l border-border/60 pl-4">
