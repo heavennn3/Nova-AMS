@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Select,
     SelectContent,
@@ -132,7 +131,7 @@ export default function Checkout({
                     </div>
                     <div>
                         <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Checkout Person</div>
-                        <div className="font-semibold text-sm">{currentUser.name} <span className="font-normal text-muted-foreground">({currentUser.email})</span></div>
+                        <div className="font-semibold text-sm">{currentUser?.name || '—'} <span className="font-normal text-muted-foreground">({currentUser?.email || '—'})</span></div>
                     </div>
                 </div>
 
@@ -173,10 +172,12 @@ export default function Checkout({
                             <div className="border-b px-5 py-3 flex items-center gap-2 bg-muted/30">
                                 <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-foreground text-background text-[10px] font-bold">2</span>
                                 <h2 className="font-semibold text-sm">Choose Assets</h2>
-                                <span className="text-xs text-muted-foreground ml-auto">
-                                    {selectedIds.size > 0 && <span className="font-semibold text-foreground mr-2">{selectedIds.size} selected</span>}
-                                    {filteredAssets.length} available
-                                </span>
+                                <div className="text-xs text-muted-foreground ml-auto flex items-center gap-2">
+                                    {selectedIds.size > 0 && (
+                                        <span className="font-semibold text-foreground">{selectedIds.size} selected</span>
+                                    )}
+                                    <span>{filteredAssets.length} available</span>
+                                </div>
                             </div>
                             <div className="p-5 space-y-3">
                                 <div className="relative max-w-sm">
@@ -194,9 +195,11 @@ export default function Checkout({
                                         <thead className="bg-muted/40 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
                                             <tr>
                                                 <th className="px-4 py-2.5 text-left w-10">
-                                                    <Checkbox
+                                                    <input
+                                                        type="checkbox"
+                                                        className="h-4 w-4 rounded border-gray-300 accent-emerald-600"
                                                         checked={visibleAssets.length > 0 && visibleAssets.every(a => selectedIds.has(a.id))}
-                                                        onCheckedChange={toggleAll}
+                                                        onChange={toggleAll}
                                                     />
                                                 </th>
                                                 <th className="px-4 py-2.5 text-left">Asset Tag</th>
@@ -216,8 +219,13 @@ export default function Checkout({
                                                         onClick={() => toggleAsset(asset.id)}
                                                         className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-muted/30'}`}
                                                     >
-                                                        <td className="px-4 py-2.5">
-                                                            <Checkbox checked={isSelected} onCheckedChange={() => toggleAsset(asset.id)} />
+                                                        <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+                                                            <input
+                                                                type="checkbox"
+                                                                className="h-4 w-4 rounded border-gray-300 accent-emerald-600"
+                                                                checked={isSelected}
+                                                                onChange={() => toggleAsset(asset.id)}
+                                                            />
                                                         </td>
                                                         <td className="px-4 py-2.5 font-mono text-xs font-medium text-emerald-700">{asset.asset_id}</td>
                                                         <td className="px-4 py-2.5 font-medium">{asset.product_name}</td>
