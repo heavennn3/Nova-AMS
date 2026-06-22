@@ -139,7 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/master-data/custom-values/batch-delete', [\App\Http\Controllers\MasterDataController::class, 'batchDeleteValues'])->name('custom-values.batch-delete');
         Route::post('/master-data/custom-values/batch-update', [\App\Http\Controllers\MasterDataController::class, 'batchUpdateValues'])->name('custom-values.batch-update');
 
-        Route::resource('vendors', \App\Http\Controllers\VendorController::class);
+
     });
 
     // Multi-Site Module

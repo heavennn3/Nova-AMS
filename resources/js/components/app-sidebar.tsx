@@ -9,7 +9,7 @@ import {
     Activity,
     Shield,
     FileText,
-    Briefcase,
+
     Headset,
     Trash2,
     Settings,
@@ -37,7 +37,7 @@ import {
     masterData,
     operationsMaintenance,
     userManagement,
-    vendors,
+
 } from '@/routes';
 
 import type { NavItem } from '@/types';
@@ -76,12 +76,7 @@ const navSections: NavSection[] = [
                 icon: Database,
                 module: 'Master Data',
             },
-            {
-                title: 'Vendor Management',
-                href: vendors(),
-                icon: Briefcase,
-                module: 'Master Data',
-            },
+
             {
                 title: 'Multi-Site Management',
                 href: '#',
@@ -167,22 +162,7 @@ const navSections: NavSection[] = [
                     },
                 ],
             },
-            {
-                title: 'Vendor',
-                href: '#',
-                icon: Briefcase,
-                module: 'Operations & Maintenance',
-                items: [
-                    {
-                        title: 'Performance Tracking',
-                        href: '/vendors/performance',
-                    },
-                    { title: 'Expiration Alerts', href: '/vendors/alerts' },
-                    { title: 'SLAs', href: '/vendors/slas' },
-                    { title: 'Purchase Orders', href: '/vendors/po' },
-                    { title: 'Vendor Portal', href: '/vendors/portal' },
-                ],
-            },
+
         ],
     },
 
