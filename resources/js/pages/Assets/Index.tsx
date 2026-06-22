@@ -426,44 +426,7 @@ export default function AssetIndex({
                             <Upload className="mr-2 h-4 w-4" /> Import
                         </Button>
                     )}
-                    <Button
-                        variant="outline"
-                        className="text-muted-foreground shadow-sm"
-                        onClick={() => {
-                            const headers = [
-                                'Asset ID',
-                                'Product Name',
-                                'Category',
-                                'Site',
-                                'Status',
-                                'Quantity',
-                                'Purchase Year',
-                                'Vendor',
-                            ];
-                            const rows = filteredAssets.map((a) => [
-                                a.asset_id,
-                                a.product_name,
-                                a.category,
-                                a.site,
-                                a.status,
-                                a.quantity,
-                                a.purchase_year,
-                                a.vendor,
-                            ]);
-                            const csvContent =
-                                'data:text/csv;charset=utf-8,' +
-                                [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-                            const encodedUri = encodeURI(csvContent);
-                            const link = document.createElement('a');
-                            link.setAttribute('href', encodedUri);
-                            link.setAttribute('download', 'asset_inventory.csv');
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        }}
-                    >
-                        <Download className="mr-2 h-4 w-4" /> Export
-                    </Button>
+
                     {isAdmin && (
                         <>
                             <Button
@@ -496,16 +459,16 @@ export default function AssetIndex({
                                 setSelectedSiteId(site.id?.toString() || '')
                             }
                             className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${selectedSiteId === (site.id?.toString() || '')
-                                    ? 'border-primary bg-primary/5 font-bold text-primary'
-                                    : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
+                                ? 'border-primary bg-primary/5 font-bold text-primary'
+                                : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
                                 }`}
                         >
                             <span>{site.name}</span>
                             <span
                                 className={`rounded-full px-1.5 py-0.5 text-[10px] ${selectedSiteId ===
-                                        (site.id?.toString() || '')
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground'
+                                    (site.id?.toString() || '')
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground'
                                     }`}
                             >
                                 {count}
