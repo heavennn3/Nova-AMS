@@ -28,14 +28,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/requests/batch-approve', [\App\Http\Controllers\AssetRequestController::class, 'batchApprove'])->name('requests.batch-approve');
     Route::post('/requests/batch-reject', [\App\Http\Controllers\AssetRequestController::class, 'batchReject'])->name('requests.batch-reject');
 
-    // Check Out / Check In
-    Route::get('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'index'])->name('checkout.index');
-    Route::get('/checkout/new', [\App\Http\Controllers\CheckOutInController::class, 'create'])->name('checkout.create');
-    Route::post('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'store'])->name('checkout.store');
-    Route::post('/checkout/{id}/checkin', [\App\Http\Controllers\CheckOutInController::class, 'checkin'])->name('checkout.checkin');
+    // Check Out / Check In (Blocked for Admin users)
+    Route::middleware(['restrict.admin'])->group(function () {
+        Route::get('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'index'])->name('checkout.index');
+        Route::get('/checkout/new', [\App\Http\Controllers\CheckOutInController::class, 'create'])->name('checkout.create');
+        Route::post('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'store'])->name('checkout.store');
+        Route::post('/checkout/{id}/checkin', [\App\Http\Controllers\CheckOutInController::class, 'checkin'])->name('checkout.checkin');
+    });
 
-    // Transactions (User)
-    Route::get('/transactions', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transactions.index');
+    // Transactions (User - Blocked for Admin users)
+    Route::middleware(['restrict.admin'])->group(function () {
+        Route::get('/transactions', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transactions.index');
+    });
 
     // Support Tickets
     Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets');

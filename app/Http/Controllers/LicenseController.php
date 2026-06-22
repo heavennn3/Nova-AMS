@@ -7,6 +7,7 @@ use App\Models\LicenseSeat;
 use App\Models\LicenseAssignment;
 use App\Models\LicenseRenewal;
 use App\Models\LicenseUsageLog;
+use App\Models\LicenseType;
 use App\Models\User;
 use App\Models\Asset;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class LicenseController extends Controller
         try {
             Log::info('License index method called');
 
-            $licenses = License::with(['vendor', 'site', 'licenseSeats'])
+            $licenses = License::with(['vendor', 'site', 'licenseSeats', 'licenseType'])
                 ->get()
                 ->map(function ($license) {
                     try {
@@ -34,6 +35,8 @@ class LicenseController extends Controller
                             'version' => $license->version,
                             'category' => $license->category,
                             'license_type' => $license->license_type,
+                            'license_type_id' => $license->license_type_id,
+                            'license_type_name' => $license->licenseType ? $license->licenseType->name : null,
                             'pricing_model' => $license->pricing_model,
                             'total_seats' => $license->total_seats,
                             'used_seats' => $license->used_seats,
@@ -75,6 +78,7 @@ class LicenseController extends Controller
 
             $sites = DB::table('sites')->select('id', 'name')->orderBy('name')->get();
             $vendors = DB::table('vendors')->select('id', 'name')->orderBy('name')->get();
+            $licenseTypes = LicenseType::active()->ordered()->get();
 
             Log::info('License page loaded successfully', [
                 'licenses_count' => $licenses->count(),
@@ -90,6 +94,7 @@ class LicenseController extends Controller
                 'assets' => $assets,
                 'sites' => $sites,
                 'vendors' => $vendors,
+                'licenseTypes' => $licenseTypes,
             ]);
 
         } catch (\Exception $e) {
@@ -117,6 +122,7 @@ class LicenseController extends Controller
             'version' => 'nullable|string',
             'category' => 'nullable|string',
             'license_type' => 'required|in:per_user,per_device,concurrent,subscription,perpetual',
+            'license_type_id' => 'nullable|exists:license_types,id',
             'pricing_model' => 'required|in:one_time,annual,monthly,quarterly',
             'total_seats' => 'required|integer|min:1|max:500',
             'purchase_cost' => 'nullable|numeric|min:0',
@@ -244,6 +250,7 @@ class LicenseController extends Controller
             'version' => 'nullable|string',
             'category' => 'nullable|string',
             'license_type' => 'required|in:per_user,per_device,concurrent,subscription,perpetual',
+            'license_type_id' => 'nullable|exists:license_types,id',
             'pricing_model' => 'required|in:one_time,annual,monthly,quarterly',
             'total_seats' => 'required|integer|min:1|max:500',
             'purchase_cost' => 'nullable|numeric|min:0',

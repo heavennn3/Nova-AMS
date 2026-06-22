@@ -35,7 +35,7 @@ import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
-export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], vendors = [] }: any) {
+export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], vendors = [], licenseTypes = [] }: any) {
     // Error boundary - if data is not in expected format, show simple version
     const [error, setError] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -44,6 +44,8 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const [selectedLicense, setSelectedLicense] = useState<any>(null);
     const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
     const [deleteReason, setDeleteReason] = useState('');
+    const [selectedVendor, setSelectedVendor] = useState<string>('all');
+    const [selectedLicenseType, setSelectedLicenseType] = useState<string>('all');
 
     // Validate data format
     useEffect(() => {
@@ -70,6 +72,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         expiration_date: '',
         license_email: '',
         license_name: '',
+        license_type_id: 'all',
         vendor_id: 'all',
         site_id: 'all',
         notes: '',
@@ -81,6 +84,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             ...form.data,
             vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
             site_id: form.data.site_id === 'all' ? null : Number(form.data.site_id),
+            license_type_id: form.data.license_type_id === 'all' ? null : Number(form.data.license_type_id),
             purchase_cost: form.data.purchase_cost ? Number(form.data.purchase_cost) : null,
             total_seats: form.data.seats,
             license_type: 'perpetual',
@@ -112,6 +116,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             ...form.data,
             vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
             site_id: form.data.site_id === 'all' ? null : Number(form.data.site_id),
+            license_type_id: form.data.license_type_id === 'all' ? null : Number(form.data.license_type_id),
             purchase_cost: form.data.purchase_cost ? Number(form.data.purchase_cost) : null,
             total_seats: form.data.seats,
             license_type: 'perpetual',
@@ -173,6 +178,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 expiration_date: license.expiration_date || '',
                 license_email: license.license_email || '',
                 license_name: license.license_name || '',
+                license_type_id: license.license_type_id ? String(license.license_type_id) : 'all',
                 vendor_id: license.vendor_id ? String(license.vendor_id) : 'all',
                 site_id: license.site_id ? String(license.site_id) : 'all',
                 notes: license.notes || '',
@@ -185,6 +191,25 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const toggleKeyVisibility = (id: number) => {
         setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
     };
+
+    // Filter licenses by selected vendor and license type
+    const filteredLicenses = useMemo(() => {
+        let filtered = licenses;
+
+        if (selectedVendor !== 'all') {
+            filtered = filtered.filter((license: any) =>
+                license.vendor_id === parseInt(selectedVendor)
+            );
+        }
+
+        if (selectedLicenseType !== 'all') {
+            filtered = filtered.filter((license: any) =>
+                license.license_type_id === parseInt(selectedLicenseType)
+            );
+        }
+
+        return filtered;
+    }, [licenses, selectedVendor, selectedLicenseType]);
 
     const columns = useMemo(
         () => [
@@ -269,6 +294,30 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 ),
             },
             {
+                id: 'vendor',
+                accessorFn: (row: any) => row.vendor || 'No Vendor',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Vendor" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="inline-flex items-center rounded bg-blue-50 dark:bg-blue-950/20 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400 border border-blue-200/50">
+                        {row.original.vendor || 'No Vendor'}
+                    </span>
+                ),
+            },
+            {
+                id: 'license_type',
+                accessorFn: (row: any) => row.license_type_name || 'Uncategorized',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="License Type" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="inline-flex items-center rounded bg-purple-50 dark:bg-purple-950/20 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-400 border border-purple-200/50">
+                        {row.original.license_type_name || 'Uncategorized'}
+                    </span>
+                ),
+            },
+            {
                 accessorKey: 'expiration_date',
                 header: ({ column }: any) => (
                     <DataTableColumnHeader column={column} title="Expiration" />
@@ -336,12 +385,12 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     );
 
     // Calc Summary Stats
-    const totalLicenses = licenses.length;
-    const totalSeats = licenses.reduce((sum: number, lic: any) => sum + lic.total_seats, 0);
-    const totalAssignedSeats = licenses.reduce((sum: number, lic: any) => sum + lic.used_seats, 0);
+    const totalLicenses = filteredLicenses.length;
+    const totalSeats = filteredLicenses.reduce((sum: number, lic: any) => sum + lic.total_seats, 0);
+    const totalAssignedSeats = filteredLicenses.reduce((sum: number, lic: any) => sum + lic.used_seats, 0);
     const totalAvailableSeats = totalSeats - totalAssignedSeats;
 
-    const expiringSoonCount = licenses.filter((lic: any) => {
+    const expiringSoonCount = filteredLicenses.filter((lic: any) => {
         if (!lic.expiration_date) return false;
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
@@ -349,7 +398,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         return diffDays > 0 && diffDays <= 30;
     }).length;
 
-    const expiredCount = licenses.filter((lic: any) => {
+    const expiredCount = filteredLicenses.filter((lic: any) => {
         if (!lic.expiration_date) return false;
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
@@ -377,7 +426,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             Software Licenses
                         </h1>
                         <p className="text-muted-foreground">
-                            Manage application license compliance, seat assignments, and activation keys.
+                            Manage software licenses and activation keys.
                         </p>
                     </div>
                 </div>
@@ -405,13 +454,13 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Total Licenses
+                                    Total Licenses (KEYS)
                                 </p>
                                 <p className="text-3xl font-bold text-foreground">
                                     {totalLicenses}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    {totalSeats} total seats provisioned
+                                    {totalSeats} User per Product Key
                                 </p>
                             </div>
                             <div className="rounded-lg bg-primary/10 p-3 text-primary">
@@ -426,7 +475,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Seats In Use
+                                    IN USE
                                 </p>
                                 <p className="text-3xl font-bold text-blue-600">
                                     {totalAssignedSeats}
@@ -447,7 +496,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Available Seats
+                                    Available
                                 </p>
                                 <p className="text-3xl font-bold text-emerald-600">
                                     {totalAvailableSeats}
@@ -468,7 +517,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Compliance Alerts
+                                    Expiring Alerts
                                 </p>
                                 <p className="text-3xl font-bold text-rose-600">
                                     {expiredCount + expiringSoonCount}
@@ -486,22 +535,65 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             </div>
 
             <div className="rounded-lg border bg-card shadow-sm">
+                <div className="p-4 border-b flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">License Type:</label>
+                            <Select value={selectedLicenseType} onValueChange={setSelectedLicenseType}>
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue placeholder="All Types" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Types</SelectItem>
+                                    {licenseTypes.map((lt: any) => (
+                                        <SelectItem key={lt.id} value={String(lt.id)}>{lt.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">Vendor:</label>
+                            <Select value={selectedVendor} onValueChange={setSelectedVendor}>
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue placeholder="All Vendors" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Vendors</SelectItem>
+                                    {vendors.map((v: any) => (
+                                        <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                        {filteredLicenses.length} {filteredLicenses.length === 1 ? 'license' : 'licenses'} {(selectedVendor !== 'all' || selectedLicenseType !== 'all') ? 'filtered' : ''}
+                    </div>
+                </div>
                 {error ? (
                     <div className="p-8 text-center text-red-600">
                         <p className="font-semibold">Unable to display licenses</p>
                         <p className="text-sm mt-2">{error}</p>
                         <p className="text-xs mt-4 text-muted-foreground">Please refresh the page or contact support if the problem persists.</p>
                     </div>
-                ) : licenses.length > 0 ? (
-                    <DataTable columns={columns} data={licenses} searchKey="name" />
+                ) : filteredLicenses.length > 0 ? (
+                    <DataTable columns={columns} data={filteredLicenses} searchKey="name" />
                 ) : (
                     <div className="p-8 text-center text-muted-foreground">
                         <FileKey className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                        <p className="text-lg font-medium mb-2">No licenses found</p>
-                        <p className="text-sm mb-4">Create your first software license to get started tracking compliance and seats.</p>
-                        <Button onClick={() => setIsCreateOpen(true)}>
-                            <Plus className="mr-2 h-4 w-4" /> Add Your First License
-                        </Button>
+                        <p className="text-lg font-medium mb-2">
+                            {(selectedVendor !== 'all' || selectedLicenseType !== 'all') ? 'No licenses found for the selected filters' : 'No licenses found'}
+                        </p>
+                        <p className="text-sm mb-4">
+                            {(selectedVendor !== 'all' || selectedLicenseType !== 'all')
+                                ? 'Try adjusting your filters or add licenses that match your criteria.'
+                                : 'Create your first software license to get started tracking compliance and seats.'}
+                        </p>
+                        {(selectedVendor === 'all' && selectedLicenseType === 'all') && (
+                            <Button onClick={() => setIsCreateOpen(true)}>
+                                <Plus className="mr-2 h-4 w-4" /> Add Your First License
+                            </Button>
+                        )}
                     </div>
                 )}
             </div>
@@ -603,6 +695,24 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                                         onChange={(e) => form.setData('license_name', e.target.value)}
                                     />
                                     {form.errors.license_name && <div className="text-xs text-rose-600">{form.errors.license_name}</div>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">License Type</label>
+                                    <Select
+                                        value={form.data.license_type_id}
+                                        onValueChange={(v) => form.setData('license_type_id', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select License Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">No License Type</SelectItem>
+                                            {licenseTypes.map((lt: any) => (
+                                                <SelectItem key={lt.id} value={String(lt.id)}>{lt.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="space-y-2">
@@ -763,6 +873,24 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                                 </div>
 
                                 <div className="space-y-2">
+                                    <label className="text-sm font-medium">License Type</label>
+                                    <Select
+                                        value={form.data.license_type_id}
+                                        onValueChange={(v) => form.setData('license_type_id', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select License Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">No License Type</SelectItem>
+                                            {licenseTypes.map((lt: any) => (
+                                                <SelectItem key={lt.id} value={String(lt.id)}>{lt.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
                                     <label className="text-sm font-medium">Vendor</label>
                                     <Select
                                         value={form.data.vendor_id}
@@ -834,12 +962,12 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                     </DialogHeader>
                     <div className="py-4 space-y-4">
                         <p className="text-sm text-muted-foreground">
-                            Are you sure you want to delete the license <strong>{selectedLicense?.name}</strong>? 
+                            Are you sure you want to delete the license <strong>{selectedLicense?.name}</strong>?
                             This will move the license to the trash bin.
                         </p>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Reason for deletion *</label>
-                            <Textarea 
+                            <Textarea
                                 required
                                 placeholder="Please provide a reason for deleting this license..."
                                 value={deleteReason}

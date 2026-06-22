@@ -4,6 +4,7 @@ use App\Http\Middleware\CheckUserActive;
 use App\Http\Middleware\CheckPagePermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RestrictAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'pagePermission' => CheckPagePermission::class,
+            'restrict.admin' => RestrictAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

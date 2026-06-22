@@ -319,8 +319,8 @@ export function AppSidebar() {
                         return allowedForNormalUser.includes(item.title);
                     }
 
-                    // Admin-only: hide user "Requests" page (admins use "Manage Requests")
-                    const hiddenForAdmin = ['Requests'];
+                    // Admin-only: hide user "Requests", "Check Out / Check In", and "Transactions" pages
+                    const hiddenForAdmin = ['Requests', 'Check Out / Check In', 'Transactions'];
                     if (hiddenForAdmin.includes(item.title)) return false;
 
                     // Standard module access check for Admins or users with specific roles

@@ -15,6 +15,7 @@ class License extends Model
         'version',
         'category',
         'license_type',
+        'license_type_id',
         'pricing_model',
         'total_seats',
         'used_seats',
@@ -55,6 +56,11 @@ class License extends Model
     public function vendor()
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function licenseType()
+    {
+        return $this->belongsTo(LicenseType::class);
     }
 
     public function site()
