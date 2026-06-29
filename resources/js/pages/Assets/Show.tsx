@@ -240,7 +240,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                             Asset Details Dashboard
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Overview of metrics, cost allocations, and check history.
+                            Detailed information about asset
                         </p>
                     </div>
                 </div>
