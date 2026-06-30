@@ -70,13 +70,7 @@ const navSections: NavSection[] = [
                 icon: Activity,
                 module: 'Asset Inventory',
             },
-            { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
-            {
-                title: 'Master Data',
-                href: masterData(),
-                icon: Database,
-                module: 'Master Data',
-            },
+
 
             {
                 title: 'Multi-Site Management',
@@ -101,11 +95,11 @@ const navSections: NavSection[] = [
                 module: 'Operations & Maintenance',
                 items: [
                     {
-                        title: 'Asset Status Tracking',
+                        title: 'Status Tracking',
                         href: '/lifecycle/status',
                     },
                     {
-                        title: 'Warranty Management',
+                        title: 'Warranty',
                         href: '/lifecycle/warranty',
                     },
                     {
@@ -120,7 +114,7 @@ const navSections: NavSection[] = [
                 ],
             },
             {
-                title: 'Software License Management',
+                title: 'Software Licenses',
                 href: '/licenses',
                 icon: FileText,
                 module: 'Asset Inventory',
@@ -133,8 +127,16 @@ const navSections: NavSection[] = [
         ],
     },
     {
-        title: 'OPERATIONS & MAINTENANCE',
+        title: 'OPERATIONS',
+        
         items: [
+            {
+                title: ' Requests',
+                href: '/requests/admin',
+                icon: ClipboardList,
+                module: 'Asset Inventory',
+            },
+
             {
                 title: 'Maintenance Operations',
                 href: operationsMaintenance(),
@@ -168,17 +170,16 @@ const navSections: NavSection[] = [
     },
 
     {
-        title: 'SYSTEM & ADMINISTRATION',
+        title: 'ADMINISTRATION',
         items: [
             {
-                title: 'User Management & Security',
+                title: 'Users',
                 href: '#',
                 icon: Shield,
                 module: 'System Settings',
                 items: [
-                    { title: 'Manage Users & Roles', href: userManagement() },
-                    { title: 'Role Access Matrix', href: '/security/roles' },
-                    { title: 'Profile Settings', href: '/settings/profile' },
+                    { title: 'Manage Users', href: userManagement() },
+                    { title: 'Access Control', href: '/security/roles' },
                 ],
             },
             {
@@ -201,30 +202,7 @@ const navSections: NavSection[] = [
                 ],
             },
 
-            {
-                title: 'Deleted Items',
-                href: '#',
-                icon: Trash2,
-                module: 'System Settings',
-                items: [
-                    {
-                        title: 'Vendors',
-                        href: '/security/recycle-bin?type=vendors',
-                    },
-                    {
-                        title: 'Spareparts',
-                        href: '/security/recycle-bin?type=spareparts',
-                    },
-                    {
-                        title: 'Users',
-                        href: '/security/recycle-bin?type=users',
-                    },
-                    {
-                        title: 'Assets',
-                        href: '/security/recycle-bin?type=assets',
-                    },
-                ],
-            },
+           
         ],
     },
 
@@ -232,11 +210,13 @@ const navSections: NavSection[] = [
         title: 'OTHERS',
         items: [
             {
-                title: 'Manage Requests',
-                href: '/requests/admin',
-                icon: ClipboardList,
-                module: 'Asset Inventory',
+                title: 'Master Data',
+                href: masterData(),
+                icon: Database,
+                module: 'Master Data',
             },
+            { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
+    
             {
                 title: 'Requests',
                 href: '/requests',
@@ -262,10 +242,34 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
             {
-                title: 'System Activity Logs',
+                title: 'Activity Logs',
                 href: '/security/logs',
                 icon: History,
                 module: 'System Settings',
+            },
+            {
+                title: 'Deleted Items',
+                href: '#',
+                icon: Trash2,
+                module: 'System Settings',
+                items: [
+                    {
+                        title: 'Vendors',
+                        href: '/security/recycle-bin?type=vendors',
+                    },
+                    {
+                        title: 'Spareparts',
+                        href: '/security/recycle-bin?type=spareparts',
+                    },
+                    {
+                        title: 'Users',
+                        href: '/security/recycle-bin?type=users',
+                    },
+                    {
+                        title: 'Assets',
+                        href: '/security/recycle-bin?type=assets',
+                    },
+                ],
             },
             {
                 title: 'Settings',
@@ -283,6 +287,7 @@ const navSections: NavSection[] = [
                     { title: 'Locations', href: '/settings/locations' },
                 ],
             },
+            
         ],
     },
 ];
@@ -294,6 +299,8 @@ export function AppSidebar() {
 
     const modulePermissions: string[] = auth.user?.modulePermissions ?? [];
     const isAdmin = auth.user?.roles?.includes('Admin') ?? false;
+    const isManager = auth.user?.roles?.includes('Manager') || auth.user?.roles?.includes('Site Manager') || false;
+    const isEmployee = auth.user?.roles?.includes('Employee') || auth.user?.roles?.includes('Technician') || auth.user?.roles?.includes('Viewer') || false;
 
     const canAccess = (module?: string) => {
         if (!module) return true; // No restriction (e.g. Dashboard)
@@ -305,7 +312,7 @@ export function AppSidebar() {
             return {
                 ...section,
                 items: section.items.filter((item) => {
-                    if (!isAdmin) {
+                    if (isEmployee && !isAdmin && !isManager) {
                         // Explicitly allowed items for normal users
                         const allowedForNormalUser = [
                             'Dashboard',
@@ -319,12 +326,26 @@ export function AppSidebar() {
                         return allowedForNormalUser.includes(item.title);
                     }
 
-                    // Admin-only: hide user "Requests", "Check Out / Check In", and "Transactions" pages
-                    const hiddenForAdmin = ['Requests', 'Check Out / Check In', 'Transactions'];
-                    if (hiddenForAdmin.includes(item.title)) return false;
+                    if (isAdmin || isManager) {
+                        // Admin/Manager: hide user "Requests", "Check Out / Check In", and "Transactions" pages
+                        const hiddenForAdminOrManager = ['Requests', 'Check Out / Check In', 'Transactions'];
+                        if (hiddenForAdminOrManager.includes(item.title)) return false;
 
-                    // Standard module access check for Admins or users with specific roles
-                    return canAccess((item as any).module);
+                        // Standard module access check
+                        return canAccess((item as any).module);
+                    }
+
+                    // Fallback for any other users
+                    const allowedForNormalUser = [
+                        'Dashboard',
+                        'Asset Inventory',
+                        'Maintenance Operations',
+                        'Requests',
+                        'Check Out / Check In',
+                        'Transactions',
+                        'Chat',
+                    ];
+                    return allowedForNormalUser.includes(item.title);
                 }),
             };
         })
