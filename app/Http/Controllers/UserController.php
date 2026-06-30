@@ -24,17 +24,19 @@ class UserController extends Controller
                     'ic_number' => $user->ic_number,
                     'profile_photo' => $user->profile_photo ? Storage::url($user->profile_photo) : null,
                     'role' => $user->roles->pluck('name')->first() ?? 'None',
+                    'site_ids' => $user->sites->pluck('id')->toArray(),
                     'sites' => $user->sites->pluck('name')->toArray(),
                     'is_active' => (bool) $user->is_active,
                     'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 ];
             })->values();
 
-        $sites = \DB::table('sites')->select('id', 'name')->get();
+        $sites = \DB::table('sites')->select('id', 'name')->orderBy('name')->get();
 
         return Inertia::render('Users/Index', [
             'users' => $users,
             'sites' => $sites,
+            'roles' => Role::where('name', '!=', 'Admin')->pluck('name'),
         ]);
     }
 

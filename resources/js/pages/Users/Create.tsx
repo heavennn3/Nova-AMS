@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,17 @@ export default function UserCreate({
 
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const siteId = params.get('site_id');
+        if (siteId) {
+            const id = parseInt(siteId, 10);
+            if (!Number.isNaN(id)) {
+                setData('site_ids', [id]);
+            }
+        }
+    }, []);
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
