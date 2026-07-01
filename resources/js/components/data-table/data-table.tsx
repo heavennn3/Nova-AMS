@@ -117,8 +117,8 @@ export function DataTable<TData, TValue>({
     }), []);
 
     const tableColumns = React.useMemo(() => {
-        return isAdmin ? [selectColumn, ...columns] : columns;
-    }, [columns, selectColumn, isAdmin]);
+        return [selectColumn, ...columns];
+    }, [columns, selectColumn]);
 
     const table = useReactTable({
         data,
@@ -232,7 +232,7 @@ export function DataTable<TData, TValue>({
                     onImportCsv={onImportCsv}
                 />
             )}
-            {isAdmin && selectedRows.length > 0 && (
+            {selectedRows.length > 0 && (
                 <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-4 shadow-xs">
                     <div className="flex items-center space-x-2 text-sm font-semibold">
                         <span>{selectedRows.length} items selected</span>
@@ -268,7 +268,7 @@ export function DataTable<TData, TValue>({
                         >
                             Export Selected
                         </Button>
-                        {['assets', 'work-orders', 'users'].includes(resourceType || '') && (
+                        {isAdmin && ['assets', 'work-orders', 'users'].includes(resourceType || '') && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">
@@ -302,7 +302,7 @@ export function DataTable<TData, TValue>({
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
-                        {onBatchRestore ? (
+                        {isAdmin && onBatchRestore ? (
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -317,7 +317,7 @@ export function DataTable<TData, TValue>({
                                 Restore Selected
                             </Button>
                         ) : null}
-                        {onBatchDelete ? (
+                        {isAdmin && (onBatchDelete ? (
                             <Button
                                 variant="destructive"
                                 size="sm"
@@ -338,7 +338,7 @@ export function DataTable<TData, TValue>({
                             >
                                 Delete Selected
                             </Button>
-                        ) : null}
+                        ) : null)}
                         <Button
                             variant="ghost"
                             size="sm"
