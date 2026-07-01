@@ -11,7 +11,7 @@ import {
     VisibilityState,
 } from '@tanstack/react-table';
 import * as React from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { RefreshCcw } from 'lucide-react';
 
@@ -54,6 +54,9 @@ export function DataTable<TData, TValue>({
     onBatchDelete,
     onBatchRestore,
 }: DataTableProps<TData, TValue>) {
+    const { auth } = usePage<any>().props;
+    const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
+
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([]);
@@ -114,8 +117,8 @@ export function DataTable<TData, TValue>({
     }), []);
 
     const tableColumns = React.useMemo(() => {
-        return [selectColumn, ...columns];
-    }, [columns, selectColumn]);
+        return isAdmin ? [selectColumn, ...columns] : columns;
+    }, [columns, selectColumn, isAdmin]);
 
     const table = useReactTable({
         data,
@@ -229,7 +232,7 @@ export function DataTable<TData, TValue>({
                     onImportCsv={onImportCsv}
                 />
             )}
-            {selectedRows.length > 0 && (
+            {isAdmin && selectedRows.length > 0 && (
                 <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-4 shadow-xs">
                     <div className="flex items-center space-x-2 text-sm font-semibold">
                         <span>{selectedRows.length} items selected</span>

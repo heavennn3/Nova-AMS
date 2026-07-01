@@ -433,6 +433,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::post('/api/quick/bulk-import', function (\Illuminate\Http\Request $request) {
+        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+            return response()->json(['message' => 'Unauthorized. Only admins can perform bulk actions.'], 403);
+        }
+
         $type = $request->input('type');
         $rows = $request->input('rows');
         
@@ -584,6 +588,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::post('/api/quick/bulk-delete', function (\Illuminate\Http\Request $request) {
+        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+            return response()->json(['message' => 'Unauthorized. Only admins can perform bulk actions.'], 403);
+        }
+
         $type = $request->input('type');
         $ids = $request->input('ids');
         
@@ -638,6 +646,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::post('/api/quick/bulk-status', function (\Illuminate\Http\Request $request) {
+        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+            return response()->json(['message' => 'Unauthorized. Only admins can perform bulk actions.'], 403);
+        }
+
         $type = $request->input('type');
         $ids = $request->input('ids');
         $status = $request->input('status');
