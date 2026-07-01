@@ -125,6 +125,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/live-tracking/report', [\App\Http\Controllers\AssetTrackingController::class, 'report'])->name('live-tracking.report');
         Route::post('/live-tracking/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('live-tracking.checkout');
         Route::patch('/live-tracking/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('live-tracking.checkin');
+        Route::post('/live-tracking/{assignment}/send-reminder', [\App\Http\Controllers\AssetTrackingController::class, 'sendReminder'])->name('live-tracking.send-reminder');
+        Route::post('/live-tracking/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('live-tracking.bulk-reminders');
 
         // Asset Withdrawals Module
         Route::prefix('withdrawals')->group(function () {

@@ -14,18 +14,60 @@ class AssetTrackingController extends Controller
     /**
      * Live tracking dashboard page (Inertia).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $liveAssignments = AssetAssignment::with([
+        $user = auth()->user();
+        $isAdmin = $user->hasRole('Admin');
+
+        // Get filter parameters
+        $siteFilter = $request->get('site_id', 'all');
+        $statusFilter = $request->get('status', 'all');
+
+        // Base query for live assignments
+        $liveAssignmentsQuery = AssetAssignment::with([
                 'asset.category',
                 'asset.site',
                 'asset.location',
                 'user',
+                'site',
+                'location',
             ])
-            ->active()
+            ->active();
+
+        // Apply site filter for admins
+        if ($isAdmin && $siteFilter !== 'all') {
+            $liveAssignmentsQuery->where('site_id', $siteFilter);
+        }
+
+        $liveAssignments = $liveAssignmentsQuery
             ->latest('assigned_at')
             ->get()
             ->map(fn($a) => $this->formatAssignment($a));
+
+        // Group by site for admin view
+        $assignmentsBySite = [];
+        if ($isAdmin) {
+            $sites = \App\Models\Site::withCount(['assetAssignments' => function($query) {
+                $query->active();
+            }])->get();
+
+            foreach ($sites as $site) {
+                $siteAssignments = $liveAssignments->filter(function($assignment) use ($site) {
+                    return $assignment['site_id'] == $site->id || $assignment['site'] == $site->name;
+                });
+
+                $assignmentsBySite[] = [
+                    'site' => [
+                        'id' => $site->id,
+                        'name' => $site->name,
+                        'code' => $site->code,
+                    ],
+                    'assignments' => $siteAssignments->values(),
+                    'total_count' => $siteAssignments->count(),
+                    'overdue_count' => $siteAssignments->where('is_overdue', true)->count(),
+                ];
+            }
+        }
 
         $availableAssets = Asset::with(['category', 'site'])
             ->where('status', 'available')
@@ -70,8 +112,11 @@ class AssetTrackingController extends Controller
             ->latest('returned_at')
             ->paginate(50);
 
-        return Inertia::render('Assets/LiveTracking', [
+        $view = $isAdmin ? 'Assets/LiveTrackingAdmin' : 'Assets/LiveTracking';
+
+        return Inertia::render($view, [
             'liveAssignments' => $liveAssignments,
+            'assignmentsBySite' => $assignmentsBySite,
             'availableAssets' => $availableAssets,
             'users'           => $users,
             'sites'           => $sites,
@@ -83,6 +128,11 @@ class AssetTrackingController extends Controller
                 'current_page' => $history->currentPage(),
                 'last_page'    => $history->lastPage(),
             ],
+            'filters'         => [
+                'site_id' => $siteFilter,
+                'status' => $statusFilter,
+            ],
+            'is_admin'       => $isAdmin,
         ]);
     }
 
@@ -192,6 +242,93 @@ class AssetTrackingController extends Controller
     }
 
     /**
+     * Send reminder email for overdue asset
+     */
+    public function sendReminder(Request $request, AssetAssignment $assignment)
+    {
+        if (!$assignment->user || !$assignment->user->email) {
+            return back()->with('error', 'User email not found.');
+        }
+
+        try {
+            // Calculate days overdue
+            $expectedReturnDate = $assignment->expected_return_date
+                ? Carbon::parse($assignment->expected_return_date)
+                : Carbon::parse($assignment->assigned_at)->addDays(7);
+
+            $daysOverdue = Carbon::now()->diffInDays($expectedReturnDate, false);
+
+            // Send email using Laravel's mail system
+            \Illuminate\Support\Facades\Mail::raw(
+                view('emails.asset-reminder', [
+                    'user' => $assignment->user,
+                    'assignment' => $assignment,
+                    'asset' => $assignment->asset,
+                    'expectedReturnDate' => $expectedReturnDate,
+                    'daysOverdue' => $daysOverdue,
+                ]),
+                function ($message) use ($assignment) {
+                    $message->to($assignment->user->email)
+                        ->subject('Overdue Asset Return Reminder - ' . ($assignment->asset->product_name ?? 'Asset'));
+                }
+            );
+
+            return back()->with('success', 'Reminder email sent successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send reminder: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send bulk reminders for multiple overdue assets
+     */
+    public function sendBulkReminders(Request $request)
+    {
+        $validated = $request->validate([
+            'assignment_ids' => 'required|array',
+            'assignment_ids.*' => 'integer|exists:asset_assignments,id',
+        ]);
+
+        $successCount = 0;
+        $failedCount = 0;
+
+        foreach ($validated['assignment_ids'] as $assignmentId) {
+            $assignment = AssetAssignment::find($assignmentId);
+
+            if (!$assignment || !$assignment->user || !$assignment->user->email) {
+                $failedCount++;
+                continue;
+            }
+
+            try {
+                $expectedReturnDate = $assignment->expected_return_date
+                    ? Carbon::parse($assignment->expected_return_date)
+                    : Carbon::parse($assignment->assigned_at)->addDays(7);
+
+                \Illuminate\Support\Facades\Mail::raw(
+                    view('emails.asset-reminder', [
+                        'user' => $assignment->user,
+                        'assignment' => $assignment,
+                        'asset' => $assignment->asset,
+                        'expectedReturnDate' => $expectedReturnDate,
+                        'daysOverdue' => Carbon::now()->diffInDays($expectedReturnDate, false),
+                    ]),
+                    function ($message) use ($assignment) {
+                        $message->to($assignment->user->email)
+                            ->subject('Overdue Asset Return Reminder - ' . ($assignment->asset->product_name ?? 'Asset'));
+                    }
+                );
+
+                $successCount++;
+            } catch (\Exception $e) {
+                $failedCount++;
+            }
+        }
+
+        return back()->with('success', "Sent {$successCount} reminders successfully. {$failedCount} failed.");
+    }
+
+    /**
      * JSON endpoint for history — supports search & pagination.
      */
     public function history(Request $request)
@@ -252,6 +389,14 @@ class AssetTrackingController extends Controller
         $mins = (int) Carbon::parse($a->assigned_at)->diffInMinutes(now());
         $duration = $this->humanDuration($mins);
 
+        // Calculate expected return date (default 7 days from assignment)
+        $expectedReturnDate = $a->expected_return_date
+            ? Carbon::parse($a->expected_return_date)
+            : Carbon::parse($a->assigned_at)->addDays(7);
+
+        $isOverdue = Carbon::now()->greaterThan($expectedReturnDate);
+        $daysOverdue = $isOverdue ? Carbon::now()->diffInDays($expectedReturnDate) : 0;
+
         return [
             'id'           => $a->id,
             'asset_id'     => $a->asset?->asset_id ?? '—',
@@ -259,11 +404,15 @@ class AssetTrackingController extends Controller
             'product_name' => $a->asset?->product_name ?? '—',
             'category'     => $a->asset?->category?->name ?? '—',
             'site'         => $a->site?->name ?? $a->asset?->site?->name ?? '—',
+            'site_id'      => $a->site_id ?? $a->asset?->site_id,
             'location'     => $a->location?->name ?? $a->asset?->location?->name ?? '—',
             'user_name'    => $a->user?->name ?? 'Unknown',
             'user_email'   => $a->user?->email ?? '',
             'assigned_at'  => $a->assigned_at?->toIso8601String(),
+            'expected_return_date' => $expectedReturnDate->toIso8601String(),
             'duration'     => $duration,
+            'is_overdue'   => $isOverdue,
+            'days_overdue' => $daysOverdue,
             'remarks'      => $a->remarks,
         ];
     }

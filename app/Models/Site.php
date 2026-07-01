@@ -23,6 +23,11 @@ class Site extends Model implements Auditable
         return $this->hasMany(Asset::class);
     }
 
+    public function assetAssignments()
+    {
+        return $this->hasMany(AssetAssignment::class);
+    }
+
     public function siteAdmin()
     {
         return $this->belongsTo(User::class, 'site_admin_id');
