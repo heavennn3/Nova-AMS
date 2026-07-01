@@ -307,11 +307,10 @@ export default function UsersIndex({
                     const isActive = row.original.is_active;
                     return (
                         <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                                isActive
-                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                            }`}
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${isActive
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                }`}
                         >
                             <span
                                 className={`inline-block h-1.5 w-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-red-500'}`}
@@ -483,19 +482,17 @@ export default function UsersIndex({
                 <div className="no-scrollbar flex w-full space-x-2 overflow-x-auto border-b border-border pb-px">
                     <button
                         onClick={() => setSelectedSiteId('all')}
-                        className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${
-                            selectedSiteId === 'all'
-                                ? 'border-primary bg-primary/5 font-bold text-primary'
-                                : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
-                        }`}
+                        className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${selectedSiteId === 'all'
+                            ? 'border-primary bg-primary/5 font-bold text-primary'
+                            : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
+                            }`}
                     >
                         <span>All Sites</span>
                         <span
-                            className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                                selectedSiteId === 'all'
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
+                            className={`rounded-full px-1.5 py-0.5 text-[10px] ${selectedSiteId === 'all'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground'
+                                }`}
                         >
                             {users.length}
                         </span>
@@ -508,19 +505,17 @@ export default function UsersIndex({
                                 onClick={() =>
                                     setSelectedSiteId(site.id.toString())
                                 }
-                                className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${
-                                    selectedSiteId === site.id.toString()
-                                        ? 'border-primary bg-primary/5 font-bold text-primary'
-                                        : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
-                                }`}
+                                className={`flex items-center space-x-2 border-b-2 px-4 py-2 whitespace-nowrap transition-all ${selectedSiteId === site.id.toString()
+                                    ? 'border-primary bg-primary/5 font-bold text-primary'
+                                    : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/30 hover:text-foreground'
+                                    }`}
                             >
                                 <span>{site.name}</span>
                                 <span
-                                    className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                                        selectedSiteId === site.id.toString()
-                                            ? 'bg-primary text-primary-foreground'
-                                            : 'bg-muted text-muted-foreground'
-                                    }`}
+                                    className={`rounded-full px-1.5 py-0.5 text-[10px] ${selectedSiteId === site.id.toString()
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground'
+                                        }`}
                                 >
                                     {count}
                                 </span>
@@ -644,7 +639,7 @@ export default function UsersIndex({
                     <div className="relative w-[250px]">
                         <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Search name, email, phone, IC..."
+                            placeholder="Search "
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="h-8 pl-8 text-sm"
@@ -709,14 +704,13 @@ export default function UsersIndex({
                                         >
                                             <div className="flex items-center gap-2">
                                                 <span
-                                                    className={`inline-block h-2 w-2 rounded-full ${
-                                                        opt.value === 'active'
-                                                            ? 'bg-emerald-500'
-                                                            : opt.value ===
-                                                                'deactivated'
-                                                              ? 'bg-red-500'
-                                                              : 'bg-gray-400'
-                                                    }`}
+                                                    className={`inline-block h-2 w-2 rounded-full ${opt.value === 'active'
+                                                        ? 'bg-emerald-500'
+                                                        : opt.value ===
+                                                            'deactivated'
+                                                            ? 'bg-red-500'
+                                                            : 'bg-gray-400'
+                                                        }`}
                                                 />
                                                 <span>{opt.label}</span>
                                             </div>
@@ -726,8 +720,8 @@ export default function UsersIndex({
                                                 </span>
                                                 {selectedStatus ===
                                                     opt.value && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
-                                                )}
+                                                        <Check className="h-3.5 w-3.5 text-primary" />
+                                                    )}
                                             </div>
                                         </button>
                                     ))}
@@ -758,20 +752,19 @@ export default function UsersIndex({
                                         >
                                             <div className="flex items-center gap-2">
                                                 <span
-                                                    className={`inline-block h-2 w-2 rounded-full ${
-                                                        role === 'Admin'
-                                                            ? 'bg-purple-500'
+                                                    className={`inline-block h-2 w-2 rounded-full ${role === 'Admin'
+                                                        ? 'bg-purple-500'
+                                                        : role ===
+                                                            'Site Manager'
+                                                            ? 'bg-blue-500'
                                                             : role ===
-                                                                'Site Manager'
-                                                              ? 'bg-blue-500'
-                                                              : role ===
-                                                                  'Technician'
+                                                                'Technician'
                                                                 ? 'bg-emerald-500'
                                                                 : role ===
                                                                     'Viewer'
-                                                                  ? 'bg-gray-500'
-                                                                  : 'bg-orange-500'
-                                                    }`}
+                                                                    ? 'bg-gray-500'
+                                                                    : 'bg-orange-500'
+                                                        }`}
                                                 />
                                                 <span>{role}</span>
                                             </div>
@@ -808,11 +801,10 @@ export default function UsersIndex({
 
                     {selectedStatus !== 'all' && (
                         <span
-                            className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${
-                                selectedStatus === 'active'
-                                    ? 'border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300'
-                                    : 'border-red-100 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300'
-                            }`}
+                            className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${selectedStatus === 'active'
+                                ? 'border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300'
+                                : 'border-red-100 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300'
+                                }`}
                         >
                             Status:{' '}
                             {selectedStatus === 'active'
@@ -876,15 +868,15 @@ export default function UsersIndex({
                             {confirmAction?.type === 'delete'
                                 ? 'Delete User'
                                 : confirmAction?.user.is_active
-                                  ? 'Deactivate User'
-                                  : 'Activate User'}
+                                    ? 'Deactivate User'
+                                    : 'Activate User'}
                         </DialogTitle>
                         <DialogDescription>
                             {confirmAction?.type === 'delete'
                                 ? `Are you sure you want to delete "${confirmAction?.user.name}"? This action cannot be undone.`
                                 : confirmAction?.user.is_active
-                                  ? `"${confirmAction?.user.name}" will lose access to the system until reactivated.`
-                                  : `"${confirmAction?.user.name}" will regain access to the system.`}
+                                    ? `"${confirmAction?.user.name}" will lose access to the system until reactivated.`
+                                    : `"${confirmAction?.user.name}" will regain access to the system.`}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0">
@@ -905,8 +897,8 @@ export default function UsersIndex({
                             {confirmAction?.type === 'delete'
                                 ? 'Delete User'
                                 : confirmAction?.user.is_active
-                                  ? 'Deactivate'
-                                  : 'Activate'}
+                                    ? 'Deactivate'
+                                    : 'Activate'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

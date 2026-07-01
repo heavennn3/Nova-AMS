@@ -221,6 +221,8 @@ class DashboardController extends Controller
             ->take(5)
             ->values();
 
+        $pendingRequestsCount = \App\Models\AssetRequest::where('status', 'Pending')->count();
+
         return Inertia::render('dashboard', [
             'stats' => [
                 'totalAssets' => $totalAssets,
@@ -230,6 +232,7 @@ class DashboardController extends Controller
                 'openTickets' => $openTickets,
                 'lowSpareParts' => $lowSpareParts,
                 'sitesWithStats' => $sitesWithStats,
+                'pendingRequests' => $pendingRequestsCount,
             ],
             'charts' => [
                 'assetsBySite' => $assetsBySite,

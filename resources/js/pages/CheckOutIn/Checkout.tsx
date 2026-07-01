@@ -183,7 +183,7 @@ export default function Checkout({
                                 <div className="relative max-w-sm">
                                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Search name, tag, brand, serial..."
+                                        placeholder=" "
                                         className="pl-8 h-9"
                                         value={assetSearch}
                                         onChange={(e) => { setAssetSearch(e.target.value); setVisibleCount(10); }}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -64,17 +64,15 @@ export default function Dashboard({
         openTickets: 0,
         lowSpareParts: [],
         sitesWithStats: [],
+        pendingRequests: 0,
     },
     charts = { assetsByStatus: [], assetsBySite: [], monthlyAssets: [] },
     recentActivities = [],
     overdueCheckouts = [],
     warrantyExpiring = [],
 }: any) {
-    const [telemetry, setTelemetry] = useState({
-        cpu: '0.0',
-        ram: '0.0',
-        disk: 0,
-    });
+    const { auth } = usePage<any>().props;
+    const isAdmin = auth.user?.roles?.includes('Admin');
 
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
@@ -96,28 +94,6 @@ export default function Dashboard({
 
         return matchesSite && matchesAction;
     });
-
-    useEffect(() => {
-        let active = true;
-        const fetchTelemetry = async () => {
-            try {
-                const response = await fetch('/api/system/monitoring');
-                if (response.ok && active) {
-                    const data = await response.json();
-                    setTelemetry(data);
-                }
-            } catch (err) {
-                console.error('Telemetry fetch failed:', err);
-            }
-        };
-
-        fetchTelemetry();
-        const interval = setInterval(fetchTelemetry, 5000);
-        return () => {
-            active = false;
-            clearInterval(interval);
-        };
-    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -156,33 +132,7 @@ export default function Dashboard({
                         </div>
                     </div>
                     <div className="flex space-x-3">
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                const csvContent =
-                                    'data:text/csv;charset=utf-8,' +
-                                    'Metric,Value\n' +
-                                    `Total Assets,${stats.totalAssets}\n` +
-                                    `Sites Managed,${stats.totalSites}\n` +
-                                    `Total Users,${stats.totalUsers}\n` +
-                                    `Active Work Orders,${stats.activeWorkOrders}\n` +
-                                    `Open Tickets,${stats.openTickets}`;
 
-                                const encodedUri = encodeURI(csvContent);
-                                const link = document.createElement('a');
-                                link.setAttribute('href', encodedUri);
-                                link.setAttribute(
-                                    'download',
-                                    'dashboard_summary.csv',
-                                );
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }}
-                        >
-                            <TrendingDown className="mr-2 h-4 w-4" />
-                            Export Data
-                        </Button>
                         <Button onClick={() => window.location.reload()}>
                             Refresh Data
                         </Button>
@@ -191,8 +141,8 @@ export default function Dashboard({
             </div>
 
             {/* Metric Cards Row */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <Card className="border-l-4 border-l-primary bg-card/50 shadow-sm backdrop-blur-sm">
+            <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 ${isAdmin ? 'xl:grid-cols-6' : 'xl:grid-cols-5'}`}>
+                <Card className="border-l-4 border-l-primary bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
@@ -208,7 +158,7 @@ export default function Dashboard({
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-emerald-500 bg-card/50 shadow-sm backdrop-blur-sm">
+                <Card className="border-l-4 border-l-emerald-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
@@ -226,7 +176,7 @@ export default function Dashboard({
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-purple-500 bg-card/50 shadow-sm backdrop-blur-sm">
+                <Card className="border-l-4 border-l-purple-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
@@ -244,7 +194,7 @@ export default function Dashboard({
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-amber-500 bg-card/50 shadow-sm backdrop-blur-sm">
+                <Card className="border-l-4 border-l-amber-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
@@ -262,7 +212,7 @@ export default function Dashboard({
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-blue-500 bg-card/50 shadow-sm backdrop-blur-sm">
+                <Card className="border-l-4 border-l-blue-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
@@ -279,86 +229,34 @@ export default function Dashboard({
                         </div>
                     </CardContent>
                 </Card>
+
+                {isAdmin && (
+                    <Link href="/requests/admin" className="block">
+                        <Card className="border-l-4 border-l-rose-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/85 transition-all duration-200 cursor-pointer h-full">
+                            <CardContent className="p-6">
+                                <div className="flex items-start justify-between">
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            Pending Requests
+                                        </p>
+                                        <p className="text-3xl font-bold text-rose-600 dark:text-rose-400">
+                                            {stats.pendingRequests || 0}
+                                        </p>
+                                    </div>
+                                    <div className="rounded-full bg-rose-100 p-2 dark:bg-rose-950/30">
+                                        <Clock className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+                )}
             </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-
-                <Card className="lg:col-span-1">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <div>
-                            <CardTitle>System Monitoring</CardTitle>
-                        </div>
-                        <span className="relative flex h-2 w-2">
-
-                        </span>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-3.5">
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between text-xs font-semibold">
-                                    <span className="flex items-center"><Cpu className="mr-1.5 h-3.5 w-3.5 text-zinc-500" /> CPU Cluster</span>
-                                    <span>{telemetry.cpu}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden dark:bg-zinc-800">
-                                    <div
-                                        className="h-full bg-zinc-900 rounded-full transition-all duration-500 dark:bg-white"
-                                        style={{ width: `${Math.min(100, Math.max(0, parseFloat(telemetry.cpu || '0')))}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between text-xs font-semibold">
-                                    <span className="flex items-center"><Layers className="mr-1.5 h-3.5 w-3.5 text-zinc-500" /> RAM Buffers</span>
-                                    <span>{telemetry.ram}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden dark:bg-zinc-800">
-                                    <div
-                                        className="h-full bg-zinc-900 rounded-full transition-all duration-500 dark:bg-white"
-                                        style={{ width: `${Math.min(100, Math.max(0, parseFloat(telemetry.ram || '0')))}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between text-xs font-semibold">
-                                    <span className="flex items-center"><HardDrive className="mr-1.5 h-3.5 w-3.5 text-zinc-500" /> NVMe Array</span>
-                                    <span>{telemetry.disk}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden dark:bg-zinc-800">
-                                    <div
-                                        className="h-full bg-zinc-900 rounded-full transition-all duration-500 dark:bg-white"
-                                        style={{ width: `${Math.min(100, Math.max(0, telemetry.disk || 0))}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="pt-2 space-y-2 border-t border-border/80">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Platform Dispatcher</p>
-                            <div className="grid grid-cols-1 gap-2">
-                                <Button variant="outline" size="sm" className="h-8.5 justify-start text-xs font-semibold" asChild>
-                                    <Link href="/assets/create">
-                                        <Plus className="mr-2 h-3.5 w-3.5" /> Register Hardware Asset
-                                    </Link>
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-8.5 justify-start text-xs font-semibold" asChild>
-                                    <Link href="/maintenance/work-orders">
-                                        <Wrench className="mr-2 h-3.5 w-3.5" /> Create Maintenance Order
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Low Spareparts & Site Weather Grid */}
+            {/* Row 2: Urgent Alerts & Overdues */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Low Stock Alerts */}
-                <Card className="border border-red-100 dark:border-red-900/30">
+                <Card className="border-t-4 border-t-red-500 bg-card/45 shadow-sm backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <div>
                             <CardTitle className="text-red-600 dark:text-red-400 flex items-center">
@@ -366,7 +264,7 @@ export default function Dashboard({
                             </CardTitle>
                             <p className="text-xs text-muted-foreground mt-1">Inventory stock levels running below minimum thresholds.</p>
                         </div>
-                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-950/30 dark:text-red-400">
                             Action Required
                         </span>
                     </CardHeader>
@@ -398,44 +296,8 @@ export default function Dashboard({
                     </CardContent>
                 </Card>
 
-                {/* Site managed with Live Weather */}
-                <Card>
-                    <CardHeader pb-2>
-                        <CardTitle>Weather</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Current site weather conditions</p>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {stats.sitesWithStats && stats.sitesWithStats.length > 0 ? (
-                                stats.sitesWithStats.map((site: any) => (
-                                    <div key={site.id} className="flex items-center justify-between p-3 border border-border/80 bg-muted/20 rounded-xl">
-                                        <div className="space-y-1">
-                                            <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{site.name}</p>
-                                            <p className="text-[10px] font-mono text-muted-foreground uppercase">{site.code} • {site.assets_count} Assets</p>
-                                        </div>
-                                        <div className="flex items-center space-x-3 bg-muted/40 p-2 rounded-lg">
-                                            <WeatherIcon condition={site.weather.condition} />
-                                            <div className="text-right">
-                                                <p className="text-sm font-bold">{site.weather.temp}</p>
-                                                <p className="text-[9px] text-muted-foreground">{site.weather.condition}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="col-span-2 py-8 text-center text-muted-foreground text-xs">
-                                    No registered sites found.
-                                </div>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Overdue Checkouts & Warranty Expiring Grid */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Overdue Checkouts Section */}
-                <Card className="border border-orange-200 dark:border-orange-900/30">
+                <Card className="border-t-4 border-t-orange-500 bg-card/45 shadow-sm backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <div>
                             <CardTitle className="text-orange-600 dark:text-orange-400 flex items-center">
@@ -443,7 +305,7 @@ export default function Dashboard({
                             </CardTitle>
                             <p className="text-xs text-muted-foreground mt-1">Assets checked out past their expected return date.</p>
                         </div>
-                        <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                        <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800 dark:bg-orange-950/30 dark:text-orange-400">
                             {overdueCheckouts.length} Overdue
                         </span>
                     </CardHeader>
@@ -483,13 +345,12 @@ export default function Dashboard({
                                                     {item.checkout_date}
                                                 </td>
                                                 <td className="py-3 pr-2 text-right">
-                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${
-                                                        item.days_late > 14
+                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${item.days_late > 14
                                                             ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
                                                             : item.days_late > 7
-                                                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
-                                                    }`}>
+                                                                ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                                                        }`}>
                                                         {item.days_late}d late
                                                     </span>
                                                 </td>
@@ -512,9 +373,12 @@ export default function Dashboard({
                         )}
                     </CardContent>
                 </Card>
+            </div>
 
+            {/* Row 3: Status & Information */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Warranty Expiring Soon Section */}
-                <Card className="border border-purple-200 dark:border-purple-900/30">
+                <Card className="border-t-4 border-t-purple-500 bg-card/45 shadow-sm backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <div>
                             <CardTitle className="text-purple-600 dark:text-purple-400 flex items-center">
@@ -522,7 +386,7 @@ export default function Dashboard({
                             </CardTitle>
                             <p className="text-xs text-muted-foreground mt-1">Assets with warranty expiring within the next 90 days.</p>
                         </div>
-                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800 dark:bg-purple-950/30 dark:text-purple-400">
                             {warrantyExpiring.length} Expiring
                         </span>
                     </CardHeader>
@@ -562,13 +426,12 @@ export default function Dashboard({
                                                     {item.expiry_date}
                                                 </td>
                                                 <td className="py-3 pr-2 text-right">
-                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${
-                                                        item.days_remaining <= 7
+                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${item.days_remaining <= 7
                                                             ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
                                                             : item.days_remaining <= 30
-                                                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                                                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
-                                                    }`}>
+                                                                ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                                                                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                                                        }`}>
                                                         {item.days_remaining}d left
                                                     </span>
                                                 </td>
@@ -591,11 +454,46 @@ export default function Dashboard({
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Site managed with Live Weather */}
+                <Card className="border-t-4 border-t-blue-500 bg-card/45 shadow-sm backdrop-blur-sm">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-blue-600 dark:text-blue-400 flex items-center">
+                            <Cloud className="mr-2 h-5 w-5 text-blue-500" /> Weather Status
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1">Current site weather conditions</p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {stats.sitesWithStats && stats.sitesWithStats.length > 0 ? (
+                                stats.sitesWithStats.map((site: any) => (
+                                    <div key={site.id} className="flex items-center justify-between p-3 border border-border/80 bg-muted/20 rounded-xl hover:bg-muted/30 transition-colors">
+                                        <div className="space-y-1">
+                                            <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{site.name}</p>
+                                            <p className="text-[10px] font-mono text-muted-foreground uppercase">{site.code} • {site.assets_count} Assets</p>
+                                        </div>
+                                        <div className="flex items-center space-x-3 bg-muted/40 p-2 rounded-lg">
+                                            <WeatherIcon condition={site.weather.condition} />
+                                            <div className="text-right">
+                                                <p className="text-sm font-bold">{site.weather.temp}</p>
+                                                <p className="text-[9px] text-muted-foreground">{site.weather.condition}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="col-span-2 py-8 text-center text-muted-foreground text-xs">
+                                    No registered sites found.
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Recent Activities Section (All Users + DateTime + Location) */}
-            <Card>
-                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 pb-4 border-b">
+            <Card className="border-t-4 border-t-emerald-500 bg-card/45 shadow-sm backdrop-blur-sm">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 pb-4 border-b border-border/50">
                     <div>
                         <CardTitle>Recent Activities</CardTitle>
                         <p className="text-xs text-muted-foreground mt-1">NOVA AMS System Activities</p>
