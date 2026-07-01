@@ -183,6 +183,17 @@ const navSections: NavSection[] = [
                 ],
             },
             {
+                title: 'Technician Center',
+                href: '#',
+                icon: Wrench,
+                module: 'Operations & Maintenance',
+                items: [
+                    { title: 'Manage Technicians', href: '/technicians' },
+                    { title: 'Assign Work Orders', href: '/maintenance/work-orders' },
+                    { title: 'Performance Reports', href: '/maintenance/history' },
+                ],
+            },
+            {
                 title: 'Document Management',
                 href: '#',
                 icon: FileText,
@@ -312,16 +323,41 @@ export function AppSidebar() {
             return {
                 ...section,
                 items: section.items.filter((item) => {
-                    if (isEmployee && !isAdmin && !isManager) {
-                        // Explicitly allowed items for normal users
+                    const isTechnician = auth.user?.roles?.includes('Technician');
+
+                    if (isTechnician && !isAdmin && !isManager) {
+                        // Technicians should see their own dashboard and relevant items
+                        const allowedForTechnician = [
+                            'Dashboard',
+                            'Asset Inventory',
+                            'Asset Withdrawal',
+                            'Maintenance Operations',
+                            'Comprehensive Maintenance',
+                            'Preventive Scheduling',
+                            'Work Orders',
+                            'Maintenance History',
+                            'Technician Assignment',
+                            'Master Data',
+                            'Spare Parts',
+                            'Requests',
+                            'Check Out / Check In',
+                            'Transactions',
+                            'Chat',
+                            'Activity Logs',
+                        ];
+                        return allowedForTechnician.includes(item.title);
+                    }
+
+                    if (isEmployee && !isAdmin && !isManager && !isTechnician) {
+                        // Regular employees (non-technicians)
                         const allowedForNormalUser = [
                             'Dashboard',
                             'Asset Inventory',
-                            'Maintenance Operations', // maintence
-                            'Requests', // request
-                            'Check Out / Check In', // checkout/checkin
-                            'Transactions', // transaction history
-                            'Chat', // live chat
+                            'Maintenance Operations',
+                            'Requests',
+                            'Check Out / Check In',
+                            'Transactions',
+                            'Chat',
                         ];
                         return allowedForNormalUser.includes(item.title);
                     }

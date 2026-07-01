@@ -59,6 +59,14 @@ class User extends Authenticatable implements Auditable
     }
 
     /**
+     * Get work orders assigned to this user (as technician)
+     */
+    public function workOrders()
+    {
+        return $this->hasMany(WorkOrder::class, 'assigned_to');
+    }
+
+    /**
      * Get all page permissions for this user
      */
     public function pagePermissions()

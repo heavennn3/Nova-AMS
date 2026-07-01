@@ -56,6 +56,9 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
+    const isManager = auth?.user?.roles?.includes('Manager') || auth?.user?.roles?.includes('Site Manager') || false;
+    const isTechnician = auth?.user?.roles?.includes('Technician') ?? false;
+    const canUpdateStatus = isAdmin || isManager || isTechnician;
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] =
@@ -268,7 +271,7 @@ export function DataTable<TData, TValue>({
                         >
                             Export Selected
                         </Button>
-                        {isAdmin && ['assets', 'work-orders', 'users'].includes(resourceType || '') && (
+                        {canUpdateStatus && ['assets', 'work-orders', 'users'].includes(resourceType || '') && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">

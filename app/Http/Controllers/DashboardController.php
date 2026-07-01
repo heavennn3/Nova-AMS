@@ -18,7 +18,12 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
+        // Redirect technicians to their specialized dashboard
+        if ($user && $user->hasRole('Technician')) {
+            return redirect()->route('technician.dashboard');
+        }
+
         // Basic Stats
         $totalAssets = Asset::count();
         $totalSites = Site::count();

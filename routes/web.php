@@ -12,6 +12,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
+    // Technician Dashboard
+    Route::get('/technician/dashboard', [\App\Http\Controllers\TechnicianController::class, 'dashboard'])->name('technician.dashboard');
+
+    // Technician Management (Admin & Site Manager)
+    Route::prefix('technicians')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TechnicianManagementController::class, 'index'])->name('technicians.index');
+        Route::post('/', [\App\Http\Controllers\TechnicianManagementController::class, 'store'])->name('technicians.store');
+        Route::put('/{id}', [\App\Http\Controllers\TechnicianManagementController::class, 'update'])->name('technicians.update');
+        Route::delete('/{id}', [\App\Http\Controllers\TechnicianManagementController::class, 'destroy'])->name('technicians.destroy');
+        Route::post('/{id}/toggle-active', [\App\Http\Controllers\TechnicianManagementController::class, 'toggleActive'])->name('technicians.toggle-active');
+        Route::get('/export', [\App\Http\Controllers\TechnicianManagementController::class, 'export'])->name('technicians.export');
+    });
+
     // Asset Requests (User)
     Route::get('/requests', [\App\Http\Controllers\AssetRequestController::class, 'index'])->name('requests.index');
     Route::get('/requests/create', [\App\Http\Controllers\AssetRequestController::class, 'create'])->name('requests.create');
