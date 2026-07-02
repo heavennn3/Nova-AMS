@@ -100,58 +100,70 @@ class AssetController extends Controller
             'locations' => \App\Models\Location::all(),
             'suppliers' => \App\Models\Supplier::all(),
             'statusLabels' => \App\Models\StatusLabel::all(),
+            'configurations' => \App\Models\TableConfiguration::getAllColumns('assets'),
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'asset_id' => 'required|unique:assets',
-            'serial_number' => 'nullable|string',
-            'product_name' => 'required|string',
-            'asset_name' => 'nullable|string',
-            'brand' => 'nullable|string',
-            'category_id' => 'nullable|exists:asset_categories,id',
-            'type_id' => 'nullable|exists:asset_types,id',
-            'vendor_id' => 'nullable|exists:vendors,id',
-            'site_id' => 'nullable|exists:sites,id',
-            'location_id' => 'nullable|exists:locations,id',
-            'purchase_year' => 'nullable|integer',
-            'status' => 'required|string',
-            'status_label_id' => 'nullable|exists:status_labels,id',
-            'notes' => 'nullable|string',
-            'warranty_months' => 'nullable|integer',
-            'order_number' => 'nullable|string',
-            'purchase_date' => 'nullable|date',
-            'eol_date' => 'nullable|date',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'purchase_cost' => 'nullable|numeric',
-        ]);
+        $configs = \App\Models\TableConfiguration::getAllColumns('assets');
+
+        $rules = [];
+        foreach ($configs as $c) {
+            $dbField = $this->columnKeyToDbField($c->column_key);
+            if (!$dbField) continue;
+            if ($dbField === 'asset_id') {
+                $rules[$c->column_key] = 'required|unique:assets';
+            } elseif (str_ends_with($dbField, '_id')) {
+                $table = $this->fkTable($dbField);
+                $rules[$c->column_key] = $table ? "nullable|exists:{$table},id" : 'nullable|string';
+            } else {
+                $rules[$c->column_key] = match ($c->data_type) {
+                    'number' => 'nullable|numeric',
+                    'date' => 'nullable|date',
+                    'boolean' => 'nullable|boolean',
+                    default => 'nullable|string',
+                };
+            }
+        }
+
+        $validated = $request->validate($rules);
 
         $request->validate([
             'image' => 'nullable|image|max:4096',
         ]);
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('assets', 'public');
-            $validated['image_path'] = '/storage/' . $path;
-        }
-
-        // Map status label to standard status enum for compatibility
-        if (!empty($validated['status_label_id'])) {
-            $statusLabel = \App\Models\StatusLabel::find($validated['status_label_id']);
-            if ($statusLabel) {
-                if ($statusLabel->type === 'deployable') {
-                    $validated['status'] = 'available';
-                } elseif ($statusLabel->type === 'pending') {
-                    $validated['status'] = 'maintenance';
-                } elseif ($statusLabel->type === 'archived' || $statusLabel->type === 'undeployable') {
-                    $validated['status'] = 'retired';
-                }
+        // Map column_key to DB field names
+        $data = [];
+        foreach ($configs as $c) {
+            $dbField = $this->columnKeyToDbField($c->column_key);
+            if ($dbField && isset($validated[$c->column_key])) {
+                $data[$dbField] = $validated[$c->column_key];
             }
         }
 
-        $asset = Asset::create($validated);
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('assets', 'public');
+            $data['image_path'] = '/storage/' . $path;
+        }
+
+        // Map status_label to standard status enum for compatibility
+        if (!empty($data['status_label_id'])) {
+            $statusLabel = \App\Models\StatusLabel::find($data['status_label_id']);
+            if ($statusLabel) {
+                $data['status'] = match ($statusLabel->type) {
+                    'deployable' => 'available',
+                    'pending' => 'maintenance',
+                    'archived', 'undeployable' => 'retired',
+                    default => $data['status'] ?? 'available',
+                };
+            }
+        }
+
+        if (empty($data['status'])) $data['status'] = 'available';
+        if (empty($data['product_name'])) $data['product_name'] = 'Unknown';
+
+        $asset = Asset::create($data);
 
         // Notify Admins
         $user = \Illuminate\Support\Facades\Auth::user();
@@ -161,6 +173,35 @@ class AssetController extends Controller
         return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
     }
 
+    private function columnKeyToDbField(string $key): ?string
+    {
+        $direct = ['asset_id', 'serial_number', 'product_name', 'asset_name', 'brand', 'purchase_year', 'quantity', 'status', 'condition_status', 'notes', 'latitude', 'longitude', 'image_path', 'warranty_months', 'order_number', 'purchase_date', 'eol_date', 'purchase_cost'];
+        $fk = [
+            'category' => 'category_id',
+            'type' => 'type_id',
+            'vendor' => 'vendor_id',
+            'site' => 'site_id',
+            'location' => 'location_id',
+            'supplier' => 'supplier_id',
+            'status_label' => 'status_label_id',
+        ];
+        if (in_array($key, $direct)) return $key;
+        return $fk[$key] ?? null;
+    }
+
+    private function fkTable(string $dbField): ?string
+    {
+        return match ($dbField) {
+            'category_id' => 'asset_categories',
+            'type_id' => 'asset_types',
+            'vendor_id' => 'vendors',
+            'site_id' => 'sites',
+            'location_id' => 'locations',
+            'supplier_id' => 'suppliers',
+            'status_label_id' => 'status_labels',
+            default => null,
+        };
+    }
     public function importBulk(Request $request)
     {
         $request->validate([
@@ -168,80 +209,85 @@ class AssetController extends Controller
             'site_id' => 'nullable|exists:sites,id'
         ]);
 
+        $configs = \App\Models\TableConfiguration::getAllColumns('assets');
+        $columnKeys = $configs->pluck('column_key')->toArray();
+
         $importedCount = 0;
         $selectedSiteId = $request->site_id;
 
         foreach ($request->assets as $row) {
-            // Function to find value by prefix or exact match ignoring case and newlines
-            $getValue = function($keys) use ($row) {
-                foreach ($row as $k => $v) {
-                    $cleanK = trim(preg_replace('/\s+/', ' ', strtolower($k)));
-                    foreach ((array)$keys as $searchKey) {
-                        if (str_contains($cleanK, strtolower($searchKey))) {
-                            return $v;
-                        }
-                    }
-                }
-                return null;
-            };
+            // Normalize CSV header keys: "Asset ID" → "asset_id"
+            $normalized = [];
+            foreach ($row as $k => $v) {
+                $normalized[strtolower(trim(preg_replace('/\s+/', '_', $k)))] = $v;
+            }
 
-            $assetId = $getValue(['asset id', 'aset id', 'asset_id']);
+            // Map configured column_keys to CSV values
+            $mapped = [];
+            foreach ($columnKeys as $ck) {
+                $searchKey = strtolower($ck);
+                if (array_key_exists($searchKey, $normalized)) {
+                    $mapped[$ck] = $normalized[$searchKey];
+                }
+            }
+
+            $assetId = $mapped['asset_id'] ?? null;
             if (!$assetId) continue;
 
-            $productName = $getValue(['product', 'product name']) ?? 'Unknown';
-            $quantity = $getValue(['quantity', 'kuantiti']) ?? 1;
-            $purchaseYear = $getValue(['purchase year', 'tahun']);
+            $data = [];
 
-            // Resolve Category
-            $categoryName = $getValue(['category', 'kategori aset']);
-            $categoryId = null;
-            if ($categoryName) {
-                $category = \App\Models\AssetCategory::firstOrCreate(['name' => trim($categoryName)]);
-                $categoryId = $category->id;
-            }
-
-            // Resolve Type
-            $typeName = $getValue(['type', 'jenis aset']);
-            $typeId = null;
-            if ($typeName) {
-                $type = \App\Models\AssetType::firstOrCreate(['name' => trim($typeName)]);
-                $typeId = $type->id;
-            }
-
-            // Resolve Site/Location
-            $siteId = $selectedSiteId;
-            if (!$siteId) {
-                $siteName = $getValue(['location', 'lokasi', 'site']);
-                if ($siteName) {
-                    $site = \App\Models\Site::firstOrCreate(
-                        ['name' => trim($siteName)], 
-                        ['code' => strtoupper(substr(trim($siteName), 0, 3)) . '-' . rand(1000, 9999)]
-                    );
-                    $siteId = $site->id;
+            // Direct model fields
+            foreach (['serial_number', 'product_name', 'asset_name', 'brand', 'status', 'condition_status', 'notes', 'purchase_year', 'quantity', 'warranty_months', 'order_number', 'purchase_date', 'eol_date', 'purchase_cost', 'latitude', 'longitude', 'image_path'] as $field) {
+                if (isset($mapped[$field])) {
+                    $data[$field] = $mapped[$field];
                 }
             }
 
-            // Resolve Vendor
-            $vendorName = $getValue(['vendor', 'pembekal']);
-            $vendorId = null;
-            if ($vendorName) {
-                $vendor = \App\Models\Vendor::firstOrCreate(['name' => trim($vendorName)]);
-                $vendorId = $vendor->id;
+            // Defaults
+            if (empty($data['product_name'])) $data['product_name'] = 'Unknown';
+            if (empty($data['status'])) $data['status'] = 'available';
+            if (isset($mapped['quantity'])) $data['quantity'] = (int) $mapped['quantity'];
+
+            // Resolve lookup fields (CSV name → DB ID via firstOrCreate)
+            if (!empty($mapped['category'])) {
+                $cat = \App\Models\AssetCategory::firstOrCreate(['name' => trim($mapped['category'])]);
+                $data['category_id'] = $cat->id;
+            }
+            if (!empty($mapped['type'])) {
+                $type = \App\Models\AssetType::firstOrCreate(['name' => trim($mapped['type'])]);
+                $data['type_id'] = $type->id;
+            }
+            if (!empty($mapped['vendor'])) {
+                $vendor = \App\Models\Vendor::firstOrCreate(['name' => trim($mapped['vendor'])]);
+                $data['vendor_id'] = $vendor->id;
+            }
+            if (!empty($mapped['supplier'])) {
+                $supplier = \App\Models\Supplier::firstOrCreate(['name' => trim($mapped['supplier'])]);
+                $data['supplier_id'] = $supplier->id;
+            }
+            if (!empty($mapped['location'])) {
+                $loc = \App\Models\Location::firstOrCreate(['name' => trim($mapped['location'])]);
+                $data['location_id'] = $loc->id;
+            }
+            if (!empty($mapped['status_label'])) {
+                $sl = \App\Models\StatusLabel::firstOrCreate(['name' => trim($mapped['status_label'])]);
+                $data['status_label_id'] = $sl->id;
             }
 
-            // Create or Update
+            // Site: prefer selected site from dialog, else resolve from CSV
+            if ($selectedSiteId) {
+                $data['site_id'] = $selectedSiteId;
+            } elseif (!empty($mapped['site'])) {
+                $site = \App\Models\Site::firstOrCreate(
+                    ['name' => trim($mapped['site'])],
+                    ['code' => strtoupper(substr(trim($mapped['site']), 0, 3)) . '-' . rand(1000, 9999)]
+                );
+                $data['site_id'] = $site->id;
+            }
+
             Asset::withoutGlobalScope('site_access')->updateOrCreate(
                 ['asset_id' => trim($assetId)],
-                [
-                    'product_name' => trim($productName),
-                    'quantity' => (int)$quantity,
-                    'purchase_year' => $purchaseYear,
-                    'category_id' => $categoryId,
-                    'type_id' => $typeId,
-                    'site_id' => $siteId,
-                    'vendor_id' => $vendorId,
-                    'status' => 'available' // default
-                ]
+                $data
             );
 
             $importedCount++;

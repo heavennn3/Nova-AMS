@@ -31,36 +31,35 @@ export default function AssetCreate({
     locations,
     suppliers,
     statusLabels,
+    configurations = [],
 }: any) {
     const defaultSiteId =
         typeof window !== 'undefined'
             ? new URLSearchParams(window.location.search).get('site_id') || ''
             : '';
 
-    // Form setup with new requested fields
-    const { data, setData, post, processing, errors } = useForm({
-        asset_id: '',
-        product_name: '',
-        asset_name: '',
-        serial_number: '',
-        category_id: '',
-        type_id: '',
-        vendor_id: '',
-        site_id: defaultSiteId,
-        location_id: '',
-        status: 'available',
-        status_label_id: '',
-        notes: '',
-        image: null as File | null,
-        warranty_months: '',
-        order_number: '',
-        purchase_date: '',
-        eol_date: '',
-        supplier_id: '',
-        purchase_cost: '',
-        quantity: 1,
-        purchase_year: new Date().getFullYear().toString(),
-    });
+    // Build initial form state from configurations + static defaults
+    const getInitialData = () => {
+        const base: Record<string, any> = {
+            image: null as File | null,
+            notes: '',
+            quantity: 1,
+            status: 'available',
+        };
+        // Ensure every configured column_key has an initial value
+        for (const c of configurations) {
+            if (!(c.column_key in base)) {
+                base[c.column_key] = '';
+            }
+        }
+        // Default site from URL query param
+        if (defaultSiteId && !base['site']) {
+            base['site'] = defaultSiteId;
+        }
+        return base;
+    };
+
+    const { data, setData, post, processing, errors } = useForm(getInitialData());
 
     // Local states for dynamic selections
     const [localVendors, setLocalVendors] = useState(vendors || []);
@@ -278,6 +277,118 @@ export default function AssetCreate({
         }
     };
 
+    // Lookup maps for FK-driven Select fields
+    const fkOptions: Record<string, any[]> = {
+        vendor: localVendors,
+        type: localTypes,
+        category: categories || [],
+        status_label: localStatusLabels,
+        site: localSites,
+        location: localLocations,
+        supplier: localSuppliers,
+    };
+
+    // Quick-create dialog openers for FK fields
+    const fkQuickCreate: Record<string, () => void> = {
+        vendor: () => setIsVendorOpen(true),
+        type: () => setIsTypeOpen(true),
+        status_label: () => setIsStatusOpen(true),
+        site: () => setIsSiteOpen(true),
+        location: () => setIsLocationOpen(true),
+        supplier: () => setIsSupplierOpen(true),
+    };
+
+    // Render a single field based on its configuration
+    function renderField(config: any, data: any, setData: any, errors: any) {
+        const key = config.column_key;
+        const label = config.column_title || key
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (l: string) => l.toUpperCase());
+        const required = config.is_primary_key;
+
+        // Foreign key fields → Select
+        if (key in fkOptions) {
+            return (
+                <div key={key} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <Label htmlFor={key} className="font-medium">
+                            {label}{required && <span className="text-red-500 ml-1">*</span>}
+                        </Label>
+                        {fkQuickCreate[key] && (
+                            <Button
+                                type="button"
+                                variant="link"
+                                size="sm"
+                                onClick={fkQuickCreate[key]}
+                                className="h-auto p-0 text-xs font-semibold flex items-center gap-0.5 text-primary"
+                            >
+                                <Plus className="h-3.5 w-3.5" /> New
+                            </Button>
+                        )}
+                    </div>
+                    <Select
+                        value={data[key]?.toString() || ''}
+                        onValueChange={(val) => setData(key, val)}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder={`Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {fkOptions[key].map((opt: any) => (
+                                <SelectItem key={opt.id} value={opt.id.toString()}>
+                                    {opt.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {errors[key] && <div className="text-xs text-red-500 mt-1">{errors[key]}</div>}
+                </div>
+            );
+        }
+
+        // Boolean fields → Yes/No Select
+        if (config.data_type === 'boolean') {
+            return (
+                <div key={key} className="space-y-2">
+                    <Label htmlFor={key} className="font-medium">
+                        {label}{required && <span className="text-red-500 ml-1">*</span>}
+                    </Label>
+                    <Select
+                        value={data[key]?.toString() || ''}
+                        onValueChange={(val) => setData(key, val === 'true' ? '1' : val === 'false' ? '0' : '')}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder={`Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="true">Yes</SelectItem>
+                            <SelectItem value="false">No</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    {errors[key] && <div className="text-xs text-red-500 mt-1">{errors[key]}</div>}
+                </div>
+            );
+        }
+
+        // Text / Number / Date fields → Input
+        const inputType = config.data_type === 'number' ? 'number' : config.data_type === 'date' ? 'date' : 'text';
+        return (
+            <div key={key} className="space-y-2">
+                <Label htmlFor={key} className="font-medium">
+                    {label}{required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                <Input
+                    id={key}
+                    type={inputType}
+                    value={data[key] ?? ''}
+                    onChange={(e) => setData(key, e.target.value)}
+                    placeholder={`Enter ${label.toLowerCase()}`}
+                />
+                {errors[key] && <div className="text-xs text-red-500 mt-1">{errors[key]}</div>}
+            </div>
+        );
+    }
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/assets');
@@ -306,263 +417,17 @@ export default function AssetCreate({
                         <h2 className="text-base font-semibold text-foreground">Asset Core Details</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {/* Asset ID */}
-                        <div className="space-y-2">
-                            <Label htmlFor="asset_id" className="font-medium">
-                                Asset ID <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                id="asset_id"
-                                value={data.asset_id}
-                                onChange={(e) => setData('asset_id', e.target.value)}
-                                required
-                                placeholder="e.g. ATM-543129"
-                            />
-                            {errors.asset_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.asset_id}</div>
-                            )}
+                    {configurations.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            {configurations.map((config: any) => renderField(config, data, setData, errors))}
                         </div>
-
-                        {/* Product/Model Name */}
-                        <div className="space-y-2">
-                            <Label htmlFor="product_name" className="font-medium">
-                                Product Model Name <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                id="product_name"
-                                value={data.product_name}
-                                onChange={(e) => setData('product_name', e.target.value)}
-                                required
-                                placeholder="e.g. Dell Latitude 5420"
-                            />
-                            {errors.product_name && (
-                                <div className="text-xs text-red-500 mt-1">{errors.product_name}</div>
-                            )}
+                    ) : (
+                        <div className="text-center py-10 text-muted-foreground">
+                            <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                            <p className="font-medium">No columns configured yet</p>
+                            <p className="text-sm mt-1">Go to <strong>Master Data &rarr; Table Configuration</strong> to set up the asset table columns first.</p>
                         </div>
-
-                        {/* Serial Number */}
-                        <div className="space-y-2">
-                            <Label htmlFor="serial_number" className="font-medium">Serial Number</Label>
-                            <Input
-                                id="serial_number"
-                                value={data.serial_number}
-                                onChange={(e) => setData('serial_number', e.target.value)}
-                                placeholder="e.g. MXL9081234"
-                            />
-                            {errors.serial_number && (
-                                <div className="text-xs text-red-500 mt-1">{errors.serial_number}</div>
-                            )}
-                        </div>
-
-                        {/* Vendor (Manufacturer/Brand) Selection with inline "new" */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="vendor_id" className="font-medium">Vendor / Manufacturer</Label>
-                                <Button
-                                    type="button"
-                                    variant="link"
-                                    size="sm"
-                                    onClick={() => setIsVendorOpen(true)}
-                                    className="h-auto p-0 text-xs font-semibold flex items-center gap-0.5 text-primary"
-                                >
-                                    <Plus className="h-3.5 w-3.5" /> New
-                                </Button>
-                            </div>
-                            <Select
-                                value={data.vendor_id}
-                                onValueChange={(val) => setData('vendor_id', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Vendor" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {localVendors.map((vendor: any) => (
-                                        <SelectItem key={vendor.id} value={vendor.id.toString()}>
-                                            {vendor.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.vendor_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.vendor_id}</div>
-                            )}
-                        </div>
-
-                        {/* Type Selection with inline "new" */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="type_id" className="font-medium">Asset Type</Label>
-                                <Button
-                                    type="button"
-                                    variant="link"
-                                    size="sm"
-                                    onClick={() => setIsTypeOpen(true)}
-                                    className="h-auto p-0 text-xs font-semibold flex items-center gap-0.5 text-primary"
-                                >
-                                    <Plus className="h-3.5 w-3.5" /> New
-                                </Button>
-                            </div>
-                            <Select
-                                value={data.type_id}
-                                onValueChange={(val) => setData('type_id', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Asset Type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {localTypes.map((type: any) => (
-                                        <SelectItem key={type.id} value={type.id.toString()}>
-                                            {type.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.type_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.type_id}</div>
-                            )}
-                        </div>
-
-                        {/* Status Label Selection with inline "new" */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="status_label_id" className="font-medium">Status Label</Label>
-                                <Button
-                                    type="button"
-                                    variant="link"
-                                    size="sm"
-                                    onClick={() => setIsStatusOpen(true)}
-                                    className="h-auto p-0 text-xs font-semibold flex items-center gap-0.5 text-primary"
-                                >
-                                    <Plus className="h-3.5 w-3.5" /> New
-                                </Button>
-                            </div>
-                            <Select
-                                value={data.status_label_id}
-                                onValueChange={(val) => setData('status_label_id', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Status Label" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {localStatusLabels.map((lbl: any) => (
-                                        <SelectItem key={lbl.id} value={lbl.id.toString()}>
-                                            {lbl.name} ({lbl.type})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.status_label_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.status_label_id}</div>
-                            )}
-                        </div>
-
-                        {/* Category Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="category_id" className="font-medium">Category</Label>
-                            <Select
-                                value={data.category_id}
-                                onValueChange={(val) => setData('category_id', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {categories?.map((cat: any) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                                            {cat.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.category_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.category_id}</div>
-                            )}
-                        </div>
-
-                        {/* Location / Site Selection with inline "new" */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="site_id" className="font-medium">Site (Base Location)</Label>
-                                <Button
-                                    type="button"
-                                    variant="link"
-                                    size="sm"
-                                    onClick={() => setIsSiteOpen(true)}
-                                    className="h-auto p-0 text-xs font-semibold flex items-center gap-0.5 text-primary"
-                                >
-                                    <Plus className="h-3.5 w-3.5" /> New
-                                </Button>
-                            </div>
-                            <Select
-                                value={data.site_id}
-                                onValueChange={(val) => setData('site_id', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Site Location" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {localSites.map((site: any) => (
-                                        <SelectItem key={site.id} value={site.id.toString()}>
-                                            {site.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.site_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.site_id}</div>
-                            )}
-                        </div>
-
-                        {/* Sub Location Selection with inline "new" */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="location_id" className="font-medium">Specific Location (Sub-site)</Label>
-                                <Button
-                                    type="button"
-                                    variant="link"
-                                    size="sm"
-                                    onClick={() => setIsLocationOpen(true)}
-                                    className="h-auto p-0 text-xs font-semibold flex items-center gap-0.5 text-primary"
-                                >
-                                    <Plus className="h-3.5 w-3.5" /> New
-                                </Button>
-                            </div>
-                            <Select
-                                value={data.location_id}
-                                onValueChange={(val) => setData('location_id', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Sub Location" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {localLocations.map((loc: any) => (
-                                        <SelectItem key={loc.id} value={loc.id.toString()}>
-                                            {loc.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.location_id && (
-                                <div className="text-xs text-red-500 mt-1">{errors.location_id}</div>
-                            )}
-                        </div>
-
-                        {/* Quantity */}
-                        <div className="space-y-2">
-                            <Label htmlFor="quantity" className="font-medium">Quantity</Label>
-                            <Input
-                                id="quantity"
-                                type="number"
-                                min="1"
-                                value={data.quantity}
-                                onChange={(e) => setData('quantity', parseInt(e.target.value) || 1)}
-                            />
-                            {errors.quantity && (
-                                <div className="text-xs text-red-500 mt-1">{errors.quantity}</div>
-                            )}
-                        </div>
-                    </div>
+                    )}
 
                     {/* Notes */}
                     <div className="space-y-2 mt-4">

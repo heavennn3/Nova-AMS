@@ -138,12 +138,12 @@ function SortableRow({ config, index, onEdit, onDelete, onToggleVisible }: {
                     </div>
                 </div>
             </td>
-            <td className="p-2">
+            <td className="p-2 w-24">
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">
                     {config.data_type}
                 </span>
             </td>
-            <td className="p-2">
+            <td className="p-2 w-36">
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => onToggleVisible(config)}
@@ -155,15 +155,15 @@ function SortableRow({ config, index, onEdit, onDelete, onToggleVisible }: {
                     >
                         {config.is_visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                     </button>
-                    <span className={`text-xs px-1.5 py-0.5 rounded ${config.is_sortable ? 'text-blue-600 bg-blue-50' : 'text-gray-300'}`}>
-                        <ArrowUpDown className="h-3 w-3 inline" />
+                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${config.is_sortable ? 'text-blue-600 bg-blue-50' : 'text-gray-300'}`}>
+                        <ArrowUpDown className="h-3.5 w-3.5" />
                     </span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded ${config.is_filterable ? 'text-violet-600 bg-violet-50' : 'text-gray-300'}`}>
-                        <Filter className="h-3 w-3 inline" />
+                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${config.is_filterable ? 'text-violet-600 bg-violet-50' : 'text-gray-300'}`}>
+                        <Filter className="h-3.5 w-3.5" />
                     </span>
                 </div>
             </td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-right w-20">
                 <div className="flex items-center justify-end gap-1">
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onEdit(config)} title="Edit">
                         <Edit className="h-3.5 w-3.5" />

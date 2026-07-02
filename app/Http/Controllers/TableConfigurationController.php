@@ -61,12 +61,24 @@ class TableConfigurationController extends Controller
             'options' => 'nullable|array',
         ]);
 
-        // Check if column_key already exists for this table
-        $exists = TableConfiguration::where('table_name', $validated['table_name'])
+        // Check if column_key already exists for this table (include soft-deleted rows)
+        $existing = TableConfiguration::withTrashed()->where('table_name', $validated['table_name'])
             ->where('column_key', $validated['column_key'])
-            ->exists();
+            ->first();
 
-        if ($exists) {
+        if ($existing) {
+            if ($existing->trashed()) {
+                // Restore soft-deleted row and update it with new values
+                $existing->restore();
+                $existing->update(array_merge($validated, [
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]));
+                return redirect()->route('table-configurations.index', [
+                    'tableName' => $validated['table_name']
+                ])->with('success', 'Column configuration restored and updated successfully.');
+            }
+
             return back()->withErrors([
                 'column_key' => 'This column key already exists for this table.'
             ])->withInput();
@@ -134,10 +146,11 @@ class TableConfigurationController extends Controller
     /**
      * Remove the specified table configuration.
      */
-    public function destroy(TableConfiguration $tableConfiguration)
+    public function destroy($id)
     {
+        $tableConfiguration = TableConfiguration::withTrashed()->findOrFail($id);
         $tableName = $tableConfiguration->table_name;
-        $tableConfiguration->delete();
+        $tableConfiguration->forceDelete();
 
         return redirect()->route('table-configurations.index', [
             'tableName' => $tableName
@@ -189,7 +202,7 @@ class TableConfigurationController extends Controller
      */
     public function resetToDefault($tableName)
     {
-        TableConfiguration::forTable($tableName)->delete();
+        TableConfiguration::forTable($tableName)->forceDelete();
 
         $this->createDefaultConfiguration($tableName);
 
