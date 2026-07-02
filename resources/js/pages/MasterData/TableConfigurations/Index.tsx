@@ -203,11 +203,13 @@ function ColumnFormModal({
     onClose,
     config,
     tableName,
+    existingConfigs = [],
 }: {
     open: boolean;
     onClose: () => void;
     config: TableConfiguration | null;
     tableName: string;
+    existingConfigs?: TableConfiguration[];
 }) {
     const isEditing = !!config;
 
@@ -295,6 +297,17 @@ function ColumnFormModal({
                 parsedOptions = JSON.parse(optionsText);
             } catch {
                 toast.error('Invalid JSON in options field');
+                return;
+            }
+        }
+
+        // Check for duplicate column_key on create
+        if (!isEditing) {
+            const existingKey = existingConfigs.find(
+                (c) => c.column_key === data.column_key && c.table_name === data.table_name
+            );
+            if (existingKey) {
+                toast.error(`Column key "${data.column_key}" already exists for this table`);
                 return;
             }
         }
@@ -637,6 +650,7 @@ export default function TableConfigurationIndex({
                 onClose={closeModal}
                 config={editingConfig}
                 tableName={currentTable}
+                existingConfigs={configurations}
             />
         </div>
     );
