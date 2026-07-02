@@ -31,8 +31,7 @@ class DashboardController extends Controller
         $activeWorkOrders = WorkOrder::whereIn('status', ['pending', 'in_progress'])->count();
         $openTickets = SupportTicket::whereIn('status', ['open', 'in_progress'])->count();
 
-        // Low Spare Parts Alert (RAM/Monitor/PSU etc)
-        // Check if stock is low or below minimum
+        // Low Spare Parts Alert
         $lowSpareParts = \App\Models\SparePart::with('site')
             ->where(function($query) {
                 $query->whereColumn('stock_level', '<=', 'minimum_stock_level')
@@ -48,58 +47,14 @@ class DashboardController extends Controller
                 'site' => $part->site?->name ?? 'HQ Central Store',
             ]);
 
-        // If spare parts table is empty, seed mock items for preview
-        if ($lowSpareParts->isEmpty()) {
-            $lowSpareParts = collect([
-                [
-                    'id' => 1,
-                    'name' => 'DDR4 16GB RAM module',
-                    'part_number' => 'SP-RAM-001',
-                    'stock_level' => 2,
-                    'minimum_stock_level' => 5,
-                    'site' => 'Kota Kinabalu Tower',
-                ],
-                [
-                    'id' => 2,
-                    'name' => '24" LCD Monitor Panel',
-                    'part_number' => 'SP-MON-024',
-                    'stock_level' => 1,
-                    'minimum_stock_level' => 3,
-                    'site' => 'Kuching FIR Centre',
-                ],
-                [
-                    'id' => 3,
-                    'name' => '750W Redundant PSU unit',
-                    'part_number' => 'SP-PSU-750',
-                    'stock_level' => 0,
-                    'minimum_stock_level' => 4,
-                    'site' => 'Miri Airport Radar',
-                ],
-            ]);
-        }
-
-        // Sites with Asset count and Weather info
+        // Sites with Asset count
         $sitesWithStats = Site::withCount('assets')->get()->map(function($site) {
-            // Seed weather states based on site name / code
-            $conditions = ['Sunny', 'Light Rain', 'Cloudy', 'Thunderstorm'];
-            $conditionsKK = ['Sunny', 'Cloudy'];
-            $conditionsSarawak = ['Light Rain', 'Thunderstorm'];
-            
-            $isSarawak = str_contains(strtolower($site->name), 'kuching') || str_contains(strtolower($site->name), 'miri');
-            $condition = $isSarawak ? $conditionsSarawak[rand(0, 1)] : $conditionsKK[rand(0, 1)];
-            
             return [
                 'id' => $site->id,
                 'name' => $site->name,
                 'code' => $site->code,
                 'region' => $site->region,
                 'assets_count' => $site->assets_count,
-                'weather' => [
-                    'temp' => rand(27, 32) . '°C',
-                    'condition' => $condition,
-                    'wind' => rand(8, 22) . ' km/h',
-                    'humidity' => rand(75, 95) . '%',
-                ]
             ];
         });
 

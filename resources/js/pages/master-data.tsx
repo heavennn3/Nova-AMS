@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, Settings, Columns, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Settings, Columns, Eye, EyeOff, Table, Copy, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -30,6 +30,9 @@ type MasterDataProps = {
     vendors: any[];
     customTypes: any[];
     licenses: any[];
+    tableConfigurations?: any[];
+    configurationTables?: string[];
+    currentConfigTable?: string;
 };
 
 type TabType = string;
@@ -79,8 +82,15 @@ export default function MasterData({
     vendors = [],
     customTypes = [],
     licenses = [],
+    tableConfigurations = [],
+    configurationTables = [],
+    currentConfigTable = 'assets',
 }: MasterDataProps) {
-    const [activeTab, setActiveTab] = useState<TabType>('sites');
+    // Read tab from URL query params
+    const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const defaultTab = urlParams.get('tab') || 'sites';
+
+    const [activeTab, setActiveTab] = useState<TabType>(defaultTab as TabType);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>({});
@@ -102,6 +112,11 @@ export default function MasterData({
 
     // License column visibility
     const [licenseColVisibility, setLicenseColVisibility] = useState<Record<string, boolean>>(loadLicenseColVisibility);
+    
+    // Table config tab state
+    const [configSelectedTable, setConfigSelectedTable] = useState(currentConfigTable);
+    const [configSelectedColumns, setConfigSelectedColumns] = useState<Set<number>>(new Set());
+    const [configDraggedId, setConfigDraggedId] = useState<number | null>(null);
     const [isLicenseColsOpen, setIsLicenseColsOpen] = useState(false);
 
     const toggleLicenseCol = (key: string) => {
@@ -834,6 +849,15 @@ export default function MasterData({
         },
     };
 
+    // Table Configuration tab
+    tabConfig['table-configurations'] = {
+        title: 'Table Configurations',
+        data: [],
+        isConfigTab: true,
+        columns: [],
+        renderForm: () => null,
+    };
+
     // Dynamically inject custom types with dynamic columns
     customTypes.forEach((cType: any) => {
         const typeColumns = cType.columns || [];
@@ -978,13 +1002,20 @@ export default function MasterData({
                         Master Data
                     </h1>
                 </div>
-                <Button variant="outline" onClick={() => {
-                    setEditingType(null);
-                    setTypeFormData({});
-                    setIsManageTypesOpen(true);
-                }}>
-                    Manage Custom Types
-                </Button>
+                <div className="flex items-center gap-3">
+                    <Link href="/master-data/table-configurations">
+                        <Button variant="outline">
+                            Table Configurations
+                        </Button>
+                    </Link>
+                    <Button variant="outline" onClick={() => {
+                        setEditingType(null);
+                        setTypeFormData({});
+                        setIsManageTypesOpen(true);
+                    }}>
+                        Manage Custom Types
+                    </Button>
+                </div>
             </div>
 
             <div className="flex w-full space-x-2 overflow-x-auto border-b border-border pb-1">
@@ -1046,13 +1077,217 @@ export default function MasterData({
                     </div>
                 )}
 
-                <div className="p-4">
-                    <DataTable
-                        columns={currentTab.columns}
-                        data={currentTab.data}
-                        hideToolbar
-                    />
-                </div>
+                {activeTab === 'table-configurations' ? (
+                    <div className="space-y-6">
+                        {/* Table selector pills */}
+                        <div className="flex items-center gap-4">
+                            <label className="text-sm font-medium">Select Table:</label>
+                            <div className="flex flex-wrap gap-2">
+                                {(configurationTables.length > 0 ? configurationTables : ['assets']).map(table => (
+                                    <button
+                                        key={table}
+                                        onClick={() => {
+                                            setConfigSelectedTable(table);
+                                            router.get(`/master-data?tab=table-configurations&tableName=${table}`, {}, {
+                                                preserveScroll: true,
+                                                only: ['tableConfigurations', 'configurationTables', 'currentConfigTable'],
+                                            });
+                                        }}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                                            configSelectedTable === table
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'bg-muted hover:bg-muted/80'
+                                        }`}
+                                    >
+                                        {table}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Columns table */}
+                        <div className="rounded-lg border bg-card">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b bg-muted/50">
+                                            <th className="p-3 text-left font-medium text-sm">Column Title</th>
+                                            <th className="p-3 text-left font-medium text-sm">Key</th>
+                                            <th className="p-3 text-left font-medium text-sm">Type</th>
+                                            <th className="p-3 text-left font-medium text-sm">Sort</th>
+                                            <th className="p-3 text-left font-medium text-sm">Filter</th>
+                                            <th className="p-3 text-left font-medium text-sm">Visible</th>
+                                            <th className="p-3 text-left font-medium text-sm">Order</th>
+                                            <th className="p-3 text-left font-medium text-sm">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {tableConfigurations.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                                                    <Settings className="mx-auto h-10 w-10 opacity-40 mb-2" />
+                                                    <p className="text-sm">No columns configured for this table.</p>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            tableConfigurations.map((config: any, index: number) => (
+                                                <tr key={config.id} className="border-b hover:bg-muted/30">
+                                                    <td className="p-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-medium text-sm">{config.column_title}</span>
+                                                            {config.is_primary_key && (
+                                                                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] rounded-full font-semibold">PK</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-3 font-mono text-xs text-muted-foreground">{config.column_key}</td>
+                                                    <td className="p-3">
+                                                        <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">{config.data_type}</span>
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={config.is_sortable}
+                                                            onChange={() => {
+                                                                router.put(`/master-data/table-configurations/${config.id}`, {
+                                                                    ...config,
+                                                                    is_sortable: !config.is_sortable,
+                                                                }, { preserveScroll: true });
+                                                            }}
+                                                            className="h-4 w-4 rounded border-gray-300"
+                                                        />
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={config.is_filterable}
+                                                            onChange={() => {
+                                                                router.put(`/master-data/table-configurations/${config.id}`, {
+                                                                    ...config,
+                                                                    is_filterable: !config.is_filterable,
+                                                                }, { preserveScroll: true });
+                                                            }}
+                                                            className="h-4 w-4 rounded border-gray-300"
+                                                        />
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <button
+                                                            onClick={() => {
+                                                                router.put(`/master-data/table-configurations/${config.id}`, {
+                                                                    ...config,
+                                                                    is_visible: !config.is_visible,
+                                                                }, { preserveScroll: true });
+                                                            }}
+                                                            className={`p-1.5 rounded transition-colors ${
+                                                                config.is_visible
+                                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                                            }`}
+                                                        >
+                                                            {config.is_visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                                                        </button>
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="text-xs text-muted-foreground">{config.sort_order}</span>
+                                                            <div className="flex flex-col">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (index > 0) {
+                                                                            router.post('/master-data/table-configurations/update-order', {
+                                                                                columns: [
+                                                                                    { id: config.id, sort_order: index - 1 },
+                                                                                    { id: tableConfigurations[index - 1].id, sort_order: index },
+                                                                                ],
+                                                                            }, { preserveScroll: true });
+                                                                        }
+                                                                    }}
+                                                                    disabled={index === 0}
+                                                                    className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-30"
+                                                                >
+                                                                    <ArrowUp className="h-3 w-3" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (index < tableConfigurations.length - 1) {
+                                                                            router.post('/master-data/table-configurations/update-order', {
+                                                                                columns: [
+                                                                                    { id: config.id, sort_order: index + 1 },
+                                                                                    { id: tableConfigurations[index + 1].id, sort_order: index },
+                                                                                ],
+                                                                            }, { preserveScroll: true });
+                                                                        }
+                                                                    }}
+                                                                    disabled={index === tableConfigurations.length - 1}
+                                                                    className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-30"
+                                                                >
+                                                                    <ArrowDown className="h-3 w-3" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <div className="flex items-center gap-1">
+                                                            <Link href={`/master-data/table-configurations/${config.id}/edit`}>
+                                                                <Button variant="ghost" size="sm" className="h-7 px-2">
+                                                                    <Edit className="h-3.5 w-3.5" />
+                                                                </Button>
+                                                            </Link>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-7 px-2 text-red-600"
+                                                                onClick={() => {
+                                                                    if (confirm('Delete this column configuration?')) {
+                                                                        router.delete(`/master-data/table-configurations/${config.id}`, {
+                                                                            preserveScroll: true,
+                                                                        });
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <Link href={`/master-data/table-configurations/create?tableName=${configSelectedTable}`}>
+                                <Button size="sm" className="gap-1.5">
+                                    <Plus className="h-4 w-4" /> Add Column
+                                </Button>
+                            </Link>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5"
+                                onClick={() => {
+                                    if (confirm('Reset to default configuration? Custom columns will be lost.')) {
+                                        router.post(`/master-data/table-configurations/reset-to-default/${configSelectedTable}`, {}, {
+                                            preserveScroll: true,
+                                        });
+                                    }
+                                }}
+                            >
+                                <RefreshCw className="h-4 w-4" /> Reset to Default
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-4">
+                        <DataTable
+                            columns={currentTab.columns}
+                            data={currentTab.data}
+                            hideToolbar
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Add/Edit Record Dialog */}

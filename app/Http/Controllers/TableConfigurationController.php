@@ -1,0 +1,319 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\TableConfiguration;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+
+class TableConfigurationController extends Controller
+{
+    /**
+     * Display a listing of table configurations for a specific table.
+     */
+    public function index(Request $request, $tableName = 'assets')
+    {
+        $configurations = TableConfiguration::forTable($tableName)
+            ->ordered()
+            ->get();
+
+        $tables = TableConfiguration::select('table_name')
+            ->distinct()
+            ->pluck('table_name');
+
+        return inertia('MasterData/TableConfigurations/Index', [
+            'configurations' => $configurations,
+            'currentTable' => $tableName,
+            'tables' => $tables,
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new table configuration.
+     */
+    public function create($tableName = 'assets')
+    {
+        return inertia('MasterData/TableConfigurations/Create', [
+            'currentTable' => $tableName,
+        ]);
+    }
+
+    /**
+     * Store a newly created table configuration.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'table_name' => 'required|string|max:255',
+            'column_key' => 'required|string|max:255',
+            'column_title' => 'required|string|max:255',
+            'data_type' => 'required|string|in:string,number,date,boolean,enum,array',
+            'data_source' => 'nullable|string|max:255',
+            'is_primary_key' => 'boolean',
+            'is_sortable' => 'boolean',
+            'is_filterable' => 'boolean',
+            'is_visible' => 'boolean',
+            'sort_order' => 'integer|min:0',
+            'width' => 'nullable|integer|min:50|max:500',
+            'alignment' => 'required|string|in:left,center,right',
+            'format_pattern' => 'nullable|string|max:255',
+            'options' => 'nullable|array',
+        ]);
+
+        // Check if column_key already exists for this table
+        $exists = TableConfiguration::where('table_name', $validated['table_name'])
+            ->where('column_key', $validated['column_key'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'column_key' => 'This column key already exists for this table.'
+            ])->withInput();
+        }
+
+        $validated['created_by'] = Auth::id();
+        $validated['updated_by'] = Auth::id();
+
+        TableConfiguration::create($validated);
+
+        return redirect()->route('table-configurations.index', [
+            'tableName' => $validated['table_name']
+        ])->with('success', 'Column configuration created successfully.');
+    }
+
+    /**
+     * Display the specified table configuration.
+     */
+    public function show(TableConfiguration $tableConfiguration)
+    {
+        return inertia('MasterData/TableConfigurations/Show', [
+            'configuration' => $tableConfiguration,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified table configuration.
+     */
+    public function edit(TableConfiguration $tableConfiguration)
+    {
+        return inertia('MasterData/TableConfigurations/Edit', [
+            'configuration' => $tableConfiguration,
+        ]);
+    }
+
+    /**
+     * Update the specified table configuration.
+     */
+    public function update(Request $request, TableConfiguration $tableConfiguration)
+    {
+        $validated = $request->validate([
+            'column_title' => 'required|string|max:255',
+            'data_type' => 'required|string|in:string,number,date,boolean,enum,array',
+            'data_source' => 'nullable|string|max:255',
+            'is_primary_key' => 'boolean',
+            'is_sortable' => 'boolean',
+            'is_filterable' => 'boolean',
+            'is_visible' => 'boolean',
+            'sort_order' => 'integer|min:0',
+            'width' => 'nullable|integer|min:50|max:500',
+            'alignment' => 'required|string|in:left,center,right',
+            'format_pattern' => 'nullable|string|max:255',
+            'options' => 'nullable|array',
+        ]);
+
+        $validated['updated_by'] = Auth::id();
+
+        $tableConfiguration->update($validated);
+
+        return redirect()->route('table-configurations.index', [
+            'tableName' => $tableConfiguration->table_name
+        ])->with('success', 'Column configuration updated successfully.');
+    }
+
+    /**
+     * Remove the specified table configuration.
+     */
+    public function destroy(TableConfiguration $tableConfiguration)
+    {
+        $tableName = $tableConfiguration->table_name;
+        $tableConfiguration->delete();
+
+        return redirect()->route('table-configurations.index', [
+            'tableName' => $tableName
+        ])->with('success', 'Column configuration deleted successfully.');
+    }
+
+    /**
+     * Bulk update sort order.
+     */
+    public function updateOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'columns' => 'required|array',
+            'columns.*.id' => 'required|exists:table_configurations,id',
+            'columns.*.sort_order' => 'required|integer|min:0',
+        ]);
+
+        foreach ($validated['columns'] as $column) {
+            TableConfiguration::where('id', $column['id'])
+                ->update(['sort_order' => $column['sort_order'], 'updated_by' => Auth::id()]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Duplicate a configuration.
+     */
+    public function duplicate(TableConfiguration $tableConfiguration)
+    {
+        $newConfiguration = $tableConfiguration->replicate([
+            'created_by',
+            'created_at',
+        ]);
+        $newConfiguration->column_key = $tableConfiguration->column_key . '_copy';
+        $newConfiguration->column_title = $tableConfiguration->column_title . ' (Copy)';
+        $newConfiguration->sort_order = $tableConfiguration->sort_order + 1;
+        $newConfiguration->created_by = Auth::id();
+        $newConfiguration->updated_by = Auth::id();
+        $newConfiguration->save();
+
+        return redirect()->route('table-configurations.index', [
+            'tableName' => $tableConfiguration->table_name
+        ])->with('success', 'Column configuration duplicated successfully.');
+    }
+
+    /**
+     * Reset table to default configuration.
+     */
+    public function resetToDefault($tableName)
+    {
+        TableConfiguration::forTable($tableName)->delete();
+
+        $this->createDefaultConfiguration($tableName);
+
+        return redirect()->route('table-configurations.index', [
+            'tableName' => $tableName
+        ])->with('success', 'Table configuration reset to defaults.');
+    }
+
+    /**
+     * Create default configuration for a table.
+     */
+    private function createDefaultConfiguration($tableName)
+    {
+        $defaults = $this->getDefaultConfigurations($tableName);
+
+        foreach ($defaults as $config) {
+            TableConfiguration::create(array_merge($config, [
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+            ]));
+        }
+    }
+
+    /**
+     * Get default configurations for different tables.
+     */
+    private function getDefaultConfigurations($tableName)
+    {
+        $configs = [
+            'assets' => [
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'asset_id',
+                    'column_title' => 'Asset Tag',
+                    'data_type' => 'string',
+                    'data_source' => 'asset_id',
+                    'is_primary_key' => true,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 0,
+                    'alignment' => 'left',
+                ],
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'name',
+                    'column_title' => 'Asset Name',
+                    'data_type' => 'string',
+                    'data_source' => 'product_name',
+                    'is_primary_key' => false,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 1,
+                    'alignment' => 'left',
+                ],
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'type',
+                    'column_title' => 'Asset Type',
+                    'data_type' => 'string',
+                    'data_source' => 'type',
+                    'is_primary_key' => false,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 2,
+                    'alignment' => 'left',
+                ],
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'category',
+                    'column_title' => 'Category',
+                    'data_type' => 'string',
+                    'data_source' => 'category',
+                    'is_primary_key' => false,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 3,
+                    'alignment' => 'left',
+                ],
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'status',
+                    'column_title' => 'Status',
+                    'data_type' => 'enum',
+                    'data_source' => 'status',
+                    'is_primary_key' => false,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 4,
+                    'alignment' => 'left',
+                ],
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'condition',
+                    'column_title' => 'Condition',
+                    'data_type' => 'enum',
+                    'data_source' => 'condition_status',
+                    'is_primary_key' => false,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 5,
+                    'alignment' => 'left',
+                ],
+                [
+                    'table_name' => 'assets',
+                    'column_key' => 'vendor',
+                    'column_title' => 'Vendor',
+                    'data_type' => 'string',
+                    'data_source' => 'vendor',
+                    'is_primary_key' => false,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => 6,
+                    'alignment' => 'left',
+                ],
+            ],
+        ];
+
+        return $configs[$tableName] ?? [];
+    }
+}

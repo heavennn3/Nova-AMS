@@ -89,7 +89,7 @@ export function AppSidebarHeader({
                                 className="flex h-9 items-center gap-1 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                                 <Plus className="h-4 w-4" />
-                                <span className="hidden sm:inline">Create New</span>
+                                <span className="hidden sm:inline">Create</span>
                                 <ChevronDown className={cn("h-3.5 w-3.5 opacity-70 transition-transform duration-200", isCreateOpen && "rotate-180")} />
                             </button>
 

@@ -56,9 +56,11 @@ import { Textarea } from '@/components/ui/textarea';
 export default function AssetIndex({
     assets = [],
     sites = [],
+    configurations = [],
 }: {
     assets: any[];
     sites?: any[];
+    configurations?: any[];
 }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -75,81 +77,29 @@ export default function AssetIndex({
     const [selectedCategory, setSelectedCategory] = useState('all');
 
     const columns = React.useMemo(() => {
-        const baseColumns = [
-            {
-                id: 'rowNumber',
-                header: '#',
-                cell: ({ row }: any) => (
-                    <span className="text-muted-foreground text-xs font-medium tabular-nums">
-                        {row.index + 1}
-                    </span>
-                ),
-                enableSorting: false,
-            },
-            {
-                accessorKey: 'asset_id',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Asset Tag" />
-                ),
-                cell: ({ row }: any) => (
-                    <Link
-                        href={`/assets/${row.original.id}`}
-                        className="text-emerald-600 hover:underline font-mono font-medium text-sm"
-                    >
-                        {row.getValue('asset_id')}
-                    </Link>
-                ),
-            },
-            {
-                id: 'name',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Name" />
-                ),
-                cell: ({ row }: any) => (
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">
-                                {row.original.product_name || row.original.asset_name || 'Unnamed Asset'}
-                            </span>
-                            {row.original.quantity > 1 && (
-                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800">
-                                    Batch ×{row.original.quantity} pcs
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                ),
-            },
-            {
-                accessorKey: 'type',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Asset Type" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="text-muted-foreground text-sm font-medium">
-                        {row.original.type || '—'}
-                    </span>
-                ),
-            },
-            {
-                accessorKey: 'category',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Category" />
-                ),
-                cell: ({ row }: any) => (
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0"></span>
-                        {row.original.category || '—'}
-                    </div>
-                ),
-            },
-            {
-                accessorKey: 'status',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Status" />
-                ),
-                cell: ({ row }: any) => {
-                    const status = row.original.status;
+        const cols: any[] = (configurations || []).map((cfg: any) => ({
+            accessorKey: cfg.column_key,
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title={cfg.column_title} />
+            ),
+            enableSorting: cfg.is_sortable,
+            cell: ({ row }: any) => {
+                const val = row.getValue(cfg.column_key);
+
+                // Asset ID → link
+                if (cfg.column_key === 'asset_id') {
+                    return (
+                        <Link
+                            href={`/assets/${row.original.id}`}
+                            className="text-emerald-600 hover:underline font-mono font-medium text-sm"
+                        >
+                            {val}
+                        </Link>
+                    );
+                }
+
+                // Status → colored badge
+                if (cfg.column_key === 'status') {
                     const statusColors: Record<string, string> = {
                         available: 'border-green-200 bg-green-50 text-green-700 dark:border-green-900/30 dark:bg-green-900/10 dark:text-green-400',
                         in_use: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400',
@@ -159,60 +109,59 @@ export default function AssetIndex({
                         new: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-400',
                         retired: 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800/50 dark:bg-slate-800/10 dark:text-slate-400',
                     };
-
                     const labels: Record<string, string> = {
-                        available: 'Available',
-                        in_use: 'Assigned',
-                        maintenance: 'Maintenance',
-                        faulty: 'Faulty',
-                        degraded: 'Degraded',
-                        new: 'New',
-                        retired: 'Retired',
+                        available: 'Available', in_use: 'Assigned', maintenance: 'Maintenance',
+                        faulty: 'Faulty', degraded: 'Degraded', new: 'New', retired: 'Retired',
                     };
-
-                    const colorClass = statusColors[status] || 'border-secondary bg-secondary/50 text-secondary-foreground';
-
+                    const color = statusColors[val] || 'border-secondary bg-secondary/50 text-secondary-foreground';
                     return (
-                        <div className="flex items-center gap-1.5">
-                            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${colorClass}`}>
-                                {labels[status] || status || 'Unknown'}
-                            </span>
-                        </div>
+                        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${color}`}>
+                            {labels[val] || val || 'Unknown'}
+                        </span>
                     );
-                },
-            },
-            {
-                id: 'condition',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Condition" />
-                ),
-                cell: ({ row }: any) => {
-                    const condition = row.original.condition_status || 'good';
-                    const colorClass = condition.toLowerCase() === 'good'
+                }
+
+                // Condition
+                if (cfg.column_key === 'condition_status') {
+                    const good = (val || 'good').toLowerCase() === 'good';
+                    const color = good
                         ? 'border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400'
                         : 'border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-900/30 dark:bg-orange-900/10 dark:text-orange-400';
                     return (
-                        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${colorClass}`}>
-                            {condition}
+                        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide ${color}`}>
+                            {val || 'good'}
                         </span>
                     );
-                },
-            },
-            {
-                accessorKey: 'vendor',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Vendor" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="text-muted-foreground text-sm font-medium">
-                        {row.original.vendor || '—'}
-                    </span>
-                ),
-            },
-        ];
+                }
 
+                // Name → rich display with batch badge
+                if (cfg.column_key === 'product_name') {
+                    return (
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="font-semibold text-foreground">{val || 'Unnamed Asset'}</span>
+                                {row.original.quantity > 1 && (
+                                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800">
+                                        Batch ×{row.original.quantity} pcs
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // Number → right-aligned
+                if (cfg.data_type === 'number') {
+                    return <div className="text-right font-medium tabular-nums">{val}</div>;
+                }
+
+                return <span className="text-muted-foreground text-sm font-medium">{val ?? '—'}</span>;
+            },
+        }));
+
+        // Actions column
         if (isAdmin) {
-            baseColumns.push({
+            cols.push({
                 id: 'actions',
                 header: 'Actions',
                 cell: ({ row }: any) => {
@@ -248,8 +197,8 @@ export default function AssetIndex({
             });
         }
 
-        return baseColumns;
-    }, [isAdmin]);
+        return cols;
+    }, [configurations, isAdmin]);
 
     function MaintenanceRequestForm({ asset }: { asset: any }) {
         const { data, setData, post, processing, reset } = useForm({

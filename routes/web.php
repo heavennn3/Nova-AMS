@@ -147,6 +147,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:module.master-data'])->group(function () {
         Route::get('/master-data', [\App\Http\Controllers\MasterDataController::class, 'index'])->name('master-data');
 
+        // Table Configurations
+        Route::prefix('master-data/table-configurations')->group(function () {
+            Route::get('/', [\App\Http\Controllers\TableConfigurationController::class, 'index'])->name('table-configurations.index');
+            Route::get('/create', [\App\Http\Controllers\TableConfigurationController::class, 'create'])->name('table-configurations.create');
+            Route::post('/', [\App\Http\Controllers\TableConfigurationController::class, 'store'])->name('table-configurations.store');
+            Route::get('/{tableConfiguration}', [\App\Http\Controllers\TableConfigurationController::class, 'show'])->name('table-configurations.show');
+            Route::get('/{tableConfiguration}/edit', [\App\Http\Controllers\TableConfigurationController::class, 'edit'])->name('table-configurations.edit');
+            Route::put('/{tableConfiguration}', [\App\Http\Controllers\TableConfigurationController::class, 'update'])->name('table-configurations.update');
+            Route::delete('/{tableConfiguration}', [\App\Http\Controllers\TableConfigurationController::class, 'destroy'])->name('table-configurations.destroy');
+            Route::post('/update-order', [\App\Http\Controllers\TableConfigurationController::class, 'updateOrder'])->name('table-configurations.update-order');
+            Route::post('/{tableConfiguration}/duplicate', [\App\Http\Controllers\TableConfigurationController::class, 'duplicate'])->name('table-configurations.duplicate');
+            Route::post('/reset-to-default/{tableName}', [\App\Http\Controllers\TableConfigurationController::class, 'resetToDefault'])->name('table-configurations.reset');
+        });
+
         Route::post('/master-data/categories', [\App\Http\Controllers\MasterDataController::class, 'storeCategory'])->name('categories.store');
         Route::put('/master-data/categories/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateCategory'])->name('categories.update');
         Route::delete('/master-data/categories/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyCategory'])->name('categories.destroy');

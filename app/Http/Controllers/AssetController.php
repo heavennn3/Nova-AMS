@@ -56,7 +56,8 @@ class AssetController extends Controller
 
         return Inertia::render('Assets/Index', [
             'assets' => $assets,
-            'sites' => $sites
+            'sites' => $sites,
+            'configurations' => \App\Models\TableConfiguration::getAllColumns('assets'),
         ]);
     }
 
@@ -81,8 +82,11 @@ class AssetController extends Controller
                 ];
             });
 
+        $configs = \App\Models\TableConfiguration::getAllColumns('assets');
+
         return Inertia::render('asset-inventory', [
             'assets' => $assets,
+            'configurations' => $configs,
         ]);
     }
 

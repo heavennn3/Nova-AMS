@@ -18,8 +18,10 @@ use Illuminate\Support\Str;
 
 class MasterDataController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $tableName = $request->query('tableName', 'assets');
+
         return Inertia::render('master-data', [
             'categories' => AssetCategory::all(),
             'types' => AssetType::with('category')->get(),
@@ -66,6 +68,9 @@ class MasterDataController extends Controller
                     'notes' => $license->notes,
                 ];
             }),
+            'tableConfigurations' => \App\Models\TableConfiguration::getAllColumns($tableName),
+            'configurationTables' => \App\Models\TableConfiguration::select('table_name')->distinct()->pluck('table_name'),
+            'currentConfigTable' => $tableName,
         ]);
     }
 

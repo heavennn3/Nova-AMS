@@ -11,24 +11,78 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { Plus, Edit, Trash2, Search, Filter, X, Check } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 
-export default function AssetIndex({ assets }: { assets: any[] }) {
+interface Configuration {
+    id: number;
+    column_key: string;
+    column_title: string;
+    data_type: string;
+    data_source: string | null;
+    is_primary_key: boolean;
+    is_sortable: boolean;
+    is_filterable: boolean;
+    is_visible: boolean;
+    sort_order: number;
+    alignment: string;
+    format_pattern: string | null;
+    options: any;
+}
+
+interface Asset {
+    id: number;
+    asset_id: string;
+    category: string;
+    type: string;
+    site: string;
+    site_id: number | null;
+    quantity: number;
+    vendor: string;
+    product_name: string;
+    purchase_year: string;
+    status: string;
+    condition_status: string;
+    assignment: any;
+}
+
+interface AssetIndexProps {
+    assets: Asset[];
+    configurations: Configuration[];
+}
+
+const statusColors: Record<string, string> = {
+    available: 'bg-green-100 text-green-800',
+    in_use: 'bg-blue-100 text-blue-800',
+    maintenance: 'bg-yellow-100 text-yellow-800',
+    faulty: 'bg-red-100 text-red-800',
+    degraded: 'bg-orange-100 text-orange-800',
+    new: 'bg-emerald-100 text-emerald-800',
+    retired: 'bg-slate-100 text-slate-800',
+};
+
+const statusLabels: Record<string, string> = {
+    available: 'Available',
+    in_use: 'In Use',
+    maintenance: 'Maintenance',
+    faulty: 'Faulty Unit',
+    degraded: 'Degraded Unit',
+    new: 'New Unit',
+    retired: 'Retired',
+};
+
+export default function AssetIndex({ assets, configurations }: AssetIndexProps) {
     const [search, setSearch] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedVendor, setSelectedVendor] = useState('all');
 
     const allStatuses = useMemo(
         () =>
-            [
-                ...new Set((assets || []).map((a) => a.status).filter(Boolean)),
-            ].sort(),
+            [...new Set((assets || []).map((a) => a.status).filter(Boolean))].sort(),
         [assets],
     );
     const allVendors = useMemo(
         () =>
-            [
-                ...new Set((assets || []).map((a) => a.vendor).filter(Boolean)),
-            ].sort(),
+            [...new Set((assets || []).map((a) => a.vendor).filter(Boolean))].sort(),
         [assets],
     );
 
@@ -52,115 +106,62 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
 
     const activeFilterCount =
         (selectedStatus !== 'all' ? 1 : 0) + (selectedVendor !== 'all' ? 1 : 0);
-    const columns = [
-        {
-            accessorKey: 'asset_id',
+
+    const columns = useMemo(() => {
+        const cols: ColumnDef<Asset>[] = (configurations || []).map((cfg) => ({
+            accessorKey: cfg.column_key,
             header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Asset ID" />
+                <DataTableColumnHeader column={column} title={cfg.column_title} />
             ),
-            headerText: 'Asset ID',
-            cell: ({ row }: any) => (
-                <Link
-                    href={`/assets/${row.original.id}`}
-                    className="text-primary hover:underline font-mono font-semibold"
-                >
-                    {row.getValue('asset_id')}
-                </Link>
-            ),
-        },
-        {
-            accessorKey: 'category',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Category" />
-            ),
-            headerText: 'Category',
-        },
-        {
-            accessorKey: 'type',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Type" />
-            ),
-            headerText: 'Type',
-        },
-        {
-            accessorKey: 'site',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Location" />
-            ),
-            headerText: 'Location',
-        },
-        {
-            accessorKey: 'quantity',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Quantity" />
-            ),
-            headerText: 'Quantity',
-        },
-        {
-            accessorKey: 'vendor',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Vendor" />
-            ),
-            headerText: 'Vendor',
-        },
-        {
-            accessorKey: 'product_name',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Product" />
-            ),
-            headerText: 'Product',
-        },
-        {
-            accessorKey: 'purchase_year',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Purchase Year" />
-            ),
-            headerText: 'Purchase Year',
-        },
-        {
-            accessorKey: 'status',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Status" />
-            ),
-            headerText: 'Status',
+            headerText: cfg.column_title,
+            enableSorting: cfg.is_sortable,
             cell: ({ row }: any) => {
-                const status = row.original.status;
-                const statusColors: Record<string, string> = {
-                    available: 'bg-green-100 text-green-800',
-                    in_use: 'bg-blue-100 text-blue-800',
-                    maintenance: 'bg-yellow-100 text-yellow-800',
-                    faulty: 'bg-red-100 text-red-800',
-                    degraded: 'bg-orange-100 text-orange-800',
-                    new: 'bg-emerald-100 text-emerald-800',
-                    retired: 'bg-slate-100 text-slate-800',
-                };
+                const val = row.getValue(cfg.column_key);
 
-                const labels: Record<string, string> = {
-                    available: 'Available',
-                    in_use: 'In Use',
-                    maintenance: 'Maintenance',
-                    faulty: 'Faulty Unit',
-                    degraded: 'Degraded Unit',
-                    new: 'New Unit',
-                    retired: 'Retired',
-                };
-
-                const colorClass =
-                    statusColors[status] ||
-                    'bg-secondary text-secondary-foreground';
-
-                return (
-                    <div className="flex items-center">
-                        <span
-                            className={`rounded px-2 py-1 text-[10px] font-bold tracking-wider uppercase ${colorClass}`}
+                // Asset ID → link
+                if (cfg.column_key === 'asset_id') {
+                    return (
+                        <Link
+                            href={`/assets/${row.original.id}`}
+                            className="text-primary hover:underline font-mono font-semibold"
                         >
-                            {labels[status] || status || 'Unknown'}
-                        </span>
-                    </div>
-                );
+                            {val}
+                        </Link>
+                    );
+                }
+
+                // Status → colored badge
+                if (cfg.column_key === 'status') {
+                    const colorClass =
+                        statusColors[val] || 'bg-secondary text-secondary-foreground';
+                    return (
+                        <div className="flex items-center">
+                            <span
+                                className={`rounded px-2 py-1 text-[10px] font-bold tracking-wider uppercase ${colorClass}`}
+                            >
+                                {statusLabels[val] || val || 'Unknown'}
+                            </span>
+                        </div>
+                    );
+                }
+
+                // Number → right-aligned
+                if (cfg.data_type === 'number') {
+                    return <div className="text-right font-medium">{val}</div>;
+                }
+
+                // Boolean → checkmark
+                if (cfg.data_type === 'boolean') {
+                    return val ? '✓' : '—';
+                }
+
+                // Everything else → plain text
+                return <span>{val ?? '—'}</span>;
             },
-        },
-        {
+        }));
+
+        // Actions column (always present, not configurable)
+        cols.push({
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => {
@@ -181,11 +182,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                             size="sm"
                             className="h-8 px-2 text-red-600 hover:bg-red-50"
                             onClick={() => {
-                                if (
-                                    confirm(
-                                        'Are you sure you want to delete this asset?',
-                                    )
-                                ) {
+                                if (confirm('Are you sure you want to delete this asset?')) {
                                     router.delete(`/assets/${asset.id}`);
                                 }
                             }}
@@ -195,8 +192,10 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                     </div>
                 );
             },
-        },
-    ];
+        });
+
+        return cols;
+    }, [configurations]);
 
     const handleImportCsv = (importedData: any[]) => {
         router.post(
@@ -205,9 +204,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
             {
                 preserveScroll: true,
                 onSuccess: () =>
-                    alert(
-                        `Successfully imported ${importedData.length} assets from CSV!`,
-                    ),
+                    alert(`Successfully imported ${importedData.length} assets from CSV!`),
                 onError: (err) => {
                     console.error('Import failed:', err);
                     alert('Failed to import CSV. Check console for details.');
@@ -263,23 +260,17 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                     </PopoverTrigger>
                     <PopoverContent className="w-[260px] p-0" align="start">
                         <div className="border-b p-3">
-                            <p className="text-sm font-semibold">
-                                Filter Assets
-                            </p>
+                            <p className="text-sm font-semibold">Filter Assets</p>
                         </div>
                         <div className="border-b p-3">
-                            <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                                Status
-                            </p>
+                            <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Status</p>
                             <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
                                 <button
                                     onClick={() => setSelectedStatus('all')}
                                     className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedStatus === 'all' ? 'font-medium' : ''}`}
                                 >
                                     <span>All</span>
-                                    {selectedStatus === 'all' && (
-                                        <Check className="h-3.5 w-3.5 text-primary" />
-                                    )}
+                                    {selectedStatus === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
                                 </button>
                                 {allStatuses.map((s) => (
                                     <button
@@ -290,33 +281,23 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                                         <span>{s}</span>
                                         <div className="flex items-center gap-1.5">
                                             <span className="text-[10px] text-muted-foreground">
-                                                {
-                                                    (assets || []).filter(
-                                                        (a) => a.status === s,
-                                                    ).length
-                                                }
+                                                {(assets || []).filter((a) => a.status === s).length}
                                             </span>
-                                            {selectedStatus === s && (
-                                                <Check className="h-3.5 w-3.5 text-primary" />
-                                            )}
+                                            {selectedStatus === s && <Check className="h-3.5 w-3.5 text-primary" />}
                                         </div>
                                     </button>
                                 ))}
                             </div>
                         </div>
                         <div className="border-b p-3">
-                            <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                                Vendor
-                            </p>
+                            <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Vendor</p>
                             <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
                                 <button
                                     onClick={() => setSelectedVendor('all')}
                                     className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedVendor === 'all' ? 'font-medium' : ''}`}
                                 >
                                     <span>All</span>
-                                    {selectedVendor === 'all' && (
-                                        <Check className="h-3.5 w-3.5 text-primary" />
-                                    )}
+                                    {selectedVendor === 'all' && <Check className="h-3.5 w-3.5 text-primary" />}
                                 </button>
                                 {allVendors.map((v) => (
                                     <button
@@ -327,15 +308,9 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                                         <span>{v}</span>
                                         <div className="flex items-center gap-1.5">
                                             <span className="text-[10px] text-muted-foreground">
-                                                {
-                                                    (assets || []).filter(
-                                                        (a) => a.vendor === v,
-                                                    ).length
-                                                }
+                                                {(assets || []).filter((a) => a.vendor === v).length}
                                             </span>
-                                            {selectedVendor === v && (
-                                                <Check className="h-3.5 w-3.5 text-primary" />
-                                            )}
+                                            {selectedVendor === v && <Check className="h-3.5 w-3.5 text-primary" />}
                                         </div>
                                     </button>
                                 ))}
@@ -343,15 +318,7 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                         </div>
                         {activeFilterCount > 0 && (
                             <div className="p-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-full text-xs"
-                                    onClick={() => {
-                                        setSelectedStatus('all');
-                                        setSelectedVendor('all');
-                                    }}
-                                >
+                                <Button variant="ghost" size="sm" className="h-8 w-full text-xs" onClick={() => { setSelectedStatus('all'); setSelectedVendor('all'); }}>
                                     Clear all filters
                                 </Button>
                             </div>
@@ -361,29 +328,18 @@ export default function AssetIndex({ assets }: { assets: any[] }) {
                 {selectedStatus !== 'all' && (
                     <span className="inline-flex items-center gap-1 rounded-md border border-green-100 bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
                         Status: {selectedStatus}
-                        <button
-                            onClick={() => setSelectedStatus('all')}
-                            className="ml-0.5"
-                        >
-                            <X className="h-3 w-3" />
-                        </button>
+                        <button onClick={() => setSelectedStatus('all')} className="ml-0.5"><X className="h-3 w-3" /></button>
                     </span>
                 )}
                 {selectedVendor !== 'all' && (
                     <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
                         Vendor: {selectedVendor}
-                        <button
-                            onClick={() => setSelectedVendor('all')}
-                            className="ml-0.5"
-                        >
-                            <X className="h-3 w-3" />
-                        </button>
+                        <button onClick={() => setSelectedVendor('all')} className="ml-0.5"><X className="h-3 w-3" /></button>
                     </span>
                 )}
                 {activeFilterCount > 0 && (
                     <span className="ml-1 text-xs text-muted-foreground">
-                        {filteredAssets.length} of {(assets || []).length}{' '}
-                        assets
+                        {filteredAssets.length} of {(assets || []).length} assets
                     </span>
                 )}
                 </div>

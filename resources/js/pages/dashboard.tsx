@@ -346,10 +346,10 @@ export default function Dashboard({
                                                 </td>
                                                 <td className="py-3 pr-2 text-right">
                                                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${item.days_late > 14
-                                                            ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
-                                                            : item.days_late > 7
-                                                                ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                                                        ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
+                                                        : item.days_late > 7
+                                                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
                                                         }`}>
                                                         {item.days_late}d late
                                                     </span>
@@ -427,10 +427,10 @@ export default function Dashboard({
                                                 </td>
                                                 <td className="py-3 pr-2 text-right">
                                                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${item.days_remaining <= 7
-                                                            ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
-                                                            : item.days_remaining <= 30
-                                                                ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                                                                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                                                        ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'
+                                                        : item.days_remaining <= 30
+                                                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                                                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
                                                         }`}>
                                                         {item.days_remaining}d left
                                                     </span>
@@ -455,40 +455,7 @@ export default function Dashboard({
                     </CardContent>
                 </Card>
 
-                {/* Site managed with Live Weather */}
-                <Card className="border-t-4 border-t-blue-500 bg-card/45 shadow-sm backdrop-blur-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-blue-600 dark:text-blue-400 flex items-center">
-                            <Cloud className="mr-2 h-5 w-5 text-blue-500" /> Weather Status
-                        </CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Current site weather conditions</p>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {stats.sitesWithStats && stats.sitesWithStats.length > 0 ? (
-                                stats.sitesWithStats.map((site: any) => (
-                                    <div key={site.id} className="flex items-center justify-between p-3 border border-border/80 bg-muted/20 rounded-xl hover:bg-muted/30 transition-colors">
-                                        <div className="space-y-1">
-                                            <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{site.name}</p>
-                                            <p className="text-[10px] font-mono text-muted-foreground uppercase">{site.code} • {site.assets_count} Assets</p>
-                                        </div>
-                                        <div className="flex items-center space-x-3 bg-muted/40 p-2 rounded-lg">
-                                            <WeatherIcon condition={site.weather.condition} />
-                                            <div className="text-right">
-                                                <p className="text-sm font-bold">{site.weather.temp}</p>
-                                                <p className="text-[9px] text-muted-foreground">{site.weather.condition}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="col-span-2 py-8 text-center text-muted-foreground text-xs">
-                                    No registered sites found.
-                                </div>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
+
             </div>
 
             {/* Recent Activities Section (All Users + DateTime + Location) */}
