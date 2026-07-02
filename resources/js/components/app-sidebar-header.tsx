@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { SystemMonitor } from '@/components/system-monitor';
 import { NotificationBell } from '@/components/notification-bell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -123,9 +122,8 @@ export function AppSidebarHeader({
                         </div>
                     )}
 
-                    {/* System Monitor & Core Utilities */}
+                    {/* Core Utilities */}
                     <div className="flex items-center gap-3 border-l border-border/60 pl-4">
-                        <SystemMonitor />
 
                         {/* Dark / Light mode toggle pill */}
                         <button

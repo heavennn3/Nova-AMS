@@ -83,7 +83,7 @@ export function DataTable<TData, TValue>({
         if (path.includes('/settings/suppliers')) return 'suppliers';
         if (path.includes('/settings/manufacturers')) return 'manufacturers';
         if (path.includes('/users')) return 'users';
-        if (path.includes('/assets') || path.includes('/asset-inventory') || path.includes('/live-tracking') || path.includes('/lifecycle')) return 'assets';
+        if (path.includes('/assets') || path.includes('/asset-inventory') || path.includes('/live-tracking')) return 'assets';
         if (path.includes('/work-orders')) return 'work-orders';
         if (path.includes('/spare-parts') || path.includes('/maintenance/parts')) return 'spare-parts';
         if (path.includes('/licenses')) return 'licenses';

@@ -1,5 +1,5 @@
-import { Head, Link, usePage, useForm } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { Head, Link, usePage, useForm, router } from '@inertiajs/react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     Activity,
     Package,
@@ -21,10 +21,15 @@ import {
     ChevronUp,
     CheckCircle,
     XCircle,
+    Eye,
+    Wrench,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { DataTableActions } from '@/components/data-table/data-table-actions';
 import {
     Select,
     SelectContent,
@@ -39,10 +44,10 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 interface Assignment {
@@ -110,20 +115,47 @@ export default function LiveTrackingAdmin({
 
     const [selectedAssignments, setSelectedAssignments] = useState<number[]>([]);
     const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
-    const [expandedSites, setExpandedSites] = useState<Set<number>>(new Set());
+    const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
     const [localSiteFilter, setLocalSiteFilter] = useState(filters.site_id);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const reminderForm = useForm({
         assignment_ids: [] as number[],
     });
 
-    // Auto-expand all sites on load for admin
-    useEffect(() => {
-        if (is_admin && assignmentsBySite.length > 0) {
-            const allSiteIds = new Set(assignmentsBySite.map(sa => sa.site.id));
-            setExpandedSites(allSiteIds);
+    // Flatten all assignments for data table
+    const allAssignments = useMemo(() => {
+        let assignments = assignmentsBySite.flatMap(sa =>
+            sa.assignments.map(a => ({
+                ...a,
+                site_code: sa.site.code,
+            }))
+        );
+
+        // Apply site filter
+        if (localSiteFilter !== 'all') {
+            assignments = assignments.filter(a => a.site_id === parseInt(localSiteFilter));
         }
-    }, [assignmentsBySite, is_admin]);
+
+        // Apply search filter
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            assignments = assignments.filter(a =>
+                a.product_name.toLowerCase().includes(term) ||
+                a.asset_id.toLowerCase().includes(term) ||
+                a.user_name.toLowerCase().includes(term) ||
+                a.user_email.toLowerCase().includes(term) ||
+                a.site.toLowerCase().includes(term)
+            );
+        }
+
+        return assignments;
+    }, [assignmentsBySite, localSiteFilter, searchTerm]);
+
+    // Calculate overdue stats
+    const overdueAssignments = allAssignments.filter(a => a.is_overdue);
+    const totalOverdue = overdueAssignments.length;
 
     // Handle filter changes
     const handleFilterChange = (siteId: string) => {
@@ -137,17 +169,6 @@ export default function LiveTrackingAdmin({
         window.location.href = `${window.location.pathname}?${params.toString()}`;
     };
 
-    // Toggle site expansion
-    const toggleSite = (siteId: number) => {
-        const newExpanded = new Set(expandedSites);
-        if (newExpanded.has(siteId)) {
-            newExpanded.delete(siteId);
-        } else {
-            newExpanded.add(siteId);
-        }
-        setExpandedSites(newExpanded);
-    };
-
     // Toggle assignment selection
     const toggleAssignment = (assignmentId: number) => {
         const newSelected = selectedAssignments.includes(assignmentId)
@@ -156,16 +177,10 @@ export default function LiveTrackingAdmin({
         setSelectedAssignments(newSelected);
     };
 
-    // Toggle all assignments in a site
-    const toggleSiteAssignments = (siteAssignments: Assignment[]) => {
-        const siteIds = siteAssignments.map(a => a.id);
-        const allSelected = siteIds.every(id => selectedAssignments.includes(id));
-
-        if (allSelected) {
-            setSelectedAssignments(selectedAssignments.filter(id => !siteIds.includes(id)));
-        } else {
-            setSelectedAssignments([...new Set([...selectedAssignments, ...siteIds])]);
-        }
+    // View assignment details
+    const viewDetails = (assignment: Assignment) => {
+        setSelectedAssignment(assignment);
+        setIsDetailsDialogOpen(true);
     };
 
     // Send single reminder
@@ -217,25 +232,198 @@ export default function LiveTrackingAdmin({
         });
     };
 
-    // Calculate overdue stats
-    const overdueAssignments = assignmentsBySite.flatMap(sa =>
-        sa.assignments.filter(a => a.is_overdue)
-    );
-    const totalOverdue = overdueAssignments.length;
+    // Data table columns
+    const columns = useMemo(() => [
+        {
+            accessorKey: 'id',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="ID" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="font-mono text-xs text-primary hover:underline"
+                        onClick={() => viewDetails(assignment)}
+                    >
+                        <Hash className="h-3 w-3 mr-1" />
+                        #{assignment.id}
+                    </Button>
+                );
+            },
+        },
+        {
+            accessorKey: 'asset_info',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Asset Information" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <div className="space-y-1">
+                        <div className="font-semibold text-sm">{assignment.product_name}</div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
+                                {assignment.asset_id}
+                            </span>
+                            {assignment.category && (
+                                <span>• {assignment.category}</span>
+                            )}
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'user_info',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Assigned To" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm">
+                            <User className="h-3 w-3 text-muted-foreground" />
+                            {assignment.user_name}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            {assignment.user_email}
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'site_info',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Location" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm">
+                            <Building2 className="h-3 w-3 text-muted-foreground" />
+                            {assignment.site}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            {assignment.location}
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'assigned_at',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Assigned Date" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <div className="text-sm">
+                        {new Date(assignment.assigned_at).toLocaleDateString()}
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'expected_return_date',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Expected Return" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                const expectedDate = new Date(assignment.expected_return_date);
+                const isOverdue = assignment.is_overdue;
+
+                return (
+                    <div className="space-y-1">
+                        <div className="text-sm">
+                            {expectedDate.toLocaleDateString()}
+                        </div>
+                        {isOverdue ? (
+                            <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                {assignment.days_overdue}d overdue
+                            </Badge>
+                        ) : (
+                            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                On track
+                            </Badge>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'duration',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Duration" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <div className="text-sm text-muted-foreground">
+                        {assignment.duration}
+                    </div>
+                );
+            },
+        },
+        {
+            id: 'actions',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Actions" />
+            ),
+            cell: ({ row }: any) => {
+                const assignment = row.original;
+                return (
+                    <DataTableActions
+                        items={[
+                            {
+                                label: 'View Details',
+                                icon: Eye,
+                                onClick: () => viewDetails(assignment),
+                                show: true,
+                            },
+                            {
+                                label: 'Send Reminder',
+                                icon: Bell,
+                                onClick: () => sendSingleReminder(assignment),
+                                show: true,
+                            },
+                            {
+                                label: 'Check In',
+                                icon: CheckCircle2,
+                                onClick: () => checkInAsset(assignment),
+                                show: true,
+                            },
+                        ]}
+                    />
+                );
+            },
+        },
+    ], []);
 
     return (
         <div className="w-full space-y-6 p-8">
-            <Head title="Asset Live Tracking - Admin Dashboard" />
+            <Head title="Asset Withdrawal Tracking" />
 
             {/* Header */}
             <div className="flex items-start justify-between border-b pb-4">
                 <div>
                     <h1 className="flex items-center text-3xl font-bold tracking-tight text-foreground">
                         <Activity className="mr-3 h-8 w-8 text-primary" />
-                        Asset Live Tracking
+                        Asset Withdrawal
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Real-time asset withdrawal tracking across all sites
+                        Real-time asset withdrawal tracking and overdue management
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -320,11 +508,11 @@ export default function LiveTrackingAdmin({
             {/* Filters and Bulk Actions */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">Filter by Site:</span>
+                                <span className="text-sm font-medium">Filter:</span>
                                 <Select value={localSiteFilter} onValueChange={handleFilterChange}>
                                     <SelectTrigger className="w-[200px]">
                                         <SelectValue placeholder="All Sites" />
@@ -338,6 +526,15 @@ export default function LiveTrackingAdmin({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            </div>
+                            <div className="relative">
+                                <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search assets, users..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10 w-[250px]"
+                                />
                             </div>
                         </div>
 
@@ -356,150 +553,205 @@ export default function LiveTrackingAdmin({
                 </CardContent>
             </Card>
 
-            {/* Site-Grouped Assignments */}
-            <div className="space-y-4">
-                {assignmentsBySite.map((siteAssignment) => {
-                    const isExpanded = expandedSites.has(siteAssignment.site.id);
-                    const allSiteSelected = siteAssignment.assignments.length > 0 &&
-                        siteAssignment.assignments.every(a => selectedAssignments.includes(a.id));
+            {/* Data Table */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Package className="h-5 w-5 text-primary" />
+                            Active Withdrawals
+                        </div>
+                        <div className="text-sm font-normal text-muted-foreground">
+                            {allAssignments.length} assignments
+                        </div>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <DataTable
+                        columns={columns}
+                        data={allAssignments}
+                        search={searchTerm}
+                        onSearchChange={setSearchTerm}
+                    />
+                </CardContent>
+            </Card>
 
-                    return (
-                        <Card key={siteAssignment.site.id} className={siteAssignment.overdue_count > 0 ? 'border-red-200' : ''}>
-                            <CardHeader
-                                className="cursor-pointer hover:bg-muted/50 transition-colors"
-                                onClick={() => toggleSite(siteAssignment.site.id)}
-                            >
-                                <CardTitle className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Building2 className="h-5 w-5 text-primary" />
-                                        <span>{siteAssignment.site.name}</span>
-                                        <Badge variant="secondary">{siteAssignment.site.code}</Badge>
-                                        <Badge>{siteAssignment.total_count} Active</Badge>
-                                        {siteAssignment.overdue_count > 0 && (
-                                            <Badge className="bg-red-100 text-red-700 border-red-200">
-                                                {siteAssignment.overdue_count} Overdue
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Checkbox
-                                            checked={allSiteSelected}
-                                            onChange={(e) => {
-                                                e.stopPropagation();
-                                                toggleSiteAssignments(siteAssignment.assignments);
-                                            }}
-                                        />
-                                        {isExpanded ? (
-                                            <ChevronUp className="h-5 w-5" />
-                                        ) : (
-                                            <ChevronDown className="h-5 w-5" />
-                                        )}
-                                    </div>
-                                </CardTitle>
-                            </CardHeader>
-
-                            {isExpanded && (
-                                <CardContent className="p-6">
-                                    {siteAssignment.assignments.length === 0 ? (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            No active assignments for this site
+            {/* Assignment Details Dialog */}
+            <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Withdrawal Details</DialogTitle>
+                        <DialogDescription>
+                            Detailed information about this asset withdrawal
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedAssignment && (
+                        <div className="space-y-6">
+                            {/* Asset Information */}
+                            <div className="space-y-3">
+                                <h4 className="font-semibold flex items-center gap-2">
+                                    <Package className="h-4 w-4 text-primary" />
+                                    Asset Information
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <Label className="text-muted-foreground">Asset ID</Label>
+                                        <div className="font-mono bg-muted px-2 py-1 rounded mt-1">
+                                            {selectedAssignment.asset_id}
                                         </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {siteAssignment.assignments.map((assignment) => {
-                                                const isSelected = selectedAssignments.includes(assignment.id);
-                                                const isOverdue = assignment.is_overdue;
-
-                                                return (
-                                                    <div
-                                                        key={assignment.id}
-                                                        className={`p-4 border rounded-lg hover:bg-muted/10 transition-colors ${
-                                                            isOverdue ? 'border-red-200 bg-red-50/30' : 'border-border'
-                                                        }`}
-                                                    >
-                                                        <div className="flex items-start justify-between">
-                                                            <div className="flex items-start gap-4">
-                                                                <Checkbox
-                                                                    checked={isSelected}
-                                                                    onChange={() => toggleAssignment(assignment.id)}
-                                                                    className="mt-1"
-                                                                />
-                                                                <div className="flex-1">
-                                                                    <div className="flex items-start gap-3">
-                                                                        <div>
-                                                                            <div className="flex items-center gap-2 mb-1">
-                                                                                <span className="font-semibold text-sm">
-                                                                                    {assignment.product_name}
-                                                                                </span>
-                                                                                {isOverdue && (
-                                                                                    <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">
-                                                                                        <AlertTriangle className="h-3 w-3 mr-1" />
-                                                                                        {assignment.days_overdue}d Overdue
-                                                                                    </Badge>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="text-xs text-muted-foreground space-y-1">
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <Hash className="h-3 w-3" />
-                                                                                    {assignment.asset_id}
-                                                                                </div>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <User className="h-3 w-3" />
-                                                                                    {assignment.user_name}
-                                                                                </div>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <Mail className="h-3 w-3" />
-                                                                                    {assignment.user_email}
-                                                                                </div>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <MapPin className="h-3 w-3" />
-                                                                                    {assignment.location}
-                                                                                </div>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <Clock className="h-3 w-3" />
-                                                                                    Assigned: {new Date(assignment.assigned_at).toLocaleDateString()}
-                                                                                </div>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <Calendar className="h-3 w-3" />
-                                                                                    Expected: {new Date(assignment.expected_return_date).toLocaleDateString()}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    onClick={() => sendSingleReminder(assignment)}
-                                                                    className="h-8"
-                                                                >
-                                                                    <Bell className="h-3 w-3 mr-1" />
-                                                                    Remind
-                                                                </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    onClick={() => checkInAsset(assignment)}
-                                                                    className="h-8"
-                                                                >
-                                                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                                                    Check In
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Product Name</Label>
+                                        <div className="font-semibold mt-1">
+                                            {selectedAssignment.product_name}
                                         </div>
-                                    )}
-                                </CardContent>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Category</Label>
+                                        <div className="mt-1">
+                                            {selectedAssignment.category || 'N/A'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Withdrawal ID</Label>
+                                        <div className="font-mono text-xs mt-1">
+                                            #{selectedAssignment.id}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* User Information */}
+                            <div className="space-y-3">
+                                <h4 className="font-semibold flex items-center gap-2">
+                                    <User className="h-4 w-4 text-primary" />
+                                    Assigned User
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <Label className="text-muted-foreground">Name</Label>
+                                        <div className="font-semibold mt-1">
+                                            {selectedAssignment.user_name}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Email</Label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Mail className="h-3 w-3 text-muted-foreground" />
+                                            {selectedAssignment.user_email}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Location Information */}
+                            <div className="space-y-3">
+                                <h4 className="font-semibold flex items-center gap-2">
+                                    <MapPin className="h-4 w-4 text-primary" />
+                                    Location Information
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <Label className="text-muted-foreground">Site</Label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Building2 className="h-3 w-3 text-muted-foreground" />
+                                            {selectedAssignment.site}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Location</Label>
+                                        <div className="mt-1">
+                                            {selectedAssignment.location}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Timeline Information */}
+                            <div className="space-y-3">
+                                <h4 className="font-semibold flex items-center gap-2">
+                                    <Calendar className="h-4 w-4 text-primary" />
+                                    Timeline Information
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <Label className="text-muted-foreground">Assigned Date</Label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Clock className="h-3 w-3 text-muted-foreground" />
+                                            {new Date(selectedAssignment.assigned_at).toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Expected Return</Label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                                            {new Date(selectedAssignment.expected_return_date).toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Duration</Label>
+                                        <div className="font-semibold mt-1">
+                                            {selectedAssignment.duration}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-muted-foreground">Status</Label>
+                                        <div className="mt-1">
+                                            {selectedAssignment.is_overdue ? (
+                                                <Badge className="bg-red-100 text-red-700 border-red-200">
+                                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                                    {selectedAssignment.days_overdue} days overdue
+                                                </Badge>
+                                            ) : (
+                                                <Badge className="bg-green-100 text-green-700 border-green-200">
+                                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                    Active - On track
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Remarks */}
+                            {selectedAssignment.remarks && (
+                                <div className="space-y-3">
+                                    <h4 className="font-semibold flex items-center gap-2">
+                                        <Wrench className="h-4 w-4 text-primary" />
+                                        Remarks
+                                    </h4>
+                                    <div className="text-sm bg-muted p-3 rounded-lg">
+                                        {selectedAssignment.remarks}
+                                    </div>
+                                </div>
                             )}
-                        </Card>
-                    );
-                })}
-            </div>
+                        </div>
+                    )}
+                    <DialogFooter className="mt-6">
+                        <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
+                            Close
+                        </Button>
+                        {selectedAssignment && (
+                            <>
+                                <Button variant="outline" onClick={() => {
+                                    setIsDetailsDialogOpen(false);
+                                    sendSingleReminder(selectedAssignment);
+                                }}>
+                                    <Send className="mr-2 h-4 w-4" />
+                                    Send Reminder
+                                </Button>
+                                <Button onClick={() => {
+                                    setIsDetailsDialogOpen(false);
+                                    checkInAsset(selectedAssignment);
+                                }}>
+                                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                                    Check In Asset
+                                </Button>
+                            </>
+                        )}
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Bulk Reminder Confirmation Dialog */}
             <Dialog open={isReminderDialogOpen} onOpenChange={setIsReminderDialogOpen}>
@@ -535,25 +787,7 @@ export default function LiveTrackingAdmin({
                 </DialogContent>
             </Dialog>
 
-            {/* Instructions Card */}
-            <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/30">
-                <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                        <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5" />
-                        <div className="flex-1">
-                            <h4 className="font-semibold text-sm mb-2">Admin Features</h4>
-                            <ul className="text-sm text-muted-foreground space-y-1">
-                                <li>• View all asset withdrawals grouped by site</li>
-                                <li>• Send individual reminder emails to users</li>
-                                <li>• Send bulk reminders to multiple users</li>
-                                <li>• Check in assets directly from this view</li>
-                                <li>• Filter by site to focus on specific locations</li>
-                                <li>• Select multiple assignments for bulk operations</li>
-                            </ul>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+
         </div>
     );
 }

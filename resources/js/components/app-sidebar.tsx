@@ -58,11 +58,22 @@ const navSections: NavSection[] = [
     {
         title: 'ASSET MANAGEMENT',
         items: [
+
             {
-                title: 'Asset Inventory',
-                href: assetInventory(),
+                title: 'Inventory',
+                href: '#',
                 icon: Package,
                 module: 'Asset Inventory',
+                items: [
+                    {
+                        title: 'Assets',
+                        href: assetInventory(),
+                    },
+                    {
+                        title: 'Loan',
+                        href: '#',
+                    },
+                ],
             },
             {
                 title: 'Asset Withdrawal',
@@ -89,31 +100,6 @@ const navSections: NavSection[] = [
                 ],
             },
             {
-                title: 'Asset Lifecycle',
-                href: '#',
-                icon: Activity,
-                module: 'Operations & Maintenance',
-                items: [
-                    {
-                        title: 'Status Tracking',
-                        href: '/lifecycle/status',
-                    },
-                    {
-                        title: 'Warranty',
-                        href: '/lifecycle/warranty',
-                    },
-                    {
-                        title: 'Procurement Tracking',
-                        href: '/lifecycle/procurement',
-                    },
-                    {
-                        title: 'End of Life',
-                        href: '/lifecycle/end-of-life',
-                    },
-                    { title: 'Audit Trail', href: '/lifecycle/audit' },
-                ],
-            },
-            {
                 title: 'Software Licenses',
                 href: '/licenses',
                 icon: FileText,
@@ -128,7 +114,7 @@ const navSections: NavSection[] = [
     },
     {
         title: 'OPERATIONS',
-        
+
         items: [
             {
                 title: ' Requests',
@@ -213,7 +199,7 @@ const navSections: NavSection[] = [
                 ],
             },
 
-           
+
         ],
     },
 
@@ -227,7 +213,7 @@ const navSections: NavSection[] = [
                 module: 'Master Data',
             },
             { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
-    
+
             {
                 title: 'Requests',
                 href: '/requests',
@@ -298,7 +284,7 @@ const navSections: NavSection[] = [
                     { title: 'Locations', href: '/settings/locations' },
                 ],
             },
-            
+
         ],
     },
 ];
