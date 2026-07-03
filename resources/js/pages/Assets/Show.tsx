@@ -14,24 +14,15 @@ import {
     Landmark,
     FileText,
     ShoppingBag,
-    ShieldCheck,
-    DollarSign,
-    QrCode,
     Clock,
-    RefreshCw,
-    AlertTriangle,
-    Info,
-    HeartPulse,
     User,
+    AlertTriangle,
     CheckCircle2,
-    X,
     FileSpreadsheet,
-    HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
     Dialog,
     DialogContent,
@@ -77,74 +68,9 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
         (a: any) => a.status === 'active'
     );
 
-    // Calculate dates & EOL progress
-    const fields = asset; // assets now have their fields at the top level (merged in controller)
-    const purchaseDateStr = fields.purchase_date || null;
-    const purchaseDate = purchaseDateStr ? new Date(purchaseDateStr) : null;
-    const eolDate = fields.eol_date || null;
-    const currentDate = new Date('2026-06-15T09:01:36+08:00');
-
-    let eolTotalMonths = 36;
-    let eolElapsedMonths = 0;
-    let eolPercentage = 100;
-
-    if (purchaseDate && eolDate) {
-        eolTotalMonths =
-            (eolDate.getFullYear() - purchaseDate.getFullYear()) * 12 +
-            (eolDate.getMonth() - purchaseDate.getMonth());
-        eolElapsedMonths =
-            (currentDate.getFullYear() - purchaseDate.getFullYear()) * 12 +
-            (currentDate.getMonth() - purchaseDate.getMonth());
-        eolElapsedMonths = Math.max(0, Math.min(eolTotalMonths, eolElapsedMonths));
-        const remaining = eolTotalMonths - eolElapsedMonths;
-        eolPercentage = eolTotalMonths > 0 ? Math.round((remaining / eolTotalMonths) * 100) : 0;
-    } else if (fields.warranty_months) {
-        eolTotalMonths = parseInt(fields.warranty_months) || 36;
-        if (purchaseDate) {
-            eolElapsedMonths =
-                (currentDate.getFullYear() - purchaseDate.getFullYear()) * 12 +
-                (currentDate.getMonth() - purchaseDate.getMonth());
-            eolElapsedMonths = Math.max(0, Math.min(eolTotalMonths, eolElapsedMonths));
-            const remaining = eolTotalMonths - eolElapsedMonths;
-            eolPercentage = eolTotalMonths > 0 ? Math.round((remaining / eolTotalMonths) * 100) : 0;
-        }
-    }
-
-    // Warranty calculation
-    let warrantyTotalMonths = parseInt(fields.warranty_months) || 36;
-    let warrantyElapsedMonths = 0;
-    let warrantyPercentage = 100;
-    let warrantyExpiresDateStr = 'N/A';
-
-    if (purchaseDate) {
-        const expiresDate = new Date(purchaseDate);
-        expiresDate.setMonth(expiresDate.getMonth() + warrantyTotalMonths);
-        warrantyExpiresDateStr = expiresDate.toISOString().split('T')[0];
-
-        warrantyElapsedMonths =
-            (currentDate.getFullYear() - purchaseDate.getFullYear()) * 12 +
-            (currentDate.getMonth() - purchaseDate.getMonth());
-        warrantyElapsedMonths = Math.max(0, Math.min(warrantyTotalMonths, warrantyElapsedMonths));
-        const remaining = warrantyTotalMonths - warrantyElapsedMonths;
-        warrantyPercentage = warrantyTotalMonths > 0 ? Math.round((remaining / warrantyTotalMonths) * 100) : 0;
-    }
-
-    // Cost calculations
-    const purchaseCost = parseFloat(fields.purchase_cost) || 0;
-    const maintenanceCost = 0.00; // Mocked / default
-    const totalCost = purchaseCost + maintenanceCost;
-
     // Last Audit & Next Audit mock calculations
     const lastAuditDateStr = asset.updated_at ? asset.updated_at.split('T')[0] : 'N/A';
-    const nextAuditDateStr = purchaseDateStr ? purchaseDateStr.split('T')[0] : 'N/A';
-
-    // Formatter helpers
-    const formatCurrency = (val: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(val);
-    };
+    const fields = asset;
 
     const handleCheckoutSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -293,69 +219,8 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                                     ))}
                                 </div>
 
-                                {/* Dynamic indicators progress bars */}
-                                <div className="space-y-6 flex flex-col justify-center bg-slate-900/10 dark:bg-slate-900/35 border border-border/30 rounded-xl p-6">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-xs">
-                                            <span className="text-muted-foreground font-medium flex items-center">
-                                                Device EOL <span className="ml-1.5 text-foreground font-semibold">({eolElapsedMonths}/{eolTotalMonths} months)</span>
-                                            </span>
-                                            <span className="font-bold text-primary">{eolPercentage}%</span>
-                                        </div>
-                                        <Progress value={eolPercentage} className="h-2 bg-slate-200 dark:bg-slate-800" />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-xs">
-                                            <span className="text-muted-foreground font-medium flex items-center">
-                                                Warranty Expires <span className="ml-1.5 text-foreground font-semibold">{warrantyExpiresDateStr}</span>
-                                            </span>
-                                            <span className="font-bold text-cyan-500">{warrantyPercentage}%</span>
-                                        </div>
-                                        <Progress value={warrantyPercentage} className="h-2 bg-slate-200 dark:bg-slate-800" />
-                                    </div>
-                                </div>
                             </div>
 
-                            {/* Middle section: Cost allocation & stats */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-                                {/* Cost breakdown list */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-bold tracking-wide text-foreground uppercase border-b pb-2 mb-3">Cost Breakdown</h3>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between text-sm py-1 border-b border-border/10">
-                                            <span className="text-muted-foreground">Purchase Cost</span>
-                                            <span className="font-semibold text-foreground">{formatCurrency(purchaseCost)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm py-1 border-b border-border/10">
-                                            <span className="text-muted-foreground">Maintenances</span>
-                                            <span className="font-semibold text-foreground">{formatCurrency(0.00)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm py-1 border-b border-border/10">
-                                            <span className="text-muted-foreground">Accessories</span>
-                                            <span className="font-semibold text-foreground">{formatCurrency(0.00)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm py-1 border-b border-border/10">
-                                            <span className="text-muted-foreground">Licenses</span>
-                                            <span className="font-semibold text-foreground">{formatCurrency(0.00)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm py-1 border-b border-border/10">
-                                            <span className="text-muted-foreground">Components</span>
-                                            <span className="font-semibold text-foreground">{formatCurrency(0.00)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm py-1 border-b border-border/10">
-                                            <span className="text-muted-foreground">Assets</span>
-                                            <span className="font-semibold text-foreground">{formatCurrency(0.00)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm py-2 font-bold text-foreground bg-primary/5 px-2 rounded mt-2">
-                                            <span>Total Cost</span>
-                                            <span className="text-primary">{formatCurrency(totalCost)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Metadata / stats cards counters */}
                                 <div className="space-y-4">
                                     <h3 className="text-sm font-bold tracking-wide text-foreground uppercase border-b pb-2 mb-3">Operational Summary</h3>
 
@@ -380,7 +245,6 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
                             {/* Bottom row: QR Code container */}
                             <div className="flex flex-col items-center justify-center pt-8 border-t border-border/40">
@@ -513,13 +377,6 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-3">
-                                    <DollarSign className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Unit Cost</span>
-                                        <span className="font-bold text-foreground">{formatCurrency(purchaseCost)}</span>
-                                    </div>
-                                </div>
 
                                 <div className="flex items-start gap-3">
                                     <FileText className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
@@ -595,7 +452,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                                     <div className="space-y-0.5">
                                         <span className="text-xs text-muted-foreground block">Purchased Date</span>
                                         <span className="text-foreground font-semibold">
-                                            {purchaseDateStr ? `${purchaseDateStr.split('T')[0]} - 4 months ago` : 'N/A'}
+                                            {'N/A'}
                                         </span>
                                     </div>
                                 </div>

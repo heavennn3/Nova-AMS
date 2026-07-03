@@ -10,8 +10,7 @@ class LicenseRenewal extends Model
         'license_id',
         'previous_expiration',
         'new_expiration',
-        'renewal_cost',
-        'renewal_type',
+        'renewal_date',
         'notes',
         'renewed_by_user_id',
     ];
@@ -19,7 +18,7 @@ class LicenseRenewal extends Model
     protected $casts = [
         'previous_expiration' => 'date',
         'new_expiration' => 'date',
-        'renewal_cost' => 'decimal:2',
+        'renewal_date' => 'date',
     ];
 
     public function license()

@@ -16,7 +16,6 @@ class SparePart extends Model
         'category',
         'stock_level',
         'minimum_stock_level',
-        'unit_cost',
         'location',
         'site_id',
         'status',
@@ -26,7 +25,6 @@ class SparePart extends Model
     ];
 
     protected $casts = [
-        'unit_cost' => 'decimal:2',
         'specifications' => 'array',
         'compatibility' => 'array',
         'asset_type_id' => 'integer',
@@ -57,10 +55,6 @@ class SparePart extends Model
         return 'available';
     }
 
-    public function getTotalValueAttribute()
-    {
-        return $this->stock_level * $this->unit_cost;
-    }
 
     /**
      * The "booted" method of the model.

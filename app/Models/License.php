@@ -20,7 +20,6 @@ class License extends Model
         'total_seats',
         'used_seats',
         'available_seats',
-        'purchase_cost',
         'purchase_date',
         'expiration_date',
         'support_expiry',
@@ -48,7 +47,6 @@ class License extends Model
         'total_seats' => 'integer',
         'used_seats' => 'integer',
         'available_seats' => 'integer',
-        'purchase_cost' => 'decimal:2',
         'auto_renew' => 'boolean',
         'notification_days' => 'integer',
     ];

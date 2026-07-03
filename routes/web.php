@@ -239,32 +239,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/vendors/po', [\App\Http\Controllers\OperationsController::class, 'po']);
         Route::get('/vendors/portal', [\App\Http\Controllers\OperationsController::class, 'portal']);
 
-        // Asset Lifecycle Module
-        Route::get('/lifecycle/status', [\App\Http\Controllers\AssetLifecycleController::class, 'status']);
-        Route::get('/lifecycle/warranty', [\App\Http\Controllers\AssetLifecycleController::class, 'warranty']);
-        Route::get('/lifecycle/health', [\App\Http\Controllers\AssetLifecycleController::class, 'health']);
-        Route::get('/lifecycle/audit', [\App\Http\Controllers\AssetLifecycleController::class, 'audit']);
-        Route::get('/lifecycle/procurement', [\App\Http\Controllers\AssetLifecycleController::class, 'procurement']);
-        Route::get('/lifecycle/end-of-life', [\App\Http\Controllers\AssetLifecycleController::class, 'endOfLife']);
-    });
-
-    // Analytics Module
-    Route::middleware(['permission:module.analytics'])->group(function () {
-        Route::get('/analytics/utilization', [\App\Http\Controllers\AnalyticsController::class, 'utilization']);
-        Route::get('/analytics/costs', [\App\Http\Controllers\AnalyticsController::class, 'costs']);
-        Route::get('/analytics/availability', [\App\Http\Controllers\AnalyticsController::class, 'availability']);
-        Route::get('/analytics/compliance', [\App\Http\Controllers\AnalyticsController::class, 'compliance']);
-        Route::get('/analytics/predictive', [\App\Http\Controllers\AnalyticsController::class, 'predictive']);
-        Route::get('/analytics/heatmaps', [\App\Http\Controllers\AnalyticsController::class, 'heatmaps']);
-    });
-
-    // Finance Module
-    Route::middleware(['permission:module.finance'])->group(function () {
-        Route::get('/finance/valuation', [\App\Http\Controllers\FinanceController::class, 'valuation']);
-        Route::get('/finance/budgets', [\App\Http\Controllers\FinanceController::class, 'budgets']);
-        Route::get('/finance/costs', [\App\Http\Controllers\FinanceController::class, 'costs']);
-        Route::get('/finance/requisitions', [\App\Http\Controllers\FinanceController::class, 'requisitions']);
-        Route::get('/finance/insurance', [\App\Http\Controllers\FinanceController::class, 'insurance']);
     });
 
     // Documents Module
