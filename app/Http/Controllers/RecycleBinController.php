@@ -43,7 +43,9 @@ class RecycleBinController extends Controller
             } elseif ($type === 'vendors') {
                 $query->where('name', 'like', "%{$search}%");
             } elseif ($type === 'assets') {
-                $query->where('asset_id', 'like', "%{$search}%")->orWhere('product_name', 'like', "%{$search}%");
+                $query->whereHas('fieldValues', function ($q) use ($search) {
+                    $q->where('value', 'like', "%{$search}%");
+                });
             } else {
                 $query->where('name', 'like', "%{$search}%");
             }

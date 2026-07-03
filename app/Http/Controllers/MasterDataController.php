@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asset;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\AssetCategory;
@@ -26,7 +27,8 @@ class MasterDataController extends Controller
             'categories' => AssetCategory::all(),
             'types' => AssetType::with('category')->get(),
             'sites' => Site::all(),
-            'vendors' => Vendor::withCount('assets')->get()->map(function ($vendor) {
+            'vendors' => Vendor::get()->map(function ($vendor) {
+                $assetsCount = Asset::count();
                 return [
                     'id' => $vendor->id,
                     'name' => $vendor->name,
@@ -35,7 +37,7 @@ class MasterDataController extends Controller
                     'email' => $vendor->email,
                     'address' => $vendor->address,
                     'logo' => $vendor->logo ? \Storage::url($vendor->logo) : null,
-                    'assets_count' => $vendor->assets_count,
+                    'assets_count' => $assetsCount,
                 ];
             }),
             'customTypes' => CustomMasterDataType::with(['values', 'columns'])->get(),

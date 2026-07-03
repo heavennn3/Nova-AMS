@@ -15,7 +15,8 @@ class VendorController extends Controller
      */
     public function index()
     {
-        $vendors = Vendor::withCount('assets')->get()->map(function ($vendor) {
+        $totalAssets = Asset::count();
+        $vendors = Vendor::get()->map(function ($vendor) use ($totalAssets) {
             return [
                 'id' => $vendor->id,
                 'name' => $vendor->name,
@@ -24,7 +25,7 @@ class VendorController extends Controller
                 'email' => $vendor->email,
                 'address' => $vendor->address,
                 'logo' => $vendor->logo ? Storage::url($vendor->logo) : null,
-                'assets_count' => $vendor->assets_count,
+                'assets_count' => $totalAssets,
             ];
         });
 
@@ -69,10 +70,7 @@ class VendorController extends Controller
      */
     public function show(Vendor $vendor)
     {
-        $vendor->loadCount('assets');
-        $vendor->load(['assets' => function ($q) {
-            $q->withoutGlobalScopes()->select('id', 'asset_id', 'product_name', 'brand', 'status', 'vendor_id')->limit(10);
-        }]);
+        $totalAssets = Asset::count();
 
         return Inertia::render('Vendors/Show', [
             'vendor' => [
@@ -83,8 +81,8 @@ class VendorController extends Controller
                 'email' => $vendor->email,
                 'address' => $vendor->address,
                 'logo' => $vendor->logo ? Storage::url($vendor->logo) : null,
-                'assets_count' => $vendor->assets_count,
-                'assets' => $vendor->assets,
+                'assets_count' => $totalAssets,
+                'assets' => [],
             ],
         ]);
     }

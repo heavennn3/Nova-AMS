@@ -85,7 +85,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
-        Route::get('/assets/export-mysql', [\App\Http\Controllers\AssetController::class, 'exportMySQL'])->name('assets.export-mysql');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
 
         // Asset Registration Workflows
@@ -105,7 +104,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // QR/Barcode Scanning routes
         Route::post('/api/assets/scan', [\App\Http\Controllers\AssetController::class, 'processScan']);
         Route::post('/api/assets/scan-bulk', [\App\Http\Controllers\AssetController::class, 'processBulkScan']);
-        Route::get('/api/assets/validate-scan/{scannedValue}', [\App\Http\Controllers\AssetController::class, 'validateScan']);
         Route::get('/api/assets/lookup/{scannedValue}', [\App\Http\Controllers\AssetController::class, 'lookupAsset']);
         
         // Software Licenses Module

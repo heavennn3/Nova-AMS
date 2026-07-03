@@ -52,7 +52,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
-export default function Show({ asset, users = [] }: { asset: any; users?: any[] }) {
+export default function Show({ asset, users = [], configurations = [] }: { asset: any; users?: any[]; configurations?: any[] }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
 
@@ -78,10 +78,11 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     );
 
     // Calculate dates & EOL progress
-    const purchaseDateStr = asset.purchase_date || asset.created_at;
+    const fields = asset; // assets now have their fields at the top level (merged in controller)
+    const purchaseDateStr = fields.purchase_date || null;
     const purchaseDate = purchaseDateStr ? new Date(purchaseDateStr) : null;
-    const eolDate = asset.eol_date ? new Date(asset.eol_date) : null;
-    const currentDate = new Date('2026-06-15T09:01:36+08:00'); // current mock/system time
+    const eolDate = fields.eol_date || null;
+    const currentDate = new Date('2026-06-15T09:01:36+08:00');
 
     let eolTotalMonths = 36;
     let eolElapsedMonths = 0;
@@ -97,8 +98,8 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
         eolElapsedMonths = Math.max(0, Math.min(eolTotalMonths, eolElapsedMonths));
         const remaining = eolTotalMonths - eolElapsedMonths;
         eolPercentage = eolTotalMonths > 0 ? Math.round((remaining / eolTotalMonths) * 100) : 0;
-    } else if (asset.warranty_months) {
-        eolTotalMonths = parseInt(asset.warranty_months) || 36;
+    } else if (fields.warranty_months) {
+        eolTotalMonths = parseInt(fields.warranty_months) || 36;
         if (purchaseDate) {
             eolElapsedMonths =
                 (currentDate.getFullYear() - purchaseDate.getFullYear()) * 12 +
@@ -110,7 +111,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     }
 
     // Warranty calculation
-    let warrantyTotalMonths = parseInt(asset.warranty_months) || 36;
+    let warrantyTotalMonths = parseInt(fields.warranty_months) || 36;
     let warrantyElapsedMonths = 0;
     let warrantyPercentage = 100;
     let warrantyExpiresDateStr = 'N/A';
@@ -129,7 +130,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     }
 
     // Cost calculations
-    const purchaseCost = parseFloat(asset.purchase_cost) || 0;
+    const purchaseCost = parseFloat(fields.purchase_cost) || 0;
     const maintenanceCost = 0.00; // Mocked / default
     const totalCost = purchaseCost + maintenanceCost;
 
@@ -209,7 +210,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
         pending: { bg: 'bg-orange-500/10', text: 'text-orange-500', dot: 'bg-orange-500' },
     };
 
-    const statusObj = statusColors[asset.status] || {
+    const statusObj = statusColors[fields.status] || {
         bg: 'bg-blue-500/10',
         text: 'text-blue-500',
         dot: 'bg-blue-500',
@@ -225,7 +226,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
 
     return (
         <div className="w-full p-8 space-y-6 print:p-0">
-            <Head title={`Asset Details - ${asset.asset_id}`} />
+            <Head title={`Asset Details - ${fields[configurations?.find((c:any) => c.is_primary_key)?.column_key] || asset.id}`} />
 
             {/* Breadcrumb Header - Hidden when printing */}
             <div className="flex items-center justify-between print:hidden">
@@ -257,7 +258,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 {/* Status label pill */}
                                 <div className={`flex items-center space-x-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${statusObj.bg} ${statusObj.text}`}>
                                     <span className={`h-2 w-2 rounded-full ${statusObj.dot} animate-pulse`} />
-                                    <span>{asset.statusLabel?.name || asset.status}</span>
+                                    <span>{fields.status || '—'}</span>
                                 </div>
                             </div>
 
@@ -282,40 +283,14 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                             {/* Top row: Specifications & EOL progress indicators */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-border/40">
 
-                                {/* Spec table list */}
+                                {/* Spec table list — rendered from configurations */}
                                 <div className="space-y-4">
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Asset Tag</span>
-                                        <span className="font-semibold text-foreground font-mono bg-muted/40 px-2 py-0.5 rounded">{asset.asset_id || '—'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Asset Name</span>
-                                        <span className="font-semibold text-foreground">{asset.asset_name || asset.product_name || '—'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Current Value</span>
-                                        <span className="font-bold text-foreground">{formatCurrency(purchaseCost)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Last Audit</span>
-                                        <span className="font-semibold text-foreground">{lastAuditDateStr}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Next Audit Date</span>
-                                        <span className="font-semibold text-foreground">{nextAuditDateStr}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Default Location</span>
-                                        <span className="font-semibold text-foreground">{asset.location?.name || '—'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                        <span className="text-muted-foreground font-medium">Device EOL</span>
-                                        <span className="font-semibold text-foreground">{asset.eol_date || '—'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 text-sm">
-                                        <span className="text-muted-foreground font-medium">MAC Address</span>
-                                        <span className="font-semibold text-foreground font-mono">00:1a:2b:3c:4d:5e</span>
-                                    </div>
+                                    {configurations.map((cfg: any) => (
+                                        <div key={cfg.column_key} className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
+                                            <span className="text-muted-foreground font-medium">{cfg.column_title}</span>
+                                            <span className="font-semibold text-foreground">{fields[cfg.column_key] || '—'}</span>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 {/* Dynamic indicators progress bars */}
@@ -506,7 +481,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                     <span>Notes</span>
                                 </div>
                                 <p className="text-foreground pl-6 text-xs italic leading-relaxed">
-                                    {asset.notes || 'No administrative notes provided.'}
+                                {fields.notes || 'No notes provided.'}
                                 </p>
                             </div>
 
@@ -713,7 +688,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                     <DialogHeader>
                         <DialogTitle>Assign / Checkout Asset</DialogTitle>
                         <DialogDescription>
-                            Assign this asset ({asset.asset_id}) to an active user.
+                            Assign this asset to an active user.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -826,10 +801,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                             <AlertTriangle className="h-5 w-5" /> Danger: Delete Asset
                         </DialogTitle>
                         <DialogDescription>
-                            Are you absolutely sure you want to delete asset{' '}
-                            <span className="font-bold font-mono text-foreground">
-                                {asset.asset_id}
-                            </span>
+                            Are you sure you want to delete this asset?
                             ? This action is permanent and cannot be undone.
                         </DialogDescription>
                     </DialogHeader>

@@ -9,91 +9,53 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Asset extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable, SoftDeletes;
-    protected $fillable = [
-        'asset_id',
-        'serial_number',
-        'category_id',
-        'type_id',
-        'product_name',
-        'brand',
-        'vendor_id',
-        'purchase_year',
-        'location_id',
-        'status',
-        'condition_status',
-        'notes',
-        'latitude',
-        'longitude',
-        'quantity',
-        'site_id',
-        'image_path',
-        'asset_name',
-        'warranty_months',
-        'order_number',
-        'purchase_date',
-        'eol_date',
-        'supplier_id',
-        'purchase_cost',
-        'status_label_id',
-        'metadata',
-    ];
 
-    protected $casts = [
-        'metadata' => 'array',
-    ];
+    protected $fillable = [];
 
-    public function category()
+    // ─── EAV Helpers ───────────────────────────────────────────────
+
+    public function fieldValues()
     {
-        return $this->belongsTo(AssetCategory::class);
+        return $this->hasMany(AssetFieldValue::class);
     }
 
-    public function type()
+    /** Get a single dynamic field value. */
+    public function getField(string $key): ?string
     {
-        return $this->belongsTo(AssetType::class);
+        $fv = $this->fieldValues->firstWhere('column_key', $key);
+        return $fv?->value;
     }
 
-    public function vendor()
+    /** Get all dynamic fields as key → value array. */
+    public function getFields(): array
     {
-        return $this->belongsTo(Vendor::class);
+        return $this->fieldValues->pluck('value', 'column_key')->toArray();
     }
 
-    public function location()
+    /** Set a single dynamic field (saves immediately). */
+    public function setField(string $key, ?string $value): void
     {
-        return $this->belongsTo(Location::class);
+        $this->fieldValues()->updateOrCreate(
+            ['column_key' => $key],
+            ['value' => $value]
+        );
+        $this->load('fieldValues');
     }
 
-    public function site()
+    /** Bulk sync dynamic fields from a key→value array. */
+    public function syncFields(array $data): void
     {
-        return $this->belongsTo(Site::class);
-    }
-
-    public function supplier()
-    {
-        return $this->belongsTo(Supplier::class);
-    }
-
-    public function statusLabel()
-    {
-        return $this->belongsTo(StatusLabel::class);
-    }
-
-    /**
-     * The "booted" method of the model.
-     */
-    protected static function booted(): void
-    {
-        static::addGlobalScope('site_access', function ($builder) {
-            $user = auth()->user();
-            if ($user && !$user->hasRole('Admin')) {
-                $siteIds = $user->sites()->pluck('sites.id')->toArray();
-                if (!empty($siteIds)) {
-                    $builder->whereIn($builder->getQuery()->from . '.site_id', $siteIds);
-                } elseif ($user->site_id) {
-                    // Fallback to legacy single site_id column
-                    $builder->where($builder->getQuery()->from . '.site_id', $user->site_id);
-                }
-            }
-        });
+        $keys = array_keys($data);
+        // Delete removed keys
+        $this->fieldValues()->whereNotIn('column_key', $keys)->delete();
+        // Upsert each
+        foreach ($data as $key => $value) {
+            $this->fieldValues()->updateOrCreate(
+                ['column_key' => $key],
+                ['value' => $value]
+            );
+        }
+        $this->load('fieldValues');
     }
 
     /** The currently active (in-use) assignment, if any. */

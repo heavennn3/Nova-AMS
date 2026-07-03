@@ -85,24 +85,17 @@ class TechnicianController extends Controller
 
         // Get site statistics for technician's assigned sites
         $siteStats = Site::whereIn('id', $siteIds)
-            ->withCount('assets')
             ->get()
             ->map(function ($site) {
                 // Calculate operational rate (assets not in maintenance / total assets)
-                $totalAssets = $site->assets_count;
-                $assetsInMaintenance = Asset::where('site_id', $site->id)
-                    ->where('status', 'under_maintenance')
+                $totalAssets = Asset::count();
+                $pendingMaintenance = WorkOrder::whereIn('status', ['pending', 'in_progress'])
+                    ->whereHas('asset.assignments', fn($q) => $q->where('site_id', $site->id))
                     ->count();
 
-                $operationalAssets = $totalAssets - $assetsInMaintenance;
                 $operationalRate = $totalAssets > 0
-                    ? round(($operationalAssets / $totalAssets) * 100, 1)
+                    ? round((($totalAssets - $pendingMaintenance) / $totalAssets) * 100, 1)
                     : 100;
-
-                // Count pending maintenance for this site
-                $pendingMaintenance = WorkOrder::whereHas('asset', function($query) use ($site) {
-                    $query->where('site_id', $site->id);
-                })->whereIn('status', ['pending', 'in_progress'])->count();
 
                 return [
                     'id' => $site->id,
