@@ -25,6 +25,7 @@ class AssetController extends Controller
         return Inertia::render('Assets/Index', [
             'assets' => $assets,
             'configurations' => $configs,
+            'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -43,6 +44,7 @@ class AssetController extends Controller
         return Inertia::render('asset-inventory', [
             'assets' => $assets,
             'configurations' => $configs,
+            'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -129,21 +131,21 @@ class AssetController extends Controller
     {
         $request->validate([
             'assets' => 'required|array',
+            'site_name' => 'nullable|string',
         ]);
 
         $configs = TableConfiguration::getAllColumns('assets');
         $columnKeys = $configs->pluck('column_key')->toArray();
 
         $importedCount = 0;
+        $siteName = $request->site_name;
 
         foreach ($request->assets as $row) {
-            // Normalise CSV headers: "Asset Tag" → "asset_tag"
             $normalized = [];
             foreach ($row as $k => $v) {
                 $normalized[strtolower(trim(preg_replace('/\s+/', '_', $k)))] = $v;
             }
 
-            // Map configured column_keys to CSV values
             $mapped = [];
             foreach ($columnKeys as $ck) {
                 $searchKey = strtolower($ck);
@@ -152,12 +154,16 @@ class AssetController extends Controller
                 }
             }
 
-            // Find primary key column value to identify the asset
+            // If site selected, set lokasi to site name (only if lokasi not already in CSV)
+            if ($siteName && empty($mapped['lokasi'])) {
+                $mapped['lokasi'] = $siteName;
+            }
+
+            // Find primary key
             $pkColumn = $configs->firstWhere('is_primary_key', true);
             $pkValue = $pkColumn ? ($mapped[$pkColumn->column_key] ?? null) : null;
             if (!$pkValue) continue;
 
-            // Upsert: find existing by PK field value
             $existing = Asset::whereHas('fieldValues', function ($q) use ($pkColumn, $pkValue) {
                 $q->where('column_key', $pkColumn->column_key)->where('value', $pkValue);
             })->first();

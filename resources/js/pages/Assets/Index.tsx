@@ -25,21 +25,33 @@ import {
     DialogFooter,
     DialogDescription,
 } from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export default function AssetIndex({
     assets = [],
     configurations = [],
+    sites = [],
 }: {
     assets: any[];
     configurations?: any[];
+    sites?: { id: string; name: string }[];
 }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(
         null,
     );
+    const [importSiteId, setImportSiteId] = useState<string>('');
     const [search, setSearch] = useState('');
+    const [siteFilter, setSiteFilter] = useState<string>('all');
 
     const columns = React.useMemo(() => {
         const cols: any[] = (configurations || []).map((cfg: any) => ({
@@ -66,11 +78,6 @@ export default function AssetIndex({
                 // Number → right-aligned
                 if (cfg.data_type === 'number') {
                     return <div className="text-right font-medium tabular-nums">{val}</div>;
-                }
-
-                // Date → format nicely
-                if (cfg.data_type === 'date' && val) {
-                    return <span className="text-muted-foreground text-sm">{val}</span>;
                 }
 
                 return <span className="text-muted-foreground text-sm font-medium">{val ?? '—'}</span>;
@@ -185,29 +192,44 @@ export default function AssetIndex({
 
     const handleImportCsv = (importedData: any[]) => {
         setPendingImportData(importedData);
-        setImportSiteId(selectedSiteId);
     };
 
     const confirmImport = () => {
         if (!pendingImportData) return;
 
-        router.post('/assets/import-bulk', { assets: pendingImportData }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                alert(
-                    `Successfully imported ${pendingImportData.length} assets from CSV!`,
-                );
-                setPendingImportData(null);
+        const selectedSite = sites.find((s) => String(s.id) === importSiteId);
+        const siteName = selectedSite?.name || '';
+
+        router.post(
+            '/assets/import-bulk',
+            { assets: pendingImportData, site_name: siteName },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    alert(
+                        `Successfully imported ${pendingImportData.length} assets from CSV!`,
+                    );
+                    setPendingImportData(null);
+                    setImportSiteId('');
+                },
+                onError: (err) => {
+                    console.error('Import failed:', err);
+                    alert('Failed to import CSV. Check console for details.');
+                    setPendingImportData(null);
+                },
             },
-            onError: (err) => {
-                console.error('Import failed:', err);
-                alert('Failed to import CSV. Check console for details.');
-                setPendingImportData(null);
-            },
-        });
+        );
     };
 
-    const filteredAssets = assets || [];
+    // Filter by site
+    const configKeys = configurations?.map((c: any) => c.column_key) || [];
+    const hasLokasiKey = configKeys.includes('lokasi');
+    const filteredAssets = (assets || []).filter((a: any) => {
+        if (siteFilter === 'all') return true;
+        const lokasi = (a.lokasi || '').toLowerCase();
+        const site = sites.find((s) => String(s.id) === siteFilter);
+        return site && lokasi.includes(site.name.toLowerCase());
+    });
 
     return (
         <div className="w-full space-y-6 p-8">
@@ -240,7 +262,6 @@ export default function AssetIndex({
                         </p>
                     </div>
                 </div>
-
             </div>
 
             <div className="flex items-center justify-between pt-4">
@@ -253,8 +274,6 @@ export default function AssetIndex({
                     </p>
                 </div>
                 <div className="flex space-x-3">
-
-
                     {isAdmin && (
                         <>
                             <Button
@@ -268,11 +287,9 @@ export default function AssetIndex({
                 </div>
             </div>
 
-
             {(() => {
-                const configKeys = configurations?.map((c: any) => c.column_key) || [];
                 const q = search.toLowerCase();
-                const filteredAssets = (assets || []).filter((a) => {
+                const searchedAssets = filteredAssets.filter((a: any) => {
                     if (!q) return true;
                     return configKeys.some((key: string) => {
                         const v = a[key];
@@ -282,7 +299,7 @@ export default function AssetIndex({
 
                 return (
                     <>
-                        {/* Search + Filter row */}
+                        {/* Search + Site Filter + Import row */}
                         <div className="flex flex-wrap items-center gap-2">
                             <div className="relative w-[280px]">
                                 <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -294,9 +311,25 @@ export default function AssetIndex({
                                 />
                             </div>
 
+                            {/* Site filter dropdown */}
+                            {sites.length > 0 && hasLokasiKey && (
+                                <Select value={siteFilter} onValueChange={setSiteFilter}>
+                                    <SelectTrigger className="h-8 w-[200px] text-sm">
+                                        <SelectValue placeholder="All Sites" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Sites</SelectItem>
+                                        {sites.map((site) => (
+                                            <SelectItem key={site.id} value={String(site.id)}>
+                                                {site.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
 
                             <DataTableActions
-                                data={filteredAssets}
+                                data={searchedAssets}
                                 columns={columns}
                                 exportFileName="asset_inventory_export"
                                 onImportCsv={handleImportCsv}
@@ -305,7 +338,7 @@ export default function AssetIndex({
 
                         <DataTable
                             columns={columns}
-                            data={filteredAssets}
+                            data={searchedAssets}
                             onImportCsv={handleImportCsv}
                             hideToolbar
                         />
@@ -321,10 +354,32 @@ export default function AssetIndex({
                     <DialogHeader>
                         <DialogTitle>Import CSV</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to import{' '}
-                            {pendingImportData?.length} assets?
+                            {pendingImportData?.length} assets detected.
                         </DialogDescription>
                     </DialogHeader>
+
+                    {/* Site selection for import */}
+                    {sites.length > 0 && (
+                        <div className="space-y-2 py-2">
+                            <Label htmlFor="import-site">Assign to Site (optional)</Label>
+                            <Select value={importSiteId} onValueChange={setImportSiteId}>
+                                <SelectTrigger id="import-site">
+                                    <SelectValue placeholder="No site (use CSV Lokasi column)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">No site (use CSV data)</SelectItem>
+                                    {sites.map((site) => (
+                                        <SelectItem key={site.id} value={String(site.id)}>
+                                            {site.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                If the CSV already has a "Lokasi" column, the site won't override it.
+                            </p>
+                        </div>
+                    )}
 
                     <DialogFooter>
                         <Button
