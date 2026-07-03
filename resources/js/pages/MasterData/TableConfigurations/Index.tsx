@@ -88,12 +88,14 @@ function slugify(text: string): string {
         .replace(/^_|_$/g, '');
 }
 
-function SortableRow({ config, index, onEdit, onDelete, onToggleVisible }: {
+function SortableRow({ config, index, onEdit, onDelete, onToggleVisible, selected, onToggleSelect }: {
     config: TableConfiguration;
     index: number;
     onEdit: (c: TableConfiguration) => void;
     onDelete: (id: number) => void;
     onToggleVisible: (c: TableConfiguration) => void;
+    selected: boolean;
+    onToggleSelect: (id: number) => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: config.id });
 
@@ -110,9 +112,17 @@ function SortableRow({ config, index, onEdit, onDelete, onToggleVisible }: {
         <tr
             ref={setNodeRef}
             style={style}
-            className={`border-b transition-colors ${isEven ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50/30`}
+            className={`border-b transition-colors ${isEven ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50/30${selected ? ' bg-primary/5' : ''}`}
         >
             <td className="p-2 pl-3 w-10">
+                <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => onToggleSelect(config.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+            </td>
+            <td className="p-2 w-10">
                 <button
                     {...attributes}
                     {...listeners}
@@ -489,6 +499,54 @@ export default function TableConfigurationIndex({
 }: IndexProps) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingConfig, setEditingConfig] = useState<TableConfiguration | null>(null);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+    const toggleSelect = (id: number) => {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === configurations.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(configurations.map((c) => c.id));
+        }
+    };
+
+    const handleBatchDelete = () => {
+        if (!confirm(`Delete ${selectedIds.length} selected columns?`)) return;
+        router.post(
+            '/master-data/table-configurations/batch-delete',
+            { ids: selectedIds },
+            { onSuccess: () => { toast.success('Selected columns deleted'); setSelectedIds([]); }, preserveScroll: true },
+        );
+    };
+
+    const handleBatchToggle = (field: string, value: boolean) => {
+        router.post(
+            '/master-data/table-configurations/batch-update',
+            { ids: selectedIds, updates: [{ field, value }] },
+            { onSuccess: () => { toast.success(`Updated ${selectedIds.length} columns`); setSelectedIds([]); }, preserveScroll: true },
+        );
+    };
+
+    const [batchEditOpen, setBatchEditOpen] = useState(false);
+    const [batchTitle, setBatchTitle] = useState('');
+
+    const handleBatchEdit = () => {
+        if (!batchTitle.trim()) { toast.error('Enter a column title'); return; }
+        router.post(
+            '/master-data/table-configurations/batch-update',
+            { ids: selectedIds, updates: [{ field: 'column_title', value: batchTitle.trim() }] },
+            {
+                onSuccess: () => { toast.success(`Renamed ${selectedIds.length} columns`); setBatchEditOpen(false); setBatchTitle(''); setSelectedIds([]); },
+                onError: () => toast.error('Batch edit failed'),
+                preserveScroll: true,
+            },
+        );
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -614,34 +672,72 @@ export default function TableConfigurationIndex({
                     </Button>
                 </div>
             ) : (
-                <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                        <SortableContext items={idList} strategy={verticalListSortingStrategy}>
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b bg-gray-50/80">
-                                        <th className="p-2 pl-3 w-10"></th>
-                                        <th className="p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Column</th>
-                                        <th className="p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">Type</th>
-                                        <th className="p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-36">Properties</th>
-                                        <th className="p-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {configurations.map((config, index) => (
-                                        <SortableRow
-                                            key={config.id}
-                                            config={config}
-                                            index={index}
-                                            onEdit={openEdit}
-                                            onDelete={handleDelete}
-                                            onToggleVisible={handleToggleVisible}
-                                        />
-                                    ))}
-                                </tbody>
-                            </table>
-                        </SortableContext>
-                    </DndContext>
+                <div className="space-y-3">
+                    {/* Batch actions bar */}
+                    {selectedIds.length > 0 && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 border border-primary/20 rounded-lg">
+                            <span className="text-sm font-medium text-primary">{selectedIds.length} selected</span>
+                            <div className="flex-1" />
+                            <Button variant="outline" size="sm" onClick={() => { setBatchTitle(''); setBatchEditOpen(true); }}>
+                                <Edit className="h-3.5 w-3.5 mr-1" /> Rename
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleBatchToggle('is_visible', true)}>
+                                <Eye className="h-3.5 w-3.5 mr-1" /> Show
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleBatchToggle('is_visible', false)}>
+                                <EyeOff className="h-3.5 w-3.5 mr-1" /> Hide
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleBatchToggle('is_sortable', true)}>
+                                <ArrowUpDown className="h-3.5 w-3.5 mr-1" /> Sortable
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleBatchToggle('is_filterable', true)}>
+                                <Filter className="h-3.5 w-3.5 mr-1" /> Filterable
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={handleBatchDelete}>
+                                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
+                            </Button>
+                        </div>
+                    )}
+
+                    <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                            <SortableContext items={idList} strategy={verticalListSortingStrategy}>
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b bg-gray-50/80">
+                                            <th className="p-2 pl-3 w-10">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.length === configurations.length && configurations.length > 0}
+                                                    onChange={toggleSelectAll}
+                                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                />
+                                            </th>
+                                            <th className="p-2 w-10"></th>
+                                            <th className="p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Column</th>
+                                            <th className="p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">Type</th>
+                                            <th className="p-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-36">Properties</th>
+                                            <th className="p-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {configurations.map((config, index) => (
+                                            <SortableRow
+                                                key={config.id}
+                                                config={config}
+                                                index={index}
+                                                onEdit={openEdit}
+                                                onDelete={handleDelete}
+                                                onToggleVisible={handleToggleVisible}
+                                                selected={selectedIds.includes(config.id)}
+                                                onToggleSelect={toggleSelect}
+                                            />
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </SortableContext>
+                        </DndContext>
+                    </div>
                 </div>
             )}
 
@@ -652,6 +748,33 @@ export default function TableConfigurationIndex({
                 tableName={currentTable}
                 existingConfigs={configurations}
             />
+
+            {/* Batch rename dialog */}
+            <Dialog open={batchEditOpen} onOpenChange={(v) => { if (!v) setBatchEditOpen(false); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Rename {selectedIds.length} Columns</DialogTitle>
+                        <DialogDescription>
+                            Set a new column title for all selected columns.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-1.5 py-2">
+                        <Label htmlFor="batch-title">New Column Title</Label>
+                        <Input
+                            id="batch-title"
+                            value={batchTitle}
+                            onChange={(e) => setBatchTitle(e.target.value)}
+                            placeholder="e.g. New Column Name"
+                            autoFocus
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleBatchEdit(); }}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setBatchEditOpen(false)}>Cancel</Button>
+                        <Button onClick={handleBatchEdit}>Apply</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

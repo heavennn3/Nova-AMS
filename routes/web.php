@@ -145,11 +145,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:module.master-data'])->group(function () {
         Route::get('/master-data', [\App\Http\Controllers\MasterDataController::class, 'index'])->name('master-data');
 
-        // Table Configurations
         Route::prefix('master-data/table-configurations')->group(function () {
             Route::get('/', [\App\Http\Controllers\TableConfigurationController::class, 'index'])->name('table-configurations.index');
             Route::get('/create', [\App\Http\Controllers\TableConfigurationController::class, 'create'])->name('table-configurations.create');
             Route::post('/', [\App\Http\Controllers\TableConfigurationController::class, 'store'])->name('table-configurations.store');
+            Route::post('/generate-from-headers', [\App\Http\Controllers\TableConfigurationController::class, 'generateFromHeaders'])->name('table-configurations.generate-from-headers');
+            Route::post('/batch-delete', [\App\Http\Controllers\TableConfigurationController::class, 'batchDelete'])->name('table-configurations.batch-delete');
+            Route::post('/batch-update', [\App\Http\Controllers\TableConfigurationController::class, 'batchUpdate'])->name('table-configurations.batch-update');
             Route::get('/{tableConfiguration}', [\App\Http\Controllers\TableConfigurationController::class, 'show'])->name('table-configurations.show');
             Route::get('/{tableConfiguration}/edit', [\App\Http\Controllers\TableConfigurationController::class, 'edit'])->name('table-configurations.edit');
             Route::put('/{tableConfiguration}', [\App\Http\Controllers\TableConfigurationController::class, 'update'])->name('table-configurations.update');

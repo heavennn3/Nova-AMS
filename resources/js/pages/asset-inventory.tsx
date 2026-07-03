@@ -103,8 +103,6 @@ export default function AssetInventory({
     }, [configurations]);
 
     const configKeys = configurations?.map((c: any) => c.column_key) || [];
-    const hasLokasiKey = configKeys.includes('lokasi');
-
     // Filter by site + search
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
@@ -228,7 +226,7 @@ export default function AssetInventory({
                 </div>
 
                 {/* Site filter */}
-                {sites.length > 0 && hasLokasiKey && (
+                {sites.length > 0 && (
                     <Select value={siteFilter} onValueChange={setSiteFilter}>
                         <SelectTrigger className="h-8 w-[200px] text-sm">
                             <SelectValue placeholder="All Sites" />

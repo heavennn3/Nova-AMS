@@ -95,6 +95,57 @@ class TableConfigurationController extends Controller
     }
 
     /**
+     * Auto-generate column configs from CSV headers and set primary key.
+     */
+    public function generateFromHeaders(Request $request)
+    {
+        $validated = $request->validate([
+            'table_name' => 'required|string|max:255',
+            'headers' => 'required|array|min:1',
+            'headers.*' => 'required|string|max:255',
+            'primary_key_header' => 'nullable|string|max:255',
+        ]);
+
+        $created = [];
+        $sortOrder = 0;
+
+        foreach ($validated['headers'] as $header) {
+            $clean = trim($header);
+            $key = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $clean));
+            $key = trim($key, '_');
+
+            // Deduplicate keys
+            $originalKey = $key;
+            $suffix = 1;
+            while (TableConfiguration::where('table_name', $validated['table_name'])->where('column_key', $key)->exists()) {
+                $key = $originalKey . '_' . $suffix++;
+            }
+
+            $isPk = $validated['primary_key_header'] && strcasecmp(trim($validated['primary_key_header']), $clean) === 0;
+
+            $config = TableConfiguration::create([
+                'table_name' => $validated['table_name'],
+                'column_key' => $key,
+                'column_title' => $clean,
+                'data_type' => 'string',
+                'is_primary_key' => $isPk,
+                'is_sortable' => true,
+                'is_filterable' => true,
+                'is_visible' => true,
+                'sort_order' => $sortOrder++,
+                'alignment' => 'left',
+            ]);
+
+            $created[] = $config;
+        }
+
+        return response()->json([
+            'configurations' => $created,
+            'message' => count($created) . ' columns created from CSV.',
+        ]);
+    }
+
+    /**
      * Display the specified table configuration.
      */
     public function show(TableConfiguration $tableConfiguration)
@@ -155,6 +206,50 @@ class TableConfigurationController extends Controller
         return redirect()->route('table-configurations.index', [
             'tableName' => $tableName
         ])->with('success', 'Column configuration deleted successfully.');
+    }
+
+    /**
+     * Batch delete configurations.
+     */
+    public function batchDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:table_configurations,id',
+        ]);
+
+        $count = TableConfiguration::whereIn('id', $validated['ids'])->forceDelete();
+
+        return redirect()->back()->with('success', "$count column configurations deleted successfully.");
+    }
+
+    /**
+     * Batch update configurations (any fields).
+     */
+    public function batchUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:table_configurations,id',
+            'updates' => 'required|array|min:1',
+            'updates.*.field' => 'required|string|in:column_title,data_type,is_visible,is_sortable,is_filterable,is_primary_key,alignment,sort_order',
+            'updates.*.value' => 'required',
+        ]);
+
+        $affected = 0;
+        foreach ($validated['ids'] as $id) {
+            $record = TableConfiguration::find($id);
+            if (!$record) continue;
+            $patch = [];
+            foreach ($validated['updates'] as $u) {
+                $patch[$u['field']] = $u['value'];
+            }
+            $patch['updated_by'] = Auth::id();
+            $record->update($patch);
+            $affected++;
+        }
+
+        return redirect()->back()->with('success', "$affected column configurations updated.");
     }
 
     /**
