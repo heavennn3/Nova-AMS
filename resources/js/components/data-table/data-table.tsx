@@ -87,7 +87,9 @@ export function DataTable<TData, TValue>({
         if (path.includes('/work-orders')) return 'work-orders';
         if (path.includes('/spare-parts') || path.includes('/maintenance/parts')) return 'spare-parts';
         if (path.includes('/licenses')) return 'licenses';
-        return undefined;
+        // Generic fallback: extract first path segment as resource type
+        const segments = path.split('/').filter(Boolean);
+        return segments.length > 0 ? segments[0] : undefined;
     };
 
     const resourceType = getResourceTypeFromUrl();

@@ -32,13 +32,7 @@ export default function SparePartsDashboard({
             color: 'text-blue-600',
             bgColor: 'bg-blue-100',
         },
-        {
-            title: 'Total Value',
-            value: `RM${totalValue}`,
-            icon: DollarSign,
-            color: 'text-green-600',
-            bgColor: 'bg-green-100',
-        },
+
         {
             title: 'Available',
             value: availableParts.toString(),
