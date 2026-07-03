@@ -35,6 +35,11 @@ class Asset extends Model implements Auditable
         'supplier_id',
         'purchase_cost',
         'status_label_id',
+        'metadata',
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
     ];
 
     public function category()

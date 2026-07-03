@@ -13,6 +13,19 @@ export default function AssetUpload({ site_id = '', sites = [] }: { site_id?: st
     const [previewData, setPreviewData] = useState<any[] | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    const parseCsvText = (text: string) => {
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 2) return { headers: [], rows: [] };
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const rows = lines.slice(1).map(line => {
+            const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+            const row: Record<string, string> = {};
+            headers.forEach((h, i) => { if (h && values[i]) row[h] = values[i]; });
+            return row;
+        }).filter(row => row[headers[0]]);
+        return { headers, rows };
+    };
+
     const handleFileSelect = (file: File) => {
         setSelectedFile(file);
 
@@ -21,17 +34,8 @@ export default function AssetUpload({ site_id = '', sites = [] }: { site_id?: st
             const reader = new FileReader();
             reader.onload = (e) => {
                 const text = e.target?.result as string;
-                const lines = text.split('\n').slice(0, 6); // First 5 rows + header
-                const preview = lines.map(line => {
-                    const values = line.split(',');
-                    return {
-                        asset_id: values[0] || '',
-                        product_name: values[1] || '',
-                        category: values[2] || '',
-                        quantity: values[3] || '1',
-                    };
-                }).filter(row => row.asset_id);
-                setPreviewData(preview);
+                const { headers, rows } = parseCsvText(text);
+                setPreviewData([{ asset_id: headers.join(', ') }, ...rows.slice(0, 5)]);
             };
             reader.readAsText(file);
         }
@@ -51,25 +55,16 @@ export default function AssetUpload({ site_id = '', sites = [] }: { site_id?: st
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     const text = e.target?.result as string;
-                    const lines = text.split('\n');
-                    const assets = lines.slice(1).map(line => {
-                        const values = line.split(',');
-                        return {
-                            asset_id: values[0]?.trim(),
-                            product_name: values[1]?.trim() || 'Unknown',
-                            category: values[2]?.trim(),
-                            quantity: parseInt(values[3]?.trim()) || 1,
-                        };
-                    }).filter(asset => asset.asset_id);
+                    const { rows } = parseCsvText(text);
 
                     const payload = {
-                        assets: assets,
+                        assets: rows,
                         site_id: uploadSiteId
                     };
 
                     router.post('/assets/import-bulk', payload, {
                         onSuccess: () => {
-                            toast.success(`Successfully imported ${assets.length} assets`);
+                            toast.success(`Successfully imported ${rows.length} assets`);
                             setSelectedFile(null);
                             setPreviewData(null);
                         },
