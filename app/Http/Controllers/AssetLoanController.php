@@ -26,17 +26,13 @@ class AssetLoanController extends Controller
     public function create(Request $request)
     {
         $assets = Asset::with(['site:id,name', 'fieldValues'])
-            ->where(function ($q) {
-                $q->whereHas('fieldValues', fn($q) => $q->where('column_key', 'status')->where('value', 'Available'))
-                  ->orWhereHas('fieldValues', fn($q) => $q->where('column_key', 'status')->where('value', 'NOT UPDATED'))
-                  ->orWhereDoesntHave('fieldValues', fn($q) => $q->where('column_key', 'status'));
-            })
+            ->orderBy('id', 'desc')
             ->get()
             ->map(function ($asset) {
                 $fields = $asset->getFields();
                 return [
                     'id' => $asset->id,
-                    'site_id' => $asset->site_id,
+                    'site_id' => (string) $asset->site_id,
                     'asset_id' => $fields['asset_id'] ?? null,
                     'product_name' => $fields['product_name'] ?? null,
                     'brand' => $fields['brand'] ?? null,
@@ -66,7 +62,8 @@ class AssetLoanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'asset_id' => 'required|exists:assets,id',
+            'asset_ids' => 'required|array|min:1',
+            'asset_ids.*' => 'exists:assets,id',
             'site_id' => 'nullable|exists:sites,id',
             'loan_date' => 'required|date',
             'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
@@ -75,14 +72,24 @@ class AssetLoanController extends Controller
             'notes' => 'nullable|string|max:2000',
         ]);
 
-        $loan = AssetLoan::create([
-            ...$validated,
-            'user_id' => $request->user()->id,
-            'status' => 'pending',
-        ]);
+        $count = 0;
+        foreach ($validated['asset_ids'] as $assetId) {
+            AssetLoan::create([
+                'asset_id' => $assetId,
+                'user_id' => $request->user()->id,
+                'site_id' => $validated['site_id'] ?? null,
+                'loan_date' => $validated['loan_date'],
+                'expected_return_date' => $validated['expected_return_date'] ?? null,
+                'condition_status' => $validated['condition_status'],
+                'purpose' => $validated['purpose'],
+                'notes' => $validated['notes'] ?? null,
+                'status' => 'pending',
+            ]);
+            $count++;
+        }
 
         return redirect()->route('asset-loans.index')
-            ->with('success', 'Loan request submitted. Awaiting approval.');
+            ->with('success', "{$count} loan request(s) submitted. Awaiting approval.");
     }
 
     public function approve(Request $request, AssetLoan $loan)

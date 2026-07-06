@@ -18,6 +18,7 @@ import {
     CheckCircle2,
     AlertTriangle,
     XCircle,
+    Check,
 } from 'lucide-react';
 import InputError from '@/components/input-error';
 
@@ -37,7 +38,7 @@ export default function Create({
     currentUser: { id: number; name: string; email: string };
 }) {
     const { data, setData, processing, errors } = useForm({
-        asset_id: '',
+        asset_ids: [] as number[],
         site_id: '',
         loan_date: new Date().toISOString().split('T')[0],
         expected_return_date: '',
@@ -47,19 +48,38 @@ export default function Create({
     });
 
     const [assetSearch, setAssetSearch] = useState('');
+    const [selectedSiteId, setSelectedSiteId] = useState('');
 
-    const filteredAssets = useMemo(() => {
-        if (!assetSearch) return assets;
+    // Get assets for the selected site
+    const siteAssets = useMemo(() => {
+        if (!selectedSiteId) return [];
+        if (!assetSearch) return assets.filter((a: any) => String(a.site_id) === selectedSiteId);
         const q = assetSearch.toLowerCase();
-        return assets.filter((a) =>
-            a.product_name?.toLowerCase().includes(q) ||
-            a.asset_id?.toLowerCase().includes(q) ||
-            a.brand?.toLowerCase().includes(q) ||
-            a.serial_number?.toLowerCase().includes(q)
+        return assets.filter((a: any) =>
+            String(a.site_id) === selectedSiteId && (
+                a.product_name?.toLowerCase().includes(q) ||
+                a.asset_id?.toLowerCase().includes(q) ||
+                a.brand?.toLowerCase().includes(q) ||
+                a.serial_number?.toLowerCase().includes(q)
+            )
         );
-    }, [assets, assetSearch]);
+    }, [assets, selectedSiteId, assetSearch]);
 
-    const selectedAsset = assets.find((a) => a.id === Number(data.asset_id));
+    const toggleAsset = (id: number) => {
+        setData('asset_ids',
+            data.asset_ids.includes(id)
+                ? data.asset_ids.filter((i) => i !== id)
+                : [...data.asset_ids, id]
+        );
+    };
+
+    const toggleAll = () => {
+        const allIds = siteAssets.map((a: any) => a.id);
+        const allSelected = allIds.every((id: number) => data.asset_ids.includes(id));
+        setData('asset_ids',
+            allSelected ? data.asset_ids.filter((i) => !allIds.includes(i)) : [...new Set([...data.asset_ids, ...allIds])]
+        );
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,10 +88,12 @@ export default function Create({
         });
     };
 
+    const selectedSite = sites.find((s) => String(s.id) === selectedSiteId);
+
     return (
         <>
             <Head title="New Asset Loan" />
-            <div className="p-8 max-w-2xl mx-auto">
+            <div className="p-8 max-w-2xl">
                 <div className="flex items-center gap-3 mb-6">
                     <Link href="/asset-loans">
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -82,47 +104,62 @@ export default function Create({
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
-                    {/* Asset */}
+                    {/* Site + Asset */}
                     <div className="rounded-lg border bg-card p-4">
-                        <label className="mb-2 block text-xs font-medium text-muted-foreground uppercase tracking-wide">Asset</label>
-                        {selectedAsset ? (
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <Package className="h-5 w-5 shrink-0 text-primary" />
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium truncate">{selectedAsset.product_name}</p>
-                                        <p className="text-xs text-muted-foreground truncate">{selectedAsset.asset_id} · {selectedAsset.brand || '—'}</p>
-                                    </div>
-                                </div>
-                                <Button type="button" variant="ghost" size="sm" className="h-7 shrink-0" onClick={() => { setData('asset_id', ''); setAssetSearch(''); }}>
-                                    Change
-                                </Button>
-                            </div>
-                        ) : (
+                        <div className="mb-3">
+                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground uppercase tracking-wide">Select Site</label>
+                            <Select value={selectedSiteId} onValueChange={(v) => { setSelectedSiteId(v); setAssetSearch(''); }}>
+                                <SelectTrigger className="h-8 text-sm">
+                                    <SelectValue placeholder="Choose a site to see assets..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {sites.map((s) => (
+                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {selectedSiteId && (
                             <>
-                                <div className="relative mb-2">
-                                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Search asset..." value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} className="h-8 pl-8 text-sm" />
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="relative flex-1">
+                                        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                                        <Input placeholder="Search assets..." value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} className="h-8 pl-8 text-sm" />
+                                    </div>
+                                    <Button type="button" variant="ghost" size="sm" className="h-8 text-xs shrink-0" onClick={toggleAll}>
+                                        <Check className="h-3 w-3 mr-1" /> All
+                                    </Button>
                                 </div>
-                                <div className="max-h-36 overflow-y-auto space-y-0.5">
-                                    {filteredAssets.length === 0 ? (
-                                        <p className="py-4 text-center text-xs text-muted-foreground">No available assets</p>
+
+                                <div className="max-h-48 overflow-y-auto space-y-0.5 border rounded-md">
+                                    {siteAssets.length === 0 ? (
+                                        <p className="py-6 text-center text-xs text-muted-foreground">No assets at this site</p>
                                     ) : (
-                                        filteredAssets.map((asset) => (
-                                            <button key={asset.id} type="button"
-                                                className={`w-full rounded border px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50 ${data.asset_id === String(asset.id) ? 'border-primary bg-primary/5' : ''}`}
-                                                onClick={() => setData('asset_id', String(asset.id))}
-                                            >
-                                                <span className="font-medium">{asset.product_name}</span>
-                                                <span className="text-muted-foreground"> · {asset.asset_id}</span>
-                                                {asset.site && <span className="text-muted-foreground"> · {asset.site.name}</span>}
-                                            </button>
-                                        ))
+                                        siteAssets.map((asset: any) => {
+                                            const selected = data.asset_ids.includes(asset.id);
+                                            return (
+                                                <button key={asset.id} type="button"
+                                                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-muted/30 ${selected ? 'bg-primary/5' : ''}`}
+                                                    onClick={() => toggleAsset(asset.id)}
+                                                >
+                                                    <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${selected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
+                                                        {selected && <Check className="h-3 w-3" />}
+                                                    </div>
+                                                    <span className="font-medium">#{asset.id} {asset.product_name || asset.asset_id || ''}</span>
+                                                    <span className="text-muted-foreground ml-1">· {asset.asset_id || ''} {asset.brand ? '· '+asset.brand : ''} {asset.serial_number ? '· '+asset.serial_number : ''}</span>
+                                                </button>
+                                            );
+                                        })
                                     )}
                                 </div>
+
+                                {data.asset_ids.length > 0 && (
+                                    <p className="mt-2 text-xs text-muted-foreground">{data.asset_ids.length} asset(s) selected</p>
+                                )}
                             </>
                         )}
-                        <InputError message={errors.asset_id} />
+                        <InputError message={errors.asset_ids} />
                     </div>
 
                     {/* Borrower + Dates */}
@@ -143,37 +180,20 @@ export default function Create({
                         </div>
                     </div>
 
-                    {/* Condition + Site */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-lg border bg-card p-3">
-                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground uppercase tracking-wide">Condition</label>
-                            <div className="flex gap-1.5">
-                                {conditionOptions.map((opt) => (
-                                    <button key={opt.value} type="button"
-                                        className={`flex-1 rounded-md border py-2 text-xs font-medium transition-all ${data.condition_status === opt.value ? `${opt.color} text-white border-transparent` : 'border-muted hover:bg-muted/50'}`}
-                                        onClick={() => setData('condition_status', opt.value)}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                            <InputError message={errors.condition_status} />
+                    {/* Condition + Site (already selected above) */}
+                    <div className="rounded-lg border bg-card p-3">
+                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground uppercase tracking-wide">Condition</label>
+                        <div className="flex gap-1.5">
+                            {conditionOptions.map((opt) => (
+                                <button key={opt.value} type="button"
+                                    className={`flex-1 rounded-md border py-2 text-xs font-medium transition-all ${data.condition_status === opt.value ? `${opt.color} text-white border-transparent` : 'border-muted hover:bg-muted/50'}`}
+                                    onClick={() => setData('condition_status', opt.value)}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
-                        <div className="rounded-lg border bg-card p-3">
-                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground uppercase tracking-wide">Site</label>
-                            <Select value={data.site_id} onValueChange={(v) => setData('site_id', v === 'none' ? '' : v)}>
-                                <SelectTrigger className="h-8 text-xs">
-                                    <SelectValue placeholder="Optional" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">No site</SelectItem>
-                                    {sites.map((s) => (
-                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.site_id} />
-                        </div>
+                        <InputError message={errors.condition_status} />
                     </div>
 
                     {/* Purpose + Notes */}
@@ -193,7 +213,7 @@ export default function Create({
                     {/* Submit */}
                     <div className="flex justify-end gap-2 pt-1">
                         <Link href="/asset-loans"><Button type="button" variant="outline" size="sm">Cancel</Button></Link>
-                        <Button type="submit" size="sm" disabled={processing || !data.asset_id}>Submit Loan Request</Button>
+                        <Button type="submit" size="sm" disabled={processing || data.asset_ids.length === 0}>Submit Loan Request</Button>
                     </div>
                 </form>
             </div>
