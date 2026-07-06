@@ -10,7 +10,7 @@ class Asset extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable, SoftDeletes;
 
-    protected $fillable = ['site_id'];
+    protected $fillable = ['site_id', 'status'];
 
     // ─── Relationships ─────────────────────────────────────────────
 
