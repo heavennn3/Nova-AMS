@@ -47,6 +47,7 @@ export default function AssetIndex({
     totalFaulty = 0,
     totalRecentAdded = 0,
     configuredSiteIds = [],
+    currentSiteId = null,
 }: {
     assets: any[];
     configurations?: any[];
@@ -55,15 +56,15 @@ export default function AssetIndex({
     totalFaulty?: number;
     totalRecentAdded?: number;
     configuredSiteIds?: number[];
+    currentSiteId?: number | null;
 }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
-    const [importSiteId, setImportSiteId] = useState<string>('');
+    const [importSiteId, setImportSiteId] = useState<string>(currentSiteId ? String(currentSiteId) : '');
     const [search, setSearch] = useState('');
-    const [siteFilter, setSiteFilter] = useState<string>(sites[0] ? String(sites[0].id) : '');
-    const currentSiteHasConfig = siteFilter
-        ? configuredSiteIds.includes(Number(siteFilter)) || configurations.some((c: any) => !c.site_id)
+    const currentSiteHasConfig = currentSiteId
+        ? configuredSiteIds.includes(currentSiteId) || configurations.some((c: any) => !c.site_id)
         : false;
 
     // ── No-config flow: detect CSV headers → pick PK → create configs ──
@@ -84,7 +85,7 @@ export default function AssetIndex({
         setDetectedHeaders(headers);
         setPrimaryKeyHeader(headers[0] || '');
         setCsvRawData(importedData);
-        setImportSiteId(siteFilter);
+        setImportSiteId(currentSiteId ? String(currentSiteId) : '');
         setCsvConfigOpen(true);
     };
 
@@ -244,10 +245,7 @@ export default function AssetIndex({
         return cols;
     }, [configurations, isAdmin]);
 
-    const filteredAssets = (assets || []).filter((a: any) => {
-        if (!siteFilter) return true;
-        return String(a.site_id) === siteFilter;
-    });
+    const filteredAssets = assets;
 
     return (
         <div className="w-full space-y-6 p-8">
@@ -344,7 +342,7 @@ export default function AssetIndex({
                         </div>
 
                         {sites.length > 0 && (
-                            <Select value={siteFilter} onValueChange={setSiteFilter}>
+                            <Select value={currentSiteId ? String(currentSiteId) : ''} onValueChange={(v) => router.get('/assets', { site_id: v })}>
                                 <SelectTrigger className="h-8 w-[200px] text-sm">
                                     <SelectValue placeholder="All Sites" />
                                 </SelectTrigger>

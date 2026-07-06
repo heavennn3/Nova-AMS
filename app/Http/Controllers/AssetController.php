@@ -9,11 +9,17 @@ use Inertia\Inertia;
 
 class AssetController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $configs = TableConfiguration::getAllColumns('assets');
+        $siteId = $request->query('site_id');
 
-        $assets = Asset::with('fieldValues')->latest()->get()->map(function ($asset) use ($configs) {
+        $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
+
+        $assetsQuery = Asset::with('fieldValues')->latest();
+        if ($siteId) {
+            $assetsQuery->where('site_id', $siteId);
+        }
+        $assets = $assetsQuery->get()->map(function ($asset) use ($configs) {
             $fields = $asset->getFields();
             $row = ['id' => $asset->id, 'site_id' => $asset->site_id];
             foreach ($configs as $cfg) {
@@ -36,6 +42,7 @@ class AssetController extends Controller
                 ->whereNotNull('site_id')
                 ->distinct('site_id')
                 ->pluck('site_id'),
+            'currentSiteId' => $siteId ? (int)$siteId : null,
         ]);
     }
 
