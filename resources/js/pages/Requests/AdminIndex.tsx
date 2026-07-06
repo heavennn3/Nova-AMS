@@ -92,8 +92,10 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             search === '' ||
             r.request_number?.toLowerCase().includes(search.toLowerCase()) ||
             r.user?.name?.toLowerCase().includes(search.toLowerCase());
+        // Handle both capital and lowercase status values
+        const normalizedStatus = r.status?.toLowerCase();
         const matchesStatus =
-            selectedStatus === 'all' || r.status === selectedStatus;
+            selectedStatus === 'all' || normalizedStatus === selectedStatus.toLowerCase();
         const matchesType =
             selectedType === 'all' || r.request_type === selectedType;
         const matchesSite =
@@ -155,7 +157,14 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
 
     const submitAction = () => {
         if (!actionRequest || !actionType) return;
-        router.post(`/requests/${actionRequest.id}/${actionType}`, { admin_notes: adminNotes }, {
+
+        // Check if this is a loan request
+        const isLoanRequest = actionRequest.type === 'loan' || actionRequest.original_model === 'AssetLoan';
+
+        router.post(`/requests/${actionRequest.id}/${actionType}`, {
+            admin_notes: adminNotes,
+            is_loan_request: isLoanRequest ? 'true' : 'false'
+        }, {
             preserveScroll: true,
             onSuccess: () => { setActionRequest(null); setActionType(null); setAdminNotes(''); },
         });
@@ -169,13 +178,13 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     };
 
     // Stats
-    const pendingCount = requests.filter(r => r.status === 'Pending').length;
-    const urgentPendingCount = requests.filter(r => r.status === 'Pending' && r.priority === 'Urgent').length;
+    const pendingCount = requests.filter(r => r.status === 'Pending' || r.status === 'pending').length;
+    const urgentPendingCount = requests.filter(r => (r.status === 'Pending' || r.status === 'pending') && r.priority === 'Urgent').length;
     const stats = [
         { label: 'Pending Review', value: pendingCount, color: 'text-amber-700', bg: 'from-amber-50 to-amber-100/50', iconBg: 'bg-amber-100', icon: Clock, ring: pendingCount > 0 ? 'ring-2 ring-amber-300/50' : '' },
-        { label: 'Approved', value: requests.filter(r => r.status === 'Approved').length, color: 'text-emerald-700', bg: 'from-emerald-50 to-emerald-100/50', iconBg: 'bg-emerald-100', icon: CheckCircle2, ring: '' },
+        { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-700', bg: 'from-emerald-50 to-emerald-100/50', iconBg: 'bg-emerald-100', icon: CheckCircle2, ring: '' },
         { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-700', bg: 'from-blue-50 to-blue-100/50', iconBg: 'bg-blue-100', icon: Package, ring: '' },
-        { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected').length, color: 'text-rose-700', bg: 'from-rose-50 to-rose-100/50', iconBg: 'bg-rose-100', icon: XCircle, ring: '' },
+        { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-700', bg: 'from-rose-50 to-rose-100/50', iconBg: 'bg-rose-100', icon: XCircle, ring: '' },
     ];
 
     const clearFilters = () => {

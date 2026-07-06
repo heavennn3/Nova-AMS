@@ -120,6 +120,7 @@ class AssetRequestController extends Controller
 
     public function adminIndex()
     {
+        // Get all regular requests
         $requests = AssetRequest::with([
                 'user.site',
                 'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
@@ -130,10 +131,49 @@ class AssetRequestController extends Controller
             ->latest()
             ->get();
 
+        // Get all loan requests and merge them
+        $loanRequests = \App\Models\AssetLoan::with([
+                'user.site',
+                'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
+                'site',
+                'approver',
+            ])
+            ->latest()
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'id' => $loan->id,
+                    'type' => 'loan', // Mark as loan type
+                    'request_number' => 'LOAN-' . $loan->id,
+                    'user_id' => $loan->user_id,
+                    'user' => $loan->user,
+                    'asset_id' => $loan->asset_id,
+                    'asset' => $loan->asset,
+                    'request_type' => 'Loan',
+                    'priority' => 'Normal',
+                    'status' => ucfirst($loan->status),
+                    'created_at' => $loan->created_at,
+                    'required_from' => $loan->loan_date,
+                    'required_until' => $loan->expected_return_date,
+                    'reason' => $loan->purpose,
+                    'admin_notes' => $loan->notes,
+                    'approved_by' => $loan->approved_by,
+                    'approved_at' => $loan->approved_at,
+                    'loan_date' => $loan->loan_date,
+                    'expected_return_date' => $loan->expected_return_date,
+                    'condition_status' => $loan->condition_status,
+                    'purpose' => $loan->purpose,
+                    'original_model' => 'AssetLoan', // Track original model for actions
+                ];
+            });
+
+        // Merge both collections
+        $allRequests = collect($requests)->concat($loanRequests)->sortByDesc('created_at')->values();
+
         $sites = \App\Models\Site::select('id', 'name')->get();
 
         return Inertia::render('Requests/AdminIndex', [
-            'requests' => $requests,
+            'requests' => $allRequests,
             'sites' => $sites,
         ]);
     }
@@ -155,6 +195,30 @@ class AssetRequestController extends Controller
 
     public function approve(Request $request, $id)
     {
+        // Check if this is a loan request
+        $isLoanRequest = $request->input('is_loan_request') === 'true';
+
+        if ($isLoanRequest) {
+            // Handle AssetLoan approval
+            $loan = \App\Models\AssetLoan::findOrFail($id);
+            $loan->update([
+                'status' => 'approved',
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+            ]);
+
+            // Update asset status
+            if ($loan->asset_id) {
+                $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
+                if ($asset) {
+                    $asset->setField('status', 'Used');
+                }
+            }
+
+            return back()->with('success', 'Loan request approved.');
+        }
+
+        // Handle regular AssetRequest approval
         $assetRequest = AssetRequest::where('status', 'Pending')->findOrFail($id);
 
         $assetRequest->update([
@@ -189,6 +253,22 @@ class AssetRequestController extends Controller
 
     public function reject(Request $request, $id)
     {
+        // Check if this is a loan request
+        $isLoanRequest = $request->input('is_loan_request') === 'true';
+
+        if ($isLoanRequest) {
+            // Handle AssetLoan rejection
+            $loan = \App\Models\AssetLoan::findOrFail($id);
+            $loan->update([
+                'status' => 'rejected',
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+            ]);
+
+            return back()->with('success', 'Loan request rejected.');
+        }
+
+        // Handle regular AssetRequest rejection
         $assetRequest = AssetRequest::where('status', 'Pending')->findOrFail($id);
 
         $request->validate([
@@ -261,6 +341,29 @@ class AssetRequestController extends Controller
 
     public function markReturned(Request $request, $id)
     {
+        // Check if this is a loan request
+        $isLoanRequest = $request->input('is_loan_request') === 'true';
+
+        if ($isLoanRequest) {
+            // Handle AssetLoan return
+            $loan = \App\Models\AssetLoan::where('status', 'approved')->findOrFail($id);
+            $loan->update([
+                'status' => 'returned',
+                'returned_at' => now(),
+            ]);
+
+            // Update asset status back to available
+            if ($loan->asset_id) {
+                $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
+                if ($asset) {
+                    $asset->setField('status', 'Available');
+                }
+            }
+
+            return back()->with('success', 'Asset loan marked as returned.');
+        }
+
+        // Handle regular AssetRequest return
         $assetRequest = AssetRequest::where('status', 'Fulfilled')
             ->whereIn('request_type', ['Borrow', 'Checkout', 'Loan'])
             ->findOrFail($id);
