@@ -70,7 +70,10 @@ class MasterDataController extends Controller
                     'notes' => $license->notes,
                 ];
             }),
-            'tableConfigurations' => \App\Models\TableConfiguration::getAllColumns($tableName),
+            'tableConfigurations' => \App\Models\TableConfiguration::with('site')
+                ->where('table_name', $tableName)
+                ->orderBy('sort_order')
+                ->get(),
             'configurationTables' => \App\Models\TableConfiguration::select('table_name')->distinct()->pluck('table_name'),
             'currentConfigTable' => $tableName,
         ]);

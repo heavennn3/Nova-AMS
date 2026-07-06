@@ -1182,13 +1182,14 @@ export default function MasterData({
                                             <th className="p-3 text-left font-medium text-sm">Filter</th>
                                             <th className="p-3 text-left font-medium text-sm">Visible</th>
                                             <th className="p-3 text-left font-medium text-sm">Order</th>
+                                        <th className="p-3 text-left font-medium text-sm">Site</th>
                                             <th className="p-3 text-left font-medium text-sm">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {tableConfigurations.length === 0 ? (
                                             <tr>
-                                                <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                                                <td colSpan={9} className="p-8 text-center text-muted-foreground">
                                                     <Settings className="mx-auto h-10 w-10 opacity-40 mb-2" />
                                                     <p className="text-sm">No columns configured for this table.</p>
                                                 </td>
@@ -1289,6 +1290,11 @@ export default function MasterData({
                                                                 </button>
                                                             </div>
                                                         </div>
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted font-medium">
+                                                            {config.site?.name || 'Global'}
+                                                        </span>
                                                     </td>
                                                     <td className="p-3">
                                                         <div className="flex items-center gap-1">

@@ -29,9 +29,13 @@ class AssetController extends Controller
         ]);
     }
 
-    public function inventory()
+    public function inventory(Request $request)
     {
-        $configs = TableConfiguration::getAllColumns('assets');
+        $siteId = $request->query('site_id');
+        $site = $siteId ? \App\Models\Site::find($siteId) : null;
+
+        $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
+
         $assets = Asset::with('fieldValues')->latest()->get()->map(function ($asset) use ($configs) {
             $fields = $asset->getFields();
             $row = ['id' => $asset->id];
@@ -41,10 +45,15 @@ class AssetController extends Controller
             return $row;
         });
 
+        if ($site) {
+            $assets = $assets->filter(fn($r) => ($r['lokasi'] ?? '') === $site->name)->values();
+        }
+
         return Inertia::render('asset-inventory', [
             'assets' => $assets,
             'configurations' => $configs,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
+            'currentSiteId' => $siteId,
         ]);
     }
 
@@ -132,9 +141,11 @@ class AssetController extends Controller
         $request->validate([
             'assets' => 'required|array',
             'site_name' => 'nullable|string',
+            'site_id' => 'nullable|integer|exists:sites,id',
         ]);
 
-        $configs = TableConfiguration::getAllColumns('assets');
+        $siteId = $request->site_id;
+        $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
         $columnKeys = $configs->pluck('column_key')->toArray();
 
         $importedCount = 0;

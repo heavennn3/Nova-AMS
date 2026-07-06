@@ -12,6 +12,7 @@ class TableConfiguration extends Model
 
     protected $fillable = [
         'table_name',
+        'site_id',
         'column_key',
         'column_title',
         'data_type',
@@ -28,6 +29,11 @@ class TableConfiguration extends Model
         'created_by',
         'updated_by',
     ];
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
+    }
 
     protected $casts = [
         'is_primary_key' => 'boolean',
@@ -61,6 +67,14 @@ class TableConfiguration extends Model
         return $query->where('table_name', $tableName);
     }
 
+    public function scopeForSite($query, $siteId)
+    {
+        if ($siteId === null) {
+            return $query->whereNull('site_id');
+        }
+        return $query->where('site_id', $siteId);
+    }
+
     /**
      * Scope for visible columns only.
      */
@@ -78,23 +92,28 @@ class TableConfiguration extends Model
     }
 
     /**
-     * Get visible columns for a specific table.
+     * Get visible columns for a specific table, optionally scoped to a site.
      */
-    public static function getVisibleColumns($tableName)
+    public static function getVisibleColumns($tableName, $siteId = null)
     {
-        return self::forTable($tableName)
-            ->visible()
-            ->ordered()
-            ->get();
+        $q = self::forTable($tableName)->visible()->ordered();
+        if ($siteId !== null) {
+            $q->where('site_id', $siteId);
+        }
+        return $q->get();
     }
 
     /**
-     * Get all columns (including hidden) for a specific table.
+     * Get all columns (including hidden) for a specific table, optionally scoped to a site.
+     * When no siteId given, returns ALL columns (backward compatible).
+     * When siteId is given, returns only columns for that site.
      */
-    public static function getAllColumns($tableName)
+    public static function getAllColumns($tableName, $siteId = null)
     {
-        return self::forTable($tableName)
-            ->ordered()
-            ->get();
+        $q = self::forTable($tableName)->ordered();
+        if ($siteId !== null) {
+            $q->where('site_id', $siteId);
+        }
+        return $q->get();
     }
 }

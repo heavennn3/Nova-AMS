@@ -36,13 +36,14 @@ export default function AssetInventory({
     assets = [],
     configurations = [],
     sites = [],
+    currentSiteId = null,
 }: any) {
     const [search, setSearch] = useState('');
-    const [siteFilter, setSiteFilter] = useState('all');
+    const [siteFilter, setSiteFilter] = useState(currentSiteId || 'all');
 
     // ── Import ──
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
-    const [importSiteId, setImportSiteId] = useState<string>('');
+    const [importSiteId, setImportSiteId] = useState<string>('none');
 
     // ── No-config flow: detect CSV headers → pick PK → create configs ──
     const [csvConfigOpen, setCsvConfigOpen] = useState(false);
@@ -52,6 +53,15 @@ export default function AssetInventory({
     const [configuring, setConfiguring] = useState(false);
 
     const hasConfig = configurations.length > 0;
+
+    const handleSiteFilterChange = (value: string) => {
+        setSiteFilter(value);
+        if (value === 'all') {
+            router.get('/asset-inventory', {}, { preserveState: true, replace: true });
+        } else {
+            router.get('/asset-inventory', { site_id: value }, { preserveState: true, replace: true });
+        }
+    };
 
     const columns = useMemo(() => {
         const cols: any[] = (configurations || []).map((cfg: any) => ({
@@ -142,6 +152,7 @@ export default function AssetInventory({
         setDetectedHeaders(headers);
         setPrimaryKeyHeader(headers[0] || '');
         setCsvRawData(importedData);
+        setImportSiteId(currentSiteId || 'none');
         setCsvConfigOpen(true);
     };
 
@@ -162,6 +173,7 @@ export default function AssetInventory({
                     table_name: 'assets',
                     headers: detectedHeaders,
                     primary_key_header: primaryKeyHeader,
+                    site_id: importSiteId === 'none' ? null : importSiteId,
                 }),
             });
 
@@ -176,19 +188,19 @@ export default function AssetInventory({
             const selectedSite = sites.find((s: any) => String(s.id) === importSiteId);
             router.post(
                 '/assets/import-bulk',
-                { assets: csvRawData, site_name: selectedSite?.name || '' },
+                { assets: csvRawData, site_name: selectedSite?.name || '', site_id: importSiteId === 'none' ? null : importSiteId },
                 {
                     preserveScroll: true,
                     onSuccess: () => {
                         toast.success(`Table configured and ${csvRawData.length} assets imported!`);
                         setCsvRawData(null);
-                        setImportSiteId('');
-                        router.reload({ only: ['assets', 'configurations'] });
+                        setImportSiteId('none');
+                        router.reload({ only: ['assets', 'configurations', 'currentSiteId'] });
                     },
                     onError: (err) => {
                         console.error(err);
                         toast.error('Columns created but data import failed.');
-                        router.reload({ only: ['assets', 'configurations'] });
+                        router.reload({ only: ['assets', 'configurations', 'currentSiteId'] });
                     },
                 },
             );
@@ -216,13 +228,13 @@ export default function AssetInventory({
 
         router.post(
             '/assets/import-bulk',
-            { assets: pendingImportData, site_name: siteName },
+            { assets: pendingImportData, site_name: siteName, site_id: importSiteId === 'none' ? null : importSiteId },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     toast.success(`Imported ${pendingImportData.length} assets!`);
                     setPendingImportData(null);
-                    setImportSiteId('');
+                    setImportSiteId('none');
                 },
                 onError: (err) => {
                     console.error(err);
@@ -294,43 +306,72 @@ export default function AssetInventory({
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
                     <p className="text-sm text-muted-foreground">
-                        {hasConfig
-                            ? 'All registered assets across all sites'
-                            : 'Configure your asset table to get started'}
+                        {!hasConfig
+                            ? currentSiteId
+                                ? `Site not configured — import a CSV to set up the asset table`
+                                : 'Configure your asset table to get started'
+                            : currentSiteId
+                                ? `Assets for ${
+                                    sites.find((s: any) => String(s.id) === currentSiteId)?.name || 'selected site'
+                                }`
+                                : 'All registered assets across all sites'}
                     </p>
                 </div>
-                {hasConfig && (
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={openFilePicker}>
-                            <Upload className="mr-2 h-4 w-4" /> Import CSV
-                        </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={openFilePicker}>
+                        <Upload className="mr-2 h-4 w-4" /> Import CSV
+                    </Button>
+                    {hasConfig && (
                         <Link href="/assets/create">
                             <Button size="sm">
                                 <Plus className="mr-2 h-4 w-4" /> New Asset
                             </Button>
                         </Link>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {!hasConfig ? (
                 /* ── Empty state: no columns configured yet ── */
-                <div className="rounded-xl border-2 border-dashed bg-card p-16 text-center">
-                    <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No Columns Configured</h3>
-                    <p className="text-sm text-muted-foreground max-w-md mx-auto mb-8">
-                        Start by creating a site in Master Data, then import a CSV to
-                        automatically detect and configure your columns.
-                    </p>
-                    <div className="flex items-center justify-center gap-3">
-                        <Link href="/master-data">
-                            <Button variant="outline">
-                                <MapPin className="mr-2 h-4 w-4" /> Create Site
+                <div className="space-y-4">
+                    {sites.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
+                                <SelectTrigger className="h-8 w-[200px] text-sm">
+                                    <SelectValue placeholder="All Sites" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {sites.map((site: any) => (
+                                        <SelectItem key={site.id} value={String(site.id)}>
+                                            {site.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    <div className="rounded-xl border-2 border-dashed bg-card p-16 text-center">
+                        <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No Columns Configured</h3>
+                        <p className="text-sm text-muted-foreground max-w-md mx-auto mb-8">
+                            {currentSiteId
+                                ? `This site has no table configured. Import a CSV to auto-configure it.`
+                                : `Start by creating a site in Master Data, then import a CSV to
+automatically detect and configure your columns.`}
+                        </p>
+                        <div className="flex items-center justify-center gap-3">
+                            {!currentSiteId && (
+                                <Link href="/master-data">
+                                    <Button variant="outline">
+                                        <MapPin className="mr-2 h-4 w-4" /> Create Site
+                                    </Button>
+                                </Link>
+                            )}
+                            <Button onClick={openFilePicker}>
+                                <Upload className="mr-2 h-4 w-4" /> Import CSV &amp; Configure
                             </Button>
-                        </Link>
-                        <Button onClick={openFilePicker}>
-                            <Upload className="mr-2 h-4 w-4" /> Import CSV &amp; Configure
-                        </Button>
+                        </div>
                     </div>
                 </div>
             ) : (
@@ -347,7 +388,7 @@ export default function AssetInventory({
                         </div>
 
                         {sites.length > 0 && (
-                            <Select value={siteFilter} onValueChange={setSiteFilter}>
+                            <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
                                 <SelectTrigger className="h-8 w-[200px] text-sm">
                                     <SelectValue placeholder="All Sites" />
                                 </SelectTrigger>

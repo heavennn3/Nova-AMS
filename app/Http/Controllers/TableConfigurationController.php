@@ -50,6 +50,7 @@ class TableConfigurationController extends Controller
             'column_title' => 'required|string|max:255',
             'data_type' => 'required|string|in:string,number,date,boolean,enum,array',
             'data_source' => 'nullable|string|max:255',
+            'site_id' => 'nullable|integer|exists:sites,id',
             'is_primary_key' => 'boolean',
             'is_sortable' => 'boolean',
             'is_filterable' => 'boolean',
@@ -61,9 +62,11 @@ class TableConfigurationController extends Controller
             'options' => 'nullable|array',
         ]);
 
-        // Check if column_key already exists for this table (include soft-deleted rows)
-        $existing = TableConfiguration::withTrashed()->where('table_name', $validated['table_name'])
+        // Check if column_key already exists for this table + site (include soft-deleted rows)
+        $existing = TableConfiguration::withTrashed()
+            ->where('table_name', $validated['table_name'])
             ->where('column_key', $validated['column_key'])
+            ->where('site_id', $validated['site_id'] ?? null)
             ->first();
 
         if ($existing) {
@@ -104,6 +107,7 @@ class TableConfigurationController extends Controller
             'headers' => 'required|array|min:1',
             'headers.*' => 'required|string|max:255',
             'primary_key_header' => 'nullable|string|max:255',
+            'site_id' => 'nullable|integer|exists:sites,id',
         ]);
 
         $created = [];
@@ -114,10 +118,18 @@ class TableConfigurationController extends Controller
             $key = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $clean));
             $key = trim($key, '_');
 
-            // Deduplicate keys
+            // Deduplicate keys within the same scope (table_name + site_id)
+            $existingQuery = TableConfiguration::where('table_name', $validated['table_name'])
+                ->where('column_key', $key);
+            if (!empty($validated['site_id'])) {
+                $existingQuery->where('site_id', $validated['site_id']);
+            } else {
+                $existingQuery->whereNull('site_id');
+            }
+
             $originalKey = $key;
             $suffix = 1;
-            while (TableConfiguration::where('table_name', $validated['table_name'])->where('column_key', $key)->exists()) {
+            while ($existingQuery->exists()) {
                 $key = $originalKey . '_' . $suffix++;
             }
 
@@ -125,6 +137,7 @@ class TableConfigurationController extends Controller
 
             $config = TableConfiguration::create([
                 'table_name' => $validated['table_name'],
+                'site_id' => $validated['site_id'] ?? null,
                 'column_key' => $key,
                 'column_title' => $clean,
                 'data_type' => 'string',
@@ -174,6 +187,7 @@ class TableConfigurationController extends Controller
             'column_title' => 'required|string|max:255',
             'data_type' => 'required|string|in:string,number,date,boolean,enum,array',
             'data_source' => 'nullable|string|max:255',
+            'site_id' => 'nullable|integer|exists:sites,id',
             'is_primary_key' => 'boolean',
             'is_sortable' => 'boolean',
             'is_filterable' => 'boolean',
