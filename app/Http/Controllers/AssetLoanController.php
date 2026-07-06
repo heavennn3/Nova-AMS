@@ -13,14 +13,26 @@ class AssetLoanController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = AssetLoan::with(['asset', 'user', 'site', 'approver']);
 
-        // Admin sees all; non-admin sees only own
-        if (!$user->hasRole('Admin')) {
-            $query->where('user_id', $user->id);
-        }
-
-        $loans = $query->latest()->get();
+        // Only show current user's loans
+        $loans = AssetLoan::with(['asset', 'site', 'approver'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'id' => $loan->id,
+                    'asset_id' => $loan->asset_id,
+                    'asset_name' => $loan->asset ? $loan->asset->getFields()['product_name'] ?? 'Unknown' : 'Unknown',
+                    'loan_date' => $loan->loan_date?->format('Y-m-d'),
+                    'expected_return_date' => $loan->expected_return_date?->format('Y-m-d'),
+                    'condition_status' => $loan->condition_status,
+                    'purpose' => $loan->purpose,
+                    'status' => $loan->status,
+                    'approved_at' => $loan->approved_at?->format('Y-m-d'),
+                    'returned_at' => $loan->returned_at?->format('Y-m-d'),
+                ];
+            });
 
         return Inertia::render('AssetLoans/Index', [
             'loans' => $loans,
@@ -29,109 +41,15 @@ class AssetLoanController extends Controller
 
     public function create(Request $request)
     {
-        $assets = Asset::with(['site:id,name', 'fieldValues'])
-            ->whereHas('fieldValues', fn($q) => $q->where('column_key', 'status')->whereRaw('LOWER(value) = ?', ['available']))
-            ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($asset) {
-                $fields = $asset->getFields();
-                return [
-                    'id' => $asset->id,
-                    'site_id' => (string) $asset->site_id,
-                    'asset_id' => $fields['asset_id'] ?? $fields['aset_id'] ?? null,
-                    'product_name' => $fields['product_name'] ?? null,
-                    'brand' => $fields['brand'] ?? null,
-                    'serial_number' => $fields['serial_number'] ?? null,
-                    'category_id' => $fields['category_id'] ?? null,
-                    'type_id' => $fields['type_id'] ?? null,
-                    'status' => $fields['status'] ?? 'NOT UPDATED',
-                    'site' => $asset->site ? ['id' => $asset->site->id, 'name' => $asset->site->name] : null,
-                ];
-            })
-            ->values();
-
-        $sites = Site::select('id', 'name')->get();
-        $user = $request->user();
-
-        return Inertia::render('AssetLoans/Create', [
-            'assets' => $assets,
-            'sites' => $sites,
-            'currentUser' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-        ]);
+        // Redirect to unified request page with loan type pre-selected
+        return redirect()->route('requests.create')
+            ->with('info', 'Loan requests are now managed through the unified request system. Please select "Loan" as the request type.');
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'asset_ids' => 'required|array|min:1',
-            'asset_ids.*' => 'exists:assets,id',
-            'site_id' => 'nullable|exists:sites,id',
-            'loan_date' => 'required|date',
-            'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
-            'condition_status' => 'required|in:good,semi_faulty,faulty',
-            'purpose' => 'required|string|max:500',
-            'notes' => 'nullable|string|max:2000',
-        ]);
-
-        $count = 0;
-        foreach ($validated['asset_ids'] as $assetId) {
-            AssetLoan::create([
-                'asset_id' => $assetId,
-                'user_id' => $request->user()->id,
-                'site_id' => $validated['site_id'] ?? null,
-                'loan_date' => $validated['loan_date'],
-                'expected_return_date' => $validated['expected_return_date'] ?? null,
-                'condition_status' => $validated['condition_status'],
-                'purpose' => $validated['purpose'],
-                'notes' => $validated['notes'] ?? null,
-                'status' => 'pending',
-            ]);
-            $count++;
-        }
-
-        return redirect()->route('asset-loans.index')
-            ->with('success', "{$count} loan request(s) submitted. Awaiting approval.");
-    }
-
-    public function approve(Request $request, AssetLoan $loan)
-    {
-        $loan->update([
-            'status' => 'approved',
-            'approved_by' => $request->user()->id,
-            'approved_at' => now(),
-        ]);
-
-        Asset::withoutGlobalScope('site_access')
-            ->find($loan->asset_id)?->setField('status', 'Used');
-
-        return back()->with('success', 'Loan approved.');
-    }
-
-    public function reject(Request $request, AssetLoan $loan)
-    {
-        $loan->update([
-            'status' => 'rejected',
-            'approved_by' => $request->user()->id,
-            'approved_at' => now(),
-        ]);
-
-        return back()->with('success', 'Loan rejected.');
-    }
-
-    public function returnAsset(Request $request, AssetLoan $loan)
-    {
-        $loan->update([
-            'status' => 'returned',
-            'returned_at' => now(),
-        ]);
-
-        Asset::withoutGlobalScope('site_access')
-            ->find($loan->asset_id)?->setField('status', 'Available');
-
-        return back()->with('success', 'Asset returned.');
+        // Redirect to unified request system
+        return redirect()->route('requests.create')
+            ->with('info', 'Loan requests are now managed through the unified request system. Please select "Loan" as the request type.');
     }
 }

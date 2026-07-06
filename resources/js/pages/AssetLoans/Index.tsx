@@ -15,14 +15,8 @@ import {
     Plus,
     Search,
     Clock,
-    CheckCircle2,
-    XCircle,
-    RotateCcw,
     Calendar,
     Package,
-    ArrowLeft,
-    Ban,
-    Check,
 } from 'lucide-react';
 
 const statusColors: Record<string, string> = {
@@ -64,12 +58,12 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
             <div className="flex flex-col space-y-6 p-8">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Asset Loans</h1>
-                        <p className="text-sm text-muted-foreground mt-1">Manage your asset loan requests</p>
+                        <h1 className="text-2xl font-bold tracking-tight">My Asset Loans</h1>
+                        <p className="text-sm text-muted-foreground mt-1">View your asset loan status and history</p>
                     </div>
-                    <Link href="/asset-loans/create">
+                    <Link href="/requests/create">
                         <Button>
-                            <Plus className="mr-2 h-4 w-4" /> New Loan
+                            <Plus className="mr-2 h-4 w-4" /> New Loan Request
                         </Button>
                     </Link>
                 </div>
@@ -121,18 +115,16 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                             <thead>
                                 <tr className="border-b bg-muted/50">
                                     <th className="p-3 text-left font-medium">Asset</th>
-                                    <th className="p-3 text-left font-medium">Borrower</th>
                                     <th className="p-3 text-left font-medium">Loan Date</th>
                                     <th className="p-3 text-left font-medium">Expected Return</th>
                                     <th className="p-3 text-left font-medium">Condition</th>
                                     <th className="p-3 text-left font-medium">Status</th>
-                                    <th className="p-3 text-left font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="p-12 text-center text-muted-foreground">
+                                        <td colSpan={5} className="p-12 text-center text-muted-foreground">
                                             <Package className="mx-auto h-12 w-12 mb-3 opacity-30" />
                                             <p>No loan requests found</p>
                                         </td>
@@ -141,10 +133,9 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     filtered.map((loan) => (
                                         <tr key={loan.id} className="border-b last:border-0 hover:bg-muted/30">
                                             <td className="p-3">
-                                                <p className="font-medium">{loan.asset?.product_name || '—'}</p>
-                                                <p className="text-xs text-muted-foreground">{loan.asset?.asset_id || ''}</p>
+                                                <p className="font-medium">{loan.asset_name || '—'}</p>
+                                                <p className="text-xs text-muted-foreground">ID: {loan.asset_id || '—'}</p>
                                             </td>
-                                            <td className="p-3">{loan.user?.name || '—'}</td>
                                             <td className="p-3">
                                                 <div className="flex items-center gap-1.5 text-sm">
                                                     <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
@@ -166,40 +157,6 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                                 <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'bg-gray-100 text-gray-800'}`}>
                                                     {loan.status}
                                                 </span>
-                                            </td>
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-1">
-                                                    {loan.status === 'pending' && (
-                                                        <>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-7 text-green-600"
-                                                                onClick={() => router.post(`/asset-loans/${loan.id}/approve`, {}, { preserveScroll: true })}
-                                                            >
-                                                                <Check className="h-3.5 w-3.5" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-7 text-red-600"
-                                                                onClick={() => router.post(`/asset-loans/${loan.id}/reject`, {}, { preserveScroll: true })}
-                                                            >
-                                                                <Ban className="h-3.5 w-3.5" />
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                    {loan.status === 'approved' && (
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7 text-green-600"
-                                                            onClick={() => router.post(`/asset-loans/${loan.id}/return`, {}, { preserveScroll: true })}
-                                                        >
-                                                            <RotateCcw className="h-3.5 w-3.5" /> Return
-                                                        </Button>
-                                                    )}
-                                                </div>
                                             </td>
                                         </tr>
                                     ))
