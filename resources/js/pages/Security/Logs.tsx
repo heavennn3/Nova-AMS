@@ -229,14 +229,10 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
             {/* Header */}
             <div className="flex items-end justify-between">
                 <div className="text-left">
-                    <div className="mb-1 flex items-center space-x-2 text-primary">
-                        <ShieldAlert className="h-5 w-5" />
-                        <span className="text-xs font-bold tracking-widest uppercase">
-                            Compliance & Governance
-                        </span>
-                    </div>
+
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                        System Activity Logs
+
+                        System Logs
                     </h1>
                 </div>
             </div>

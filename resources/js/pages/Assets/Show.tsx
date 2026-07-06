@@ -457,7 +457,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                             { id: 'history', name: 'History', icon: Clock },
                             { id: 'documents', name: 'Documents', icon: FileText },
                             { id: 'maintenance', name: 'Maintenance', icon: Wrench },
-                            { id: 'depreciation', name: 'Depreciation', icon: LineChart },
+
                         ].map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -607,43 +607,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                         </div>
                     )}
 
-                    {activeTab === 'depreciation' && (
-                        <div className="space-y-6">
-                            <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2">
-                                Depreciation (Straight Line)
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 p-5 rounded-xl space-y-1">
-                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold block uppercase">Purchase Price</span>
-                                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-                                        {formatCurrency(getFieldVal(['purchase_price', 'nilai_asal', 'original_value']))}
-                                    </span>
-                                </div>
-                                <div className="border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 p-5 rounded-xl space-y-1">
-                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold block uppercase">Current Value</span>
-                                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-                                        {formatCurrency(getFieldVal(['current_value', 'nilai_semasa']))}
-                                    </span>
-                                </div>
-                                <div className="border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 p-5 rounded-xl space-y-1">
-                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold block uppercase">Total Depreciated</span>
-                                    <span className="text-2xl font-bold text-rose-500 dark:text-rose-400">
-                                        {(() => {
-                                            const purchase = parseFloat(String(getFieldVal(['purchase_price', 'nilai_asal', 'original_value']) || '').replace(/[^0-9.-]/g, ''));
-                                            const current = parseFloat(String(getFieldVal(['current_value', 'nilai_semasa']) || '').replace(/[^0-9.-]/g, ''));
-                                            if (!isNaN(purchase) && !isNaN(current)) {
-                                                return formatCurrency(purchase - current);
-                                            }
-                                            return '—';
-                                        })()}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="text-xs text-slate-400 mt-2 text-center italic">
-                                Calculations are based on automatic periodic straight-line depreciation configured for this category.
-                            </div>
-                        </div>
-                    )}
+
                 </div>
             </Card>
 
