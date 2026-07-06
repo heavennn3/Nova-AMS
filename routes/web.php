@@ -41,6 +41,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/requests/batch-approve', [\App\Http\Controllers\AssetRequestController::class, 'batchApprove'])->name('requests.batch-approve');
     Route::post('/requests/batch-reject', [\App\Http\Controllers\AssetRequestController::class, 'batchReject'])->name('requests.batch-reject');
 
+    // Asset Loans
+    Route::prefix('asset-loans')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AssetLoanController::class, 'index'])->name('asset-loans.index');
+        Route::get('/create', [\App\Http\Controllers\AssetLoanController::class, 'create'])->name('asset-loans.create');
+        Route::post('/', [\App\Http\Controllers\AssetLoanController::class, 'store'])->name('asset-loans.store');
+        Route::post('/{loan}/approve', [\App\Http\Controllers\AssetLoanController::class, 'approve'])->name('asset-loans.approve');
+        Route::post('/{loan}/reject', [\App\Http\Controllers\AssetLoanController::class, 'reject'])->name('asset-loans.reject');
+        Route::post('/{loan}/return', [\App\Http\Controllers\AssetLoanController::class, 'returnAsset'])->name('asset-loans.return');
+    });
+
     // Check Out / Check In (Blocked for Admin users)
     Route::middleware(['restrict.admin'])->group(function () {
         Route::get('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'index'])->name('checkout.index');

@@ -69,9 +69,9 @@ const navSections: NavSection[] = [
                         title: 'Assets',
                         href: assetInventory(),
                     },
-                    {
+                {
                         title: 'Loan',
-                        href: '#',
+                        href: '/asset-loans',
                     },
                 ],
             },
