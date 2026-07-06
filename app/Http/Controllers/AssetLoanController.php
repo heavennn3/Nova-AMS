@@ -33,7 +33,7 @@ class AssetLoanController extends Controller
                 return [
                     'id' => $asset->id,
                     'site_id' => (string) $asset->site_id,
-                    'asset_id' => $fields['asset_id'] ?? null,
+                    'asset_id' => $fields['asset_id'] ?? $fields['aset_id'] ?? null,
                     'product_name' => $fields['product_name'] ?? null,
                     'brand' => $fields['brand'] ?? null,
                     'serial_number' => $fields['serial_number'] ?? null,

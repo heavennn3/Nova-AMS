@@ -59,6 +59,7 @@ export default function Create({
             String(a.site_id) === selectedSiteId && (
                 a.product_name?.toLowerCase().includes(q) ||
                 a.asset_id?.toLowerCase().includes(q) ||
+                String(a.id).includes(q) ||
                 a.brand?.toLowerCase().includes(q) ||
                 a.serial_number?.toLowerCase().includes(q)
             )
@@ -146,8 +147,9 @@ export default function Create({
                                                     <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${selected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
                                                         {selected && <Check className="h-3 w-3" />}
                                                     </div>
-                                                    <span className="font-medium">#{asset.id} {asset.product_name || asset.asset_id || ''}</span>
-                                                    <span className="text-muted-foreground ml-1">· {asset.asset_id || ''} {asset.brand ? '· '+asset.brand : ''} {asset.serial_number ? '· '+asset.serial_number : ''}</span>
+                                                    <span className="font-medium">{asset.asset_id || `#${asset.id}`}</span>
+                                                    {asset.product_name && <span className="text-muted-foreground ml-1">· {asset.product_name}</span>}
+                                                    {asset.serial_number && <span className="text-muted-foreground">· {asset.serial_number}</span>}
                                                 </button>
                                             );
                                         })
