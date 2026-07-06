@@ -383,7 +383,7 @@ export default function AssetIndex({
                         automatically detect and configure your columns.
                     </p>
                     <div className="flex items-center justify-center gap-3">
-                        <Button variant="outline" onClick={() => router.get('/master-data/sites')}>
+                        <Button variant="outline" onClick={() => router.get('/master-data')}>
                             <MapPin className="mr-2 h-4 w-4" /> Create Site
                         </Button>
                         <FileImportButton onImport={handleCsvForSetup}>
