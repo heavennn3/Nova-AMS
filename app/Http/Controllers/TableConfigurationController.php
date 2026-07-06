@@ -184,8 +184,8 @@ class TableConfigurationController extends Controller
     public function update(Request $request, TableConfiguration $tableConfiguration)
     {
         $validated = $request->validate([
-            'column_title' => 'required|string|max:255',
-            'data_type' => 'required|string|in:string,number,date,boolean,enum,array',
+            'column_title' => 'sometimes|required|string|max:255',
+            'data_type' => 'sometimes|required|string|in:string,number,date,boolean,enum,array',
             'data_source' => 'nullable|string|max:255',
             'site_id' => 'nullable|integer|exists:sites,id',
             'is_primary_key' => 'boolean',
@@ -194,7 +194,7 @@ class TableConfigurationController extends Controller
             'is_visible' => 'boolean',
             'sort_order' => 'integer|min:0',
             'width' => 'nullable|integer|min:50|max:500',
-            'alignment' => 'required|string|in:left,center,right',
+            'alignment' => 'sometimes|required|string|in:left,center,right',
             'format_pattern' => 'nullable|string|max:255',
             'options' => 'nullable|array',
         ]);
@@ -202,6 +202,13 @@ class TableConfigurationController extends Controller
         $validated['updated_by'] = Auth::id();
 
         $tableConfiguration->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Column renamed successfully.',
+                'configuration' => $tableConfiguration->fresh(),
+            ]);
+        }
 
         return redirect()->route('table-configurations.index', [
             'tableName' => $tableConfiguration->table_name

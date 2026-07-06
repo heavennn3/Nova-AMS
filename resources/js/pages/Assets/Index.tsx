@@ -63,9 +63,14 @@ export default function AssetIndex({
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
     const [importSiteId, setImportSiteId] = useState<string>(currentSiteId ? String(currentSiteId) : '');
     const [search, setSearch] = useState('');
+    const [titleMap, setTitleMap] = useState<Record<number, string>>({});
     const currentSiteHasConfig = currentSiteId
         ? configuredSiteIds.includes(currentSiteId) || configurations.some((c: any) => !c.site_id)
         : false;
+
+    const handleTitleChange = (configId: number, newTitle: string) => {
+        setTitleMap((prev) => ({ ...prev, [configId]: newTitle }));
+    };
 
     // ── No-config flow: detect CSV headers → pick PK → create configs ──
     const [csvConfigOpen, setCsvConfigOpen] = useState(false);
@@ -183,7 +188,7 @@ export default function AssetIndex({
         const cols: any[] = (configurations || []).map((cfg: any) => ({
             accessorKey: cfg.column_key,
             header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title={cfg.column_title} />
+                <DataTableColumnHeader column={column} title={titleMap[cfg.id] || cfg.column_title} configId={cfg.id} isAdmin={isAdmin} onTitleChange={handleTitleChange} />
             ),
             enableSorting: cfg.is_sortable,
             cell: ({ row }: any) => {
@@ -243,7 +248,7 @@ export default function AssetIndex({
         }
 
         return cols;
-    }, [configurations, isAdmin]);
+    }, [configurations, isAdmin, titleMap]);
 
     const filteredAssets = assets;
 
@@ -344,7 +349,7 @@ export default function AssetIndex({
                         {sites.length > 0 && (
                             <Select value={currentSiteId ? String(currentSiteId) : ''} onValueChange={(v) => router.get('/assets', { site_id: v })}>
                                 <SelectTrigger className="h-8 w-[200px] text-sm">
-                                    <SelectValue placeholder="All Sites" />
+                                    <SelectValue placeholder={sites.find(s => String(s.id) === String(currentSiteId))?.name || 'Select site'} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {sites.map((site) => (

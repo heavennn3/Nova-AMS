@@ -13,6 +13,14 @@ class AssetController extends Controller
     {
         $siteId = $request->query('site_id');
 
+        // Default to first site if none selected
+        if (!$siteId) {
+            $firstSite = \App\Models\Site::orderBy('name')->first();
+            if ($firstSite) {
+                return redirect()->to('/assets?site_id=' . $firstSite->id);
+            }
+        }
+
         $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
 
         $assetsQuery = Asset::with('fieldValues')->latest();
