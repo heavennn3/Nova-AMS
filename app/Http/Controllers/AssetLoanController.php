@@ -13,10 +13,14 @@ class AssetLoanController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $loans = AssetLoan::with(['asset', 'user', 'site', 'approver'])
-            ->where('user_id', $user->id)
-            ->latest()
-            ->get();
+        $query = AssetLoan::with(['asset', 'user', 'site', 'approver']);
+
+        // Admin sees all; non-admin sees only own
+        if (!$user->hasRole('Admin')) {
+            $query->where('user_id', $user->id);
+        }
+
+        $loans = $query->latest()->get();
 
         return Inertia::render('AssetLoans/Index', [
             'loans' => $loans,
@@ -101,7 +105,7 @@ class AssetLoanController extends Controller
         ]);
 
         Asset::withoutGlobalScope('site_access')
-            ->find($loan->asset_id)?->setField('status', 'On Loan');
+            ->find($loan->asset_id)?->setField('status', 'Used');
 
         return back()->with('success', 'Loan approved.');
     }
