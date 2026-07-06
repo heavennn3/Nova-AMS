@@ -19,9 +19,14 @@ import {
     AlertTriangle,
     CheckCircle2,
     FileSpreadsheet,
+    Info,
+    Wrench,
+    LineChart,
+    RefreshCw,
+    QrCode,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
     Dialog,
@@ -32,7 +37,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
@@ -42,6 +46,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function Show({ asset, users = [], configurations = [] }: { asset: any; users?: any[]; configurations?: any[] }) {
     const { auth } = usePage<any>().props;
@@ -50,6 +55,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('information');
 
     // Form setup for Checkout
     const checkoutForm = useForm({
@@ -68,9 +74,68 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
         (a: any) => a.status === 'active'
     );
 
-    // Last Audit & Next Audit mock calculations
-    const lastAuditDateStr = asset.updated_at ? asset.updated_at.split('T')[0] : 'N/A';
     const fields = asset;
+
+    // Helper to search asset fields case-insensitively or with synonyms
+    const getFieldVal = (keys: string[]) => {
+        for (const key of keys) {
+            const foundKey = Object.keys(fields).find(
+                (k) => k.toLowerCase() === key.toLowerCase()
+            );
+            if (foundKey && fields[foundKey] !== undefined && fields[foundKey] !== null) {
+                return fields[foundKey];
+            }
+        }
+        return null;
+    };
+
+    const formatCurrency = (val: any) => {
+        if (!val || val === '—') return '—';
+        const cleanVal = String(val).trim();
+        if (cleanVal.startsWith('$') || cleanVal.startsWith('RM') || cleanVal.startsWith('Rp')) {
+            return cleanVal;
+        }
+        const num = parseFloat(cleanVal.replace(/[^0-9.-]/g, ''));
+        if (!isNaN(num)) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+        }
+        return cleanVal;
+    };
+
+    // Primary Key value
+    const pkConfig = configurations?.find((c: any) => c.is_primary_key);
+    const pkKey = pkConfig?.column_key || 'asset_id';
+    const assetCode = fields[pkKey] || asset.asset_id || asset.aset_id || `AS-${asset.id}`;
+
+    // Asset Name/Title
+    const nameKeys = ['asset_name', 'product', 'jenis_aset', 'nama_aset', 'brand', 'model', 'product_name'];
+    const nameKey = configurations?.find((c: any) => nameKeys.includes(c.column_key.toLowerCase()))?.column_key;
+    const assetTitle = nameKey ? fields[nameKey] : (getFieldVal(nameKeys) || assetCode);
+
+    // Subtitle under Asset Title (e.g. brand + model or product_name or jenis_aset)
+    const brandVal = getFieldVal(['brand', 'manufacturer', 'pengeluar']) || '';
+    const modelVal = getFieldVal(['model', 'product_model']) || '';
+    const brandModel = (brandVal || modelVal)
+        ? `${brandVal} ${modelVal}`.trim()
+        : (getFieldVal(['kategori_aset', 'category', 'jenis_aset']) || '');
+
+    // Badges:
+    // Status Badge value and styling
+    const statusValue = fields.status || 'available';
+    // Condition Badge: Good/Broken/etc.
+    const conditionValue = getFieldVal(['condition', 'kondisi', 'keadaan', 'status_fizikal']) || 'Good';
+    // Category Badge
+    const categoryValue = getFieldVal(['category', 'kategori_aset', 'kategori']) || 'IT Equipment';
+
+    // Top Summary Card Columns:
+    // Department
+    const departmentValue = getFieldVal(['department', 'jabatan', 'department_name']) || (activeAssignment?.user?.department?.name) || '—';
+    // Assigned to
+    const assignedToValue = activeAssignment ? (activeAssignment.user?.name || '—') : '—';
+    // Location
+    const locationValue = getFieldVal(['location', 'lokasi', 'tempat']) || asset.site?.name || '—';
+    // Serial Number
+    const serialNumberValue = getFieldVal(['serial_number', 'no_siri', 'serial']) || '—';
 
     const handleCheckoutSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -118,28 +183,39 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
     };
 
     // Format audit creator or fallback
-    const creatorName = asset.audits?.[0]?.user?.name || 'admin admin';
-    const createdDateFormatted = asset.created_at
-        ? new Date(asset.created_at).toLocaleString()
-        : 'N/A';
-    const updatedDateFormatted = asset.updated_at
-        ? new Date(asset.updated_at).toLocaleString()
-        : 'N/A';
+    const creatorName = asset.audits?.[0]?.user?.name || 'System Admin';
 
-    // Status pill coloring logic
-    const statusColors: Record<string, { bg: string; text: string; dot: string }> = {
-        available: { bg: 'bg-green-500/10', text: 'text-green-500', dot: 'bg-green-500' },
-        in_use: { bg: 'bg-blue-500/10', text: 'text-blue-500', dot: 'bg-blue-500' },
-        maintenance: { bg: 'bg-yellow-500/10', text: 'text-yellow-500', dot: 'bg-yellow-500' },
-        faulty: { bg: 'bg-red-500/10', text: 'text-red-500', dot: 'bg-red-500' },
-        retired: { bg: 'bg-slate-500/10', text: 'text-slate-400', dot: 'bg-slate-500' },
-        pending: { bg: 'bg-orange-500/10', text: 'text-orange-500', dot: 'bg-orange-500' },
+    // Status styling helper
+    const getStatusStyle = (status: string) => {
+        const s = status.toLowerCase();
+        if (s.includes('avail') || s.includes('sedia') || s.includes('good') || s.includes('elok')) {
+            return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        }
+        if (s.includes('use') || s.includes('assign') || s.includes('guna') || s.includes('pinjam') || s.includes('aktif')) {
+            return { bg: 'bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        }
+        if (s.includes('maint') || s.includes('repair') || s.includes('selenggara') || s.includes('baiki')) {
+            return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        }
+        if (s.includes('fault') || s.includes('damage') || s.includes('broke') || s.includes('rosak')) {
+            return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        }
+        return { bg: 'bg-slate-50 text-slate-650 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
     };
 
-    const statusObj = statusColors[fields.status] || {
-        bg: 'bg-blue-500/10',
-        text: 'text-blue-500',
-        dot: 'bg-blue-500',
+    const getConditionStyle = (cond: string) => {
+        const c = cond.toLowerCase();
+        if (c.includes('good') || c.includes('elok') || c.includes('baik') || c.includes('new')) {
+            return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        }
+        if (c.includes('fair') || c.includes('sederhana')) {
+            return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        }
+        return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+    };
+
+    const getCategoryStyle = () => {
+        return { bg: 'bg-purple-50 text-purple-600 border border-purple-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
     };
 
     // QR Code URL generator
@@ -150,357 +226,426 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
         detailUrl
     )}`;
 
-    return (
-        <div className="w-full p-8 space-y-6 print:p-0">
-            <Head title={`Asset Details - ${fields[configurations?.find((c:any) => c.is_primary_key)?.column_key] || asset.id}`} />
+    // Information tab fields definition
+    const leftFields = [
+        { label: 'Description', value: getFieldVal(['description', 'keterangan', 'desc']) || '—' },
+        { label: 'Source', value: getFieldVal(['source', 'sumber', 'punca']) || '—' },
+        { label: 'Usage Start Date', value: getFieldVal(['usage_start_date', 'tarikh_mula_guna', 'usage_date']) || '—' },
+        { label: 'Original Value', value: formatCurrency(getFieldVal(['original_value', 'nilai_asal', 'original_cost'])) },
+        { label: 'Warranty Expiry', value: getFieldVal(['warranty_expiry', 'tamat_waranti', 'warranty_date']) || '—' },
+        { label: 'Insurance Policy #', value: getFieldVal(['insurance_policy_number', 'no_polisi_insurans', 'insurance_policy']) || '—' },
+    ];
 
-            {/* Breadcrumb Header - Hidden when printing */}
-            <div className="flex items-center justify-between print:hidden">
-                <div className="flex items-center space-x-4">
+    const rightFields = [
+        { label: 'Notes', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+        { label: 'Purchase Date', value: getFieldVal(['purchase_date', 'tarikh_beli', 'date_of_purchase']) || '—' },
+        { label: 'Purchase Price', value: formatCurrency(getFieldVal(['purchase_price', 'harga_beli', 'cost'])) },
+        { label: 'Current Value', value: formatCurrency(getFieldVal(['current_value', 'nilai_semasa', 'current_cost'])) },
+        { label: 'Insurance Expiry', value: getFieldVal(['insurance_expiry', 'tamat_insurans', 'insurance_date']) || '—' },
+        { label: 'Created By', value: creatorName },
+    ];
+
+    // Identify custom configuration fields not represented in topCard or matched list
+    const topCardKeys = [
+        'asset_name', 'jenis_aset', 'product', 'nama_aset',
+        'serial_number', 'no_siri', 'serial',
+        'location', 'lokasi',
+        'category', 'kategori_aset', 'kategori',
+        'status'
+    ];
+    const topCardKeysLower = topCardKeys.map(k => k.toLowerCase());
+    const matchedKeysLower = [
+        'description', 'keterangan', 'desc',
+        'source', 'sumber', 'punca',
+        'usage_start_date', 'tarikh_mula_guna', 'usage_date',
+        'original_value', 'nilai_asal', 'original_cost',
+        'warranty_expiry', 'tamat_waranti', 'warranty_date',
+        'insurance_policy_number', 'no_polisi_insurans', 'insurance_policy',
+        'notes', 'nota', 'catatan',
+        'purchase_date', 'tarikh_beli', 'date_of_purchase',
+        'purchase_price', 'harga_beli', 'cost',
+        'current_value', 'nilai_semasa', 'current_cost',
+        'insurance_expiry', 'tamat_insurans', 'insurance_date'
+    ];
+
+    const extraFields = (configurations || []).filter((cfg: any) => {
+        const keyLower = cfg.column_key.toLowerCase();
+        return !topCardKeysLower.includes(keyLower) && !matchedKeysLower.includes(keyLower);
+    });
+
+    return (
+        <div className="w-full p-8 space-y-6 print:p-0 bg-slate-50/40 dark:bg-transparent min-h-screen">
+            <Head title={`Asset Details - ${assetCode}`} />
+
+            {/* Header / Actions Row */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden pb-2">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-sans">
+                        {assetTitle}
+                    </h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                        {assetCode}
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
                     <Link href="/assets">
-                        <Button variant="outline" size="icon" className="rounded-full">
-                            <ArrowLeft className="h-4 w-4" />
+                        <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back
                         </Button>
                     </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-foreground font-sans">
-                            Asset Details Dashboard
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Detailed information about asset
-                        </p>
-                    </div>
-                </div>
-            </div>
 
-            {/* Main Show Dashboard Page Content Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    <Button variant="outline" onClick={handlePrint} className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
+                        <Printer className="h-4 w-4 mr-2" />
+                        Print Label
+                    </Button>
 
-                {/* LEFT CARD - Main Stats Dashboard (2/3 width) */}
-                <div className="md:col-span-2 space-y-6 print:col-span-3">
-                    <Card className="border border-border/45 bg-card/65 backdrop-blur-md shadow-lg overflow-hidden">
-                        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 pb-4">
-                            <div className="flex items-center space-x-3">
-                                {/* Status label pill */}
-                                <div className={`flex items-center space-x-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${statusObj.bg} ${statusObj.text}`}>
-                                    <span className={`h-2 w-2 rounded-full ${statusObj.dot} animate-pulse`} />
-                                    <span>{fields.status || '—'}</span>
-                                </div>
-                            </div>
+                    {isAdmin && (
+                        <>
+                            {activeAssignment ? (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsCheckinOpen(true)}
+                                    className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900"
+                                >
+                                    <UserMinus className="h-4 w-4 mr-2" />
+                                    Return
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsCheckoutOpen(true)}
+                                    className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900"
+                                    disabled={asset.status === 'retired' || asset.status === 'maintenance'}
+                                >
+                                    <UserPlus className="h-4 w-4 mr-2" />
+                                    Checkout
+                                </Button>
+                            )}
+                        </>
+                    )}
 
-                            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-                                <div className="flex items-center space-x-1.5">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <span>Last Checkout:</span>
-                                    <span className="font-semibold text-foreground">
-                                        {activeAssignment ? activeAssignment.user?.name : 'N/A'}
-                                    </span>
-                                </div>
-                                <div className="flex items-center space-x-1.5">
-                                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    <span>Expected Checkin:</span>
-                                    <span className="font-semibold text-foreground">N/A</span>
-                                </div>
-                            </div>
-                        </CardHeader>
+                    <Link href="/multi-site/transfers">
+                        <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Transfer
+                        </Button>
+                    </Link>
 
-                        <CardContent className="pt-6 space-y-8">
-
-                            {/* Top row: Specifications & EOL progress indicators */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-border/40">
-
-                                {/* Spec table list — rendered from configurations */}
-                                <div className="space-y-4">
-                                    {configurations.map((cfg: any) => (
-                                        <div key={cfg.column_key} className="flex justify-between items-center py-2 border-b border-border/20 text-sm">
-                                            <span className="text-muted-foreground font-medium">{cfg.column_title}</span>
-                                            <span className="font-semibold text-foreground">{fields[cfg.column_key] || '—'}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                            </div>
-
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-bold tracking-wide text-foreground uppercase border-b pb-2 mb-3">Operational Summary</h3>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="border border-border/30 bg-card p-4 rounded-xl text-center space-y-1 shadow-sm">
-                                            <span className="text-xs text-muted-foreground font-medium block">Active Maintenances</span>
-                                            <span className="text-2xl font-bold text-foreground">0</span>
-                                        </div>
-                                        <div className="border border-border/30 bg-card p-4 rounded-xl text-center space-y-1 shadow-sm">
-                                            <span className="text-xs text-muted-foreground font-medium block">Checkouts</span>
-                                            <span className="text-2xl font-bold text-foreground">{asset.assignments?.length || 0}</span>
-                                        </div>
-                                        <div className="border border-border/30 bg-card p-4 rounded-xl text-center space-y-1 shadow-sm">
-                                            <span className="text-xs text-muted-foreground font-medium block">Checkins</span>
-                                            <span className="text-2xl font-bold text-foreground">
-                                                {asset.assignments?.filter((a: any) => a.status === 'returned').length || 0}
-                                            </span>
-                                        </div>
-                                        <div className="border border-border/30 bg-card p-4 rounded-xl text-center space-y-1 shadow-sm">
-                                            <span className="text-xs text-muted-foreground font-medium block">Requests</span>
-                                            <span className="text-2xl font-bold text-foreground">0</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            {/* Bottom row: QR Code container */}
-                            <div className="flex flex-col items-center justify-center pt-8 border-t border-border/40">
-                                <div className="bg-white p-3 rounded-lg shadow-md border border-slate-200">
-                                    <img
-                                        src={qrCodeUrl}
-                                        alt={`QR Code for ${asset.asset_id}`}
-                                        className="h-32 w-32 object-contain"
-                                        onError={(e) => {
-                                            // Fallback if network offline / QR API fails
-                                            e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>';
-                                        }}
-                                    />
-                                </div>
-                                <span className="text-xs text-muted-foreground mt-2 font-mono">Scan tag QR code to view page on mobile</span>
-                            </div>
-
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* RIGHT CARD - Metadata Details & Toolbar Sidebar (1/3 width) */}
-                <div className="space-y-6 print:hidden">
-                    <Card className="border border-border/45 bg-card/65 backdrop-blur-md shadow-lg overflow-hidden">
-
-                        {/* Quick Actions Toolbar */}
-                        <div className="bg-slate-900/20 dark:bg-slate-950/40 p-4 border-b border-border/45 flex items-center justify-between gap-1.5">
-                            <Link href="/assets">
-                                <Button variant="ghost" size="icon" title="Back to Inventory" className="rounded-lg h-9 w-9">
-                                    <ArrowLeft className="h-4.5 w-4.5" />
+                    {isAdmin && (
+                        <>
+                            <Link href={`/assets/${asset.id}/edit`}>
+                                <Button className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium shadow-sm transition-colors">
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
                                 </Button>
                             </Link>
 
-                            {isAdmin && (
-                                <>
-                                    <Link href={`/assets/${asset.id}/edit`}>
-                                        <Button variant="ghost" size="icon" title="Edit Asset" className="rounded-lg h-9 w-9 text-amber-500 hover:bg-amber-500/10">
-                                            <Edit className="h-4.5 w-4.5" />
-                                        </Button>
-                                    </Link>
-
-                                    {/* Toggle checkout/checkin based on active assignment */}
-                                    {activeAssignment ? (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setIsCheckinOpen(true)}
-                                            title="Check In Asset"
-                                            className="rounded-lg h-9 w-9 text-blue-500 hover:bg-blue-500/10"
-                                        >
-                                            <UserMinus className="h-4.5 w-4.5" />
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setIsCheckoutOpen(true)}
-                                            title="Check Out Asset"
-                                            className="rounded-lg h-9 w-9 text-green-500 hover:bg-green-500/10"
-                                            disabled={asset.status === 'retired' || asset.status === 'maintenance'}
-                                        >
-                                            <UserPlus className="h-4.5 w-4.5" />
-                                        </Button>
-                                    )}
-                                </>
-                            )}
-
                             <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handlePrint}
-                                title="Print Asset Tag Label"
-                                className="rounded-lg h-9 w-9 text-cyan-500 hover:bg-cyan-500/10"
+                                variant="outline"
+                                onClick={() => setIsDeleteOpen(true)}
+                                className="h-10 px-4 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20"
                             >
-                                <Printer className="h-4.5 w-4.5" />
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
                             </Button>
+                        </>
+                    )}
+                </div>
+            </div>
 
-                            {isAdmin && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsDeleteOpen(true)}
-                                    title="Delete Asset"
-                                    className="rounded-lg h-9 w-9 text-red-500 hover:bg-red-500/10"
-                                >
-                                    <Trash2 className="h-4.5 w-4.5" />
-                                </Button>
-                            )}
+            {/* Top Cards Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                {/* Left Card - Main Asset Summary (2/3 width) */}
+                <Card className="lg:col-span-2 border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col justify-between print:col-span-3">
+                    <div className="flex flex-col md:flex-row md:items-start gap-6">
+                        {/* Rounded Square Asset Icon Container */}
+                        <div className="h-20 w-20 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750 flex items-center justify-center shrink-0">
+                            <QrCode className="h-9 w-9 text-slate-400 dark:text-slate-500" />
                         </div>
 
-                        {/* Sidebar Details Metadata List */}
-                        <CardContent className="p-6 space-y-6 text-sm">
-
-                            {/* Text notes */}
-                            <div className="space-y-1.5 border-b pb-4 border-border/20">
-                                <div className="flex items-center text-muted-foreground gap-2 font-medium">
-                                    <FileText className="h-4 w-4 text-slate-400" />
-                                    <span>Notes</span>
-                                </div>
-                                <p className="text-foreground pl-6 text-xs italic leading-relaxed">
-                                {fields.notes || 'No notes provided.'}
+                        {/* Title, Subtitle, Badges */}
+                        <div className="space-y-2.5 flex-1">
+                            <div>
+                                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-sans">
+                                    {assetTitle}
+                                </h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                                    {brandModel}
                                 </p>
                             </div>
 
-                            {/* Property Attributes metadata */}
-                            <div className="space-y-4 pb-4 border-b border-border/20">
-                                <div className="flex items-start gap-3">
-                                    <Tag className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Serial Number</span>
-                                        <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded text-foreground font-semibold">
-                                            {asset.serial_number || 'No serial code'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <ShoppingBag className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Product Model</span>
-                                        <span className="font-semibold text-foreground">{asset.product_name || '—'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <FileSpreadsheet className="h-4 w-4 text-teal-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Model Number</span>
-                                        <span className="font-semibold text-foreground">{asset.brand ? `Model ${asset.brand}` : 'Model N/A'}</span>
-                                    </div>
-                                </div>
-
-
-                                <div className="flex items-start gap-3">
-                                    <FileText className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Purchase Order (PO)</span>
-                                        <span className="font-semibold text-foreground text-xs text-blue-500 hover:underline cursor-pointer">
-                                            {asset.order_number || 'PO-99481'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Landmark className="h-4 w-4 text-pink-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Vendor / Brand</span>
-                                        <span className="font-semibold text-foreground">{asset.vendor?.name || 'Nexus Cybernetics'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Tag className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Category</span>
-                                        <span className="font-semibold text-foreground text-xs text-blue-500 hover:underline cursor-pointer">
-                                            {asset.category?.name || 'Laptops'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <MapPin className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Default Location</span>
-                                        <span className="font-semibold text-foreground">{asset.site?.name || 'HQ - Austin'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <ShoppingBag className="h-4 w-4 text-cyan-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Supplier</span>
-                                        <span className="font-semibold text-foreground text-xs text-blue-500 hover:underline cursor-pointer">
-                                            {asset.supplier?.name || 'CDW Direct Sales'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Landmark className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Manufacturer</span>
-                                        <span className="font-semibold text-foreground text-xs text-blue-500 hover:underline cursor-pointer">
-                                            Apex Tech Corp
-                                        </span>
-                                    </div>
-                                </div>
+                            {/* Badges Row */}
+                            <div className="flex flex-wrap gap-2">
+                                <span className={cn(
+                                    "px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors",
+                                    getStatusStyle(statusValue).bg,
+                                    getStatusStyle(statusValue).text,
+                                    getStatusStyle(statusValue).bg.includes('slate') ? 'border-slate-200' : getStatusStyle(statusValue).bg.replace('bg-', 'border-').replace('/80', '').replace('-50', '-200')
+                                )}>
+                                    {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
+                                </span>
+                                <span className={cn(
+                                    "px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors",
+                                    getConditionStyle(conditionValue).bg,
+                                    getConditionStyle(conditionValue).text,
+                                    getConditionStyle(conditionValue).bg.includes('slate') ? 'border-slate-200' : getConditionStyle(conditionValue).bg.replace('bg-', 'border-').replace('/80', '').replace('-50', '-200')
+                                )}>
+                                    {conditionValue}
+                                </span>
+                                <span className={cn(
+                                    "px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors",
+                                    getCategoryStyle().bg,
+                                    getCategoryStyle().text,
+                                    'border-purple-200'
+                                )}>
+                                    {categoryValue}
+                                </span>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Extra attributes (Dates & ownership flags) */}
-                            <div className="space-y-4 pb-4 border-b border-border/20">
-                                <div className="flex items-start gap-3">
-                                    <Calendar className="h-4 w-4 text-sky-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Device EOL</span>
-                                        <span className="text-foreground font-semibold">
-                                            {asset.eol_date ? `${asset.eol_date} - 2 years 7 months` : 'N/A'}
-                                        </span>
-                                    </div>
-                                </div>
+                    {/* Metadata details block */}
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800/80 text-sm">
+                        <div className="space-y-1">
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Department</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{departmentValue}</span>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Assigned to</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{assignedToValue}</span>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Location</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{locationValue}</span>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Serial Number</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono text-xs">{serialNumberValue}</span>
+                        </div>
+                    </div>
+                </Card>
 
-                                <div className="flex items-start gap-3">
-                                    <Calendar className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
-                                    <div className="space-y-0.5">
-                                        <span className="text-xs text-muted-foreground block">Purchased Date</span>
-                                        <span className="text-foreground font-semibold">
-                                            {'N/A'}
-                                        </span>
-                                    </div>
-                                </div>
+                {/* Right Card - QR Code (1/3 width) */}
+                <Card className="border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col items-center justify-between print:hidden">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block text-center mt-1">
+                        QR CODE
+                    </span>
+                    <div className="my-4 bg-white p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                        <img
+                            src={qrCodeUrl}
+                            alt={`QR Code for ${assetCode}`}
+                            className="h-32 w-32 object-contain"
+                            onError={(e) => {
+                                e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>';
+                            }}
+                        />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 font-mono text-center mb-1">
+                        {assetCode}
+                    </span>
+                </Card>
+            </div>
 
-                                <div className="flex items-center justify-between py-1 text-xs">
-                                    <span className="text-muted-foreground font-medium">Ownership Type</span>
-                                    <span className="font-semibold text-foreground bg-slate-500/10 px-2 py-0.5 rounded">BYOD</span>
-                                </div>
-
-                                <div className="flex items-center justify-between py-1 text-xs">
-                                    <span className="text-muted-foreground font-medium">Availability</span>
-                                    <span className="font-bold text-green-500 flex items-center">
-                                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Requestable
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Creator details */}
-                            <div className="space-y-3.5 text-xs">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground flex items-center gap-1.5">
-                                        <User className="h-3.5 w-3.5 text-slate-400" /> Added by
-                                    </span>
-                                    <span className="font-semibold text-foreground text-blue-500 hover:underline cursor-pointer">
-                                        {creatorName}
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground flex items-center gap-1.5">
-                                        <Calendar className="h-3.5 w-3.5 text-slate-400" /> Created At
-                                    </span>
-                                    <span className="text-muted-foreground">{createdDateFormatted}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground flex items-center gap-1.5">
-                                        <Clock className="h-3.5 w-3.5 text-slate-400" /> Updated At
-                                    </span>
-                                    <span className="text-muted-foreground">{updatedDateFormatted}</span>
-                                </div>
-                            </div>
-
-                        </CardContent>
-                    </Card>
+            {/* Bottom Tab Layout */}
+            <Card className="border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden print:border-none print:shadow-none print:bg-transparent">
+                <div className="border-b border-slate-100 dark:border-slate-800 px-6 print:hidden">
+                    <nav className="flex space-x-8 -mb-px" aria-label="Tabs">
+                        {[
+                            { id: 'information', name: 'Information', icon: Info },
+                            { id: 'history', name: 'History', icon: Clock },
+                            { id: 'documents', name: 'Documents', icon: FileText },
+                            { id: 'maintenance', name: 'Maintenance', icon: Wrench },
+                            { id: 'depreciation', name: 'Depreciation', icon: LineChart },
+                        ].map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={cn(
+                                        "flex items-center gap-2 py-4 px-1 border-b-2 font-semibold text-sm transition-all whitespace-nowrap",
+                                        isActive
+                                            ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
+                                            : "border-transparent text-slate-400 hover:text-slate-600 dark:text-slate-555 dark:hover:text-slate-350"
+                                    )}
+                                >
+                                    <Icon className="h-4.5 w-4.5" />
+                                    <span>{tab.name}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
                 </div>
 
-            </div>
+                <div className="p-8 print:p-0">
+                    {activeTab === 'information' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+                            {/* Column 1 (Left) */}
+                            <div className="space-y-6">
+                                {leftFields.map((f, idx) => (
+                                    <div key={idx} className="space-y-1 pb-3 border-b border-slate-100/50 dark:border-slate-800/40">
+                                        <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 block">{f.label}</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 block">{f.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Column 2 (Right) */}
+                            <div className="space-y-6">
+                                {rightFields.map((f, idx) => (
+                                    <div key={idx} className="space-y-1 pb-3 border-b border-slate-100/50 dark:border-slate-800/40">
+                                        <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 block">{f.label}</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 block">{f.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Extra custom columns dynamic list */}
+                            {extraFields.length > 0 && (
+                                <div className="col-span-1 md:col-span-2 pt-6 mt-4 border-t border-slate-100 dark:border-slate-800/80">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">
+                                        Additional Specifications
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+                                        {extraFields.map((cfg: any) => (
+                                            <div key={cfg.column_key} className="space-y-1 pb-3 border-b border-slate-100/50 dark:border-slate-800/40">
+                                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 block">{cfg.column_title}</span>
+                                                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 block">{fields[cfg.column_key] || '—'}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'history' && (
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2">
+                                Checkout / Assignment History
+                            </h3>
+                            {asset.assignments && asset.assignments.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">
+                                                <th className="pb-3">User</th>
+                                                <th className="pb-3">Site / Location</th>
+                                                <th className="pb-3">Status</th>
+                                                <th className="pb-3">Assigned At</th>
+                                                <th className="pb-3">Returned At</th>
+                                                <th className="pb-3">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-sm text-slate-700 dark:text-slate-350">
+                                            {asset.assignments.map((assignment: any) => (
+                                                <tr key={assignment.id} className="border-b border-slate-50 dark:border-slate-800/30 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                                                    <td className="py-4 font-medium text-slate-900 dark:text-slate-100">
+                                                        {assignment.user?.name || '—'}
+                                                        <span className="text-xs text-slate-400 block font-normal mt-0.5">{assignment.user?.email}</span>
+                                                    </td>
+                                                    <td className="py-4">
+                                                        {assignment.site?.name || '—'}
+                                                        {assignment.location?.name && (
+                                                            <span className="text-xs text-slate-400 block mt-0.5">{assignment.location.name}</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-4">
+                                                        <span className={cn(
+                                                            "px-2 py-0.5 rounded-full text-xs font-semibold border",
+                                                            assignment.status === 'active'
+                                                                ? "bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-950/20 dark:border-blue-800/40 dark:text-blue-400"
+                                                                : "bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-850/20 dark:border-slate-800/40 dark:text-slate-400"
+                                                        )}>
+                                                            {assignment.status === 'active' ? 'Active' : 'Returned'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4">
+                                                        {assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString() : '—'}
+                                                    </td>
+                                                    <td className="py-4">
+                                                        {assignment.returned_at ? new Date(assignment.returned_at).toLocaleDateString() : '—'}
+                                                    </td>
+                                                    <td className="py-4 text-xs italic text-slate-500 max-w-xs truncate">
+                                                        {assignment.remarks || '—'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-slate-400">
+                                    <Clock className="mx-auto h-12 w-12 text-slate-200 mb-3" />
+                                    <p className="text-sm">No assignment history found for this asset.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'documents' && (
+                        <div className="text-center py-16 text-slate-400">
+                            <FileText className="mx-auto h-16 w-16 text-slate-250 dark:text-slate-850 mb-4" />
+                            <p className="text-sm font-medium">No documents attached to this asset.</p>
+                            <p className="text-xs text-slate-400 mt-1">Upload and associate relevant manuals, invoices, or guides in settings.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'maintenance' && (
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2">
+                                Maintenance History & Schedule
+                            </h3>
+                            <div className="text-center py-16 text-slate-400">
+                                <Wrench className="mx-auto h-16 w-16 text-slate-250 dark:text-slate-850 mb-4" />
+                                <p className="text-sm font-medium">No maintenance records found.</p>
+                                <p className="text-xs text-slate-400 mt-1">This asset has no scheduled or past maintenance events.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'depreciation' && (
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2">
+                                Depreciation (Straight Line)
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 p-5 rounded-xl space-y-1">
+                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold block uppercase">Purchase Price</span>
+                                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                        {formatCurrency(getFieldVal(['purchase_price', 'nilai_asal', 'original_value']))}
+                                    </span>
+                                </div>
+                                <div className="border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 p-5 rounded-xl space-y-1">
+                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold block uppercase">Current Value</span>
+                                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                        {formatCurrency(getFieldVal(['current_value', 'nilai_semasa']))}
+                                    </span>
+                                </div>
+                                <div className="border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 p-5 rounded-xl space-y-1">
+                                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold block uppercase">Total Depreciated</span>
+                                    <span className="text-2xl font-bold text-rose-500 dark:text-rose-400">
+                                        {(() => {
+                                            const purchase = parseFloat(String(getFieldVal(['purchase_price', 'nilai_asal', 'original_value']) || '').replace(/[^0-9.-]/g, ''));
+                                            const current = parseFloat(String(getFieldVal(['current_value', 'nilai_semasa']) || '').replace(/[^0-9.-]/g, ''));
+                                            if (!isNaN(purchase) && !isNaN(current)) {
+                                                return formatCurrency(purchase - current);
+                                            }
+                                            return '—';
+                                        })()}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="text-xs text-slate-400 mt-2 text-center italic">
+                                Calculations are based on automatic periodic straight-line depreciation configured for this category.
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </Card>
 
             {/* Print Label Stylesheet Injection */}
             <style dangerouslySetInnerHTML={{
@@ -589,7 +734,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={checkoutForm.processing}>
+                            <Button type="submit" disabled={checkoutForm.processing} className="bg-blue-600 hover:bg-blue-700 text-white">
                                 Checkout
                             </Button>
                         </DialogFooter>
@@ -611,11 +756,11 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                         <div className="bg-slate-500/10 p-3 rounded-lg text-xs space-y-1">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Currently Checked Out To:</span>
-                                <span className="font-semibold text-foreground">{activeAssignment?.user_name}</span>
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">{activeAssignment?.user?.name || activeAssignment?.user_name}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Checked Out Duration:</span>
-                                <span className="font-semibold text-foreground">{activeAssignment?.duration}</span>
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">{activeAssignment?.duration || '—'}</span>
                             </div>
                         </div>
 
@@ -642,6 +787,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                                 type="submit"
                                 variant="default"
                                 disabled={checkinForm.processing}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
                                 Checkin
                             </Button>
@@ -658,8 +804,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                             <AlertTriangle className="h-5 w-5" /> Danger: Delete Asset
                         </DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete this asset?
-                            ? This action is permanent and cannot be undone.
+                            Are you sure you want to delete this asset? This action is permanent and cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
 
