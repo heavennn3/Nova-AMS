@@ -65,6 +65,7 @@ export default function AssetIndex({
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
     const [importSiteId, setImportSiteId] = useState<string>(currentSiteId ? String(currentSiteId) : '');
     const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
     const [titleMap, setTitleMap] = useState<Record<number, string>>({});
     const currentSiteHasConfig = currentSiteId
         ? configuredSiteIds.includes(currentSiteId) || configurations.some((c: any) => !c.site_id)
@@ -220,6 +221,7 @@ export default function AssetIndex({
         cols.push({
             id: 'status',
             accessorKey: 'status',
+            filterFn: (row: any, id: string, filterValue: string[]) => filterValue.includes(row.getValue(id)),
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Status" />
             ),
@@ -304,7 +306,10 @@ export default function AssetIndex({
         return cols;
     }, [configurations, isAdmin, titleMap, assetStatuses]);
 
-    const filteredAssets = assets;
+    const filteredAssets = React.useMemo(() => {
+        if (statusFilter === 'all') return assets;
+        return (assets || []).filter((a: any) => a.status === statusFilter);
+    }, [assets, statusFilter]);
 
     return (
         <div className="w-full space-y-6 p-8">
@@ -414,6 +419,18 @@ export default function AssetIndex({
                                 </SelectContent>
                             </Select>
                         )}
+
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="h-8 w-[150px] text-sm">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                {assetStatuses.map((s: any) => (
+                                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
 
                         <DataTableActions
                             data={filteredAssets}

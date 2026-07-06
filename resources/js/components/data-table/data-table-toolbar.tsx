@@ -11,6 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { DataTableFacetedFilter } from './data-table-faceted-filter';
 import { DataTableActions } from './data-table-actions';
 
 interface DataTableToolbarProps<TData> {
@@ -19,6 +20,7 @@ interface DataTableToolbarProps<TData> {
     data: TData[];
     columns: any[];
     onImportCsv?: (data: any[]) => void;
+    assetStatuses?: { id: number; name: string; color: string }[];
 }
 
 export function DataTableToolbar<TData>({
@@ -27,6 +29,7 @@ export function DataTableToolbar<TData>({
     data,
     columns,
     onImportCsv,
+    assetStatuses,
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0;
     const exportFileName = searchKey ? `${searchKey}_export` : 'data_export';
@@ -94,6 +97,18 @@ export function DataTableToolbar<TData>({
                     }}
                     className="h-8 w-[150px] lg:w-[300px]"
                 />
+
+                {assetStatuses && table.getColumn('status') && (
+                    <DataTableFacetedFilter
+                        column={table.getColumn('status')}
+                        title="Status"
+                        options={assetStatuses.map((s) => ({
+                            label: s.name,
+                            value: s.name,
+                        }))}
+                    />
+                )}
+
                 {isFiltered && (
                     <Button
                         variant="ghost"

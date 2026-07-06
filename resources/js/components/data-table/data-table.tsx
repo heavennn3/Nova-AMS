@@ -222,6 +222,7 @@ export function DataTable<TData, TValue>({
                     data={data}
                     columns={columns}
                     onImportCsv={onImportCsv}
+                    assetStatuses={assetStatuses}
                 />
             )}
             {selectedRows.length > 0 && (

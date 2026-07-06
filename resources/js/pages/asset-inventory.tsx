@@ -97,6 +97,7 @@ export default function AssetInventory({
         cols.push({
             id: 'status',
             accessorKey: 'status',
+            filterFn: (row: any, id: string, filterValue: string[]) => filterValue.includes(row.getValue(id)),
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
             cell: ({ row }: any) => {
                 const val = row.getValue('status') ?? 'NOT UPDATED';
