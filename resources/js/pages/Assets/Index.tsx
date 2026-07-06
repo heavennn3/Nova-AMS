@@ -48,6 +48,7 @@ export default function AssetIndex({
     totalRecentAdded = 0,
     configuredSiteIds = [],
     currentSiteId = null,
+    assetStatuses = [],
 }: {
     assets: any[];
     configurations?: any[];
@@ -57,6 +58,7 @@ export default function AssetIndex({
     totalRecentAdded?: number;
     configuredSiteIds?: number[];
     currentSiteId?: number | null;
+    assetStatuses?: { id: number; name: string; color: string }[];
 }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -210,6 +212,58 @@ export default function AssetIndex({
             },
         }));
 
+        // ── Hardcoded STATUS column (always present) ──
+        const statusMap = Object.fromEntries(
+            (assetStatuses || []).map((s: any) => [s.name, s.color])
+        );
+
+        cols.push({
+            id: 'status',
+            accessorKey: 'status',
+            header: ({ column }: any) => (
+                <DataTableColumnHeader column={column} title="Status" />
+            ),
+            cell: ({ row }: any) => {
+                const val = row.getValue('status') ?? 'NOT UPDATED';
+                const color = statusMap[val] || '#6B7280';
+                if (isAdmin) {
+                    return (
+                        <select
+                            value={val}
+                            onChange={(e) => {
+                                const newStatus = e.target.value;
+                                router.patch(
+                                    `/assets/${row.original.id}/status`,
+                                    { status: newStatus },
+                                    {
+                                        preserveScroll: true,
+                                        onSuccess: () => toast.success('Status updated'),
+                                        onError: (err) => toast.error('Failed to update status'),
+                                    }
+                                );
+                            }}
+                            className="rounded-md border-0 bg-transparent px-1 py-0.5 text-xs font-semibold cursor-pointer"
+                            style={{ color: '#fff', backgroundColor: color }}
+                        >
+                            {(assetStatuses || []).map((s: any) => (
+                                <option key={s.id} value={s.name} style={{ color: '#000', background: '#fff' }}>
+                                    {s.name}
+                                </option>
+                            ))}
+                        </select>
+                    );
+                }
+                return (
+                    <span
+                        className="inline-block rounded-md px-2 py-0.5 text-xs font-semibold text-white"
+                        style={{ backgroundColor: color }}
+                    >
+                        {val}
+                    </span>
+                );
+            },
+        });
+
         if (isAdmin) {
             cols.push({
                 id: 'actions',
@@ -248,7 +302,7 @@ export default function AssetIndex({
         }
 
         return cols;
-    }, [configurations, isAdmin, titleMap]);
+    }, [configurations, isAdmin, titleMap, assetStatuses]);
 
     const filteredAssets = assets;
 
@@ -370,7 +424,7 @@ export default function AssetIndex({
                     </div>
 
                     {currentSiteHasConfig ? (
-                        <DataTable columns={columns} data={filteredAssets} hideToolbar />
+                        <DataTable columns={columns} data={filteredAssets} hideToolbar assetStatuses={assetStatuses} />
                     ) : (
                         <div className="rounded-xl border bg-card p-16 text-center">
                             <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />

@@ -85,7 +85,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
+        Route::patch('assets/{asset}/status', [\App\Http\Controllers\AssetController::class, 'updateStatus'])->name('assets.status');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
+        Route::get('asset-statuses', [\App\Http\Controllers\AssetController::class, 'statuses'])->name('asset-statuses');
 
         // Asset Registration Workflows
         Route::get('/assets/scan', function () {
@@ -161,42 +163,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/reset-to-default/{tableName}', [\App\Http\Controllers\TableConfigurationController::class, 'resetToDefault'])->name('table-configurations.reset');
         });
 
-        Route::post('/master-data/categories', [\App\Http\Controllers\MasterDataController::class, 'storeCategory'])->name('categories.store');
-        Route::put('/master-data/categories/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateCategory'])->name('categories.update');
-        Route::delete('/master-data/categories/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyCategory'])->name('categories.destroy');
+        // Resourceful Master Data sub-controllers
+        Route::resource('/master-data/categories', \App\Http\Controllers\MasterData\CategoryController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/types', \App\Http\Controllers\MasterData\TypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/sites', \App\Http\Controllers\MasterData\SiteController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/vendors', \App\Http\Controllers\MasterData\VendorController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/custom-types', \App\Http\Controllers\MasterData\CustomTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/custom-columns', \App\Http\Controllers\MasterData\ColumnController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/custom-values', \App\Http\Controllers\MasterData\ValueController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/licenses', \App\Http\Controllers\MasterData\LicenseController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/asset-statuses', \App\Http\Controllers\MasterData\AssetStatusController::class)->only(['store', 'update', 'destroy']);
 
-        Route::post('/master-data/types', [\App\Http\Controllers\MasterDataController::class, 'storeType'])->name('types.store');
-        Route::put('/master-data/types/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateType'])->name('types.update');
-        Route::delete('/master-data/types/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyType'])->name('types.destroy');
-
-        Route::post('/master-data/sites', [\App\Http\Controllers\MasterDataController::class, 'storeSite'])->name('sites.store');
-        Route::put('/master-data/sites/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateSite'])->name('sites.update');
-        Route::delete('/master-data/sites/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroySite'])->name('sites.destroy');
-
-        Route::post('/master-data/vendors', [\App\Http\Controllers\MasterDataController::class, 'storeVendor'])->name('vendors.store.master');
-        Route::put('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateVendor'])->name('vendors.update.master');
-        Route::delete('/master-data/vendors/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyVendor'])->name('vendors.destroy.master');
-
-        Route::post('/master-data/custom-types', [\App\Http\Controllers\MasterDataController::class, 'storeCustomType'])->name('custom-types.store');
-        Route::put('/master-data/custom-types/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateCustomType'])->name('custom-types.update');
-        Route::delete('/master-data/custom-types/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyCustomType'])->name('custom-types.destroy');
-
-        Route::post('/master-data/custom-values', [\App\Http\Controllers\MasterDataController::class, 'storeCustomValue'])->name('custom-values.store');
-        Route::put('/master-data/custom-values/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateCustomValue'])->name('custom-values.update');
-        Route::delete('/master-data/custom-values/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyCustomValue'])->name('custom-values.destroy');
-
-        Route::post('/master-data/custom-columns', [\App\Http\Controllers\MasterDataController::class, 'storeColumn'])->name('custom-columns.store');
-        Route::put('/master-data/custom-columns/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateColumn'])->name('custom-columns.update');
-        Route::delete('/master-data/custom-columns/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyColumn'])->name('custom-columns.destroy');
-
-        Route::post('/master-data/custom-values/batch-delete', [\App\Http\Controllers\MasterDataController::class, 'batchDeleteValues'])->name('custom-values.batch-delete');
-        Route::post('/master-data/custom-values/batch-update', [\App\Http\Controllers\MasterDataController::class, 'batchUpdateValues'])->name('custom-values.batch-update');
-
-        // Software Licenses (Master Data)
-        Route::post('/master-data/licenses', [\App\Http\Controllers\MasterDataController::class, 'storeLicense'])->name('master-data.licenses.store');
-        Route::put('/master-data/licenses/{id}', [\App\Http\Controllers\MasterDataController::class, 'updateLicense'])->name('master-data.licenses.update');
-        Route::delete('/master-data/licenses/{id}', [\App\Http\Controllers\MasterDataController::class, 'destroyLicense'])->name('master-data.licenses.destroy');
-
+        Route::post('/master-data/custom-values/batch-delete', [\App\Http\Controllers\MasterData\ValueController::class, 'batchDelete'])->name('custom-values.batch-delete');
+        Route::post('/master-data/custom-values/batch-update', [\App\Http\Controllers\MasterData\ValueController::class, 'batchUpdate'])->name('custom-values.batch-update');
     });
 
     // Multi-Site Module
@@ -667,11 +646,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $count = 0;
         switch ($type) {
             case 'assets':
-                $updateData = ['status' => $status];
-                if ($statusLabelId) {
-                    $updateData['status_label_id'] = $statusLabelId;
+                foreach (\App\Models\Asset::withoutGlobalScope('site_access')->whereIn('id', $ids)->cursor() as $asset) {
+                    $asset->setField('status', $status);
+                    $count++;
                 }
-                $count = \App\Models\Asset::withoutGlobalScope('site_access')->whereIn('id', $ids)->update($updateData);
                 break;
             case 'work-orders':
                 $count = \App\Models\WorkOrder::whereIn('id', $ids)->update(['status' => $status]);

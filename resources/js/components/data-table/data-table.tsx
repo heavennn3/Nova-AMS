@@ -43,6 +43,7 @@ interface DataTableProps<TData, TValue> {
     hideToolbar?: boolean;
     onBatchDelete?: (selectedRows: TData[]) => void;
     onBatchRestore?: (selectedRows: TData[]) => void;
+    assetStatuses?: { id: number; name: string; color: string }[];
 }
 
 export function DataTable<TData, TValue>({
@@ -53,6 +54,7 @@ export function DataTable<TData, TValue>({
     hideToolbar,
     onBatchDelete,
     onBatchRestore,
+    assetStatuses,
 }: DataTableProps<TData, TValue>) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -288,13 +290,9 @@ export function DataTable<TData, TValue>({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-[160px]">
                                     {resourceType === 'assets' && (
-                                        <>
-                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('available')}>Available</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('in_use')}>In Use</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('maintenance')}>Maintenance</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('faulty')}>Faulty</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('retired')}>Retired</DropdownMenuItem>
-                                        </>
+                                        <>{(assetStatuses || []).map(s => (
+                                            <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.name)}>{s.name}</DropdownMenuItem>
+                                        ))}</>
                                     )}
                                     {resourceType === 'work-orders' && (
                                         <>

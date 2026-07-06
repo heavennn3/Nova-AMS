@@ -37,6 +37,7 @@ export default function AssetInventory({
     configurations = [],
     sites = [],
     currentSiteId = null,
+    assetStatuses = [],
 }: any) {
     const [search, setSearch] = useState('');
     const [siteFilter, setSiteFilter] = useState(currentSiteId || 'all');
@@ -89,6 +90,28 @@ export default function AssetInventory({
             },
         }));
 
+        // ── Hardcoded STATUS column ──
+        const statusMap = Object.fromEntries(
+            (assetStatuses || []).map((s: any) => [s.name, s.color])
+        );
+        cols.push({
+            id: 'status',
+            accessorKey: 'status',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
+            cell: ({ row }: any) => {
+                const val = row.getValue('status') ?? 'NOT UPDATED';
+                const color = statusMap[val] || '#6B7280';
+                return (
+                    <span
+                        className="inline-block rounded-md px-2 py-0.5 text-xs font-semibold text-white"
+                        style={{ backgroundColor: color }}
+                    >
+                        {val}
+                    </span>
+                );
+            },
+        });
+
         cols.push({
             id: 'actions',
             header: 'Actions',
@@ -118,7 +141,7 @@ export default function AssetInventory({
         });
 
         return cols;
-    }, [configurations]);
+    }, [configurations, assetStatuses]);
 
     const configKeys = configurations?.map((c: any) => c.column_key) || [];
     const filteredAssets = useMemo(() => {

@@ -51,6 +51,7 @@ class AssetController extends Controller
                 ->distinct('site_id')
                 ->pluck('site_id'),
             'currentSiteId' => $siteId ? (int)$siteId : null,
+            'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color']),
         ]);
     }
 
@@ -84,6 +85,7 @@ class AssetController extends Controller
             'configurations' => $configs,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
             'currentSiteId' => $siteId ? (int)$siteId : null,
+            'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color']),
         ]);
     }
 
@@ -195,6 +197,12 @@ class AssetController extends Controller
                 }
             }
 
+            // Set default status if not provided
+            if (empty($mapped['status'])) {
+                $defaultS = \App\Models\AssetStatus::orderBy('sort_order')->first();
+                $mapped['status'] = $defaultS ? $defaultS->name : 'NOT UPDATED';
+            }
+
             // If site selected, set lokasi to site name (overrides CSV lokasi)
             if ($siteName) {
                 $mapped['lokasi'] = $siteName;
@@ -221,6 +229,28 @@ class AssetController extends Controller
         }
 
         return redirect()->back()->with('success', "Successfully imported $importedCount assets!");
+    }
+
+    public function updateStatus(Request $request, Asset $asset)
+    {
+        if (!auth()->user()?->hasRole('Admin')) {
+            abort(403, 'Only admins can update asset status.');
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|max:255',
+        ]);
+
+        $asset->setField('status', $validated['status']);
+
+        return redirect()->back()->with('success', 'Asset status updated.');
+    }
+
+    public function statuses()
+    {
+        return response()->json(
+            \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color'])
+        );
     }
 
     // ─── CSV Export ────────────────────────────────────────────────
