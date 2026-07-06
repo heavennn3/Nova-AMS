@@ -59,7 +59,7 @@ export default function AssetIndex({
     const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
     const [importSiteId, setImportSiteId] = useState<string>('');
     const [search, setSearch] = useState('');
-    const [siteFilter, setSiteFilter] = useState<string>('all');
+    const [siteFilter, setSiteFilter] = useState<string>(sites[0] ? String(sites[0].id) : '');
 
     // ── No-config flow: detect CSV headers → pick PK → create configs ──
     const [csvConfigOpen, setCsvConfigOpen] = useState(false);
@@ -238,10 +238,8 @@ export default function AssetIndex({
     }, [configurations, isAdmin]);
 
     const filteredAssets = (assets || []).filter((a: any) => {
-        if (siteFilter === 'all') return true;
-        const lokasi = (a.lokasi || '').toLowerCase();
-        const site = sites.find((s) => String(s.id) === siteFilter);
-        return site && lokasi.includes(site.name.toLowerCase());
+        if (!siteFilter) return true;
+        return String(a.site_id) === siteFilter;
     });
 
     return (
@@ -306,8 +304,8 @@ export default function AssetIndex({
                 )}
             </div>
 
-            {!hasConfig ? (
-                /* ── Empty state: no columns configured yet ── */
+            {!hasConfig && sites.length === 0 ? (
+                /* ── Empty state: no sites, no config ── */
                 <div className="rounded-xl border-2 border-dashed bg-card p-16 text-center">
                     <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No Columns Configured</h3>
@@ -344,7 +342,6 @@ export default function AssetIndex({
                                     <SelectValue placeholder="All Sites" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
                                     {sites.map((site) => (
                                         <SelectItem key={site.id} value={String(site.id)}>
                                             {site.name}
@@ -362,7 +359,21 @@ export default function AssetIndex({
                         />
                     </div>
 
-                    <DataTable columns={columns} data={filteredAssets} hideToolbar />
+                    {!hasConfig && sites.length > 0 ? (
+                        <div className="rounded-xl border bg-card p-16 text-center">
+                            <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">Site Not Configured</h3>
+                            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-8">
+                                This site has no asset table configuration yet. Import a CSV to
+                                automatically detect and configure your columns.
+                            </p>
+                            <FileImportButton onImport={handleCsvForSetup}>
+                                <Upload className="mr-2 h-4 w-4" /> Import CSV &amp; Configure
+                            </FileImportButton>
+                        </div>
+                    ) : (
+                        <DataTable columns={columns} data={filteredAssets} hideToolbar />
+                    )}
                 </>
             )}
 
