@@ -22,6 +22,14 @@ class MasterDataController extends Controller
     public function index(Request $request)
     {
         $tableName = $request->query('tableName', 'assets');
+        $configSiteId = $request->query('configSiteId');
+
+        $configsQuery = \App\Models\TableConfiguration::with('site')
+            ->where('table_name', $tableName);
+        if ($configSiteId) {
+            $configsQuery->where('site_id', $configSiteId);
+        }
+        $tableConfigurations = $configsQuery->orderBy('sort_order')->get();
 
         return Inertia::render('master-data', [
             'categories' => AssetCategory::all(),
@@ -70,12 +78,10 @@ class MasterDataController extends Controller
                     'notes' => $license->notes,
                 ];
             }),
-            'tableConfigurations' => \App\Models\TableConfiguration::with('site')
-                ->where('table_name', $tableName)
-                ->orderBy('sort_order')
-                ->get(),
+            'tableConfigurations' => $tableConfigurations,
             'configurationTables' => \App\Models\TableConfiguration::select('table_name')->distinct()->pluck('table_name'),
             'currentConfigTable' => $tableName,
+            'currentConfigSiteId' => $configSiteId ? (int)$configSiteId : null,
         ]);
     }
 

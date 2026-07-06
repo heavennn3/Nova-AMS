@@ -33,6 +33,7 @@ type MasterDataProps = {
     tableConfigurations?: any[];
     configurationTables?: string[];
     currentConfigTable?: string;
+    currentConfigSiteId?: number | null;
 };
 
 type TabType = string;
@@ -85,6 +86,7 @@ export default function MasterData({
     tableConfigurations = [],
     configurationTables = [],
     currentConfigTable = 'assets',
+    currentConfigSiteId = null,
 }: MasterDataProps) {
     // Read tab from URL query params
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
@@ -115,6 +117,7 @@ export default function MasterData({
     
     // Table config tab state
     const [configSelectedTable, setConfigSelectedTable] = useState(currentConfigTable);
+    const [configSiteFilter, setConfigSiteFilter] = useState<string>(currentConfigSiteId ? String(currentConfigSiteId) : '');
     const [configSelectedColumns, setConfigSelectedColumns] = useState<Set<number>>(new Set());
     const [configDraggedId, setConfigDraggedId] = useState<number | null>(null);
     const [isLicenseColsOpen, setIsLicenseColsOpen] = useState(false);
@@ -1167,6 +1170,28 @@ export default function MasterData({
                                     </button>
                                 ))}
                             </div>
+                        </div>
+
+                        {/* Site filter */}
+                        <div className="flex items-center gap-4">
+                            <label className="text-sm font-medium whitespace-nowrap">Filter by Site:</label>
+                            <Select value={configSiteFilter} onValueChange={(v) => {
+                                setConfigSiteFilter(v);
+                                router.get(`/master-data?tab=table-configurations&tableName=${configSelectedTable}${v !== 'all' ? '&configSiteId=' + v : ''}`, {}, {
+                                    preserveScroll: true,
+                                    only: ['tableConfigurations', 'currentConfigSiteId'],
+                                });
+                            }}>
+                                <SelectTrigger className="h-8 w-[200px] text-sm">
+                                    <SelectValue placeholder="All Sites" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {sites.map((site: any) => (
+                                        <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         {/* Columns table */}
