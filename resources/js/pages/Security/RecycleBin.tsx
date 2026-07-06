@@ -159,6 +159,8 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                 return 'Asset Categories';
             case 'spareparts':
                 return 'Spareparts';
+            case 'table_configurations':
+                return 'Table Columns';
             default:
                 return 'Items';
         }
@@ -285,6 +287,9 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                                         </SelectItem>
                                         <SelectItem value="spareparts">
                                             Spareparts
+                                        </SelectItem>
+                                        <SelectItem value="table_configurations">
+                                            Table Columns
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>

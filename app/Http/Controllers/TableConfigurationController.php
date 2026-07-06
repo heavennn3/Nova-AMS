@@ -114,44 +114,48 @@ class TableConfigurationController extends Controller
             'site_id' => 'nullable|integer|exists:sites,id',
         ]);
 
+        // Hard-delete existing configs (model uses SoftDeletes, so normal delete() just sets deleted_at)
+        \DB::table('table_configurations')
+            ->where('table_name', $validated['table_name'])
+            ->where(function ($q) use ($validated) {
+                if (!empty($validated['site_id'])) {
+                    $q->where('site_id', $validated['site_id']);
+                } else {
+                    $q->whereNull('site_id');
+                }
+            })
+            ->delete();
+
         $created = [];
-        $sortOrder = 0;
+        $sortOrder = TableConfiguration::where('table_name', $validated['table_name'])
+            ->when(!empty($validated['site_id']), fn($q) => $q->where('site_id', $validated['site_id']), fn($q) => $q->whereNull('site_id'))
+            ->max('sort_order') ?? -1;
+        $sortOrder++;
 
         foreach ($validated['headers'] as $header) {
             $clean = trim($header);
             $key = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $clean));
             $key = trim($key, '_');
 
-            // Deduplicate keys within the same scope (table_name + site_id)
-            $existingQuery = TableConfiguration::where('table_name', $validated['table_name'])
-                ->where('column_key', $key);
-            if (!empty($validated['site_id'])) {
-                $existingQuery->where('site_id', $validated['site_id']);
-            } else {
-                $existingQuery->whereNull('site_id');
-            }
-
-            $originalKey = $key;
-            $suffix = 1;
-            while ($existingQuery->exists()) {
-                $key = $originalKey . '_' . $suffix++;
-            }
-
             $isPk = $validated['primary_key_header'] && strcasecmp(trim($validated['primary_key_header']), $clean) === 0;
 
-            $config = TableConfiguration::create([
-                'table_name' => $validated['table_name'],
-                'site_id' => $validated['site_id'] ?? null,
-                'column_key' => $key,
-                'column_title' => $clean,
-                'data_type' => 'string',
-                'is_primary_key' => $isPk,
-                'is_sortable' => true,
-                'is_filterable' => true,
-                'is_visible' => true,
-                'sort_order' => $sortOrder++,
-                'alignment' => 'left',
-            ]);
+            $config = TableConfiguration::updateOrCreate(
+                [
+                    'table_name' => $validated['table_name'],
+                    'site_id' => $validated['site_id'] ?? null,
+                    'column_key' => $key,
+                ],
+                [
+                    'column_title' => $clean,
+                    'data_type' => 'string',
+                    'is_primary_key' => $isPk,
+                    'is_sortable' => true,
+                    'is_filterable' => true,
+                    'is_visible' => true,
+                    'sort_order' => $sortOrder++,
+                    'alignment' => 'left',
+                ]
+            );
 
             $created[] = $config;
         }
@@ -325,5 +329,23 @@ class TableConfigurationController extends Controller
         return redirect()->route('table-configurations.index', [
             'tableName' => $tableName
         ])->with('info', 'Default configurations are not predefined. Import a CSV to auto-generate columns.');
+    }
+    /**
+     * Delete all column configs for a table + site.
+     */
+    public function deleteTable($tableName, Request $request)
+    {
+        $siteId = $request->input('site_id');
+
+        $query = TableConfiguration::where('table_name', $tableName);
+        if ($siteId) {
+            $query->where('site_id', $siteId);
+        } else {
+            $query->whereNull('site_id');
+        }
+
+        $count = $query->delete();
+
+        return back()->with('success', "Deleted {$count} columns for {$tableName}" . ($siteId ? " (site #{$siteId})." : '.'));
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Vendor;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\AssetType;
+use App\Models\TableConfiguration;
 
 class RecycleBinController extends Controller
 {
@@ -19,7 +20,13 @@ class RecycleBinController extends Controller
         'assets' => Asset::class,
         'asset_categories' => AssetCategory::class,
         'spareparts' => \App\Models\SparePart::class,
+        'table_configurations' => TableConfiguration::class,
     ];
+
+    private function validTypes(): string
+    {
+        return implode(',', array_keys($this->models));
+    }
 
     public function index(Request $request)
     {
@@ -33,6 +40,11 @@ class RecycleBinController extends Controller
         
         // Fetch only trashed items
         $query = $modelClass::onlyTrashed();
+        
+        // Eager load for assets
+        if ($type === 'assets') {
+            $query->with(['fieldValues', 'site']);
+        }
         
         // If there's a search term
         if ($request->has('search') && !empty($request->search)) {
@@ -65,11 +77,15 @@ class RecycleBinController extends Controller
                 $data['name'] = $item->name;
                 $data['details'] = $item->contact_email ?? 'No email';
             } elseif ($type === 'assets') {
-                $data['name'] = $item->product_name ?? $item->asset_id;
-                $data['details'] = 'Asset ID: ' . $item->asset_id;
+                $fields = $item->getFields();
+                $data['name'] = $fields['asset_id'] ?? $fields['aset_id'] ?? '#' . $item->id;
+                $data['details'] = 'Site: ' . ($item->site->name ?? $item->site_id);
+            } elseif ($type === 'table_configurations') {
+                $data['name'] = $item->column_title ?? $item->column_key;
+                $data['details'] = 'Table: ' . $item->table_name . ($item->site_id ? ' (Site #' . $item->site_id . ')' : ' (Global)');
             } else {
-                $data['name'] = $item->name;
-                $data['details'] = $item->description ?? 'No description';
+                $data['name'] = $item->name ?? $item->id;
+                $data['details'] = $item->description ?? '';
             }
             
             return $data;
@@ -87,7 +103,7 @@ class RecycleBinController extends Controller
     public function restore(Request $request, $id)
     {
         $request->validate([
-            'type' => 'required|string|in:users,vendors,assets,asset_categories,spareparts'
+            'type' => 'required|string|in:' . implode(',', array_keys($this->models))
         ]);
 
         $modelClass = $this->models[$request->type];
@@ -100,7 +116,7 @@ class RecycleBinController extends Controller
     public function forceDelete(Request $request, $id)
     {
         $request->validate([
-            'type' => 'required|string|in:users,vendors,assets,asset_categories,spareparts'
+            'type' => 'required|string|in:' . implode(',', array_keys($this->models))
         ]);
 
         $modelClass = $this->models[$request->type];

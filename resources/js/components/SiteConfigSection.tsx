@@ -114,9 +114,18 @@ export default function SiteConfigSection({
                     <span className="text-xs font-normal text-muted-foreground bg-background px-2 py-0.5 rounded-full">{configs.length} column{configs.length !== 1 ? 's' : ''}</span>
                 </h3>
                 {isAdmin && (
-                    <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={openAdd}>
-                        <Plus className="h-3.5 w-3.5" /> Add Column
-                    </Button>
+                    <div className="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={openAdd}>
+                            <Plus className="h-3.5 w-3.5" /> Add Column
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                                if (confirm(`Delete all columns for "${title}"? This cannot be undone.`))
+                                    router.post(`/master-data/table-configurations/delete-table/${tableName}`, { site_id: siteId }, { preserveScroll: true });
+                            }}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                    </div>
                 )}
             </div>
 

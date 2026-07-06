@@ -266,6 +266,10 @@ const navSections: NavSection[] = [
                         title: 'Assets',
                         href: '/security/recycle-bin?type=assets',
                     },
+                    {
+                        title: 'Table Columns',
+                        href: '/security/recycle-bin?type=table_configurations',
+                    },
                 ],
             },
             {

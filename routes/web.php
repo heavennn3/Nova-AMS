@@ -172,6 +172,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/update-order', [\App\Http\Controllers\TableConfigurationController::class, 'updateOrder'])->name('table-configurations.update-order');
             Route::post('/{tableConfiguration}/duplicate', [\App\Http\Controllers\TableConfigurationController::class, 'duplicate'])->name('table-configurations.duplicate');
             Route::post('/reset-to-default/{tableName}', [\App\Http\Controllers\TableConfigurationController::class, 'resetToDefault'])->name('table-configurations.reset');
+            Route::post('/delete-table/{tableName}', [\App\Http\Controllers\TableConfigurationController::class, 'deleteTable'])->name('table-configurations.delete-table');
         });
 
         // Resourceful Master Data sub-controllers
