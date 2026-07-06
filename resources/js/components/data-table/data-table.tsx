@@ -82,14 +82,15 @@ export function DataTable<TData, TValue>({
         if (path.includes('/settings/locations')) return 'locations';
         if (path.includes('/settings/suppliers')) return 'suppliers';
         if (path.includes('/settings/manufacturers')) return 'manufacturers';
+        if (path.includes('/settings')) return 'settings';
         if (path.includes('/users')) return 'users';
         if (path.includes('/assets') || path.includes('/asset-inventory') || path.includes('/live-tracking')) return 'assets';
         if (path.includes('/work-orders')) return 'work-orders';
         if (path.includes('/spare-parts') || path.includes('/maintenance/parts')) return 'spare-parts';
         if (path.includes('/licenses')) return 'licenses';
-        // Generic fallback: extract first path segment as resource type
-        const segments = path.split('/').filter(Boolean);
-        return segments.length > 0 ? segments[0] : undefined;
+        // Generic fallback: use last meaningful path segment
+        const segments = path.split('/').filter(s => s && !s.startsWith('master-data'));
+        return segments.length > 0 ? segments[segments.length - 1] : undefined;
     };
 
     const resourceType = getResourceTypeFromUrl();
@@ -162,37 +163,42 @@ export function DataTable<TData, TValue>({
     const selectedRows = table.getFilteredSelectedRowModel().rows;
 
     const handleBulkDelete = () => {
-        if (!resourceType) return;
         const ids = selectedRows.map((r: any) => r.original.id);
-        const confirmMsg = `Are you sure you want to delete these ${selectedRows.length} items?`;
-        if (confirm(confirmMsg)) {
-            toast.promise(
-                fetch('/api/quick/bulk-delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ type: resourceType, ids })
-                }).then(async (res) => {
-                    if (!res.ok) {
-                        const err = await res.json();
-                        throw new Error(err.message || 'Failed to delete records.');
-                    }
-                    return res.json();
-                }),
-                {
-                    loading: `Deleting ${selectedRows.length} items...`,
-                    success: (res) => {
-                        table.resetRowSelection();
-                        router.reload();
-                        return res.message || 'Items deleted successfully!';
-                    },
-                    error: (err) => err.message || 'Deletion failed.'
-                }
-            );
+        if (ids.length === 0) {
+            toast.error('No records selected.');
+            return;
         }
+        const confirmMsg = `Are you sure you want to delete these ${selectedRows.length} items?`;
+        if (!confirm(confirmMsg)) return;
+
+        const type = resourceType || window.location.pathname.split('/').filter(Boolean).pop() || 'unknown';
+
+        toast.promise(
+            fetch('/api/quick/bulk-delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ type, ids })
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Failed to delete records.');
+                }
+                return res.json();
+            }),
+            {
+                loading: `Deleting ${selectedRows.length} items...`,
+                success: (res) => {
+                    table.resetRowSelection();
+                    router.reload();
+                    return res.message || 'Items deleted successfully!';
+                },
+                error: (err) => err.message || 'Deletion failed.'
+            }
+        );
     };
 
     const handleBulkStatusUpdate = (statusVal: string) => {
@@ -327,15 +333,17 @@ export function DataTable<TData, TValue>({
                                 variant="destructive"
                                 size="sm"
                                 onClick={() => {
-                                    if (confirm(`Are you sure you want to permanently delete these ${selectedRows.length} items? This action cannot be undone.`)) {
-                                        onBatchDelete(selectedRows.map((r) => r.original));
+                                    const rows = selectedRows.map((r: any) => r.original);
+                                    const msg = `Are you sure you want to delete these ${selectedRows.length} items?`;
+                                    if (confirm(msg)) {
+                                        onBatchDelete(rows);
                                         table.resetRowSelection();
                                     }
                                 }}
                             >
                                 Delete Selected
                             </Button>
-                        ) : resourceType ? (
+                        ) : (
                             <Button
                                 variant="destructive"
                                 size="sm"
@@ -343,7 +351,7 @@ export function DataTable<TData, TValue>({
                             >
                                 Delete Selected
                             </Button>
-                        ) : null)}
+                        ))}
                         <Button
                             variant="ghost"
                             size="sm"

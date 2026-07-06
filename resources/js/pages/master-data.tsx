@@ -119,6 +119,12 @@ export default function MasterData({
     const [configDraggedId, setConfigDraggedId] = useState<number | null>(null);
     const [isLicenseColsOpen, setIsLicenseColsOpen] = useState(false);
 
+    // Site region filter
+    const [siteRegionFilter, setSiteRegionFilter] = useState('all');
+    const filteredSites = siteRegionFilter === 'all'
+        ? sites
+        : sites.filter((s: any) => s.region?.toLowerCase() === siteRegionFilter);
+
     const toggleLicenseCol = (key: string) => {
         setLicenseColVisibility(prev => {
             const next = { ...prev, [key]: !prev[key] };
@@ -288,18 +294,25 @@ export default function MasterData({
     const tabConfig = {
         sites: {
             title: 'Sites (Locations)',
-            data: sites,
+            data: filteredSites,
             columns: [
                 {
                     accessorKey: 'name',
                     header: ({ column }: any) => (
                         <DataTableColumnHeader column={column} title="Name" />
                     ),
-                },
-                {
-                    accessorKey: 'code',
-                    header: ({ column }: any) => (
-                        <DataTableColumnHeader column={column} title="Code" />
+                    cell: ({ row }: any) => (
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-sm font-bold text-blue-600">
+                                {(row.original.name || '?')[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <div className="font-medium">{row.original.name}</div>
+                                {row.original.code && (
+                                    <div className="text-xs text-muted-foreground font-mono">{row.original.code}</div>
+                                )}
+                            </div>
+                        </div>
                     ),
                 },
                 {
@@ -307,49 +320,77 @@ export default function MasterData({
                     header: ({ column }: any) => (
                         <DataTableColumnHeader column={column} title="Region" />
                     ),
+                    cell: ({ row }: any) => {
+                        const region = row.original.region;
+                        if (!region) return <span className="text-xs text-muted-foreground italic">Not set</span>;
+                        const isSabah = region.toLowerCase() === 'sabah';
+                        return (
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                                isSabah
+                                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                    : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                            }`}>
+                                <span className={`h-1.5 w-1.5 rounded-full ${isSabah ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                {region.charAt(0).toUpperCase() + region.slice(1)}
+                            </span>
+                        );
+                    },
                 },
                 actionColumn,
             ],
             renderForm: () => (
-                <>
+                <div className="space-y-5">
                     <div className="grid gap-2">
-                        <Label>Name</Label>
+                        <Label className="text-sm font-medium">
+                            Site Name <span className="text-rose-500">*</span>
+                        </Label>
                         <Input
                             value={formData.name || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    name: e.target.value,
-                                })
-                            }
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="e.g. Kota Kinabalu"
                             required
+                            className="h-10"
                         />
                     </div>
-                    <div className="grid gap-2">
-                        <Label>Code</Label>
-                        <Input
-                            value={formData.code || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    code: e.target.value,
-                                })
-                            }
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <Label className="text-sm font-medium">Code</Label>
+                            <Input
+                                value={formData.code || ''}
+                                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                                placeholder="e.g. KK-01"
+                                className="h-10 font-mono"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label className="text-sm font-medium">
+                                Region <span className="text-rose-500">*</span>
+                            </Label>
+                            <Select
+                                value={formData.region || ''}
+                                onValueChange={(val) => setFormData({ ...formData, region: val })}
+                            >
+                                <SelectTrigger className="h-10">
+                                    <SelectValue placeholder="Select region" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="sabah">
+                                        <div className="flex items-center gap-2">
+                                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                            Sabah
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="sarawak">
+                                        <div className="flex items-center gap-2">
+                                            <span className="h-2 w-2 rounded-full bg-amber-500" />
+                                            Sarawak
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label>Region</Label>
-                        <Input
-                            value={formData.region || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    region: e.target.value,
-                                })
-                            }
-                        />
-                    </div>
-                </>
+                </div>
             ),
         },
         categories: {
@@ -1036,9 +1077,32 @@ export default function MasterData({
 
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
-                    <h2 className="text-lg font-semibold">
-                        {currentTab.title} List
-                    </h2>
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-lg font-semibold">
+                            {currentTab.title} List
+                        </h2>
+                        {activeTab === 'sites' && (
+                            <div className="flex items-center gap-1.5 bg-background rounded-lg p-0.5 border shadow-sm">
+                                {[
+                                    { value: 'all', label: 'All' },
+                                    { value: 'sabah', label: 'Sabah' },
+                                    { value: 'sarawak', label: 'Sarawak' },
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => setSiteRegionFilter(opt.value)}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                                            siteRegionFilter === opt.value
+                                                ? 'bg-primary text-primary-foreground shadow-sm'
+                                                : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <div className="flex items-center gap-2">
                         {isCustomTab && (
                             <Button variant="outline" size="sm" onClick={() => {

@@ -602,47 +602,49 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return response()->json(['message' => 'No records selected.'], 400);
         }
 
-        $count = 0;
-        switch ($type) {
-            case 'assets':
-                $count = \App\Models\Asset::withoutGlobalScope('site_access')->whereIn('id', $ids)->delete();
-                break;
-            case 'categories':
-                $count = \App\Models\AssetCategory::whereIn('id', $ids)->delete();
-                break;
-            case 'departments':
-                $count = \App\Models\Department::whereIn('id', $ids)->delete();
-                break;
-            case 'suppliers':
-                $count = \App\Models\Supplier::whereIn('id', $ids)->delete();
-                break;
-            case 'locations':
-                $count = \App\Models\Location::whereIn('id', $ids)->delete();
-                break;
-            case 'manufacturers':
-                $count = \App\Models\Manufacturer::whereIn('id', $ids)->delete();
-                break;
-            case 'status-labels':
-                $count = \App\Models\StatusLabel::whereIn('id', $ids)->delete();
-                break;
-            case 'asset-models':
-                $count = \App\Models\AssetModel::whereIn('id', $ids)->delete();
-                break;
-            case 'users':
-                $count = \App\Models\User::whereIn('id', $ids)->delete();
-                break;
-            case 'spare-parts':
-                $count = \App\Models\SparePart::whereIn('id', $ids)->delete();
-                break;
-            case 'work-orders':
-                $count = \App\Models\WorkOrder::whereIn('id', $ids)->delete();
-                break;
-            case 'licenses':
-                $count = \App\Models\License::whereIn('id', $ids)->delete();
-                break;
-            case 'custom-fields':
-                $count = \App\Models\CustomField::whereIn('id', $ids)->delete();
-                break;
+        $modelMap = [
+            'assets' => \App\Models\Asset::class,
+            'categories' => \App\Models\AssetCategory::class,
+            'departments' => \App\Models\Department::class,
+            'suppliers' => \App\Models\Supplier::class,
+            'locations' => \App\Models\Location::class,
+            'manufacturers' => \App\Models\Manufacturer::class,
+            'status-labels' => \App\Models\StatusLabel::class,
+            'asset-models' => \App\Models\AssetModel::class,
+            'users' => \App\Models\User::class,
+            'spare-parts' => \App\Models\SparePart::class,
+            'work-orders' => \App\Models\WorkOrder::class,
+            'licenses' => \App\Models\License::class,
+            'custom-fields' => \App\Models\CustomField::class,
+            'table-configurations' => \App\Models\TableConfiguration::class,
+        ];
+
+        $modelClass = $modelMap[$type] ?? null;
+
+        if (!$modelClass) {
+            // Try studly-case fallback
+            $candidate = '\\App\\Models\\' . \Illuminate\Support\Str::studly(str_replace('-', '_', $type));
+            if (class_exists($candidate)) {
+                $modelClass = $candidate;
+            }
+        }
+
+        if (!$modelClass) {
+            return response()->json(['message' => "Unknown resource type: $type"], 400);
+        }
+
+        // Special handling: assets has a global scope that needs bypassing
+        if ($type === 'assets') {
+            $count = \App\Models\Asset::withoutGlobalScope('site_access')->whereIn('id', $ids)->forceDelete();
+        } else {
+            $instance = new $modelClass;
+            $count = method_exists($instance, 'forceDelete')
+                ? $modelClass::whereIn('id', $ids)->forceDelete()
+                : $modelClass::whereIn('id', $ids)->delete();
+        }
+
+        if ($count === 0) {
+            return response()->json(['message' => 'No records found to delete. The records may already be deleted.'], 404);
         }
 
         return response()->json(['message' => "Successfully deleted $count records!", 'count' => $count]);

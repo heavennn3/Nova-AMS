@@ -113,12 +113,12 @@ class MasterDataController extends Controller
     // Sites
     public function storeSite(Request $request)
     {
-        Site::create($request->validate(['name' => 'required|string|max:255', 'code' => 'nullable|string|max:255', 'region' => 'nullable|string|max:255']));
+        Site::create($request->validate(['name' => 'required|string|max:255', 'code' => 'nullable|string|max:255', 'region' => 'nullable|string|in:sabah,sarawak']));
         return back()->with('success', 'Site created.');
     }
     public function updateSite(Request $request, $id)
     {
-        Site::findOrFail($id)->update($request->validate(['name' => 'required|string|max:255', 'code' => 'nullable|string|max:255', 'region' => 'nullable|string|max:255']));
+        Site::findOrFail($id)->update($request->validate(['name' => 'required|string|max:255', 'code' => 'nullable|string|max:255', 'region' => 'nullable|string|in:sabah,sarawak']));
         return back()->with('success', 'Site updated.');
     }
     public function destroySite($id)

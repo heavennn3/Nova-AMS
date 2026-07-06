@@ -154,8 +154,8 @@ class AssetController extends Controller
                 }
             }
 
-            // If site selected, set lokasi to site name (only if lokasi not already in CSV)
-            if ($siteName && empty($mapped['lokasi'])) {
+            // If site selected, set lokasi to site name (overrides CSV lokasi)
+            if ($siteName) {
                 $mapped['lokasi'] = $siteName;
             }
 

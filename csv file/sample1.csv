@@ -1,0 +1,11 @@
+Asset ID,Asset Name,Category,Brand,Model,Serial Number,Purchase Date,Purchase Price,Status,Location
+AST001,Dell Latitude 5440,Laptop,Dell,Latitude 5440,DL5440-001,2025-01-15,4200.00,Available,IT Office
+AST002,HP LaserJet Pro M404,Printer,HP,M404,HPM404-002,2024-11-20,1350.00,In Use,Admin Office
+AST003,Lenovo ThinkCentre M70,Desktop,Lenovo,M70,LNVM70-003,2025-02-10,3100.00,Available,Lab 1
+AST004,Samsung 27 Monitor,Monitor,Samsung,S27R650,SAM27-004,2025-03-05,850.00,In Use,Lab 2
+AST005,Cisco Catalyst 9200,Network,Cisco,C9200,CISCO-005,2024-10-18,7800.00,Available,Server Room
+AST006,Logitech MX Keys,Keyboard,Logitech,MX Keys,LOGK-006,2025-04-12,450.00,Available,IT Office
+AST007,Canon EOS 250D,Camera,Canon,250D,CAN250D-007,2024-09-08,2600.00,Maintenance,Media Room
+AST008,Apple iPad Air,Tablet,Apple,Air M2,IPAD-008,2025-05-01,3200.00,In Use,Meeting Room
+AST009,Epson EB-X06,Projector,Epson,EB-X06,EPS-009,2024-12-01,2400.00,Available,Conference Hall
+AST010,APC Smart UPS,UPS,APC,SMT1500,APC-010,2024-08-15,4100.00,In Use,Server Room
