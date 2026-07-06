@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('assets/{asset}/status', [\App\Http\Controllers\AssetController::class, 'updateStatus'])->name('assets.status');
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
         Route::get('asset-statuses', [\App\Http\Controllers\AssetController::class, 'statuses'])->name('asset-statuses');
+        Route::post('assets/bulk-update-status', [\App\Http\Controllers\AssetController::class, 'bulkUpdateStatus'])->name('assets.bulk-status');
 
         // Asset Registration Workflows
         Route::get('/assets/scan', function () {

@@ -206,32 +206,11 @@ export function DataTable<TData, TValue>({
     const handleBulkStatusUpdate = (statusVal: string) => {
         if (!resourceType) return;
         const ids = selectedRows.map((r: any) => r.original.id);
-        toast.promise(
-            fetch('/api/quick/bulk-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ type: resourceType, ids, status: statusVal })
-            }).then(async (res) => {
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.message || 'Failed to update status.');
-                }
-                return res.json();
-            }),
-            {
-                loading: `Updating status for ${selectedRows.length} items...`,
-                success: (res) => {
-                    table.resetRowSelection();
-                    router.reload();
-                    return res.message || 'Status updated successfully!';
-                },
-                error: (err) => err.message || 'Update failed.'
-            }
-        );
+        if (ids.length === 0) { toast.error('No records selected.'); return; }
+        router.post('/assets/bulk-update-status', { ids, status: statusVal }, {
+            preserveScroll: true,
+            onSuccess: () => { table.resetRowSelection(); },
+        });
     };
 
     return (
@@ -291,7 +270,10 @@ export function DataTable<TData, TValue>({
                                 <DropdownMenuContent align="end" className="w-[160px]">
                                     {resourceType === 'assets' && (
                                         <>{(assetStatuses || []).map(s => (
-                                            <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.name)}>{s.name}</DropdownMenuItem>
+                                            <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.name)}>
+                                                <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                                                {s.name}
+                                            </DropdownMenuItem>
                                         ))}</>
                                     )}
                                     {resourceType === 'work-orders' && (

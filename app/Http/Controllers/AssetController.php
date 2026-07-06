@@ -33,6 +33,7 @@ class AssetController extends Controller
             foreach ($configs as $cfg) {
                 $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
             }
+            $row['status'] = $fields['status'] ?? null;
             return $row;
         });
 
@@ -77,6 +78,7 @@ class AssetController extends Controller
                 $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
             }
             $row['lokasi'] = $fields['lokasi'] ?? null;
+            $row['status'] = $fields['status'] ?? null;
             return $row;
         });
 
@@ -251,6 +253,27 @@ class AssetController extends Controller
         return response()->json(
             \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color'])
         );
+    }
+
+    public function bulkUpdateStatus(Request $request)
+    {
+        if (!auth()->user()?->hasRole('Admin')) {
+            abort(403, 'Only admins can perform bulk status updates.');
+        }
+
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:assets,id',
+            'status' => 'required|string|max:255',
+        ]);
+
+        $count = 0;
+        foreach (Asset::withoutGlobalScope('site_access')->whereIn('id', $validated['ids'])->cursor() as $asset) {
+            $asset->setField('status', $validated['status']);
+            $count++;
+        }
+
+        return redirect()->back()->with('success', "Successfully updated status of $count assets!");
     }
 
     // ─── CSV Export ────────────────────────────────────────────────
