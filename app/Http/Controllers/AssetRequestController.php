@@ -54,12 +54,14 @@ class AssetRequestController extends Controller
         $licenses = License::select('id', 'name', 'category', 'available_seats')
             ->where('available_seats', '>', 0)
             ->get();
+        $sites = \App\Models\Site::select('id', 'name')->get();
 
         return Inertia::render('Requests/Create', [
             'assetTypes' => $assetTypes,
             'assets' => $assets,
             'categories' => $categories,
             'licenses' => $licenses,
+            'sites' => $sites,
         ]);
     }
 
@@ -70,7 +72,7 @@ class AssetRequestController extends Controller
         }
 
         $validated = $request->validate([
-            'request_type' => 'required|string|in:Borrow,Checkout,Software License,Maintenance Request,Purchase Request',
+            'request_type' => 'required|string|in:Borrow,Checkout,Software License,Maintenance Request,Purchase Request,Loan',
             'priority' => 'required|string|in:Normal,High,Urgent',
             'asset_id' => 'nullable|exists:assets,id',
             'asset_category_id' => 'nullable|exists:asset_categories,id',
@@ -78,11 +80,23 @@ class AssetRequestController extends Controller
             'required_from' => 'nullable|date',
             'required_until' => 'nullable|date|after_or_equal:required_from',
             'reason' => 'required|string',
+            // Loan-specific fields
+            'loan_date' => 'nullable|date',
+            'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
+            'condition_status' => 'nullable|in:good,semi_faulty,faulty',
+            'purpose' => 'nullable|string|max:500',
         ]);
 
         $validated['user_id'] = $request->user()->id;
         $validated['request_number'] = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(6));
         $validated['status'] = 'Pending';
+
+        // Handle loan-specific fields
+        if ($validated['request_type'] === 'Loan') {
+            $validated['loan_date'] = $validated['loan_date'] ?? now();
+            $validated['purpose'] = $validated['purpose'] ?? $validated['reason'];
+            $validated['condition_status'] = $validated['condition_status'] ?? 'good';
+        }
 
         AssetRequest::create($validated);
 
@@ -219,19 +233,71 @@ class AssetRequestController extends Controller
             }
         }
 
+        // For Loan requests: create AssetLoan record
+        if ($assetRequest->request_type === 'Loan' && $assetRequest->asset_id) {
+            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
+
+            if ($asset) {
+                \App\Models\AssetLoan::create([
+                    'asset_id' => $assetRequest->asset_id,
+                    'user_id' => $assetRequest->user_id,
+                    'site_id' => $asset->site_id,
+                    'loan_date' => $assetRequest->loan_date ?? now(),
+                    'expected_return_date' => $assetRequest->expected_return_date ?? $assetRequest->required_until,
+                    'condition_status' => $assetRequest->condition_status ?? 'good',
+                    'purpose' => $assetRequest->purpose ?? $assetRequest->reason,
+                    'notes' => $assetRequest->admin_notes,
+                    'status' => 'approved',
+                    'approved_by' => $assetRequest->approved_by,
+                    'approved_at' => $assetRequest->approved_at,
+                ]);
+
+                $asset->setField('status', 'Used');
+            }
+        }
+
         return back()->with('success', 'Request fulfilled.');
     }
 
     public function markReturned(Request $request, $id)
     {
         $assetRequest = AssetRequest::where('status', 'Fulfilled')
-            ->whereIn('request_type', ['Borrow', 'Checkout'])
+            ->whereIn('request_type', ['Borrow', 'Checkout', 'Loan'])
             ->findOrFail($id);
 
         $assetRequest->update([
             'status' => 'Returned',
             'returned_at' => now(),
         ]);
+
+        // Handle asset return based on request type
+        if ($assetRequest->request_type === 'Loan' && $assetRequest->asset_id) {
+            // Find and update the associated AssetLoan
+            $assetLoan = \App\Models\AssetLoan::where('asset_id', $assetRequest->asset_id)
+                ->where('user_id', $assetRequest->user_id)
+                ->where('status', 'approved')
+                ->latest()
+                ->first();
+
+            if ($assetLoan) {
+                $assetLoan->update([
+                    'status' => 'returned',
+                    'returned_at' => now(),
+                ]);
+            }
+
+            // Update asset status back to available
+            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
+            if ($asset) {
+                $asset->setField('status', 'Available');
+            }
+        } elseif (in_array($assetRequest->request_type, ['Borrow', 'Checkout']) && $assetRequest->asset_id) {
+            // Handle Borrow/Checkout returns
+            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
+            if ($asset) {
+                $asset->update(['status' => 'available']);
+            }
+        }
 
         return back()->with('success', 'Asset marked as returned.');
     }

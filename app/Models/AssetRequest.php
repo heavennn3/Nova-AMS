@@ -28,6 +28,11 @@ class AssetRequest extends Model
         'admin_notes',
         'fulfilled_at',
         'returned_at',
+        // Loan-specific fields
+        'loan_date',
+        'expected_return_date',
+        'condition_status',
+        'purpose',
     ];
 
     protected $casts = [
@@ -36,6 +41,8 @@ class AssetRequest extends Model
         'approved_at' => 'datetime',
         'fulfilled_at' => 'datetime',
         'returned_at' => 'datetime',
+        'loan_date' => 'date',
+        'expected_return_date' => 'date',
     ];
 
     public function user(): BelongsTo
