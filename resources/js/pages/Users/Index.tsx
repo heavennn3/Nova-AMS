@@ -457,12 +457,8 @@ export default function UsersIndex({
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        User Management
+                        Manage Users
                     </h1>
-                    <p className="mt-1 text-muted-foreground">
-                        Manage user profiles, roles, and site access across the
-                        system.
-                    </p>
                 </div>
                 <Link href={createUserHref}>
                     <Button className="gap-2">
@@ -475,10 +471,6 @@ export default function UsersIndex({
 
             {/* Site tabs */}
             <div>
-                <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>Browse users by site</span>
-                </div>
                 <div className="no-scrollbar flex w-full space-x-2 overflow-x-auto border-b border-border pb-px">
                     <button
                         onClick={() => setSelectedSiteId('all')}
