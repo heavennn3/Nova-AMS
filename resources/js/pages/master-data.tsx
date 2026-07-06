@@ -22,6 +22,7 @@ import {
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab } from './MasterData/tabConfigs';
+import SiteConfigSection from '@/components/SiteConfigSection';
 
 type MasterDataProps = {
     categories: any[];
@@ -30,10 +31,9 @@ type MasterDataProps = {
     vendors: any[];
     customTypes: any[];
     licenses: any[];
-    tableConfigurations?: any[];
+    tableConfigurations?: Record<string, any[]>;
     configurationTables?: string[];
     currentConfigTable?: string;
-    currentConfigSiteId?: number | null;
     assetStatuses?: { id: number; name: string; color: string; sort_order: number }[];
     isAdmin?: boolean;
 };
@@ -70,9 +70,9 @@ function loadLicenseColVisibility(): Record<string, boolean> {
 
 export default function MasterData({
     categories = [], types = [], sites = [], vendors = [],
-    customTypes = [], licenses = [], tableConfigurations = [],
+    customTypes = [], licenses = [], tableConfigurations = {},
     configurationTables = [], currentConfigTable = 'assets',
-    currentConfigSiteId = null, isAdmin = false, assetStatuses = [],
+    isAdmin = false, assetStatuses = [],
 }: MasterDataProps) {
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const defaultTab = urlParams.get('tab') || 'sites';
@@ -103,7 +103,6 @@ export default function MasterData({
 
     // Table config tab state
     const [configSelectedTable, setConfigSelectedTable] = useState(currentConfigTable);
-    const [configSiteFilter, setConfigSiteFilter] = useState<string>(currentConfigSiteId ? String(currentConfigSiteId) : '');
 
     // Site region filter
     const [siteRegionFilter, setSiteRegionFilter] = useState('all');
@@ -301,7 +300,6 @@ export default function MasterData({
             <div className="flex items-center justify-between">
                 <div><h1 className="text-3xl font-bold tracking-tight text-foreground">Master Data</h1></div>
                 <div className="flex items-center gap-3">
-                    <Link href="/master-data/table-configurations"><Button variant="outline">Table Configurations</Button></Link>
                     {isAdmin && <Button variant="outline" onClick={() => { setEditingType(null); setTypeFormData({}); setIsManageTypesOpen(true); }}>Manage Custom Types</Button>}
                 </div>
             </div>
@@ -313,12 +311,16 @@ export default function MasterData({
                         {tabConfig[tab].title}
                     </button>
                 ))}
+                <button onClick={() => { setActiveTab('table-configurations'); setSelectedRows(new Set()); }}
+                    className={`border-b-2 px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-200 ${activeTab === 'table-configurations' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'}`}>
+                    Columns
+                </button>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
                     <div className="flex items-center gap-4">
-                        <h2 className="text-lg font-semibold">{currentTab.title} List</h2>
+                        <h2 className="text-lg font-semibold">{activeTab === 'table-configurations' ? 'Table Columns' : `${currentTab.title} List`}</h2>
                         {activeTab === 'sites' && (
                             <div className="flex items-center gap-1.5 bg-background rounded-lg p-0.5 border shadow-sm">
                                 {[{ value: 'all', label: 'All' }, { value: 'sabah', label: 'Sabah' }, { value: 'sarawak', label: 'Sarawak' }].map((opt) => (
@@ -341,7 +343,7 @@ export default function MasterData({
                                 <Eye className="mr-2 h-4 w-4" /> Manage Columns
                             </Button>
                         )}
-                        {isAdmin && <Button onClick={() => handleOpenDialog()} size="sm"><Plus className="mr-2 h-4 w-4" /> Add New</Button>}
+                        {activeTab !== 'table-configurations' && isAdmin && <Button onClick={() => handleOpenDialog()} size="sm"><Plus className="mr-2 h-4 w-4" /> Add New</Button>}
                     </div>
                 </div>
 
@@ -354,14 +356,14 @@ export default function MasterData({
                 )}
 
                 {activeTab === 'table-configurations' ? (
-                    /* Table Configurations inline content */
-                    <div className="p-4 space-y-4">
+                    <div className="p-4 space-y-6">
+                        {/* Table selector */}
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium whitespace-nowrap">Select Table:</span>
                             {configurationTables.map((table: string) => (
                                 <button key={table} onClick={() => {
                                     setConfigSelectedTable(table);
-                                    router.get(`/master-data?tab=table-configurations&tableName=${table}${configSiteFilter ? '&configSiteId=' + configSiteFilter : ''}`, {}, {
+                                    router.get(`/master-data?tab=table-configurations&tableName=${table}`, {}, {
                                         preserveScroll: true, only: ['tableConfigurations', 'currentConfigTable'],
                                     });
                                 }}
@@ -371,81 +373,50 @@ export default function MasterData({
                             ))}
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <label className="text-sm font-medium whitespace-nowrap">Filter by Site:</label>
-                            <Select value={configSiteFilter} onValueChange={(v) => {
-                                setConfigSiteFilter(v);
-                                router.get(`/master-data?tab=table-configurations&tableName=${configSelectedTable}${v !== 'all' ? '&configSiteId=' + v : ''}`, {}, {
-                                    preserveScroll: true, only: ['tableConfigurations', 'currentConfigSiteId'],
-                                });
-                            }}>
-                                <SelectTrigger className="h-8 w-[200px] text-sm"><SelectValue placeholder="All Sites" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map((site: any) => <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {/* Per-site Configuration Sections */}
+                        {(() => {
+                            // Build a map of site_id -> configs
+                            const siteIds = Object.keys(tableConfigurations).filter(k => k !== 'global');
+                            const hasGlobal = !!tableConfigurations['global'];
 
-                        <div className="rounded-lg border bg-card">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="border-b bg-muted/50">
-                                            <th className="p-3 text-left font-medium text-sm">Column Title</th>
-                                            <th className="p-3 text-left font-medium text-sm">Key</th>
-                                            <th className="p-3 text-left font-medium text-sm">Type</th>
-                                            <th className="p-3 text-left font-medium text-sm">Sort</th>
-                                            <th className="p-3 text-left font-medium text-sm">Filter</th>
-                                            <th className="p-3 text-left font-medium text-sm">Visible</th>
-                                            <th className="p-3 text-left font-medium text-sm">Order</th>
-                                            <th className="p-3 text-left font-medium text-sm">Site</th>
-                                            <th className="p-3 text-left font-medium text-sm">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {tableConfigurations.length === 0 ? (
-                                            <tr><td colSpan={9} className="p-8 text-center text-muted-foreground"><Settings className="mx-auto h-10 w-10 opacity-40 mb-2" /><p className="text-sm">No columns configured for this table.</p></td></tr>
-                                        ) : (
-                                            tableConfigurations.map((config: any, index: number) => (
-                                                <tr key={config.id} className="border-b hover:bg-muted/30">
-                                                    <td className="p-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-medium text-sm">{config.column_title}</span>
-                                                            {config.is_primary_key && <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] rounded-full font-semibold">PK</span>}
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-3 font-mono text-xs text-muted-foreground">{config.column_key}</td>
-                                                    <td className="p-3"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs">{config.data_type}</span></td>
-                                                    <td className="p-3"><input type="checkbox" checked={config.is_sortable} onChange={() => router.put(`/master-data/table-configurations/${config.id}`, { ...config, is_sortable: !config.is_sortable }, { preserveScroll: true })} /></td>
-                                                    <td className="p-3"><input type="checkbox" checked={config.is_filterable} onChange={() => router.put(`/master-data/table-configurations/${config.id}`, { ...config, is_filterable: !config.is_filterable }, { preserveScroll: true })} /></td>
-                                                    <td className="p-3"><input type="checkbox" checked={config.is_visible} onChange={() => router.put(`/master-data/table-configurations/${config.id}`, { ...config, is_visible: !config.is_visible }, { preserveScroll: true })} /></td>
-                                                    <td className="p-3">
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-xs text-muted-foreground">{config.sort_order}</span>
-                                                            <button onClick={() => { if (index > 0) router.post('/master-data/table-configurations/update-order', { columns: [{ id: config.id, sort_order: index - 1 }, { id: tableConfigurations[index - 1].id, sort_order: index }] }, { preserveScroll: true }); }} disabled={index === 0} className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
-                                                            <button onClick={() => { if (index < tableConfigurations.length - 1) router.post('/master-data/table-configurations/update-order', { columns: [{ id: config.id, sort_order: index + 1 }, { id: tableConfigurations[index + 1].id, sort_order: index }] }, { preserveScroll: true }); }} disabled={index === tableConfigurations.length - 1} className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-3"><span className="text-xs px-2 py-0.5 rounded-full bg-muted font-medium">{config.site?.name || 'Global'}</span></td>
-                                                    <td className="p-3">
-                                                        <div className="flex items-center gap-1">
-                                                            <Link href={`/master-data/table-configurations/${config.id}/edit`}><Button variant="ghost" size="sm" className="h-7 px-2"><Edit className="h-3.5 w-3.5" /></Button></Link>
-                                                            <Button variant="ghost" size="sm" className="h-7 px-2 text-red-600" onClick={() => { if (confirm('Delete this column configuration?')) router.delete(`/master-data/table-configurations/${config.id}`, { preserveScroll: true }); }}><Trash2 className="h-3.5 w-3.5" /></Button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+                            return (
+                                <>
+                                    {/* Global (no site) section */}
+                                    {hasGlobal && (
+                                        <SiteConfigSection
+                                            title="Global"
+                                            configs={tableConfigurations['global'] || []}
+                                            siteId={null}
+                                            tableName={configSelectedTable}
+                                            isAdmin={isAdmin}
+                                            sites={sites}
+                                        />
+                                    )}
+
+                                    {/* Per-site sections */}
+                                    {siteIds.map(siteId => {
+                                        const site = sites.find((s: any) => String(s.id) === siteId);
+                                        return (
+                                            <SiteConfigSection
+                                                key={siteId}
+                                                title={site?.name || `Site #${siteId}`}
+                                                configs={tableConfigurations[siteId] || []}
+                                                siteId={Number(siteId)}
+                                                tableName={configSelectedTable}
+                                                isAdmin={isAdmin}
+                                                sites={sites}
+                                            />
+                                        );
+                                    })}
+                                </>
+                            );
+                        })()}
+
+                        {isAdmin && (
+                            <div className="flex items-center gap-3 pt-2">
+                                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { if (confirm('Reset to default configuration? Custom columns will be lost.')) router.post(`/master-data/table-configurations/reset-to-default/${configSelectedTable}`, {}, { preserveScroll: true }); }}><RefreshCw className="h-4 w-4" /> Reset to Default</Button>
                             </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            {isAdmin && <Link href={`/master-data/table-configurations/create?tableName=${configSelectedTable}`}><Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> Add Column</Button></Link>}
-                            {isAdmin && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { if (confirm('Reset to default configuration? Custom columns will be lost.')) router.post(`/master-data/table-configurations/reset-to-default/${configSelectedTable}`, {}, { preserveScroll: true }); }}><RefreshCw className="h-4 w-4" /> Reset to Default</Button>}
-                        </div>
+                        )}
                     </div>
                 ) : (
                     <div className="p-4">
@@ -455,6 +426,7 @@ export default function MasterData({
             </div>
 
             {/* Add/Edit Record Dialog */}
+            {currentTab && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -469,6 +441,7 @@ export default function MasterData({
                     </form>
                 </DialogContent>
             </Dialog>
+            )}
 
             {/* Manage Custom Types Dialog */}
             <Dialog open={isManageTypesOpen} onOpenChange={setIsManageTypesOpen}>

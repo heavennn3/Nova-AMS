@@ -32,10 +32,14 @@ class TableConfigurationController extends Controller
     /**
      * Show the form for creating a new table configuration.
      */
-    public function create($tableName = 'assets')
+    public function create(Request $request, $tableName = 'assets')
     {
+        $siteId = $request->query('site_id');
+
         return inertia('MasterData/TableConfigurations/Create', [
             'currentTable' => $tableName,
+            'sites' => \App\Models\Site::select('id', 'name')->get(),
+            'currentSiteId' => $siteId ? (int) $siteId : null,
         ]);
     }
 

@@ -225,7 +225,7 @@ export function licensesTab(opts: any) {
 
 export function assetStatusesTab(opts: any) {
     const { assetStatuses, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
-    const presetColors = ['#6B7280','#EF4444','#EAB308','#22C55E','#3B82F6','#F97316','#8B5CF6','#EC4899','#14B8A6','#F43F5E'];
+    const presetColors = ['#6B7280', '#EF4444', '#EAB308', '#22C55E', '#3B82F6', '#F97316', '#8B5CF6', '#EC4899', '#14B8A6', '#F43F5E'];
     return {
         title: 'Asset Statuses',
         columns: [
@@ -233,7 +233,8 @@ export function assetStatusesTab(opts: any) {
                 accessorKey: 'color', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Color" />,
                 cell: ({ row }: any) => <span className="inline-block h-5 w-5 rounded" style={{ backgroundColor: row.original.color }} />,
             },
-            { accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
+            {
+                accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
                 cell: ({ row }: any) => <span className="inline-block rounded-md px-2 py-0.5 text-xs font-semibold text-white" style={{ backgroundColor: row.original.color }}>{row.original.name}</span>,
             },
             ...editDeleteCol(handleOpenDialog, handleDelete, isAdmin),

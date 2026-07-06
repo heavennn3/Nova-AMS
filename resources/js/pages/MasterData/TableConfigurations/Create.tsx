@@ -23,13 +23,16 @@ import { useState } from 'react';
 
 interface CreateProps {
     currentTable: string;
+    sites?: { id: number; name: string }[];
+    currentSiteId?: number | null;
 }
 
-export default function TableConfigurationCreate({ currentTable }: CreateProps) {
+export default function TableConfigurationCreate({ currentTable, sites = [], currentSiteId }: CreateProps) {
     const [customOptions, setCustomOptions] = useState('');
 
     const { data, setData, post, processing, errors } = useForm({
         table_name: currentTable,
+        site_id: currentSiteId ? String(currentSiteId) : '',
         column_key: '',
         column_title: '',
         data_type: 'string',
@@ -156,6 +159,23 @@ export default function TableConfigurationCreate({ currentTable }: CreateProps) 
                                 <p className="text-sm text-red-600">{errors.table_name}</p>
                             )}
                         </div>
+
+                        {/* Site */}
+                        {sites.length > 0 && (
+                            <div className="space-y-2">
+                                <Label htmlFor="site_id">Site</Label>
+                                <Select value={data.site_id} onValueChange={(v) => setData('site_id', v === 'all_sites' ? '' : v)}>
+                                    <SelectTrigger id="site_id"><SelectValue placeholder="All Sites (Global)" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all_sites">All Sites (Global)</SelectItem>
+                                        {sites.map((s) => (
+                                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.site_id && <p className="text-sm text-red-600">{errors.site_id}</p>}
+                            </div>
+                        )}
 
                         {/* Column Key */}
                         <div className="space-y-2">

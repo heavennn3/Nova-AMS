@@ -20,14 +20,15 @@ class MasterDataController extends Controller
     public function index(Request $request)
     {
         $tableName = $request->query('tableName', 'assets');
-        $configSiteId = $request->query('configSiteId');
 
-        $configsQuery = TableConfiguration::with('site')
-            ->where('table_name', $tableName);
-        if ($configSiteId) {
-            $configsQuery->where('site_id', $configSiteId);
-        }
-        $tableConfigurations = $configsQuery->orderBy('sort_order')->get();
+        $allConfigs = TableConfiguration::with('site')
+            ->where('table_name', $tableName)
+            ->orderBy('sort_order')
+            ->get();
+
+        $tableConfigurations = $allConfigs->groupBy(function ($c) {
+            return $c->site_id ?? 'global';
+        })->toArray();
 
         $assetsCount = Asset::count();
         $isAdmin = $request->user()?->hasRole('Admin') ?? false;
@@ -77,7 +78,6 @@ class MasterDataController extends Controller
             'tableConfigurations' => $tableConfigurations,
             'configurationTables' => TableConfiguration::select('table_name')->distinct()->pluck('table_name'),
             'currentConfigTable' => $tableName,
-            'currentConfigSiteId' => $configSiteId ? (int)$configSiteId : null,
             'isAdmin' => $isAdmin,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color', 'sort_order']),
         ]);
