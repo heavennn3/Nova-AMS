@@ -19,6 +19,8 @@ import {
     AlertTriangle,
     XCircle,
     Check,
+    ChevronDown,
+    ChevronRight,
 } from 'lucide-react';
 import InputError from '@/components/input-error';
 
@@ -49,6 +51,7 @@ export default function Create({
 
     const [assetSearch, setAssetSearch] = useState('');
     const [selectedSiteId, setSelectedSiteId] = useState('');
+    const [collapsed, setCollapsed] = useState(false);
 
     // Get assets for the selected site
     const siteAssets = useMemo(() => {
@@ -107,8 +110,15 @@ export default function Create({
                 <form onSubmit={handleSubmit} className="space-y-3">
                     {/* Site + Asset */}
                     <div className="rounded-lg border bg-card p-4">
-                        <div className="mb-3">
-                            <label className="mb-1.5 block text-xs font-medium text-muted-foreground uppercase tracking-wide">Select Site</label>
+                        <div className="mb-3 flex items-center justify-between">
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Select Site</label>
+                            {selectedSiteId && (
+                                <button type="button" onClick={() => setCollapsed(!collapsed)} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                                    {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                    {collapsed ? 'Show assets' : 'Hide assets'}
+                                </button>
+                            )}
+                        </div>
                             <Select value={selectedSiteId} onValueChange={(v) => { setSelectedSiteId(v); setAssetSearch(''); }}>
                                 <SelectTrigger className="h-8 text-sm">
                                     <SelectValue placeholder="Choose a site to see assets..." />
@@ -119,9 +129,8 @@ export default function Create({
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
 
-                        {selectedSiteId && (
+                        {selectedSiteId && !collapsed && (
                             <>
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="relative flex-1">
