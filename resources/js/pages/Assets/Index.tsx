@@ -46,6 +46,7 @@ export default function AssetIndex({
     totalSites = 0,
     totalFaulty = 0,
     totalRecentAdded = 0,
+    configuredSiteIds = [],
 }: {
     assets: any[];
     configurations?: any[];
@@ -53,6 +54,7 @@ export default function AssetIndex({
     totalSites?: number;
     totalFaulty?: number;
     totalRecentAdded?: number;
+    configuredSiteIds?: number[];
 }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -60,6 +62,9 @@ export default function AssetIndex({
     const [importSiteId, setImportSiteId] = useState<string>('');
     const [search, setSearch] = useState('');
     const [siteFilter, setSiteFilter] = useState<string>(sites[0] ? String(sites[0].id) : '');
+    const currentSiteHasConfig = siteFilter
+        ? configuredSiteIds.includes(Number(siteFilter)) || configurations.some((c: any) => !c.site_id)
+        : false;
 
     // ── No-config flow: detect CSV headers → pick PK → create configs ──
     const [csvConfigOpen, setCsvConfigOpen] = useState(false);
@@ -79,6 +84,7 @@ export default function AssetIndex({
         setDetectedHeaders(headers);
         setPrimaryKeyHeader(headers[0] || '');
         setCsvRawData(importedData);
+        setImportSiteId(siteFilter);
         setCsvConfigOpen(true);
     };
 
@@ -99,6 +105,7 @@ export default function AssetIndex({
                     table_name: 'assets',
                     headers: detectedHeaders,
                     primary_key_header: primaryKeyHeader,
+                    site_id: importSiteId || null,
                 }),
             });
 
@@ -114,19 +121,19 @@ export default function AssetIndex({
             const selectedSite = sites.find((s) => String(s.id) === importSiteId);
             router.post(
                 '/assets/import-bulk',
-                { assets: csvRawData, site_name: selectedSite?.name || '' },
+                { assets: csvRawData, site_name: selectedSite?.name || '', site_id: importSiteId || null },
                 {
                     preserveScroll: true,
                     onSuccess: () => {
                         toast.success(`Table configured and ${csvRawData.length} assets imported!`);
                         setCsvRawData(null);
                         setImportSiteId('');
-                        router.reload({ only: ['assets', 'configurations'] });
+                        router.reload({ only: ['assets', 'configurations', 'configuredSiteIds', 'totalSites'] });
                     },
                     onError: (err) => {
                         console.error(err);
                         toast.error('Import completed but data import failed. Columns were created.');
-                        router.reload({ only: ['assets', 'configurations'] });
+                        router.reload({ only: ['assets', 'configurations', 'configuredSiteIds', 'totalSites'] });
                     },
                 },
             );
@@ -153,7 +160,7 @@ export default function AssetIndex({
 
         router.post(
             '/assets/import-bulk',
-            { assets: pendingImportData, site_name: siteName },
+            { assets: pendingImportData, site_name: siteName, site_id: importSiteId || null },
             {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -359,7 +366,9 @@ export default function AssetIndex({
                         />
                     </div>
 
-                    {!hasConfig && sites.length > 0 ? (
+                    {currentSiteHasConfig ? (
+                        <DataTable columns={columns} data={filteredAssets} hideToolbar />
+                    ) : (
                         <div className="rounded-xl border bg-card p-16 text-center">
                             <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
                             <h3 className="text-lg font-semibold mb-2">Site Not Configured</h3>
@@ -371,8 +380,6 @@ export default function AssetIndex({
                                 <Upload className="mr-2 h-4 w-4" /> Import CSV &amp; Configure
                             </FileImportButton>
                         </div>
-                    ) : (
-                        <DataTable columns={columns} data={filteredAssets} hideToolbar />
                     )}
                 </>
             )}

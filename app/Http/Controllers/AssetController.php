@@ -32,6 +32,10 @@ class AssetController extends Controller
                 ->distinct('asset_id')
                 ->count('asset_id'),
             'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
+            'configuredSiteIds' => \App\Models\TableConfiguration::where('table_name', 'assets')
+                ->whereNotNull('site_id')
+                ->distinct('site_id')
+                ->pluck('site_id'),
         ]);
     }
 
