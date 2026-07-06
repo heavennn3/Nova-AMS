@@ -19,6 +19,11 @@ class Asset extends Model implements Auditable
         return $this->belongsTo(Site::class);
     }
 
+    public function category()
+    {
+        return $this->belongsTo(AssetCategory::class);
+    }
+
     // ─── EAV Helpers ───────────────────────────────────────────────
 
     public function fieldValues()
