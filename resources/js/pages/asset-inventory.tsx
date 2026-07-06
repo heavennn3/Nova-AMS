@@ -124,9 +124,7 @@ export default function AssetInventory({
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
             if (siteFilter === 'all') return true;
-            const lokasi = (a.lokasi || '').toLowerCase();
-            const site = sites.find((s: any) => String(s.id) === siteFilter);
-            return site && lokasi.includes(site.name.toLowerCase());
+            return String(a.site_id) === siteFilter;
         });
 
         const q = search.toLowerCase();
@@ -362,11 +360,9 @@ automatically detect and configure your columns.`}
                         </p>
                         <div className="flex items-center justify-center gap-3">
                             {!currentSiteId && (
-                                <Link href="/master-data">
-                                    <Button variant="outline">
-                                        <MapPin className="mr-2 h-4 w-4" /> Create Site
-                                    </Button>
-                                </Link>
+                                <Button variant="outline" onClick={() => router.get('/master-data')}>
+                                    <MapPin className="mr-2 h-4 w-4" /> Create Site
+                                </Button>
                             )}
                             <Button onClick={openFilePicker}>
                                 <Upload className="mr-2 h-4 w-4" /> Import CSV &amp; Configure

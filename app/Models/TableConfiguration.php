@@ -107,6 +107,7 @@ class TableConfiguration extends Model
      * Get all columns (including hidden) for a specific table, optionally scoped to a site.
      * When no siteId given, returns ALL columns (backward compatible).
      * When siteId is given, returns only columns for that site.
+     * Falls back to global configs if the site has no custom configs.
      */
     public static function getAllColumns($tableName, $siteId = null)
     {
@@ -114,6 +115,11 @@ class TableConfiguration extends Model
         if ($siteId !== null) {
             $q->where('site_id', $siteId);
         }
-        return $q->get();
+        $results = $q->get();
+        // If site has no configs, fall back to global configs
+        if ($siteId !== null && $results->isEmpty()) {
+            return self::forTable($tableName)->ordered()->whereNull('site_id')->get();
+        }
+        return $results;
     }
 }

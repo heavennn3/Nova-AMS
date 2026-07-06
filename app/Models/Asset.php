@@ -10,7 +10,14 @@ class Asset extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable, SoftDeletes;
 
-    protected $fillable = [];
+    protected $fillable = ['site_id'];
+
+    // ─── Relationships ─────────────────────────────────────────────
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
+    }
 
     // ─── EAV Helpers ───────────────────────────────────────────────
 

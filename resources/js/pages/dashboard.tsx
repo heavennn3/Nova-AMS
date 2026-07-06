@@ -141,14 +141,12 @@ export default function Dashboard({
             </div>
 
             {/* Metric Cards Row */}
-            <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 ${isAdmin ? 'xl:grid-cols-6' : 'xl:grid-cols-5'}`}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <Card className="border-l-4 border-l-primary bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Total Assets
-                                </p>
+                                <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
                                 <p className="text-3xl font-bold">{stats.totalAssets}</p>
                             </div>
                             <div className="rounded-full bg-primary/10 p-2">
@@ -162,51 +160,11 @@ export default function Dashboard({
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Sites Managed
-                                </p>
-                                <p className="text-3xl font-bold text-emerald-600">
-                                    {stats.totalSites}
-                                </p>
+                                <p className="text-sm font-medium text-muted-foreground">Total Sites</p>
+                                <p className="text-3xl font-bold text-emerald-600">{stats.totalSites}</p>
                             </div>
                             <div className="rounded-full bg-emerald-100 p-2 dark:bg-emerald-900/30">
                                 <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-purple-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Total Users
-                                </p>
-                                <p className="text-3xl font-bold text-purple-600">
-                                    {stats.totalUsers || 0}
-                                </p>
-                            </div>
-                            <div className="rounded-full bg-purple-100 p-2 dark:bg-purple-900/30">
-                                <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-amber-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/75 transition-all duration-200">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Active Work Orders
-                                </p>
-                                <p className="text-3xl font-bold text-amber-600">
-                                    {stats.activeWorkOrders}
-                                </p>
-                            </div>
-                            <div className="rounded-full bg-amber-100 p-2 dark:bg-amber-900/30">
-                                <Wrench className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                             </div>
                         </div>
                     </CardContent>
@@ -216,41 +174,15 @@ export default function Dashboard({
                     <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                             <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Open Tickets
-                                </p>
-                                <p className="text-3xl font-bold text-blue-600">
-                                    {stats.openTickets}
-                                </p>
+                                <p className="text-sm font-medium text-muted-foreground">Recent Added (30 days)</p>
+                                <p className="text-3xl font-bold text-blue-600">{stats.totalRecentAdded ?? 0}</p>
                             </div>
                             <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900/30">
-                                <Headset className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
-
-                {isAdmin && (
-                    <Link href="/requests/admin" className="block">
-                        <Card className="border-l-4 border-l-rose-500 bg-card/50 shadow-sm backdrop-blur-sm hover:shadow-md hover:bg-card/85 transition-all duration-200 cursor-pointer h-full">
-                            <CardContent className="p-6">
-                                <div className="flex items-start justify-between">
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Pending Requests
-                                        </p>
-                                        <p className="text-3xl font-bold text-rose-600 dark:text-rose-400">
-                                            {stats.pendingRequests || 0}
-                                        </p>
-                                    </div>
-                                    <div className="rounded-full bg-rose-100 p-2 dark:bg-rose-950/30">
-                                        <Clock className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </Link>
-                )}
             </div>
 
             {/* Row 2: Urgent Alerts & Overdues */}

@@ -15,7 +15,7 @@ class AssetController extends Controller
 
         $assets = Asset::with('fieldValues')->latest()->get()->map(function ($asset) use ($configs) {
             $fields = $asset->getFields();
-            $row = ['id' => $asset->id];
+            $row = ['id' => $asset->id, 'site_id' => $asset->site_id];
             foreach ($configs as $cfg) {
                 $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
             }
@@ -26,34 +26,45 @@ class AssetController extends Controller
             'assets' => $assets,
             'configurations' => $configs,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
+            'totalSites' => \App\Models\Site::count(),
+            'totalFaulty' => \App\Models\AssetFieldValue::where('column_key', 'status')
+                ->whereRaw('LOWER(value) IN (?, ?, ?, ?)', ['faulty', 'rusak', 'broken', 'damaged'])
+                ->distinct('asset_id')
+                ->count('asset_id'),
+            'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
         ]);
     }
 
     public function inventory(Request $request)
     {
         $siteId = $request->query('site_id');
-        $site = $siteId ? \App\Models\Site::find($siteId) : null;
 
         $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
 
-        $assets = Asset::with('fieldValues')->latest()->get()->map(function ($asset) use ($configs) {
+        $assetsQuery = Asset::with('fieldValues')->latest();
+
+        if ($siteId) {
+            $assetsQuery->where('site_id', $siteId);
+        }
+
+        $assets = $assetsQuery->get()->map(function ($asset) use ($configs) {
             $fields = $asset->getFields();
-            $row = ['id' => $asset->id];
+            $row = [
+                'id' => $asset->id,
+                'site_id' => $asset->site_id,
+            ];
             foreach ($configs as $cfg) {
                 $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
             }
+            $row['lokasi'] = $fields['lokasi'] ?? null;
             return $row;
         });
-
-        if ($site) {
-            $assets = $assets->filter(fn($r) => ($r['lokasi'] ?? '') === $site->name)->values();
-        }
 
         return Inertia::render('asset-inventory', [
             'assets' => $assets,
             'configurations' => $configs,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
-            'currentSiteId' => $siteId,
+            'currentSiteId' => $siteId ? (int)$siteId : null,
         ]);
     }
 
@@ -75,7 +86,7 @@ class AssetController extends Controller
 
         $validated = $request->validate($rules);
 
-        $asset = Asset::create([]);
+        $asset = Asset::create(['site_id' => $request->site_id]);
         $asset->syncFields($validated);
 
         return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
@@ -89,7 +100,7 @@ class AssetController extends Controller
         $configs = TableConfiguration::getAllColumns('assets');
         $fields = $asset->getFields();
 
-        $row = ['id' => $asset->id];
+        $row = ['id' => $asset->id, 'site_id' => $asset->site_id];
         foreach ($configs as $cfg) {
             $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
         }
@@ -108,7 +119,7 @@ class AssetController extends Controller
         $fields = $asset->getFields();
 
         return Inertia::render('Assets/Edit', [
-            'asset' => array_merge(['id' => $asset->id], $fields),
+            'asset' => array_merge(['id' => $asset->id, 'site_id' => $asset->site_id], $fields),
             'configurations' => $configs,
         ]);
     }
@@ -180,9 +191,10 @@ class AssetController extends Controller
             })->first();
 
             if ($existing) {
+                if ($siteId) $existing->update(['site_id' => $siteId]);
                 $existing->syncFields($mapped);
             } else {
-                $asset = Asset::create([]);
+                $asset = Asset::create(['site_id' => $siteId ? (int)$siteId : null]);
                 $asset->syncFields($mapped);
             }
 

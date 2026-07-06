@@ -4,13 +4,10 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
     Plus,
     Edit,
     Trash2,
-    Wrench,
     Package,
     Search,
     Eye,
@@ -19,7 +16,10 @@ import {
     Upload,
     Table2,
     MapPin,
+    AlertTriangle,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Dialog,
     DialogContent,
@@ -43,10 +43,16 @@ export default function AssetIndex({
     assets = [],
     configurations = [],
     sites = [],
+    totalSites = 0,
+    totalFaulty = 0,
+    totalRecentAdded = 0,
 }: {
     assets: any[];
     configurations?: any[];
     sites?: { id: string; name: string }[];
+    totalSites?: number;
+    totalFaulty?: number;
+    totalRecentAdded?: number;
 }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -242,7 +248,7 @@ export default function AssetIndex({
         <div className="w-full space-y-6 p-8">
             <Head title="Asset Inventory" />
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-primary/10 p-3">
                         <Package className="h-6 w-6 text-primary" />
@@ -253,12 +259,30 @@ export default function AssetIndex({
                     </div>
                 </div>
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Wrench className="h-6 w-6 text-blue-500" />
+                    <div className="rounded-full bg-emerald-500/10 p-3">
+                        <MapPin className="h-6 w-6 text-emerald-500" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Total Assets</p>
-                        <p className="text-2xl font-bold">{(assets || []).length}</p>
+                        <p className="text-sm text-muted-foreground">Total Sites</p>
+                        <p className="text-2xl font-bold">{totalSites ?? 0}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-red-500/10 p-3">
+                        <AlertTriangle className="h-6 w-6 text-red-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Faulty</p>
+                        <p className="text-2xl font-bold">{totalFaulty ?? 0}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-blue-500/10 p-3">
+                        <Plus className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Recent Added (30d)</p>
+                        <p className="text-2xl font-bold">{totalRecentAdded ?? 0}</p>
                     </div>
                 </div>
             </div>
@@ -358,11 +382,10 @@ export default function AssetIndex({
                         {detectedHeaders.map((h) => (
                             <div
                                 key={h}
-                                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                    primaryKeyHeader === h
+                                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${primaryKeyHeader === h
                                         ? 'border-primary bg-primary/5'
                                         : 'border-border hover:bg-accent/50'
-                                }`}
+                                    }`}
                                 onClick={() => setPrimaryKeyHeader(h)}
                             >
                                 <input
