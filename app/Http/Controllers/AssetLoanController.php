@@ -30,6 +30,7 @@ class AssetLoanController extends Controller
     public function create(Request $request)
     {
         $assets = Asset::with(['site:id,name', 'fieldValues'])
+            ->whereHas('fieldValues', fn($q) => $q->where('column_key', 'status')->whereRaw('LOWER(value) = ?', ['available']))
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($asset) {
