@@ -22,6 +22,7 @@ import {
     XCircle,
     Eye,
     Wrench,
+    MoreHorizontal,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,8 @@ export default function LiveTrackingAdmin({
         available: 0,
         returned_today: 0,
         total_history: 0,
+        total_returned: 0,
+        overdue: 0,
     },
     sites = [],
     filters = {
@@ -102,6 +105,8 @@ export default function LiveTrackingAdmin({
         available: number;
         returned_today: number;
         total_history: number;
+        total_returned: number;
+        overdue: number;
     };
     sites: any[];
     filters: {
@@ -381,29 +386,27 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+                const actions = [
+                    { label: 'View Details', icon: Eye, onClick: () => viewDetails(assignment) },
+                    { label: 'Send Reminder', icon: Bell, onClick: () => sendSingleReminder(assignment) },
+                    { label: 'Check In', icon: CheckCircle2, onClick: () => checkInAsset(assignment) },
+                ];
                 return (
-                    <DataTableActions
-                        items={[
-                            {
-                                label: 'View Details',
-                                icon: Eye,
-                                onClick: () => viewDetails(assignment),
-                                show: true,
-                            },
-                            {
-                                label: 'Send Reminder',
-                                icon: Bell,
-                                onClick: () => sendSingleReminder(assignment),
-                                show: true,
-                            },
-                            {
-                                label: 'Check In',
-                                icon: CheckCircle2,
-                                onClick: () => checkInAsset(assignment),
-                                show: true,
-                            },
-                        ]}
-                    />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {actions.map(a => (
+                                <DropdownMenuItem key={a.label} onClick={a.onClick}>
+                                    <a.icon className="mr-2 h-4 w-4" />
+                                    {a.label}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 );
             },
         },
@@ -486,8 +489,6 @@ export default function LiveTrackingAdmin({
                     <DataTable
                         columns={columns}
                         data={allAssignments}
-                        search={searchTerm}
-                        onSearchChange={setSearchTerm}
                     />
                 </CardContent>
             </Card>

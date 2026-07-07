@@ -116,19 +116,6 @@ export default function MasterData({
         });
     };
 
-    const handleTypeSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const url = editingType ? `/master-data/custom-types/${editingType.id}` : `/master-data/custom-types`;
-        router[editingType ? 'put' : 'post'](url, typeFormData, {
-            preserveScroll: true,
-            onSuccess: () => setIsManageTypesOpen(false),
-        });
-    };
-
-    const handleTypeDelete = (id: number) => {
-        if (!confirm('Are you sure you want to delete this custom master data type and all its values?')) return;
-        router.delete(`/master-data/custom-types/${id}`, { preserveScroll: true });
-    };
 
     const handleColumnSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -296,11 +283,6 @@ export default function MasterData({
                         {isCustomTab && isAdmin && (
                             <Button variant="outline" size="sm" onClick={() => { setColumnTypeId(activeCustomType?.id); setEditingColumn(null); setColumnFormData({ data_type: 'text', sort_order: 0 }); setIsColumnsOpen(true); }}>
                                 <Columns className="mr-2 h-4 w-4" /> Manage Columns
-                            </Button>
-                        )}
-                        {currentTab?.isLicenseTab && (
-                            <Button variant="outline" size="sm" onClick={() => setIsLicenseColsOpen(true)}>
-                                <Eye className="mr-2 h-4 w-4" /> Manage Columns
                             </Button>
                         )}
                         {isAdmin && <Button onClick={() => handleOpenDialog()} size="sm"><Plus className="mr-2 h-4 w-4" /> Add New</Button>}

@@ -89,6 +89,14 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         vendor_id: '',
         product_key: '',
         expiration_date: '',
+        seats: 1,
+        purchase_cost: '',
+        purchase_date: '',
+        license_email: '',
+        license_name: '',
+        license_type_id: 'all',
+        site_id: 'all',
+        notes: '',
     });
 
     const handleCreate = (e: React.FormEvent) => {
