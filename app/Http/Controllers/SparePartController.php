@@ -64,6 +64,11 @@ class SparePartController extends Controller
                 ];
             });
 
+        // All spare parts for filtered table display
+        $allParts = SparePart::select('id', 'name', 'category', 'stock_level', 'minimum_stock_level', 'location', 'status')
+            ->latest()
+            ->get();
+
         return Inertia::render('SpareParts/Dashboard', [
             'totalParts' => $totalParts,
             'totalValue' => number_format($totalValue, 2),
@@ -73,6 +78,7 @@ class SparePartController extends Controller
             'categoryData' => $categoryData,
             'recentCheckouts' => $recentCheckouts,
             'lowStockAlerts' => $lowStockAlerts,
+            'allParts' => $allParts,
         ]);
     }
 

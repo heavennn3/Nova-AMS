@@ -1,9 +1,10 @@
+import { useState, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, DollarSign, AlertTriangle, CheckCircle, TrendingUp, ArrowRight } from 'lucide-react';
+import { Package, DollarSign, AlertTriangle, CheckCircle, TrendingUp, ArrowRight, X } from 'lucide-react';
 
 export default function SparePartsDashboard({
     totalParts = 0,
@@ -14,6 +15,7 @@ export default function SparePartsDashboard({
     categoryData = [],
     recentCheckouts = [],
     lowStockAlerts = [],
+    allParts = [],
 }: {
     totalParts: number;
     totalValue: string;
@@ -23,10 +25,26 @@ export default function SparePartsDashboard({
     categoryData: any[];
     recentCheckouts: any[];
     lowStockAlerts: any[];
+    allParts: any[];
 }) {
+    const [activeStat, setActiveStat] = useState<string | null>(null);
+
+    const statFilters: Record<string, (p: any) => boolean> = {
+        'Total Spare Parts': () => true,
+        'Available': (p) => p.status === 'available',
+        'Low Stock': (p) => p.stock_level > 0 && p.stock_level <= p.minimum_stock_level,
+        'Out of Stock': (p) => p.stock_level <= 0,
+        'Faulty Parts': (p) => p.status === 'faulty',
+    };
+
+    const filteredParts = useMemo(() => {
+        const filterFn = statFilters[activeStat || ''];
+        return filterFn ? allParts.filter(filterFn) : [];
+    }, [activeStat, allParts]);
+
     const statsCards = [
         {
-            title: 'Total Parts',
+            title: 'Total Spare Parts',
             value: totalParts.toString(),
             icon: Package,
             color: 'text-blue-600',
@@ -49,6 +67,13 @@ export default function SparePartsDashboard({
         },
         {
             title: 'Out of Stock',
+            value: outOfStockParts.toString(),
+            icon: AlertTriangle,
+            color: 'text-red-600',
+            bgColor: 'bg-red-100',
+        },
+        {
+            title: 'Faulty Parts',
             value: outOfStockParts.toString(),
             icon: AlertTriangle,
             color: 'text-red-600',
@@ -111,7 +136,7 @@ export default function SparePartsDashboard({
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
                         Spare Parts Inventory
                     </h1>
-                 
+
                 </div>
                 <Link href="/spare-parts">
                     <Button>
@@ -121,26 +146,64 @@ export default function SparePartsDashboard({
                 </Link>
             </div>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-5 gap-3">
                 {statsCards.map((stat) => {
                     const Icon = stat.icon;
+                    const isActive = activeStat === stat.title;
                     return (
-                        <Card key={stat.title}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">
-                                    {stat.title}
-                                </CardTitle>
-                                <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                                    <Icon className={`h-4 w-4 ${stat.color}`} />
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stat.value}</div>
-                            </CardContent>
-                        </Card>
+                        <button
+                            key={stat.title}
+                            type="button"
+                            onClick={() => setActiveStat(activeStat === stat.title ? null : stat.title)}
+                            className={`text-left rounded-xl border transition-all duration-200 ${isActive
+                                    ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
+                                    : 'hover:shadow-md hover:scale-[1.01]'
+                                }`}
+                        >
+                            <Card className={`border-0 shadow-none ${isActive ? stat.bgColor : ''}`}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">
+                                        {stat.title}
+                                    </CardTitle>
+                                    <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+                                        <Icon className={`h-5 w-5 ${stat.color}`} />
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className={`text-3xl font-bold tracking-tight ${stat.color}`}>{stat.value}</div>
+                                </CardContent>
+                            </Card>
+                        </button>
                     );
                 })}
             </div>
+
+            {/* Filtered Parts Table */}
+            {activeStat && (
+                <Card className="overflow-hidden border-emerald-200">
+                    <CardHeader className="flex flex-row items-center justify-between bg-muted/30 py-3">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                            <span className={`inline-block h-2 w-2 rounded-full ${statsCards.find(s => s.title === activeStat)?.color.replace('text-', 'bg-')}`} />
+                            {activeStat} Parts
+                        </CardTitle>
+                        <button type="button" onClick={() => setActiveStat(null)} className="text-muted-foreground hover:text-foreground">
+                            <X className="h-4 w-4" />
+                        </button>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <DataTable
+                            columns={[
+                                { accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" /> },
+                                { accessorKey: 'category', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" /> },
+                                { accessorKey: 'stock_level', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Stock" /> },
+                                { accessorKey: 'location', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Location" /> },
+                            ]}
+                            data={filteredParts}
+                            hideToolbar
+                        />
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Category Breakdown */}
