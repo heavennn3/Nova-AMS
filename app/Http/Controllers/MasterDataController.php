@@ -71,6 +71,29 @@ class MasterDataController extends Controller
                 'site_id' => $l->site_id,
                 'notes' => $l->notes,
             ]),
+            'spareParts' => \App\Models\SparePart::with(['site', 'assetType', 'category', 'fieldValues'])
+                ->latest()
+                ->get()
+                ->map(fn($p) => [
+                    'id' => $p->id,
+                    'spare_part_id' => $p->spare_part_id,
+                    'name' => $p->name,
+                    'part_number' => $p->part_number,
+                    'category' => $p->category,
+                    'spare_part_category_id' => $p->spare_part_category_id,
+                    'category_name' => $p->category?->name,
+                    'quantity' => $p->quantity,
+                    'minimum_stock_level' => $p->minimum_stock_level,
+                    'unit_cost' => $p->unit_cost,
+                    'location' => $p->location,
+                    'site_id' => $p->site_id,
+                    'site_name' => $p->site?->name,
+                    'asset_type_id' => $p->asset_type_id,
+                    'asset_type_name' => $p->assetType?->name,
+                    'status' => $p->status,
+                    'availability' => $p->availability,
+                    'fields' => $p->getFields(),
+                ]),
             'tableConfigurations' => $tableConfigurations,
             'configurationTables' => TableConfiguration::select('table_name')->distinct()->pluck('table_name')
                 ->merge(['spare_parts'])->unique()->values(),
@@ -84,6 +107,7 @@ class MasterDataController extends Controller
                 'parent_name' => $c->parent?->name,
                 'description' => $c->description,
             ]),
+            'assetTypes' => \App\Models\AssetType::orderBy('name')->get(['id', 'name']),
         ]);
     }
 }

@@ -308,3 +308,193 @@ export function sparePartCategoriesTab(opts: any) {
         ),
     };
 }
+
+export function sparePartsTab(opts: any) {
+    const { spareParts, sites, sparePartCategories, assetTypes, formData, setFormData, handleOpenDialog, handleDelete, isAdmin, editingItem } = opts;
+
+    // Collect unique dynamic field keys from all parts
+    const allFieldKeys = new Set<string>();
+    (spareParts || []).forEach((p: any) => {
+        if (p.fields) Object.keys(p.fields).forEach((k: string) => allFieldKeys.add(k));
+    });
+
+    const fixedCols: any[] = [
+        {
+            accessorKey: 'spare_part_id', header: ({ column }: any) => <DataTableColumnHeader column={column} title="SP ID" />,
+            cell: ({ row }: any) => <span className="font-mono text-xs">{row.original.spare_part_id || <span className="italic text-muted-foreground">auto</span>}</span>,
+        },
+        {
+            accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
+            cell: ({ row }: any) => <span className="font-medium">{row.original.name}</span>,
+        },
+        {
+            accessorKey: 'part_number', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Part #" />,
+            cell: ({ row }: any) => <span className="font-mono text-xs">{row.original.part_number || '—'}</span>,
+        },
+        {
+            accessorKey: 'category_name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
+            cell: ({ row }: any) => row.original.category_name
+                ? <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200">{row.original.category_name}</span>
+                : <span className="text-xs text-muted-foreground italic">—</span>,
+        },
+        {
+            accessorKey: 'quantity', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Qty" />,
+            cell: ({ row }: any) => <span className="tabular-nums font-semibold">{row.original.quantity}</span>,
+        },
+        {
+            accessorKey: 'minimum_stock_level', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Min Stock" />,
+            cell: ({ row }: any) => <span className="tabular-nums text-muted-foreground">{row.original.minimum_stock_level}</span>,
+        },
+        {
+            accessorKey: 'unit_cost', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Unit Cost" />,
+            cell: ({ row }: any) => <span className="tabular-nums">{row.original.unit_cost ? `RM${Number(row.original.unit_cost).toFixed(2)}` : '—'}</span>,
+        },
+        {
+            accessorKey: 'status', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
+            cell: ({ row }: any) => {
+                const s = row.original.status;
+                const colors: Record<string, string> = { available: 'bg-emerald-100 text-emerald-700 border-emerald-200', in_use: 'bg-blue-100 text-blue-700 border-blue-200', damaged: 'bg-red-100 text-red-700 border-red-200', disposed: 'bg-gray-100 text-gray-600 border-gray-200' };
+                return <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${colors[s] || 'bg-gray-100 text-gray-600'}`}>{s || '—'}</span>;
+            },
+        },
+        {
+            accessorKey: 'site_name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Site" />,
+            cell: ({ row }: any) => <span className="text-sm">{row.original.site_name || '—'}</span>,
+        },
+        {
+            accessorKey: 'asset_type_name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Asset Type" />,
+            cell: ({ row }: any) => <span className="text-sm">{row.original.asset_type_name || '—'}</span>,
+        },
+        {
+            accessorKey: 'location', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Location" />,
+            cell: ({ row }: any) => <span className="text-sm">{row.original.location || '—'}</span>,
+        },
+    ];
+
+    // Dynamic EAV columns
+    const dynCols: any[] = Array.from(allFieldKeys).map((key: string) => ({
+        accessorKey: `fields.${key}`,
+        header: ({ column }: any) => <DataTableColumnHeader column={column} title={key.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())} />,
+        cell: ({ row }: any) => <span className="text-sm">{row.original.fields?.[key] ?? '—'}</span>,
+    }));
+
+    return {
+        title: 'Spare Parts Settings',
+        data: spareParts || [],
+        columns: [...fixedCols, ...dynCols, ...editDeleteCol(handleOpenDialog, handleDelete, isAdmin)],
+        renderForm: () => (
+            <div className="grid grid-cols-2 gap-4">
+                {/* Fixed: spare_part_id — read only on edit */}
+                <div className="grid gap-2">
+                    <Label>Spare Part ID</Label>
+                    <Input
+                        value={formData.spare_part_id || ''}
+                        onChange={(e) => setFormData({ ...formData, spare_part_id: e.target.value })}
+                        placeholder="Auto-generated if empty"
+                        disabled={!!editingItem}
+                        className="font-mono"
+                    />
+                    {formData.spare_part_id && editingItem && <p className="text-[10px] text-muted-foreground">🔒 Read-only after creation</p>}
+                </div>
+
+                {/* Fixed: name */}
+                <div className="grid gap-2">
+                    <Label>Name <span className="text-rose-500">*</span></Label>
+                    <Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                </div>
+
+                {/* Fixed: part_number — read only on edit */}
+                <div className="grid gap-2">
+                    <Label>Part Number</Label>
+                    <Input
+                        value={formData.part_number || ''}
+                        onChange={(e) => setFormData({ ...formData, part_number: e.target.value })}
+                        placeholder="Unique part identifier"
+                        disabled={!!editingItem}
+                        className="font-mono"
+                    />
+                    {formData.part_number && editingItem && <p className="text-[10px] text-muted-foreground">🔒 Read-only after creation</p>}
+                </div>
+
+                {/* FK: spare_part_category_id */}
+                <div className="grid gap-2">
+                    <Label>Category (FK) <span className="text-rose-500">*</span></Label>
+                    <Select value={formData.spare_part_category_id?.toString() || ''} onValueChange={(v) => setFormData({ ...formData, spare_part_category_id: v ? parseInt(v) : null })}>
+                        <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">— None —</SelectItem>
+                            {(sparePartCategories || []).map((c: any) => (
+                                <SelectItem key={c.id} value={c.id.toString()}>{c.parent_name ? `${c.parent_name} > ` : ''}{c.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* Fixed: quantity */}
+                <div className="grid gap-2">
+                    <Label>Quantity <span className="text-rose-500">*</span></Label>
+                    <Input type="number" min={0} value={formData.quantity ?? 0} onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })} required />
+                </div>
+
+                {/* Fixed: minimum_stock_level */}
+                <div className="grid gap-2">
+                    <Label>Minimum Stock Level <span className="text-rose-500">*</span></Label>
+                    <Input type="number" min={0} value={formData.minimum_stock_level ?? 0} onChange={(e) => setFormData({ ...formData, minimum_stock_level: parseInt(e.target.value) || 0 })} required />
+                </div>
+
+                {/* Fixed: unit_cost */}
+                <div className="grid gap-2">
+                    <Label>Unit Cost (RM)</Label>
+                    <Input type="number" min={0} step="0.01" value={formData.unit_cost ?? ''} onChange={(e) => setFormData({ ...formData, unit_cost: e.target.value })} />
+                </div>
+
+                {/* Fixed: status */}
+                <div className="grid gap-2">
+                    <Label>Status <span className="text-rose-500">*</span></Label>
+                    <Select value={formData.status || 'available'} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {[{ v: 'available', l: 'Available' }, { v: 'in_use', l: 'In Use' }, { v: 'damaged', l: 'Damaged' }, { v: 'disposed', l: 'Disposed' }].map(o => (
+                                <SelectItem key={o.v} value={o.v}>{o.l}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* FK: site_id */}
+                <div className="grid gap-2">
+                    <Label>Site (FK)</Label>
+                    <Select value={formData.site_id?.toString() || ''} onValueChange={(v) => setFormData({ ...formData, site_id: v ? parseInt(v) : null })}>
+                        <SelectTrigger><SelectValue placeholder="Select site" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">— None —</SelectItem>
+                            {(sites || []).map((s: any) => (
+                                <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* FK: asset_type_id */}
+                <div className="grid gap-2">
+                    <Label>Asset Type (FK)</Label>
+                    <Select value={formData.asset_type_id?.toString() || ''} onValueChange={(v) => setFormData({ ...formData, asset_type_id: v ? parseInt(v) : null })}>
+                        <SelectTrigger><SelectValue placeholder="Select asset type" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">— None —</SelectItem>
+                            {(assetTypes || []).map((t: any) => (
+                                <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* Fixed: location */}
+                <div className="grid gap-2">
+                    <Label>Location</Label>
+                    <Input value={formData.location || ''} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="e.g. Shelf A-12" />
+                </div>
+            </div>
+        ),
+    };
+}

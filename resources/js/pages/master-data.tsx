@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab, sparePartCategoriesTab } from './MasterData/tabConfigs';
+import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab, sparePartCategoriesTab, sparePartsTab } from './MasterData/tabConfigs';
 import SiteConfigSection from '@/components/SiteConfigSection';
 
 type MasterDataProps = {
@@ -36,6 +36,8 @@ type MasterDataProps = {
     currentConfigTable?: string;
     assetStatuses?: { id: number; name: string; color: string; sort_order: number }[];
     sparePartCategories?: any[];
+    spareParts?: any[];
+    assetTypes?: any[];
     isAdmin?: boolean;
 };
 
@@ -74,6 +76,7 @@ export default function MasterData({
     customTypes = [], licenses = [], tableConfigurations = {},
     configurationTables = [], currentConfigTable = 'assets',
     isAdmin = false, assetStatuses = [], sparePartCategories = [],
+    spareParts = [], assetTypes = [],
 }: MasterDataProps) {
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const defaultTab = urlParams.get('tab') || 'sites';
@@ -126,13 +129,17 @@ export default function MasterData({
         if (item) {
             setFormData({ ...item, asset_category_id: item.asset_category_id?.toString() || '' });
         } else {
-            setFormData({ custom_master_data_type_id: customTypes.find((ct: any) => ct.slug === activeTab)?.id });
+            if (activeTab === 'spare-parts') {
+                setFormData({ status: 'available', quantity: 0, minimum_stock_level: 0 });
+            } else {
+                setFormData({ custom_master_data_type_id: customTypes.find((ct: any) => ct.slug === activeTab)?.id });
+            }
         }
         setIsDialogOpen(true);
     };
 
     const handleDelete = (id: number) => {
-        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses'];
+        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses', 'spare-parts'];
         const typeName = builtinTabs.includes(activeTab) ? activeTab.slice(0, -1) : 'item';
         if (!confirm(`Are you sure you want to delete this ${typeName}?`)) return;
         let url = `/master-data/${activeTab}/${id}`;
@@ -142,7 +149,7 @@ export default function MasterData({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses'];
+        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses', 'spare-parts'];
         let url = `/master-data/${activeTab}`;
         if (!builtinTabs.includes(activeTab)) url = `/master-data/custom-values`;
         if (editingItem) url = `${url}/${editingItem.id}`;
@@ -219,6 +226,7 @@ export default function MasterData({
         licenses: licensesTab({ ...sharedOpts, licenses, licenseColVisibility }),
         'asset-statuses': assetStatusesTab({ ...sharedOpts, assetStatuses }),
         'spare-part-categories': sparePartCategoriesTab({ ...sharedOpts, sparePartCategories }),
+        'spare-parts': sparePartsTab({ ...sharedOpts, spareParts, sites, sparePartCategories, assetTypes, editingItem }),
     };
 
     // Build dynamic tabs for custom master data types
