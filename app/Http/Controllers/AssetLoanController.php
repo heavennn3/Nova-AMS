@@ -106,9 +106,9 @@ class AssetLoanController extends Controller
             'asset_ids.*' => 'exists:assets,id',
             'site_id' => 'required|exists:sites,id',
             'loan_date' => 'nullable|date',
-            'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
+            'expected_return_date' => 'required|date|after_or_equal:loan_date',
             'condition_status' => 'nullable|in:good,semi_faulty,faulty',
-            'purpose' => 'nullable|string|max:500',
+            'purpose' => 'required|string|max:500',
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -120,9 +120,9 @@ class AssetLoanController extends Controller
                 'user_id' => $user->id,
                 'site_id' => $validated['site_id'],
                 'loan_date' => $validated['loan_date'] ?? now()->format('Y-m-d'),
-                'expected_return_date' => $validated['expected_return_date'] ?? null,
+                'expected_return_date' => $validated['expected_return_date'],
                 'condition_status' => $validated['condition_status'] ?? 'good',
-                'purpose' => $validated['purpose'] ?? '',
+                'purpose' => $validated['purpose'],
                 'notes' => $validated['notes'] ?? '',
                 'status' => 'pending',
             ]);
