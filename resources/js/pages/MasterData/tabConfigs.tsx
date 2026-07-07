@@ -124,22 +124,31 @@ export function vendorsTab(opts: any) {
                 cell: ({ row }: any) => {
                     const v = row.original;
                     return <div className="flex items-center gap-3">
-                        {v.logo ? <img src={v.logo} alt="" className="h-8 w-8 rounded-lg object-cover" />
-                            : <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-sm font-bold text-purple-600">{(v.name || '?')[0].toUpperCase()}</div>}
-                        <div><div className="font-medium">{v.name}</div>{v.contact_person && <div className="text-xs text-muted-foreground">{v.contact_person}</div>}</div>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-sm font-bold text-purple-600">{(v.name || '?')[0].toUpperCase()}</div>
+                        <div><div className="font-medium">{v.name}</div></div>
                     </div>;
                 },
             },
-            { accessorKey: 'email', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Email" /> },
-            { accessorKey: 'phone', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Phone" /> },
+            { 
+                accessorKey: 'description', 
+                header: ({ column }: any) => <DataTableColumnHeader column={column} title="Description" />,
+                cell: ({ row }: any) => {
+                    const description = row.original.description;
+                    return <span className="text-sm text-muted-foreground">{description || '—'}</span>;
+                }
+            },
             ...editDeleteCol(handleOpenDialog, handleDelete, isAdmin),
         ],
         renderForm: () => (
-            <><div className="grid gap-2"><Label>Vendor Name</Label><Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required /></div>
-                <div className="grid gap-2"><Label>Contact Person</Label><Input value={formData.contact_person || ''} onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })} /></div>
-                <div className="grid gap-2"><Label>Email</Label><Input value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} type="email" /></div>
-                <div className="grid gap-2"><Label>Phone</Label><Input value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} /></div>
-                <div className="grid gap-2"><Label>Address</Label><Input value={formData.address || ''} onChange={(e) => setFormData({ ...formData, address: e.target.value })} /></div>
+            <>
+                <div className="grid gap-2">
+                    <Label>Vendor Name <span className="text-rose-500">*</span></Label>
+                    <Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                </div>
+                <div className="grid gap-2">
+                    <Label>Description</Label>
+                    <Input value={formData.description || ''} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Optional description" />
+                </div>
             </>
         ),
     };

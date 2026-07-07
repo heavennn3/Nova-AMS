@@ -10,7 +10,10 @@ class Vendor extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
     public function assets()
     {

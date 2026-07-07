@@ -40,11 +40,7 @@ class MasterDataController extends Controller
             'vendors' => Vendor::get()->map(fn($v) => [
                 'id' => $v->id,
                 'name' => $v->name,
-                'contact_person' => $v->contact_person,
-                'phone' => $v->phone,
-                'email' => $v->email,
-                'address' => $v->address,
-                'logo' => $v->logo ? \Storage::url($v->logo) : null,
+                'description' => $v->description,
                 'assets_count' => $assetsCount,
             ]),
             'customTypes' => CustomMasterDataType::with(['values', 'columns'])->get(),

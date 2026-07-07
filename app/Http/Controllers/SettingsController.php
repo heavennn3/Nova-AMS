@@ -223,10 +223,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string'
+            'description' => 'nullable|string',
         ]);
         Vendor::create($validated);
         return back()->with('success', 'Vendor created successfully.');
@@ -235,10 +232,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string'
+            'description' => 'nullable|string',
         ]);
         Vendor::findOrFail($id)->update($validated);
         return back()->with('success', 'Vendor updated successfully.');

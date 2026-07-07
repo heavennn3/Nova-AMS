@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Vendor;
 use App\Models\Asset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class VendorController extends Controller
@@ -20,11 +19,7 @@ class VendorController extends Controller
             return [
                 'id' => $vendor->id,
                 'name' => $vendor->name,
-                'contact_person' => $vendor->contact_person,
-                'phone' => $vendor->phone,
-                'email' => $vendor->email,
-                'address' => $vendor->address,
-                'logo' => $vendor->logo ? Storage::url($vendor->logo) : null,
+                'description' => $vendor->description,
                 'assets_count' => $totalAssets,
             ];
         });
@@ -49,16 +44,8 @@ class VendorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string',
-            'logo' => 'nullable|image|max:2048',
+            'description' => 'nullable|string',
         ]);
-
-        if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('vendor-logos', 'public');
-        }
 
         Vendor::create($validated);
 
@@ -76,11 +63,7 @@ class VendorController extends Controller
             'vendor' => [
                 'id' => $vendor->id,
                 'name' => $vendor->name,
-                'contact_person' => $vendor->contact_person,
-                'phone' => $vendor->phone,
-                'email' => $vendor->email,
-                'address' => $vendor->address,
-                'logo' => $vendor->logo ? Storage::url($vendor->logo) : null,
+                'description' => $vendor->description,
                 'assets_count' => $totalAssets,
                 'assets' => [],
             ],
@@ -96,11 +79,7 @@ class VendorController extends Controller
             'vendor' => [
                 'id' => $vendor->id,
                 'name' => $vendor->name,
-                'contact_person' => $vendor->contact_person,
-                'phone' => $vendor->phone,
-                'email' => $vendor->email,
-                'address' => $vendor->address,
-                'logo' => $vendor->logo ? Storage::url($vendor->logo) : null,
+                'description' => $vendor->description,
             ],
         ]);
     }
@@ -112,20 +91,8 @@ class VendorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string',
-            'logo' => 'nullable|image|max:2048',
+            'description' => 'nullable|string',
         ]);
-
-        if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($vendor->logo) {
-                Storage::disk('public')->delete($vendor->logo);
-            }
-            $validated['logo'] = $request->file('logo')->store('vendor-logos', 'public');
-        }
 
         $vendor->update($validated);
 
