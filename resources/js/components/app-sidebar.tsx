@@ -127,7 +127,7 @@ const navSections: NavSection[] = [
             },
 
              {
-                title: 'Document Management',
+                title: 'Document',
                 href: '#',
                 icon: FileText,
                 module: 'Document Management',
@@ -254,19 +254,10 @@ const navSections: NavSection[] = [
 
               {
                 title: 'Settings',
-                href: '#',
+                href: '/settings',
                 icon: Settings,
                 module: 'System Settings',
-                items: [
-                    { title: 'Custom Fields', href: '/settings/custom-fields' },
-                    { title: 'Status Labels', href: '/settings/status-labels' },
-                    { title: 'Asset Models', href: '/settings/asset-models' },
-                    { title: 'Categories', href: '/settings/categories' },
-                    { title: 'Manufacturers', href: '/settings/manufacturers' },
-                    { title: 'Suppliers/Vendors', href: '/settings/suppliers' },
-                    { title: 'Departments', href: '/settings/departments' },
-                    { title: 'Locations', href: '/settings/locations' },
-                ],
+               
             },
            
 

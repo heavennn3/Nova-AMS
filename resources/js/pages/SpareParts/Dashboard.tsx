@@ -109,11 +109,9 @@ export default function SparePartsDashboard({
             <div className="flex items-center justify-between border-b pb-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                        Spare Parts Management
+                        Spare Parts Inventory
                     </h1>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Monitor inventory, checkouts, and stock levels
-                    </p>
+                 
                 </div>
                 <Link href="/spare-parts">
                     <Button>
