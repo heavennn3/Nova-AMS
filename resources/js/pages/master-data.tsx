@@ -212,9 +212,9 @@ export default function MasterData({
     const sharedOpts = { formData, setFormData, handleOpenDialog, handleDelete, isAdmin, assetStatuses };
     const tabConfig: Record<string, any> = {
         sites: sitesTab({ ...sharedOpts, filteredSites }),
-        categories: categoriesTab({ ...sharedOpts }),
-        types: typesTab({ ...sharedOpts, categories }),
-        vendors: vendorsTab({ ...sharedOpts }),
+        categories: categoriesTab({ ...sharedOpts, categories }),
+        types: typesTab({ ...sharedOpts, types, categories }),
+        vendors: vendorsTab({ ...sharedOpts, vendors }),
         licenses: licensesTab({ ...sharedOpts, licenses, licenseColVisibility }),
         'asset-statuses': assetStatusesTab({ ...sharedOpts, assetStatuses }),
     };

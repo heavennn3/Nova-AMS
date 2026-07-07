@@ -75,9 +75,10 @@ export function sitesTab(opts: any) {
 }
 
 export function categoriesTab(opts: any) {
-    const { formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
+    const { categories, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
     return {
         title: 'Asset Categories',
+        data: categories || [],
         columns: [
             { accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" /> },
             { accessorKey: 'description', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Description" /> },
