@@ -21,8 +21,9 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab, sparePartCategoriesTab, sparePartsTab } from './MasterData/tabConfigs';
+import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab } from './MasterData/tabConfigs';
 import SiteConfigSection from '@/components/SiteConfigSection';
+import SparePartSection from './MasterData/SparePartSection';
 
 type MasterDataProps = {
     categories: any[];
@@ -61,7 +62,7 @@ function loadLicenseColVisibility(): Record<string, boolean> {
     try {
         const saved = localStorage.getItem('masterdata_license_cols');
         if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch { }
     return {
         name: true, product_key: true, version: true, category: true,
         license_type: true, pricing_model: false, seats: true,
@@ -129,17 +130,13 @@ export default function MasterData({
         if (item) {
             setFormData({ ...item, asset_category_id: item.asset_category_id?.toString() || '' });
         } else {
-            if (activeTab === 'spare-parts') {
-                setFormData({ status: 'available', quantity: 0, minimum_stock_level: 0 });
-            } else {
-                setFormData({ custom_master_data_type_id: customTypes.find((ct: any) => ct.slug === activeTab)?.id });
-            }
+            setFormData({ custom_master_data_type_id: customTypes.find((ct: any) => ct.slug === activeTab)?.id });
         }
         setIsDialogOpen(true);
     };
 
     const handleDelete = (id: number) => {
-        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses', 'spare-parts'];
+        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses'];
         const typeName = builtinTabs.includes(activeTab) ? activeTab.slice(0, -1) : 'item';
         if (!confirm(`Are you sure you want to delete this ${typeName}?`)) return;
         let url = `/master-data/${activeTab}/${id}`;
@@ -149,7 +146,7 @@ export default function MasterData({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses', 'spare-parts'];
+        const builtinTabs = ['sites', 'categories', 'types', 'vendors', 'licenses', 'asset-statuses'];
         let url = `/master-data/${activeTab}`;
         if (!builtinTabs.includes(activeTab)) url = `/master-data/custom-values`;
         if (editingItem) url = `${url}/${editingItem.id}`;
@@ -225,18 +222,19 @@ export default function MasterData({
         vendors: vendorsTab({ ...sharedOpts, vendors }),
         licenses: licensesTab({ ...sharedOpts, licenses, licenseColVisibility }),
         'asset-statuses': assetStatusesTab({ ...sharedOpts, assetStatuses }),
-        'spare-part-categories': sparePartCategoriesTab({ ...sharedOpts, sparePartCategories }),
-        'spare-parts': sparePartsTab({ ...sharedOpts, spareParts, sites, sparePartCategories, assetTypes, editingItem }),
+        'spare-part': { title: 'Spare Part', isComposite: true },
     };
 
     // Build dynamic tabs for custom master data types
     customTypes.forEach((cType: any) => {
         const typeColumns = cType.columns || [];
         const dynamicColumns: any[] = [
-            { id: 'select', header: ({ table }: any) => {
-                const allIds = (cType.values || []).map((v: any) => v.id);
-                return <Checkbox checked={allIds.length > 0 && allIds.every((id: number) => selectedRows.has(id))} onCheckedChange={() => toggleAllRows(allIds)} />;
-            }, cell: ({ row }: any) => <Checkbox checked={selectedRows.has(row.original.id)} onCheckedChange={() => toggleRow(row.original.id)} />, size: 40 },
+            {
+                id: 'select', header: ({ table }: any) => {
+                    const allIds = (cType.values || []).map((v: any) => v.id);
+                    return <Checkbox checked={allIds.length > 0 && allIds.every((id: number) => selectedRows.has(id))} onCheckedChange={() => toggleAllRows(allIds)} />;
+                }, cell: ({ row }: any) => <Checkbox checked={selectedRows.has(row.original.id)} onCheckedChange={() => toggleRow(row.original.id)} />, size: 40
+            },
         ];
         typeColumns.forEach((col: any) => {
             dynamicColumns.push({
@@ -428,6 +426,16 @@ export default function MasterData({
                             </div>
                         )}
                     </div>
+                ) : currentTab?.isComposite ? (
+                    <div className="p-4">
+                        <SparePartSection
+                            spareParts={spareParts}
+                            sites={sites}
+                            sparePartCategories={sparePartCategories}
+                            assetTypes={assetTypes}
+                            isAdmin={isAdmin}
+                        />
+                    </div>
                 ) : (
                     <div className="p-4">
                         <DataTable columns={currentTab.columns} data={currentTab.data} hideToolbar />
@@ -435,22 +443,22 @@ export default function MasterData({
                 )}
             </div>
 
-            {/* Add/Edit Record Dialog */}
-            {currentTab && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{editingItem ? 'Edit' : 'Add New'} {currentTab.title.replace(/s$/, '')}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                        {currentTab.renderForm()}
-                        <DialogFooter className="mt-6">
-                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                            {isAdmin && <Button type="submit">Save Changes</Button>}
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+            {/* Add/Edit Record Dialog — skip for composite tabs */}
+            {currentTab && !currentTab.isComposite && (
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{editingItem ? 'Edit' : 'Add New'} {currentTab.title.replace(/s$/, '')}</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                            {currentTab.renderForm()}
+                            <DialogFooter className="mt-6">
+                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                                {isAdmin && <Button type="submit">Save Changes</Button>}
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             )}
 
             {/* Manage Custom Types Dialog */}
