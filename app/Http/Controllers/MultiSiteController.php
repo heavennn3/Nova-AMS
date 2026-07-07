@@ -19,10 +19,11 @@ class MultiSiteController extends Controller
 
     public function dashboards()
     {
-        $sites = Site::with(['assets' => function ($query) {
-            $query->select('id', 'site_id', 'condition_status', 'status');
-        }])->get()->map(function ($site) {
-            $assetIds = $site->assets->pluck('id');
+        $sites = Site::with(['assets.fieldValues'])->get()->map(function ($site) {
+            $assets = $site->assets;
+            
+            // Get asset IDs for work order queries
+            $assetIds = $assets->pluck('id');
             
             $workOrders = \App\Models\WorkOrder::whereIn('asset_id', $assetIds)->get();
             
@@ -37,14 +38,17 @@ class MultiSiteController extends Controller
                 ->count();
             
             // Calculate actual Asset Health score from asset condition
-            $totalAssets = $site->assets->count();
+            $totalAssets = $assets->count();
             if ($totalAssets > 0) {
-                $totalScore = $site->assets->reduce(function ($carry, $asset) {
-                    switch ($asset->condition_status) {
+                $totalScore = $assets->reduce(function ($carry, $asset) {
+                    $conditionStatus = $asset->getField('condition_status') ?? 'good';
+                    switch ($conditionStatus) {
+                        case 'excellent':
                         case 'good': return $carry + 100;
                         case 'fair': return $carry + 75;
                         case 'poor': return $carry + 50;
-                        case 'damaged': return $carry + 25;
+                        case 'damaged':
+                        case 'faulty': return $carry + 25;
                         default: return $carry + 100;
                     }
                 }, 0);
