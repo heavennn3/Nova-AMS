@@ -391,23 +391,7 @@ export default function LiveTrackingAdmin({
                     { label: 'Send Reminder', icon: Bell, onClick: () => sendSingleReminder(assignment) },
                     { label: 'Check In', icon: CheckCircle2, onClick: () => checkInAsset(assignment) },
                 ];
-                return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            {actions.map(a => (
-                                <DropdownMenuItem key={a.label} onClick={a.onClick}>
-                                    <a.icon className="mr-2 h-4 w-4" />
-                                    {a.label}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                );
+
             },
         },
     ], []);
