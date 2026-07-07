@@ -125,14 +125,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/licenses/{id}/force', [\App\Http\Controllers\LicenseController::class, 'forceDelete'])->name('licenses.force-delete');
         Route::resource('licenses', \App\Http\Controllers\LicenseController::class);
 
-        Route::get('/live-tracking', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('live-tracking');
+        Route::get('/asset-track', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('asset-track');
         Route::get('/api/live-tracking/poll', [\App\Http\Controllers\AssetTrackingController::class, 'poll'])->name('live-tracking.poll');
         Route::get('/api/live-tracking/history', [\App\Http\Controllers\AssetTrackingController::class, 'history'])->name('live-tracking.history');
         Route::get('/api/live-tracking/report', [\App\Http\Controllers\AssetTrackingController::class, 'report'])->name('live-tracking.report');
-        Route::post('/live-tracking/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('live-tracking.checkout');
-        Route::patch('/live-tracking/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('live-tracking.checkin');
-        Route::post('/live-tracking/{assignment}/send-reminder', [\App\Http\Controllers\AssetTrackingController::class, 'sendReminder'])->name('live-tracking.send-reminder');
-        Route::post('/live-tracking/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('live-tracking.bulk-reminders');
+        Route::post('/asset-track/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('asset-track.checkout');
+        Route::patch('/asset-track/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('asset-track.checkin');
+        Route::post('/asset-track/{assignment}/send-reminder', [\App\Http\Controllers\AssetTrackingController::class, 'sendReminder'])->name('asset-track.send-reminder');
+        Route::post('/asset-track/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('asset-track.bulk-reminders');
 
         // Asset Withdrawals Module
         Route::prefix('withdrawals')->group(function () {

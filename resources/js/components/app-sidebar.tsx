@@ -80,7 +80,7 @@ const navSections: NavSection[] = [
 
             {
                 title: 'Asset Withdrawal',
-                href: '/live-tracking',
+                href: '/asset-track',
                 icon: Activity,
                 module: 'Asset Inventory',
             },

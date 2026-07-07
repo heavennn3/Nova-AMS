@@ -187,7 +187,7 @@ export default function LiveTrackingAdmin({
     const sendSingleReminder = (assignment: Assignment) => {
         if (!confirm(`Send reminder to ${assignment.user_name} about ${assignment.product_name}?`)) return;
 
-        router.post(`/live-tracking/${assignment.id}/send-reminder`, {}, {
+        router.post(`/asset-track/${assignment.id}/send-reminder`, {}, {
             onSuccess: () => {
                 toast.success('Reminder sent successfully!');
             },
@@ -205,7 +205,7 @@ export default function LiveTrackingAdmin({
         }
 
         reminderForm.setData('assignment_ids', selectedAssignments);
-        reminderForm.post('/live-tracking/bulk-reminders', {
+        reminderForm.post('/asset-track/bulk-reminders', {
             onSuccess: () => {
                 setIsReminderDialogOpen(false);
                 setSelectedAssignments([]);
@@ -221,7 +221,7 @@ export default function LiveTrackingAdmin({
     const checkInAsset = (assignment: Assignment) => {
         if (!confirm(`Check in ${assignment.product_name} from ${assignment.user_name}?`)) return;
 
-        router.patch(`/live-tracking/${assignment.id}/checkin`, {}, {
+        router.patch(`/asset-track/${assignment.id}/checkin`, {}, {
             onSuccess: () => {
                 toast.success('Asset checked in successfully!');
                 window.location.reload();
@@ -422,9 +422,7 @@ export default function LiveTrackingAdmin({
                         <Activity className="mr-3 h-8 w-8 text-primary" />
                         Asset Withdrawal
                     </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Real-time asset withdrawal tracking and overdue management
-                    </p>
+
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={() => window.location.reload()}>
@@ -796,7 +794,7 @@ LiveTrackingAdmin.layout = {
     breadcrumbs: [
         {
             title: 'Asset Tracking',
-            href: '/live-tracking',
+            href: '/asset-track',
         },
         {
             title: 'Admin Dashboard',

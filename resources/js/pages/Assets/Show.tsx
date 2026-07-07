@@ -139,7 +139,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
 
     const handleCheckoutSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        checkoutForm.post('/live-tracking/checkout', {
+        checkoutForm.post('/asset-track/checkout', {
             onSuccess: () => {
                 setIsCheckoutOpen(false);
                 checkoutForm.reset();
@@ -154,7 +154,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
     const handleCheckinSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!activeAssignment) return;
-        checkinForm.patch(`/live-tracking/${activeAssignment.id}/checkin`, {
+        checkinForm.patch(`/asset-track/${activeAssignment.id}/checkin`, {
             onSuccess: () => {
                 setIsCheckinOpen(false);
                 checkinForm.reset();

@@ -391,7 +391,7 @@ export default function LiveTracking({
         if (!checkoutAssetId || !checkoutUserId) return;
         setSubmitting(true);
         router.post(
-            '/live-tracking/checkout',
+            '/asset-track/checkout',
             {
                 asset_id: checkoutAssetId,
                 user_id: checkoutUserId,
@@ -414,7 +414,7 @@ export default function LiveTracking({
 
     const handleCheckin = (assignment: Assignment) => {
         router.patch(
-            `/live-tracking/${assignment.id}/checkin`,
+            `/asset-track/${assignment.id}/checkin`,
             {},
             {
                 preserveScroll: true,
@@ -1667,6 +1667,6 @@ export default function LiveTracking({
 LiveTracking.layout = {
     breadcrumbs: [
         { title: 'Asset Management', href: '#' },
-        { title: 'Asset Tracking', href: '/live-tracking' },
+        { title: 'Asset Tracking', href: '/asset-track' },
     ],
 };
