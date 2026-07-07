@@ -184,7 +184,7 @@ export default function SparePartsDashboard({
                     <CardHeader className="flex flex-row items-center justify-between bg-muted/30 py-3">
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
                             <span className={`inline-block h-2 w-2 rounded-full ${statsCards.find(s => s.title === activeStat)?.color.replace('text-', 'bg-')}`} />
-                            {activeStat} Parts
+                            {activeStat}
                         </CardTitle>
                         <button type="button" onClick={() => setActiveStat(null)} className="text-muted-foreground hover:text-foreground">
                             <X className="h-4 w-4" />
