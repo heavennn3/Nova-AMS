@@ -75,6 +75,9 @@ const navSections: NavSection[] = [
                     },
                 ],
             },
+
+            { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
+
             {
                 title: 'Asset Withdrawal',
                 href: '/live-tracking',
@@ -123,63 +126,7 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
 
-            {
-                title: 'Maintenance Operations',
-                href: operationsMaintenance(),
-                icon: Wrench,
-                module: 'Operations & Maintenance',
-            },
-            {
-                title: 'Comprehensive Maintenance',
-                href: '#',
-                icon: Wrench,
-                module: 'Operations & Maintenance',
-                items: [
-                    {
-                        title: 'Preventive Scheduling',
-                        href: '/maintenance/scheduling',
-                    },
-                    { title: 'Work Orders', href: '/maintenance/work-orders' },
-                    {
-                        title: 'Maintenance History',
-                        href: '/maintenance/history',
-                    },
-
-                    {
-                        title: 'Technician Assignment',
-                        href: '/maintenance/technicians',
-                    },
-                ],
-            },
-
-        ],
-    },
-
-    {
-        title: 'ADMINISTRATION',
-        items: [
-            {
-                title: 'Users',
-                href: '#',
-                icon: Shield,
-                module: 'System Settings',
-                items: [
-                    { title: 'Manage Users', href: userManagement() },
-                    { title: 'Access Control', href: '/security/roles' },
-                ],
-            },
-            {
-                title: 'Technician Center',
-                href: '#',
-                icon: Wrench,
-                module: 'Operations & Maintenance',
-                items: [
-                    { title: 'Manage Technicians', href: '/technicians' },
-                    { title: 'Assign Work Orders', href: '/maintenance/work-orders' },
-                    { title: 'Performance Reports', href: '/maintenance/history' },
-                ],
-            },
-            {
+             {
                 title: 'Document Management',
                 href: '#',
                 icon: FileText,
@@ -199,9 +146,13 @@ const navSections: NavSection[] = [
                 ],
             },
 
+            
+            
 
         ],
     },
+
+    
 
     {
         title: 'OTHERS',
@@ -212,7 +163,7 @@ const navSections: NavSection[] = [
                 icon: Database,
                 module: 'Master Data',
             },
-            { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
+            
 
             {
                 title: 'Requests',
@@ -239,7 +190,7 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
             {
-                title: 'Activity Logs',
+                title: 'Audit Log',
                 href: '/security/logs',
                 icon: History,
                 module: 'System Settings',
@@ -272,7 +223,36 @@ const navSections: NavSection[] = [
                     },
                 ],
             },
+          
+
+        ],
+    },
+    {
+        title: 'ADMINISTRATION',
+        items: [
             {
+                title: 'Users',
+                href: '#',
+                icon: Shield,
+                module: 'System Settings',
+                items: [
+                    { title: 'Manage Users', href: userManagement() },
+                    { title: 'Access Control', href: '/security/roles' },
+                ],
+            },
+            {
+                title: 'Technician Center',
+                href: '#',
+                icon: Wrench,
+                module: 'Operations & Maintenance',
+                items: [
+                    { title: 'Manage Technicians', href: '/technicians' },
+                    { title: 'Assign Work Orders', href: '/maintenance/work-orders' },
+                    { title: 'Performance Reports', href: '/maintenance/history' },
+                ],
+            },
+
+              {
                 title: 'Settings',
                 href: '#',
                 icon: Settings,
@@ -288,6 +268,8 @@ const navSections: NavSection[] = [
                     { title: 'Locations', href: '/settings/locations' },
                 ],
             },
+           
+
 
         ],
     },
