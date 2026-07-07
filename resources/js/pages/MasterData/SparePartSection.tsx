@@ -13,11 +13,12 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Layers, Package, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Layers, Package, Settings, Columns } from 'lucide-react';
+import SiteConfigSection from '@/components/SiteConfigSection';
 
-type SubTab = 'categories' | 'settings';
+type SubTab = 'categories' | 'settings' | 'columns';
 
-export default function SparePartSection({ spareParts, sites, sparePartCategories, assetTypes, isAdmin }: any) {
+export default function SparePartSection({ spareParts, sites, sparePartCategories, assetTypes, sparePartTableConfigs, isAdmin }: any) {
     const [subTab, setSubTab] = useState<SubTab>('categories');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
@@ -123,6 +124,7 @@ export default function SparePartSection({ spareParts, sites, sparePartCategorie
     const subTabs: { key: SubTab; label: string; icon: any }[] = [
         { key: 'categories', label: 'Categories', icon: Layers },
         { key: 'settings', label: 'Settings', icon: Settings },
+        { key: 'columns', label: 'Columns', icon: Columns },
     ];
 
     return (
@@ -141,7 +143,25 @@ export default function SparePartSection({ spareParts, sites, sparePartCategorie
                 })}
             </div>
 
-            {/* Table */}
+            {/* Content */}
+            {subTab === 'columns' ? (
+                <div className="space-y-6">
+                    {sparePartTableConfigs?.global && (
+                        <SiteConfigSection title="Global (All Sites)" configs={sparePartTableConfigs.global} siteId={null} tableName="spare_parts" isAdmin={isAdmin} sites={sites} />
+                    )}
+                    {Object.keys(sparePartTableConfigs || {}).filter(k => k !== 'global').map(siteId => {
+                        const site = sites?.find((s: any) => String(s.id) === siteId);
+                        return <SiteConfigSection key={siteId} title={site?.name || `Site #${siteId}`} configs={sparePartTableConfigs[siteId]} siteId={Number(siteId)} tableName="spare_parts" isAdmin={isAdmin} sites={sites} />;
+                    })}
+                    {isAdmin && (
+                        <div className="flex items-center gap-3 pt-2">
+                            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { if (confirm('Reset to default? Custom columns will be lost.')) router.post('/master-data/table-configurations/reset-to-default/spare_parts', {}, { preserveScroll: true }); }}>
+                                Reset to Default
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            ) : (
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
                     <h2 className="text-lg font-semibold">{subTab === 'categories' ? 'Spare Part Categories' : 'Spare Parts Settings'}</h2>
@@ -159,8 +179,10 @@ export default function SparePartSection({ spareParts, sites, sparePartCategorie
                     )}
                 </div>
             </div>
+            )}
 
-            {/* Dialog */}
+            {/* Dialog — for categories/settings only */}
+            {subTab !== 'columns' && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -270,6 +292,7 @@ export default function SparePartSection({ spareParts, sites, sparePartCategorie
                     </form>
                 </DialogContent>
             </Dialog>
+            )}
         </div>
     );
 }

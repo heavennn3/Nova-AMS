@@ -34,12 +34,12 @@ type MasterDataProps = {
     customTypes: any[];
     licenses: any[];
     tableConfigurations?: Record<string, any[]>;
-    configurationTables?: string[];
-    currentConfigTable?: string;
     assetStatuses?: { id: number; name: string; color: string; sort_order: number }[];
     sparePartCategories?: any[];
     spareParts?: any[];
     assetTypes?: any[];
+    assetTableConfigs?: any;
+    sparePartTableConfigs?: any;
     isAdmin?: boolean;
 };
 
@@ -76,9 +76,9 @@ function loadLicenseColVisibility(): Record<string, boolean> {
 export default function MasterData({
     categories = [], types = [], sites = [], vendors = [],
     customTypes = [], licenses = [], tableConfigurations = {},
-    configurationTables = [], currentConfigTable = 'assets',
     isAdmin = false, assetStatuses = [], sparePartCategories = [],
     spareParts = [], assetTypes = [],
+    assetTableConfigs = {}, sparePartTableConfigs = {},
 }: MasterDataProps) {
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const defaultTab = urlParams.get('tab') || 'sites';
@@ -106,9 +106,6 @@ export default function MasterData({
     // License column visibility
     const [licenseColVisibility, setLicenseColVisibility] = useState<Record<string, boolean>>(loadLicenseColVisibility);
     const [isLicenseColsOpen, setIsLicenseColsOpen] = useState(false);
-
-    // Table config tab state
-    const [configSelectedTable, setConfigSelectedTable] = useState(currentConfigTable);
 
     // Site region filter
     const [siteRegionFilter, setSiteRegionFilter] = useState('all');
@@ -318,16 +315,12 @@ export default function MasterData({
                         {tabConfig[tab].title}
                     </button>
                 ))}
-                <button onClick={() => { setActiveTab('table-configurations'); setSelectedRows(new Set()); }}
-                    className={`border-b-2 px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-200 ${activeTab === 'table-configurations' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'}`}>
-                    Columns
-                </button>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
                     <div className="flex items-center gap-4">
-                        <h2 className="text-lg font-semibold">{activeTab === 'table-configurations' ? 'Table Columns' : `${currentTab.title} List`}</h2>
+                        <h2 className="text-lg font-semibold">{currentTab.title} List</h2>
                         {activeTab === 'sites' && (
                             <div className="flex items-center gap-1.5 bg-background rounded-lg p-0.5 border shadow-sm">
                                 {[{ value: 'all', label: 'All' }, { value: 'sabah', label: 'Sabah' }, { value: 'sarawak', label: 'Sarawak' }].map((opt) => (
@@ -350,7 +343,7 @@ export default function MasterData({
                                 <Eye className="mr-2 h-4 w-4" /> Manage Columns
                             </Button>
                         )}
-                        {activeTab !== 'table-configurations' && isAdmin && <Button onClick={() => handleOpenDialog()} size="sm"><Plus className="mr-2 h-4 w-4" /> Add New</Button>}
+                        {isAdmin && <Button onClick={() => handleOpenDialog()} size="sm"><Plus className="mr-2 h-4 w-4" /> Add New</Button>}
                     </div>
                 </div>
 
@@ -362,70 +355,7 @@ export default function MasterData({
                     </div>
                 )}
 
-                {activeTab === 'table-configurations' ? (
-                    <div className="p-4 space-y-6">
-                        {/* Table selector */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium whitespace-nowrap">Select Table:</span>
-                            {configurationTables.map((table: string) => (
-                                <button key={table} onClick={() => {
-                                    setConfigSelectedTable(table);
-                                    router.get(`/master-data?tab=table-configurations&tableName=${table}`, {}, {
-                                        preserveScroll: true, only: ['tableConfigurations', 'currentConfigTable'],
-                                    });
-                                }}
-                                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${configSelectedTable === table ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}>
-                                    {table}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Per-site Configuration Sections */}
-                        {(() => {
-                            // Build a map of site_id -> configs
-                            const siteIds = Object.keys(tableConfigurations).filter(k => k !== 'global');
-                            const hasGlobal = !!tableConfigurations['global'];
-
-                            return (
-                                <>
-                                    {/* Global (no site) section */}
-                                    {hasGlobal && (
-                                        <SiteConfigSection
-                                            title="Global"
-                                            configs={tableConfigurations['global'] || []}
-                                            siteId={null}
-                                            tableName={configSelectedTable}
-                                            isAdmin={isAdmin}
-                                            sites={sites}
-                                        />
-                                    )}
-
-                                    {/* Per-site sections */}
-                                    {siteIds.map(siteId => {
-                                        const site = sites.find((s: any) => String(s.id) === siteId);
-                                        return (
-                                            <SiteConfigSection
-                                                key={siteId}
-                                                title={site?.name || `Site #${siteId}`}
-                                                configs={tableConfigurations[siteId] || []}
-                                                siteId={Number(siteId)}
-                                                tableName={configSelectedTable}
-                                                isAdmin={isAdmin}
-                                                sites={sites}
-                                            />
-                                        );
-                                    })}
-                                </>
-                            );
-                        })()}
-
-                        {isAdmin && (
-                            <div className="flex items-center gap-3 pt-2">
-                                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { if (confirm('Reset to default configuration? Custom columns will be lost.')) router.post(`/master-data/table-configurations/reset-to-default/${configSelectedTable}`, {}, { preserveScroll: true }); }}><RefreshCw className="h-4 w-4" /> Reset to Default</Button>
-                            </div>
-                        )}
-                    </div>
-                ) : currentTab?.isComposite ? (
+                {currentTab?.isComposite ? (
                     <div className="p-4">
                         {activeTab === 'spare-part' ? (
                             <SparePartSection
@@ -433,6 +363,7 @@ export default function MasterData({
                                 sites={sites}
                                 sparePartCategories={sparePartCategories}
                                 assetTypes={assetTypes}
+                                sparePartTableConfigs={sparePartTableConfigs}
                                 isAdmin={isAdmin}
                             />
                         ) : (
@@ -440,6 +371,8 @@ export default function MasterData({
                                 categories={categories}
                                 types={types}
                                 assetStatuses={assetStatuses}
+                                assetTableConfigs={assetTableConfigs}
+                                sites={sites}
                                 isAdmin={isAdmin}
                             />
                         )}

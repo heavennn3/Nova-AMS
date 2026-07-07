@@ -19,19 +19,23 @@ class MasterDataController extends Controller
 {
     public function index(Request $request)
     {
-        $tableName = $request->query('tableName', 'assets');
+        $isAdmin = $request->user()?->hasRole('Admin') ?? false;
 
-        $allConfigs = TableConfiguration::with('site')
-            ->where('table_name', $tableName)
+        $assetTableConfigs = TableConfiguration::with('site')
+            ->where('table_name', 'assets')
             ->orderBy('sort_order')
-            ->get();
+            ->get()
+            ->groupBy(fn($c) => $c->site_id ?? 'global')
+            ->toArray();
 
-        $tableConfigurations = $allConfigs->groupBy(function ($c) {
-            return $c->site_id ?? 'global';
-        })->toArray();
+        $sparePartTableConfigs = TableConfiguration::with('site')
+            ->where('table_name', 'spare_parts')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy(fn($c) => $c->site_id ?? 'global')
+            ->toArray();
 
         $assetsCount = Asset::count();
-        $isAdmin = $request->user()?->hasRole('Admin') ?? false;
 
         return Inertia::render('master-data', [
             'categories' => AssetCategory::all(),
@@ -94,10 +98,8 @@ class MasterDataController extends Controller
                     'availability' => $p->availability,
                     'fields' => $p->getFields(),
                 ]),
-            'tableConfigurations' => $tableConfigurations,
-            'configurationTables' => TableConfiguration::select('table_name')->distinct()->pluck('table_name')
-                ->merge(['spare_parts'])->unique()->values(),
-            'currentConfigTable' => $tableName,
+            'assetTableConfigs' => $assetTableConfigs,
+            'sparePartTableConfigs' => $sparePartTableConfigs,
             'isAdmin' => $isAdmin,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color', 'sort_order']),
             'sparePartCategories' => \App\Models\SparePartCategory::with('parent:id,name')->orderBy('name')->get()->map(fn($c) => [
