@@ -17,11 +17,11 @@ class SparePartController extends Controller
     {
         $totalParts = SparePart::count();
         $totalValue = SparePart::get()->sum(function ($part) {
-            return $part->stock_level * $part->unit_cost;
+            return $part->quantity * $part->unit_cost;
         });
         $availableParts = SparePart::where('status', 'available')->count();
-        $lowStockParts = SparePart::whereRaw('stock_level <= minimum_stock_level')->count();
-        $outOfStockParts = SparePart::where('stock_level', 0)->count();
+        $lowStockParts = SparePart::whereRaw('quantity <= minimum_stock_level')->count();
+        $outOfStockParts = SparePart::where('quantity', 0)->count();
 
         // Category breakdown by master data parent groups
         $parents = \App\Models\SparePartCategory::with('children')->whereNull('parent_id')->get();
@@ -30,7 +30,7 @@ class SparePartController extends Controller
             $count = SparePart::whereIn('category', $childNames)->count();
             $value = SparePart::whereIn('category', $childNames)
                 ->get()
-                ->sum(fn($p) => $p->stock_level * $p->unit_cost);
+                ->sum(fn($p) => $p->quantity * $p->unit_cost);
             return [
                 'category' => $parent->name,
                 'count' => $count,
@@ -55,22 +55,22 @@ class SparePartController extends Controller
             });
 
         // Low stock alerts
-        $lowStockAlerts = SparePart::whereRaw('stock_level <= minimum_stock_level')
-            ->where('stock_level', '>', 0)
+        $lowStockAlerts = SparePart::whereRaw('quantity <= minimum_stock_level')
+            ->where('quantity', '>', 0)
             ->latest()
             ->limit(5)
             ->get()
             ->map(function ($part) {
                 return [
                     'name' => $part->name,
-                    'stock_level' => $part->stock_level,
+                    'stock_level' => $part->quantity,
                     'minimum_level' => $part->minimum_stock_level,
                     'location' => $part->location,
                 ];
             });
 
         // All spare parts for filtered table display
-        $allParts = SparePart::select('id', 'name', 'category', 'stock_level', 'minimum_stock_level', 'location', 'status')
+        $allParts = SparePart::select('id', 'name', 'category', 'quantity', 'minimum_stock_level', 'location', 'status')
             ->latest()
             ->get();
 
@@ -132,7 +132,7 @@ class SparePartController extends Controller
 
         $rules = [
             'part_number' => 'required|string|unique:spare_parts,part_number',
-            'stock_level' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'required|numeric|min:0',
             'location' => 'nullable|string',
@@ -172,7 +172,7 @@ class SparePartController extends Controller
 
         $rules = [
             'part_number' => 'required|string|unique:spare_parts,part_number,' . $sparePart->id,
-            'stock_level' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'required|numeric|min:0',
             'location' => 'nullable|string',
@@ -215,14 +215,14 @@ class SparePartController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'quantity' => 'required|integer|min:1|max:' . $sparePart->stock_level,
+            'quantity' => 'required|integer|min:1|max:' . $sparePart->quantity,
             'purpose' => 'nullable|string',
             'expected_return_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 
         // Update stock level
-        $sparePart->decrement('stock_level', $validated['quantity']);
+        $sparePart->decrement('quantity', $validated['quantity']);
 
         // Create checkout record
         Checkout::create([
@@ -242,7 +242,7 @@ class SparePartController extends Controller
     public function returnCheckout(Request $request, Checkout $checkout)
     {
         // Update stock level
-        $checkout->sparePart->increment('stock_level', $checkout->quantity);
+        $checkout->sparePart->increment('quantity', $checkout->quantity);
 
         // Update checkout record
         $checkout->update([
@@ -332,7 +332,7 @@ class SparePartController extends Controller
             if (empty($data)) continue;
 
             $data['status'] ??= 'available';
-            $data['stock_level'] = (int)($data['stock_level'] ?? 0);
+            $data['quantity'] = (int)($data['quantity'] ?? 0);
             $data['minimum_stock_level'] = (int)($data['minimum_stock_level'] ?? 0);
 
             // Auto-register category in master data
@@ -370,9 +370,9 @@ class SparePartController extends Controller
             'item_name' => 'name',
             'part_id' => 'part_number',
             'part_number' => 'part_number',
-            'quantity' => 'stock_level',
-            'stock_level' => 'stock_level',
-            'stock' => 'stock_level',
+            'quantity' => 'quantity',
+            'stock_level' => 'quantity',
+            'stock' => 'quantity',
             'minimum_stock' => 'minimum_stock_level',
             'minimum_stock_level' => 'minimum_stock_level',
             'min_stock' => 'minimum_stock_level',

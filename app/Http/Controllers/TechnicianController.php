@@ -65,8 +65,8 @@ class TechnicianController extends Controller
         $lowStockParts = SparePart::with('site')
             ->whereIn('site_id', $siteIds)
             ->where(function($query) {
-                $query->whereColumn('stock_level', '<=', 'minimum_stock_level')
-                      ->orWhere('stock_level', '<=', 5);
+                $query->whereColumn('quantity', '<=', 'minimum_stock_level')
+                      ->orWhere('quantity', '<=', 5);
             })
             ->latest()
             ->limit(20)
@@ -76,7 +76,7 @@ class TechnicianController extends Controller
                     'id' => $part->id,
                     'name' => $part->name,
                     'part_number' => $part->part_number,
-                    'stock_level' => $part->stock_level,
+                    'stock_level' => $part->quantity,
                     'minimum_stock_level' => $part->minimum_stock_level,
                     'location' => $part->location ?: 'Main Store',
                     'site' => $part->site?->name ?: 'Unknown',

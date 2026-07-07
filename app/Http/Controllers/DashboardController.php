@@ -32,15 +32,15 @@ class DashboardController extends Controller
         // Low Spare Parts Alert
         $lowSpareParts = \App\Models\SparePart::with('site')
             ->where(function($query) {
-                $query->whereColumn('stock_level', '<=', 'minimum_stock_level')
-                      ->orWhere('stock_level', '<', 5);
+                $query->whereColumn('quantity', '<=', 'minimum_stock_level')
+                      ->orWhere('quantity', '<', 5);
             })
             ->get()
             ->map(fn($part) => [
                 'id' => $part->id,
                 'name' => $part->name,
                 'part_number' => $part->part_number,
-                'stock_level' => $part->stock_level,
+                'quantity' => $part->quantity,
                 'minimum_stock_level' => $part->minimum_stock_level,
                 'site' => $part->site?->name ?? 'HQ Central Store',
             ]);

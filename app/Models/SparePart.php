@@ -11,10 +11,12 @@ class SparePart extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'spare_part_id',
         'name',
         'part_number',
         'category',
-        'stock_level',
+        'spare_part_category_id',
+        'quantity',
         'minimum_stock_level',
         'location',
         'site_id',
@@ -23,6 +25,11 @@ class SparePart extends Model
         'compatibility',
         'asset_type_id',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(SparePartCategory::class, 'spare_part_category_id');
+    }
 
     // ─── EAV Helpers ───────────────────────────────────────────────
 
@@ -87,9 +94,9 @@ class SparePart extends Model
 
     public function getAvailabilityAttribute()
     {
-        if ($this->stock_level <= $this->minimum_stock_level) {
+        if ($this->quantity <= $this->minimum_stock_level) {
             return 'low';
-        } elseif ($this->stock_level == 0) {
+        } elseif ($this->quantity == 0) {
             return 'out_of_stock';
         }
         return 'available';

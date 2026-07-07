@@ -103,7 +103,7 @@ class OperationsController extends Controller
         $validated = $request->validate([
             'part_number' => 'required|string|unique:spare_parts,part_number',
             'name' => 'required|string',
-            'stock_level' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'nullable|numeric|min:0',
             'site_id' => 'nullable|exists:sites,id',
@@ -121,7 +121,7 @@ class OperationsController extends Controller
         $validated = $request->validate([
             'part_number' => 'required|string|unique:spare_parts,part_number,' . $part->id,
             'name' => 'required|string',
-            'stock_level' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'nullable|numeric|min:0',
             'site_id' => 'nullable|exists:sites,id',

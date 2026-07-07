@@ -42,7 +42,7 @@ export default function SparePartsIndex({
     const form = useForm(() => {
         const initial: Record<string, any> = {
             name: '', part_number: '', category: '',
-            stock_level: 0, minimum_stock_level: 0, unit_cost: '',
+            quantity: 0, minimum_stock_level: 0, unit_cost: '',
             location: '', site_id: 'all', asset_type_id: 'none', status: 'available',
         };
         for (const cfg of (configurations || [])) {
@@ -63,7 +63,7 @@ export default function SparePartsIndex({
             const matchesStatus = selectedStatus === 'all' ||
                 (selectedStatus === 'available' && part.availability === 'available') ||
                 (selectedStatus === 'low' && part.availability === 'low') ||
-                (selectedStatus === 'out' && part.stock_level === 0);
+                (selectedStatus === 'out' && part.quantity === 0);
 
             return matchesSearch && matchesCategory && matchesAssetType && matchesStatus;
         });
@@ -145,12 +145,12 @@ export default function SparePartsIndex({
 
         // Always append stock column (availability-aware)
         cols.push({
-            accessorKey: 'stock_level',
+            accessorKey: 'quantity',
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Stock" />
             ),
             cell: ({ row }: any) => {
-                const stock = row.getValue('stock_level');
+                const stock = row.getValue('quantity');
                 const minLevel = row.original.minimum_stock_level;
                 const availability = row.original.availability;
 
@@ -175,7 +175,7 @@ export default function SparePartsIndex({
             header: 'Actions',
             cell: ({ row }: any) => {
                 const part = row.original;
-                const isOutOfStock = part.stock_level === 0;
+                const isOutOfStock = part.quantity === 0;
 
                 return (
                     <div className="flex items-center gap-2">
@@ -311,7 +311,7 @@ export default function SparePartsIndex({
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">Out of Stock</p>
-                        <p className="text-2xl font-bold">{spareParts.filter((p: any) => p.stock_level === 0).length}</p>
+                        <p className="text-2xl font-bold">{spareParts.filter((p: any) => p.quantity === 0).length}</p>
                     </div>
                 </div>
             </div>
@@ -389,7 +389,7 @@ export default function SparePartsIndex({
                         <form onSubmit={handleCheckout} className="space-y-4">
                             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                                 <p className="font-semibold">{selectedPart.name}</p>
-                                <p className="text-sm text-muted-foreground">Available: {selectedPart.stock_level}</p>
+                                <p className="text-sm text-muted-foreground">Available: {selectedPart.quantity}</p>
                             </div>
 
                             <div>
@@ -398,7 +398,7 @@ export default function SparePartsIndex({
                                     type="number"
                                     name="quantity"
                                     min="1"
-                                    max={selectedPart.stock_level}
+                                    max={selectedPart.quantity}
                                     defaultValue="1"
                                     required
                                 />
@@ -476,8 +476,8 @@ export default function SparePartsIndex({
                                         required
                                         type="number"
                                         min="0"
-                                        value={form.data.stock_level}
-                                        onChange={(e) => form.setData('stock_level', parseInt(e.target.value) || 0)}
+                                        value={form.data.quantity}
+                                        onChange={(e) => form.setData('quantity', parseInt(e.target.value) || 0)}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -556,7 +556,7 @@ export default function SparePartsIndex({
                                 {/* Dynamic config-defined fields */}
                                 {configurations
                                     .filter((cfg: any) =>
-                                        !['name', 'part_number', 'category', 'stock_level', 'minimum_stock_level', 'unit_cost', 'location', 'site_id', 'asset_type_id', 'status'].includes(cfg.column_key)
+                                        !['name', 'part_number', 'category', 'quantity', 'minimum_stock_level', 'unit_cost', 'location', 'site_id', 'asset_type_id', 'status'].includes(cfg.column_key)
                                     )
                                     .map((cfg: any) => {
                                         const key = cfg.column_key;

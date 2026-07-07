@@ -215,7 +215,7 @@ export default function Dashboard({
                                     </div>
                                     <div className="text-right">
                                         <span className="inline-flex items-center rounded bg-amber-50 dark:bg-amber-950/20 px-2 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30">
-                                            Stock: {part.stock_level} (Min: {part.minimum_stock_level})
+                                            Stock: {part.quantity} (Min: {part.minimum_stock_level})
                                         </span>
                                     </div>
                                 </div>
