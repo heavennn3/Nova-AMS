@@ -227,11 +227,6 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                 </Button>
                                             </>
                                         )}
-                                        {r.status === 'Approved' && (
-                                            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleAction('fulfill')}>
-                                                <Package className="h-4 w-4 mr-2" /> Mark Fulfilled
-                                            </Button>
-                                        )}
                                         {r.status === 'Fulfilled' && ['Borrow', 'Checkout'].includes(r.request_type) && (
                                             <Button className="bg-violet-600 hover:bg-violet-700 text-white" onClick={() => handleAction('return')}>
                                                 <RotateCcw className="h-4 w-4 mr-2" /> Mark Returned

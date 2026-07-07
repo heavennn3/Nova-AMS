@@ -447,7 +447,7 @@ export default function AssetIndex({
                     ) : (
                         <div className="rounded-xl border bg-card p-16 text-center">
                             <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">Site Not Configured</h3>
+                            <h3 className="text-lg font-semibold mb-2">Table Not Configured</h3>
                             <p className="text-sm text-muted-foreground max-w-md mx-auto mb-8">
                                 This site has no asset table configuration yet. Import a CSV to
                                 automatically detect and configure your columns.

@@ -210,19 +210,21 @@ class AssetRequestController extends Controller
                 $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
                 if ($asset) {
                     $asset->setField('status', 'Used');
+                    $asset->update(['status' => 'Used']);
                 }
             }
 
             return back()->with('success', 'Loan request approved.');
         }
 
-        // Handle regular AssetRequest approval
+        // Handle regular AssetRequest approval — directly fulfill
         $assetRequest = AssetRequest::where('status', 'Pending')->findOrFail($id);
 
         $assetRequest->update([
-            'status' => 'Approved',
+            'status' => 'Fulfilled',
             'approved_by' => $request->user()->id,
             'approved_at' => now(),
+            'fulfilled_at' => now(),
             'admin_notes' => $request->input('admin_notes'),
         ]);
 
@@ -246,7 +248,46 @@ class AssetRequestController extends Controller
             }
         }
 
-        return back()->with('success', 'Request approved.');
+        // For Checkout / Borrow: create assignment and mark asset in_use
+        if (in_array($assetRequest->request_type, ['Checkout', 'Borrow']) && $assetRequest->asset_id) {
+            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
+            if ($asset) {
+                \App\Models\AssetAssignment::create([
+                    'asset_id' => $asset->id,
+                    'user_id' => $assetRequest->user_id,
+                    'site_id' => $asset->site_id,
+                    'assigned_at' => now(),
+                    'status' => 'active',
+                    'remarks' => $assetRequest->reason . ($assetRequest->required_until ? ' | Expected return: ' . $assetRequest->required_until->format('Y-m-d') : ''),
+                ]);
+                $asset->setField('status', 'Used');
+                $asset->update(['status' => 'Used']);
+            }
+        }
+
+        // For Loan requests: create AssetLoan record directly
+        if ($assetRequest->request_type === 'Loan' && $assetRequest->asset_id) {
+            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
+            if ($asset) {
+                \App\Models\AssetLoan::create([
+                    'asset_id' => $assetRequest->asset_id,
+                    'user_id' => $assetRequest->user_id,
+                    'site_id' => $asset->site_id,
+                    'loan_date' => $assetRequest->loan_date ?? now(),
+                    'expected_return_date' => $assetRequest->expected_return_date ?? $assetRequest->required_until,
+                    'condition_status' => $assetRequest->condition_status ?? 'good',
+                    'purpose' => $assetRequest->purpose ?? $assetRequest->reason,
+                    'notes' => $assetRequest->admin_notes,
+                    'status' => 'fulfilled',
+                    'approved_by' => $request->user()->id,
+                    'approved_at' => now(),
+                ]);
+                $asset->setField('status', 'Used');
+                $asset->update(['status' => 'Used']);
+            }
+        }
+
+        return back()->with('success', 'Request approved and fulfilled.');
     }
 
     public function reject(Request $request, $id)
@@ -281,60 +322,6 @@ class AssetRequestController extends Controller
         ]);
 
         return back()->with('success', 'Request rejected.');
-    }
-
-    public function fulfill(Request $request, $id)
-    {
-        $assetRequest = AssetRequest::where('status', 'Approved')->findOrFail($id);
-
-        $assetRequest->update([
-            'status' => 'Fulfilled',
-            'fulfilled_at' => now(),
-            'admin_notes' => $request->input('admin_notes') ?: $assetRequest->admin_notes,
-        ]);
-
-        // For Checkout / Borrow: create the actual assignment and mark asset in_use
-        if (in_array($assetRequest->request_type, ['Checkout', 'Borrow']) && $assetRequest->asset_id) {
-            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
-
-            if ($asset) {
-                \App\Models\AssetAssignment::create([
-                    'asset_id' => $asset->id,
-                    'user_id' => $assetRequest->user_id,
-                    'site_id' => $asset->site_id,
-                    'assigned_at' => now(),
-                    'status' => 'active',
-                    'remarks' => $assetRequest->reason . ($assetRequest->required_until ? ' | Expected return: ' . $assetRequest->required_until->format('Y-m-d') : ''),
-                ]);
-
-                $asset->update(['status' => 'in_use']);
-            }
-        }
-
-        // For Loan requests: create AssetLoan record
-        if ($assetRequest->request_type === 'Loan' && $assetRequest->asset_id) {
-            $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
-
-            if ($asset) {
-                \App\Models\AssetLoan::create([
-                    'asset_id' => $assetRequest->asset_id,
-                    'user_id' => $assetRequest->user_id,
-                    'site_id' => $asset->site_id,
-                    'loan_date' => $assetRequest->loan_date ?? now(),
-                    'expected_return_date' => $assetRequest->expected_return_date ?? $assetRequest->required_until,
-                    'condition_status' => $assetRequest->condition_status ?? 'good',
-                    'purpose' => $assetRequest->purpose ?? $assetRequest->reason,
-                    'notes' => $assetRequest->admin_notes,
-                    'status' => 'approved',
-                    'approved_by' => $assetRequest->approved_by,
-                    'approved_at' => $assetRequest->approved_at,
-                ]);
-
-                $asset->setField('status', 'Used');
-            }
-        }
-
-        return back()->with('success', 'Request fulfilled.');
     }
 
     public function markReturned(Request $request, $id)

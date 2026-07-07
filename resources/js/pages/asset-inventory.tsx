@@ -68,29 +68,29 @@ export default function AssetInventory({
         const cols: any[] = (configurations || [])
             .filter((cfg: any) => cfg.is_visible)
             .map((cfg: any) => ({
-            accessorKey: cfg.column_key,
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title={cfg.column_title} />
-            ),
-            enableSorting: cfg.is_sortable,
-            cell: ({ row }: any) => {
-                const val = row.getValue(cfg.column_key);
+                accessorKey: cfg.column_key,
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title={cfg.column_title} />
+                ),
+                enableSorting: cfg.is_sortable,
+                cell: ({ row }: any) => {
+                    const val = row.getValue(cfg.column_key);
 
-                if (cfg.is_primary_key) {
-                    return (
-                        <Link href={`/assets/${row.original.id}`} className="text-primary hover:underline font-mono font-semibold">
-                            {val ?? '—'}
-                        </Link>
-                    );
-                }
+                    if (cfg.is_primary_key) {
+                        return (
+                            <Link href={`/assets/${row.original.id}`} className="text-primary hover:underline font-mono font-semibold">
+                                {val ?? '—'}
+                            </Link>
+                        );
+                    }
 
-                if (cfg.data_type === 'number') {
-                    return <div className="text-right font-medium">{val ?? '—'}</div>;
-                }
+                    if (cfg.data_type === 'number') {
+                        return <div className="text-right font-medium">{val ?? '—'}</div>;
+                    }
 
-                return <span>{val ?? '—'}</span>;
-            },
-        }));
+                    return <span>{val ?? '—'}</span>;
+                },
+            }));
 
         // ── Hardcoded STATUS column ──
         const statusMap = Object.fromEntries(
@@ -335,8 +335,7 @@ export default function AssetInventory({
                                 ? `Site not configured — import a CSV to set up the asset table`
                                 : 'Configure your asset table to get started'
                             : currentSiteId
-                                ? `Assets for ${
-                                    sites.find((s: any) => String(s.id) === currentSiteId)?.name || 'selected site'
+                                ? `Assets for ${sites.find((s: any) => String(s.id) === currentSiteId)?.name || 'selected site'
                                 }`
                                 : 'All registered assets across all sites'}
                     </p>
@@ -446,11 +445,10 @@ automatically detect and configure your columns.`}
                         {detectedHeaders.map((h) => (
                             <div
                                 key={h}
-                                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                    primaryKeyHeader === h
+                                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${primaryKeyHeader === h
                                         ? 'border-primary bg-primary/5'
                                         : 'border-border hover:bg-accent/50'
-                                }`}
+                                    }`}
                                 onClick={() => setPrimaryKeyHeader(h)}
                             >
                                 <input

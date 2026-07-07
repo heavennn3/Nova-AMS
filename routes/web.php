@@ -36,7 +36,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
     Route::post('/requests/{id}/approve', [\App\Http\Controllers\AssetRequestController::class, 'approve'])->name('requests.approve');
     Route::post('/requests/{id}/reject', [\App\Http\Controllers\AssetRequestController::class, 'reject'])->name('requests.reject');
-    Route::post('/requests/{id}/fulfill', [\App\Http\Controllers\AssetRequestController::class, 'fulfill'])->name('requests.fulfill');
     Route::post('/requests/{id}/return', [\App\Http\Controllers\AssetRequestController::class, 'markReturned'])->name('requests.return');
     Route::post('/requests/batch-approve', [\App\Http\Controllers\AssetRequestController::class, 'batchApprove'])->name('requests.batch-approve');
     Route::post('/requests/batch-reject', [\App\Http\Controllers\AssetRequestController::class, 'batchReject'])->name('requests.batch-reject');

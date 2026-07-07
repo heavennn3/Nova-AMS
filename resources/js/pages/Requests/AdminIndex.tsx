@@ -52,7 +52,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
 
     // Action dialogs
     const [actionRequest, setActionRequest] = useState<any>(null);
-    const [actionType, setActionType] = useState<'approve' | 'reject' | 'fulfill' | 'return' | null>(null);
+    const [actionType, setActionType] = useState<'approve' | 'reject' | 'return' | null>(null);
     const [adminNotes, setAdminNotes] = useState('');
 
     // Batch dialogs
@@ -149,7 +149,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         }
     };
 
-    const openAction = (request: any, type: 'approve' | 'reject' | 'fulfill' | 'return') => {
+    const openAction = (request: any, type: 'approve' | 'reject' | 'return') => {
         setActionRequest(request);
         setActionType(type);
         setAdminNotes('');
@@ -173,7 +173,6 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const actionConfig: Record<string, { title: string; buttonText: string; buttonClass: string; requireNotes: boolean }> = {
         approve: { title: 'Approve Request', buttonText: 'Approve', buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white', requireNotes: false },
         reject: { title: 'Reject Request', buttonText: 'Reject', buttonClass: 'bg-rose-600 hover:bg-rose-700 text-white', requireNotes: true },
-        fulfill: { title: 'Mark as Fulfilled', buttonText: 'Fulfill', buttonClass: 'bg-blue-600 hover:bg-blue-700 text-white', requireNotes: false },
         return: { title: 'Mark as Returned', buttonText: 'Mark Returned', buttonClass: 'bg-violet-600 hover:bg-violet-700 text-white', requireNotes: false },
     };
 
@@ -457,11 +456,6 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             </Button>
                                                         </>
                                                     )}
-                                                    {r.status === 'Approved' && (
-                                                        <Button size="sm" className="h-7 bg-blue-600 hover:bg-blue-700 text-white text-xs px-2" onClick={() => openAction(r, 'fulfill')}>
-                                                            <Package className="h-3 w-3 mr-1" /> Fulfill
-                                                        </Button>
-                                                    )}
                                                     {r.status === 'Fulfilled' && ['Borrow', 'Checkout'].includes(r.request_type) && (
                                                         <Button size="sm" className="h-7 bg-violet-600 hover:bg-violet-700 text-white text-xs px-2" onClick={() => openAction(r, 'return')}>
                                                             <RotateCcw className="h-3 w-3 mr-1" /> Return
@@ -540,9 +534,6 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                 {actionRequest.license.available_seats ?? '?'} seat(s) left
                                             </Badge>
                                         </div>
-                                        {actionType === 'fulfill' && (
-                                            <p className="text-[11px] text-emerald-600 mt-1.5">A license seat will be automatically assigned to {actionRequest.user?.name} upon fulfillment.</p>
-                                        )}
                                     </div>
                                 )}
                             </div>
