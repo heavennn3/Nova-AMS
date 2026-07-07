@@ -1,8 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileKey, CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
 
 type SimpleLicensesProps = {
     licenses: any[];
@@ -64,7 +62,7 @@ export default function SimpleLicensesIndex({
             default:
                 return licenses;
         }
-    }, [selectedFilter, licenses]);
+    }, [selectedFilter, licenses, activeLicenses, expiringLicenses, expiredLicenses, inUseLicenses]);
 
     const getStatusBadge = (license: any) => {
         if (!license.expiration_date) {
@@ -122,7 +120,7 @@ export default function SimpleLicensesIndex({
                     }`}
                     onClick={() => setSelectedFilter('active')}
                 >
-                    <h3 className="font-semibold text-green-900">Active Licenses</h3>
+                    <h3 className="font-semibold text-green-900">Active</h3>
                     <p className="text-2xl font-bold text-green-600">{activeLicenses.length}</p>
                     <p className="text-xs text-green-700 mt-1">Not expired</p>
                 </div>
@@ -133,7 +131,7 @@ export default function SimpleLicensesIndex({
                     }`}
                     onClick={() => setSelectedFilter('expiring')}
                 >
-                    <h3 className="font-semibold text-amber-900">Expiring This Month</h3>
+                    <h3 className="font-semibold text-amber-900">Expiring Soon</h3>
                     <p className="text-2xl font-bold text-amber-600">{expiringLicenses.length}</p>
                     <p className="text-xs text-amber-700 mt-1">Next 30 days</p>
                 </div>
@@ -144,7 +142,7 @@ export default function SimpleLicensesIndex({
                     }`}
                     onClick={() => setSelectedFilter('expired')}
                 >
-                    <h3 className="font-semibold text-red-900">Expired Licenses</h3>
+                    <h3 className="font-semibold text-red-900">Expired </h3>
                     <p className="text-2xl font-bold text-red-600">{expiredLicenses.length}</p>
                     <p className="text-xs text-red-700 mt-1">Need renewal</p>
                 </div>
@@ -155,7 +153,7 @@ export default function SimpleLicensesIndex({
                     }`}
                     onClick={() => setSelectedFilter('inuse')}
                 >
-                    <h3 className="font-semibold text-purple-900">In Use Licenses</h3>
+                    <h3 className="font-semibold text-purple-900">In Use</h3>
                     <p className="text-2xl font-bold text-purple-600">{inUseLicenses.length}</p>
                     <p className="text-xs text-purple-700 mt-1">Have assignments</p>
                 </div>
@@ -182,7 +180,9 @@ export default function SimpleLicensesIndex({
                 <div className="p-6">
                     {filteredLicenses.length === 0 ? (
                         <div className="text-center py-12">
-                            <FileKey className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                            <div className="h-12 w-12 mx-auto mb-4 opacity-50 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <span className="text-2xl">📄</span>
+                            </div>
                             <p className="text-lg font-medium text-muted-foreground mb-2">
                                 No {selectedFilter === 'all' ? '' : 
                                     selectedFilter === 'active' ? 'active ' :
