@@ -1,13 +1,14 @@
 /**
- * Full Novatis logo — used in the sidebar header (expanded state).
- * Shows the logo at a comfortable height that fits the sidebar.
+ * Full Nova AMS logo — used in the sidebar header (expanded state).
+ * Shows the logo text at a comfortable height that fits the sidebar.
  */
 export default function AppLogo() {
     return (
-        <img
-            src="/images/novatis-logo.png"
-            alt="Novatis Resources"
-            className="h-8 w-auto object-contain"
-        />
+        <div className="flex items-center h-8">
+            <span className="text-xl font-bold tracking-tight">
+                <span className="text-primary">NOVA</span>{' '}
+                <span className="text-muted-foreground">AMS</span>
+            </span>
+        </div>
     );
 }
