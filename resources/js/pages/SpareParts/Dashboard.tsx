@@ -156,8 +156,8 @@ export default function SparePartsDashboard({
                             type="button"
                             onClick={() => setActiveStat(activeStat === stat.title ? null : stat.title)}
                             className={`text-left rounded-xl border transition-all duration-200 ${isActive
-                                    ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
-                                    : 'hover:shadow-md hover:scale-[1.01]'
+                                ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
+                                : 'hover:shadow-md hover:scale-[1.01]'
                                 }`}
                         >
                             <Card className={`border-0 shadow-none ${isActive ? stat.bgColor : ''}`}>
@@ -219,9 +219,7 @@ export default function SparePartsDashboard({
                                         <p className="font-medium">{cat.category}</p>
                                         <p className="text-sm text-muted-foreground">{cat.count} items</p>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-semibold">RM{cat.value}</p>
-                                    </div>
+
                                 </div>
                             ))}
                         </div>

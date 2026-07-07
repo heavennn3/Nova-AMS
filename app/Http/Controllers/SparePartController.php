@@ -21,17 +21,20 @@ class SparePartController extends Controller
         $lowStockParts = SparePart::whereRaw('stock_level <= minimum_stock_level')->count();
         $outOfStockParts = SparePart::where('stock_level', 0)->count();
 
-        // Category breakdown
-        $categoryData = SparePart::selectRaw('category, COUNT(*) as count, SUM(stock_level * unit_cost) as value')
-            ->groupBy('category')
-            ->get()
-            ->map(function ($cat) {
-                return [
-                    'category' => $cat->category,
-                    'count' => $cat->count,
-                    'value' => number_format($cat->value, 2)
-                ];
-            });
+        // Category breakdown by master data parent groups
+        $parents = \App\Models\SparePartCategory::with('children')->whereNull('parent_id')->get();
+        $categoryData = $parents->map(function ($parent) {
+            $childNames = $parent->children->pluck('name')->toArray();
+            $count = SparePart::whereIn('category', $childNames)->count();
+            $value = SparePart::whereIn('category', $childNames)
+                ->get()
+                ->sum(fn($p) => $p->stock_level * $p->unit_cost);
+            return [
+                'category' => $parent->name,
+                'count' => $count,
+                'value' => number_format($value, 2),
+            ];
+        });
 
         // Recent checkouts
         $recentCheckouts = Checkout::with(['sparePart', 'user'])

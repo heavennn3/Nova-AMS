@@ -16,6 +16,11 @@ class SparePartCategory extends Model
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
     public function spareParts()
     {
         return $this->hasMany(SparePart::class, 'spare_part_category_id');
