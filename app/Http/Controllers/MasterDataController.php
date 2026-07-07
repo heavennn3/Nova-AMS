@@ -35,6 +35,13 @@ class MasterDataController extends Controller
             ->groupBy(fn($c) => $c->site_id ?? 'global')
             ->toArray();
 
+        $licenseTableConfigs = TableConfiguration::with('site')
+            ->where('table_name', 'licenses')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy(fn($c) => $c->site_id ?? 'global')
+            ->toArray();
+
         $assetsCount = Asset::count();
 
         return Inertia::render('master-data', [
@@ -100,6 +107,7 @@ class MasterDataController extends Controller
                 ]),
             'assetTableConfigs' => $assetTableConfigs,
             'sparePartTableConfigs' => $sparePartTableConfigs,
+            'licenseTableConfigs' => $licenseTableConfigs,
             'isAdmin' => $isAdmin,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color', 'sort_order']),
             'sparePartCategories' => \App\Models\SparePartCategory::with('parent:id,name')->orderBy('name')->get()->map(fn($c) => [

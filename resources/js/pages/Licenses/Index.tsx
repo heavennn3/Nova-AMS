@@ -456,11 +456,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Link href="/licenses/trash">
-                        <Button variant="outline">
-                            <Trash2 className="mr-2 h-4 w-4" /> Trash Bin
-                        </Button>
-                    </Link>
+
                     <Button
                         onClick={() => {
                             form.reset();

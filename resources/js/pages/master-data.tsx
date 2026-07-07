@@ -21,10 +21,10 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { sitesTab, vendorsTab, licensesTab } from './MasterData/tabConfigs';
-import SiteConfigSection from '@/components/SiteConfigSection';
+import { sitesTab, vendorsTab } from './MasterData/tabConfigs';
 import SparePartSection from './MasterData/SparePartSection';
 import AssetSection from './MasterData/AssetSection';
+import LicenseSection from './MasterData/LicenseSection';
 
 type MasterDataProps = {
     categories: any[];
@@ -40,45 +40,18 @@ type MasterDataProps = {
     assetTypes?: any[];
     assetTableConfigs?: any;
     sparePartTableConfigs?: any;
+    licenseTableConfigs?: any;
     isAdmin?: boolean;
 };
 
 type TabType = string;
-
-const LICENSE_COL_KEYS = [
-    'name', 'product_key', 'version', 'category', 'license_type',
-    'pricing_model', 'seats', 'purchase_cost', 'vendor', 'site',
-    'expiration_date', 'compliance_status', 'license_email', 'notes',
-] as const;
-
-const LICENSE_COL_LABELS: Record<string, string> = {
-    name: 'Name', product_key: 'Product Key', version: 'Version',
-    category: 'Category', license_type: 'License Type', pricing_model: 'Pricing Model',
-    seats: 'Seats', purchase_cost: 'Cost', vendor: 'Vendor', site: 'Site',
-    expiration_date: 'Expiry Date', compliance_status: 'Status',
-    license_email: 'License Email', notes: 'Notes',
-};
-
-function loadLicenseColVisibility(): Record<string, boolean> {
-    try {
-        const saved = localStorage.getItem('masterdata_license_cols');
-        if (saved) return JSON.parse(saved);
-    } catch { }
-    return {
-        name: true, product_key: true, version: true, category: true,
-        license_type: true, pricing_model: false, seats: true,
-        purchase_cost: true, vendor: true, site: true,
-        expiration_date: true, compliance_status: true,
-        license_email: false, notes: false,
-    };
-}
 
 export default function MasterData({
     categories = [], types = [], sites = [], vendors = [],
     customTypes = [], licenses = [], tableConfigurations = {},
     isAdmin = false, assetStatuses = [], sparePartCategories = [],
     spareParts = [], assetTypes = [],
-    assetTableConfigs = {}, sparePartTableConfigs = {},
+    assetTableConfigs = {}, sparePartTableConfigs = {}, licenseTableConfigs = {},
 }: MasterDataProps) {
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const defaultTab = urlParams.get('tab') || 'sites';
@@ -103,9 +76,7 @@ export default function MasterData({
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const [isBatchEditOpen, setIsBatchEditOpen] = useState(false);
 
-    // License column visibility
-    const [licenseColVisibility, setLicenseColVisibility] = useState<Record<string, boolean>>(loadLicenseColVisibility);
-    const [isLicenseColsOpen, setIsLicenseColsOpen] = useState(false);
+
 
     // Site region filter
     const [siteRegionFilter, setSiteRegionFilter] = useState('all');
@@ -113,13 +84,7 @@ export default function MasterData({
         ? sites
         : sites.filter((s: any) => s.region?.toLowerCase() === siteRegionFilter);
 
-    const toggleLicenseCol = (key: string) => {
-        setLicenseColVisibility(prev => {
-            const next = { ...prev, [key]: !prev[key] };
-            localStorage.setItem('masterdata_license_cols', JSON.stringify(next));
-            return next;
-        });
-    };
+
     const [batchField, setBatchField] = useState('');
     const [batchValue, setBatchValue] = useState('');
 
@@ -216,7 +181,7 @@ export default function MasterData({
     const tabConfig: Record<string, any> = {
         sites: sitesTab({ ...sharedOpts, filteredSites }),
         vendors: vendorsTab({ ...sharedOpts, vendors }),
-        licenses: licensesTab({ ...sharedOpts, licenses, licenseColVisibility }),
+        licenses: { title: 'Software License', isComposite: true },
         asset: { title: 'Asset', isComposite: true },
         'spare-part': { title: 'Spare Part', isComposite: true },
     };
@@ -366,13 +331,20 @@ export default function MasterData({
                                 sparePartTableConfigs={sparePartTableConfigs}
                                 isAdmin={isAdmin}
                             />
-                        ) : (
+                        ) : activeTab === 'asset' ? (
                             <AssetSection
                                 categories={categories}
                                 types={types}
                                 assetStatuses={assetStatuses}
                                 assetTableConfigs={assetTableConfigs}
                                 sites={sites}
+                                isAdmin={isAdmin}
+                            />
+                        ) : (
+                            <LicenseSection
+                                licenses={licenses}
+                                sites={sites}
+                                licenseTableConfigs={licenseTableConfigs}
                                 isAdmin={isAdmin}
                             />
                         )}
@@ -514,27 +486,7 @@ export default function MasterData({
                 </DialogContent>
             </Dialog>
 
-            {/* License Column Visibility Dialog */}
-            <Dialog open={isLicenseColsOpen} onOpenChange={setIsLicenseColsOpen}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader><DialogTitle>Manage License Table Columns</DialogTitle></DialogHeader>
-                    <p className="text-sm text-muted-foreground mb-4">Toggle columns to show or hide them in the Software License table.</p>
-                    <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
-                        {LICENSE_COL_KEYS.map((key) => (
-                            <button key={key} type="button"
-                                className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${licenseColVisibility[key] ? 'bg-primary/5 border-primary/20 text-foreground' : 'bg-muted/30 border-border text-muted-foreground'}`}
-                                onClick={() => toggleLicenseCol(key)}>
-                                <span className="font-medium">{LICENSE_COL_LABELS[key]}</span>
-                                {licenseColVisibility[key] ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                            </button>
-                        ))}
-                    </div>
-                    <DialogFooter className="mt-4">
-                        <Button variant="outline" size="sm" onClick={() => { const all: Record<string, boolean> = {}; LICENSE_COL_KEYS.forEach(k => all[k] = true); setLicenseColVisibility(all); localStorage.setItem('masterdata_license_cols', JSON.stringify(all)); }}>Show All</Button>
-                        <Button size="sm" onClick={() => setIsLicenseColsOpen(false)}>Done</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+
         </div>
     );
 }

@@ -88,37 +88,7 @@ export default function LicenseTrash({ licenses = [] }: any) {
         []
     );
 
-    return (
-        <div className="w-full space-y-6 p-8">
-            <Head title="License Trash Bin" />
 
-            <div className="flex items-center justify-between">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <Link href="/licenses">
-                            <Button variant="ghost" size="sm" className="h-8 p-1">
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                        </Link>
-                        <h1 className="text-2xl font-bold tracking-tight">License Trash Bin</h1>
-                    </div>
-                    <p className="text-muted-foreground ml-8 mt-1">
-                        View deleted licenses, their deletion reasons, and manage restoration or permanent removal.
-                    </p>
-                </div>
-            </div>
-
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="p-4 border-b bg-muted/20">
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                        <Trash2 className="h-5 w-5 text-muted-foreground" />
-                        Deleted Items
-                    </h2>
-                </div>
-                <DataTable columns={columns} data={licenses} searchKey="name" />
-            </div>
-        </div>
-    );
 }
 
 LicenseTrash.layout = {
@@ -127,9 +97,6 @@ LicenseTrash.layout = {
             title: 'Software Licenses',
             href: '/licenses',
         },
-        {
-            title: 'Trash Bin',
-            href: '#',
-        },
+
     ],
 };
