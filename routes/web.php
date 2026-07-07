@@ -182,6 +182,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('/master-data/custom-values', \App\Http\Controllers\MasterData\ValueController::class)->only(['store', 'update', 'destroy']);
         Route::resource('/master-data/licenses', \App\Http\Controllers\MasterData\LicenseController::class)->only(['store', 'update', 'destroy']);
         Route::resource('/master-data/asset-statuses', \App\Http\Controllers\MasterData\AssetStatusController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('/master-data/spare-part-categories', \App\Http\Controllers\MasterData\SparePartCategoryController::class)->only(['store', 'update', 'destroy']);
 
         Route::post('/master-data/custom-values/batch-delete', [\App\Http\Controllers\MasterData\ValueController::class, 'batchDelete'])->name('custom-values.batch-delete');
         Route::post('/master-data/custom-values/batch-update', [\App\Http\Controllers\MasterData\ValueController::class, 'batchUpdate'])->name('custom-values.batch-update');

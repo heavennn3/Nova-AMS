@@ -129,8 +129,8 @@ export function vendorsTab(opts: any) {
                     </div>;
                 },
             },
-            { 
-                accessorKey: 'description', 
+            {
+                accessorKey: 'description',
                 header: ({ column }: any) => <DataTableColumnHeader column={column} title="Description" />,
                 cell: ({ row }: any) => {
                     const description = row.original.description;
@@ -239,7 +239,7 @@ export function assetStatusesTab(opts: any) {
     const { assetStatuses, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
     const presetColors = ['#6B7280', '#EF4444', '#EAB308', '#22C55E', '#3B82F6', '#F97316', '#8B5CF6', '#EC4899', '#14B8A6', '#F43F5E'];
     return {
-        title: 'Asset Statuses',
+        title: 'Asset Status (Color)',
         columns: [
             {
                 accessorKey: 'color', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Color" />,
@@ -251,7 +251,7 @@ export function assetStatusesTab(opts: any) {
             },
             ...editDeleteCol(handleOpenDialog, handleDelete, isAdmin),
         ],
-        data: assetStatuses,
+        data: assetStatuses || [],
         renderForm: () => (
             <>
                 <div className="grid gap-2"><Label>Status Name <span className="text-rose-500">*</span></Label><Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. IN TRANSIT" required /></div>
@@ -266,6 +266,44 @@ export function assetStatusesTab(opts: any) {
                     <Input value={formData.color || '#6B7280'} onChange={(e) => setFormData({ ...formData, color: e.target.value })} placeholder="#HEX" className="mt-1 font-mono" />
                 </div>
                 <div className="grid gap-2"><Label>Sort Order</Label><Input type="number" value={formData.sort_order ?? 0} onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })} /></div>
+            </>
+        ),
+    };
+}
+
+export function sparePartCategoriesTab(opts: any) {
+    const { sparePartCategories, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
+    return {
+        title: 'Spare Part Categories',
+        data: sparePartCategories || [],
+        columns: [
+            { accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" /> },
+            {
+                accessorKey: 'parent_name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Group" />,
+                cell: ({ row }: any) => row.original.parent_name
+                    ? <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200">{row.original.parent_name}</span>
+                    : <span className="text-xs text-muted-foreground italic">—</span>,
+            },
+            ...editDeleteCol(handleOpenDialog, handleDelete, isAdmin),
+        ],
+        renderForm: () => (
+            <>
+                <div className="grid gap-2">
+                    <Label>Name <span className="text-rose-500">*</span></Label>
+                    <Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. RAM, Laptop, Router" required />
+                </div>
+                <div className="grid gap-2">
+                    <Label>Group</Label>
+                    <Select value={formData.parent_id?.toString() || ''} onValueChange={(v) => setFormData({ ...formData, parent_id: v ? parseInt(v) : null })}>
+                        <SelectTrigger><SelectValue placeholder="Select group (optional)" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">— No group —</SelectItem>
+                            {sparePartCategories.filter((c: any) => !c.parent_id).map((c: any) => (
+                                <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </>
         ),
     };

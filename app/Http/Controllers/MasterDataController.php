@@ -77,6 +77,13 @@ class MasterDataController extends Controller
             'currentConfigTable' => $tableName,
             'isAdmin' => $isAdmin,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color', 'sort_order']),
+            'sparePartCategories' => \App\Models\SparePartCategory::with('parent:id,name')->orderBy('name')->get()->map(fn($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'parent_id' => $c->parent_id,
+                'parent_name' => $c->parent?->name,
+                'description' => $c->description,
+            ]),
         ]);
     }
 }

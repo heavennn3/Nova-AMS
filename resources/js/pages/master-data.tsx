@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab } from './MasterData/tabConfigs';
+import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab, sparePartCategoriesTab } from './MasterData/tabConfigs';
 import SiteConfigSection from '@/components/SiteConfigSection';
 
 type MasterDataProps = {
@@ -35,6 +35,7 @@ type MasterDataProps = {
     configurationTables?: string[];
     currentConfigTable?: string;
     assetStatuses?: { id: number; name: string; color: string; sort_order: number }[];
+    sparePartCategories?: any[];
     isAdmin?: boolean;
 };
 
@@ -72,7 +73,7 @@ export default function MasterData({
     categories = [], types = [], sites = [], vendors = [],
     customTypes = [], licenses = [], tableConfigurations = {},
     configurationTables = [], currentConfigTable = 'assets',
-    isAdmin = false, assetStatuses = [],
+    isAdmin = false, assetStatuses = [], sparePartCategories = [],
 }: MasterDataProps) {
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const defaultTab = urlParams.get('tab') || 'sites';
@@ -209,7 +210,7 @@ export default function MasterData({
     };
 
     // Build tab config
-    const sharedOpts = { formData, setFormData, handleOpenDialog, handleDelete, isAdmin, assetStatuses };
+    const sharedOpts = { formData, setFormData, handleOpenDialog, handleDelete, isAdmin, assetStatuses, sparePartCategories };
     const tabConfig: Record<string, any> = {
         sites: sitesTab({ ...sharedOpts, filteredSites }),
         categories: categoriesTab({ ...sharedOpts, categories }),
@@ -217,6 +218,7 @@ export default function MasterData({
         vendors: vendorsTab({ ...sharedOpts, vendors }),
         licenses: licensesTab({ ...sharedOpts, licenses, licenseColVisibility }),
         'asset-statuses': assetStatusesTab({ ...sharedOpts, assetStatuses }),
+        'spare-part-categories': sparePartCategoriesTab({ ...sharedOpts, sparePartCategories }),
     };
 
     // Build dynamic tabs for custom master data types
