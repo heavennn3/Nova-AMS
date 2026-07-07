@@ -8,9 +8,7 @@ use App\Models\Asset;
 use App\Models\Site;
 use App\Models\WorkOrder;
 use App\Models\SupportTicket;
-use App\Models\Withdrawal;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -89,27 +87,8 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Overdue Checkouts (Withdrawals) — 5 latest
-        $overdueCheckouts = Withdrawal::with(['asset', 'user'])
-            ->where('status', 'active')
-            ->whereNotNull('expected_return_date')
-            ->where('expected_return_date', '<', Carbon::today())
-            ->latest('expected_return_date')
-            ->limit(5)
-            ->get()
-            ->map(function ($w) {
-                $daysLate = Carbon::parse($w->expected_return_date)->diffInDays(Carbon::today());
-                $asset = $w->asset;
-                return [
-                    'id' => $w->id,
-                    'asset_id' => $asset?->getField('asset_id') ?? '—',
-                    'asset_name' => $asset?->getField('asset_name') ?? $asset?->getField('product_name') ?? '—',
-                    'user_name' => $w->user?->name ?? 'Unknown',
-                    'checkout_date' => $w->withdrawal_date?->format('Y-m-d'),
-                    'expected_return_date' => $w->expected_return_date?->format('Y-m-d'),
-                    'days_late' => (int) $daysLate,
-                ];
-            });
+        // Overdue Checkouts — removed (Withdrawals module deleted)
+        $overdueCheckouts = collect([]);
 
         // Warranty Expiring — no longer queryable by old columns, skip for now
         $warrantyExpiring = collect();

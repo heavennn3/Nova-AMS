@@ -135,18 +135,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/asset-track/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('asset-track.bulk-reminders');
 
         // Asset Withdrawals Module
-        Route::prefix('withdrawals')->group(function () {
-            Route::get('/', [\App\Http\Controllers\WithdrawalController::class, 'index'])->name('withdrawals.index');
-            Route::get('/create', [\App\Http\Controllers\WithdrawalController::class, 'create'])->name('withdrawals.create');
-            Route::post('/', [\App\Http\Controllers\WithdrawalController::class, 'store'])->name('withdrawals.store');
-            Route::get('/{withdrawal}', [\App\Http\Controllers\WithdrawalController::class, 'show'])->name('withdrawals.show');
-            Route::put('/{withdrawal}', [\App\Http\Controllers\WithdrawalController::class, 'update'])->name('withdrawals.update');
-            Route::delete('/{withdrawal}', [\App\Http\Controllers\WithdrawalController::class, 'destroy'])->name('withdrawals.destroy');
-            Route::post('/{withdrawal}/return', [\App\Http\Controllers\WithdrawalController::class, 'returnAsset'])->name('withdrawals.return');
-            Route::post('/{withdrawal}/approve', [\App\Http\Controllers\WithdrawalController::class, 'approve'])->name('withdrawals.approve');
-            Route::post('/{withdrawal}/reject', [\App\Http\Controllers\WithdrawalController::class, 'reject'])->name('withdrawals.reject');
-            Route::get('/dashboard', [\App\Http\Controllers\WithdrawalController::class, 'dashboard'])->name('withdrawals.dashboard');
-        });
+        // Removed
     });
 
     // Master Data Module

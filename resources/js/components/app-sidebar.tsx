@@ -79,14 +79,6 @@ const navSections: NavSection[] = [
             { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
 
             {
-                title: 'Asset Withdrawal',
-                href: '/asset-track',
-                icon: Activity,
-                module: 'Asset Inventory',
-            },
-
-
-            {
                 title: 'Multi-Site Management',
                 href: '#',
                 icon: MapPin,
@@ -121,6 +113,13 @@ const navSections: NavSection[] = [
             {
                 title: ' Requests',
                 href: '/requests/admin',
+                icon: ClipboardList,
+                module: 'Asset Inventory',
+            },
+
+            {
+                title: ' Asset Track',
+                href: '/asset-track',
                 icon: ClipboardList,
                 module: 'Asset Inventory',
             },
@@ -298,7 +297,6 @@ export function AppSidebar() {
                         const allowedForTechnician = [
                             'Dashboard',
                             'Asset Inventory',
-                            'Asset Withdrawal',
                             'Maintenance Operations',
                             'Comprehensive Maintenance',
                             'Preventive Scheduling',

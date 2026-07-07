@@ -607,7 +607,7 @@ export default function LiveTracking({
                             >
                                 <div className="border-b p-3">
                                     <p className="text-sm font-semibold">
-                                        Filter Active Withdrawals
+                                        Filter Active Loans
                                     </p>
                                 </div>
                                 {/* Site */}

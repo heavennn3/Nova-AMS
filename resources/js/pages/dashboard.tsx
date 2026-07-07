@@ -257,12 +257,11 @@ export default function Dashboard({
                                         {overdueCheckouts.map((item: any) => (
                                             <tr key={item.id} className="hover:bg-muted/10 transition-colors">
                                                 <td className="py-3 pl-2">
-                                                    <Link
-                                                        href={`/withdrawals/${item.id}`}
-                                                        className="font-semibold text-primary hover:underline hover:text-primary/80 transition-colors cursor-pointer"
+                                                    <span
+                                                        className="font-semibold text-foreground"
                                                     >
                                                         {item.asset_name}
-                                                    </Link>
+                                                    </span>
                                                     <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.asset_id}</p>
                                                 </td>
                                                 <td className="py-3">
@@ -294,13 +293,6 @@ export default function Dashboard({
                         ) : (
                             <div className="py-8 text-center text-muted-foreground text-xs">
                                 No overdue checkouts. All assets returned on time.
-                            </div>
-                        )}
-                        {overdueCheckouts.length > 0 && (
-                            <div className="mt-4 flex justify-center">
-                                <Button variant="ghost" className="text-xs" asChild>
-                                    <Link href="/withdrawals">View All Withdrawals</Link>
-                                </Button>
                             </div>
                         )}
                     </CardContent>

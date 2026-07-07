@@ -1,4 +1,4 @@
-import { Head, Link, usePage, useForm, router } from '@inertiajs/react';
+import { Head, usePage, useForm, router } from '@inertiajs/react';
 import { useState, useEffect, useMemo } from 'react';
 import {
     Activity,
@@ -13,7 +13,6 @@ import {
     Send,
     Filter,
     RefreshCw,
-    Download,
     Building2,
     Calendar,
     Hash,
@@ -424,16 +423,6 @@ export default function LiveTrackingAdmin({
 
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => window.location.reload()}>
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Refresh
-                    </Button>
-                    <Link href="/withdrawals">
-                        <Button variant="outline">
-                            <Download className="mr-2 h-4 w-4" />
-                            View All Withdrawals
-                        </Button>
-                    </Link>
                 </div>
             </div>
 
@@ -488,11 +477,9 @@ export default function LiveTrackingAdmin({
                     <CardTitle className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Package className="h-5 w-5 text-primary" />
-                            Active Withdrawals
+                            Active Loans
                         </div>
-                        <div className="text-sm font-normal text-muted-foreground">
-                            {allAssignments.length} assignments
-                        </div>
+
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
