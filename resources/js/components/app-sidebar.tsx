@@ -9,7 +9,7 @@ import {
     Activity,
     Shield,
     FileText,
-
+    Users,
     Headset,
     Trash2,
     Settings,
@@ -232,14 +232,20 @@ const navSections: NavSection[] = [
         items: [
             {
                 title: 'Users',
-                href: '#',
+                href: '/users',
+                icon: Users,
+                module: 'System Settings',
+              
+            },
+
+            {
+                title: 'Access Control',
+                href: '/security/roles',
                 icon: Shield,
                 module: 'System Settings',
-                items: [
-                    { title: 'Manage Users', href: userManagement() },
-                    { title: 'Access Control', href: '/security/roles' },
-                ],
+               
             },
+
             {
                 title: 'Technician Center',
                 href: '#',
