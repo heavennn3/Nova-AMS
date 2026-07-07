@@ -21,9 +21,10 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { sitesTab, categoriesTab, typesTab, vendorsTab, licensesTab, assetStatusesTab } from './MasterData/tabConfigs';
+import { sitesTab, vendorsTab, licensesTab } from './MasterData/tabConfigs';
 import SiteConfigSection from '@/components/SiteConfigSection';
 import SparePartSection from './MasterData/SparePartSection';
+import AssetSection from './MasterData/AssetSection';
 
 type MasterDataProps = {
     categories: any[];
@@ -217,11 +218,9 @@ export default function MasterData({
     const sharedOpts = { formData, setFormData, handleOpenDialog, handleDelete, isAdmin, assetStatuses, sparePartCategories };
     const tabConfig: Record<string, any> = {
         sites: sitesTab({ ...sharedOpts, filteredSites }),
-        categories: categoriesTab({ ...sharedOpts, categories }),
-        types: typesTab({ ...sharedOpts, types, categories }),
         vendors: vendorsTab({ ...sharedOpts, vendors }),
         licenses: licensesTab({ ...sharedOpts, licenses, licenseColVisibility }),
-        'asset-statuses': assetStatusesTab({ ...sharedOpts, assetStatuses }),
+        asset: { title: 'Asset', isComposite: true },
         'spare-part': { title: 'Spare Part', isComposite: true },
     };
 
@@ -428,13 +427,22 @@ export default function MasterData({
                     </div>
                 ) : currentTab?.isComposite ? (
                     <div className="p-4">
-                        <SparePartSection
-                            spareParts={spareParts}
-                            sites={sites}
-                            sparePartCategories={sparePartCategories}
-                            assetTypes={assetTypes}
-                            isAdmin={isAdmin}
-                        />
+                        {activeTab === 'spare-part' ? (
+                            <SparePartSection
+                                spareParts={spareParts}
+                                sites={sites}
+                                sparePartCategories={sparePartCategories}
+                                assetTypes={assetTypes}
+                                isAdmin={isAdmin}
+                            />
+                        ) : (
+                            <AssetSection
+                                categories={categories}
+                                types={types}
+                                assetStatuses={assetStatuses}
+                                isAdmin={isAdmin}
+                            />
+                        )}
                     </div>
                 ) : (
                     <div className="p-4">
