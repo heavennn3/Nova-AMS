@@ -91,9 +91,10 @@ export function categoriesTab(opts: any) {
 }
 
 export function typesTab(opts: any) {
-    const { categories, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
+    const { types, categories, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
     return {
         title: 'Asset Types',
+        data: types || [],
         columns: [
             { accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" /> },
             { accessorKey: 'category.name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" /> },
@@ -113,9 +114,10 @@ export function typesTab(opts: any) {
 }
 
 export function vendorsTab(opts: any) {
-    const { formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
+    const { vendors, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
     return {
         title: 'Vendors',
+        data: vendors || [],
         columns: [
             {
                 accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
