@@ -17,6 +17,8 @@ import {
     MessageSquare,
     ClipboardList,
     ArrowRightLeft,
+    Key,
+    ScrollText,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -97,7 +99,7 @@ const navSections: NavSection[] = [
             {
                 title: 'Software Licenses',
                 href: '/licenses',
-                icon: FileText,
+                icon: Key,
                 module: 'Asset Inventory',
                 items: [
                     { title: 'License Inventory', href: '/licenses' },
@@ -120,7 +122,7 @@ const navSections: NavSection[] = [
             {
                 title: ' Asset Track',
                 href: '/asset-track',
-                icon: ClipboardList,
+                icon: Map,
                 module: 'Asset Inventory',
             },
 
@@ -190,7 +192,7 @@ const navSections: NavSection[] = [
             {
                 title: 'Audit Log',
                 href: '/security/logs',
-                icon: History,
+                icon: ScrollText,
                 module: 'System Settings',
             },
             {
