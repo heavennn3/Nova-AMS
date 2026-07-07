@@ -24,11 +24,12 @@ class AssetLoanController extends Controller
                 $assetId = 'N/A';
                 
                 if ($loan->asset) {
-                    $assetName = $loan->asset->getField('product_name') 
-                        ?? $loan->asset->getField('asset_name') 
+                    $fields = $loan->asset->getFields();
+                    $assetName = $fields['jenis_aset']
+                        ?? $fields['aset_id']
                         ?? 'Unknown';
-                    $assetId = $loan->asset->getField('asset_id') 
-                        ?? $loan->asset->getField('serial_number') 
+                    $assetId = $fields['aset_id']
+                        ?? $fields['serial_number']
                         ?? 'N/A';
                 }
 

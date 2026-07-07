@@ -115,7 +115,9 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b bg-muted/50">
+                                    <th className="p-3 text-left font-medium">Loan ID</th>
                                     <th className="p-3 text-left font-medium">Asset</th>
+                                    <th className="p-3 text-left font-medium">Asset ID</th>
                                     <th className="p-3 text-left font-medium">Loan Date</th>
                                     <th className="p-3 text-left font-medium">Expected Return</th>
                                     <th className="p-3 text-left font-medium">Condition</th>
@@ -125,7 +127,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                             <tbody>
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="p-12 text-center text-muted-foreground">
+                                        <td colSpan={7} className="p-12 text-center text-muted-foreground">
                                             <Package className="mx-auto h-12 w-12 mb-3 opacity-30" />
                                             <p>No loan requests found</p>
                                         </td>
@@ -134,8 +136,15 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     filtered.map((loan) => (
                                         <tr key={loan.id} className="border-b last:border-0 hover:bg-muted/30">
                                             <td className="p-3">
+                                                <Link href={`/requests/${loan.id}?is_loan=true`} className="text-primary hover:underline font-mono text-sm font-medium">
+                                                    {loan.loan_id}
+                                                </Link>
+                                            </td>
+                                            <td className="p-3">
                                                 <p className="font-medium">{loan.asset_name || '—'}</p>
-                                                <p className="text-xs text-muted-foreground">ID: {loan.asset_id || '—'}</p>
+                                            </td>
+                                            <td className="p-3">
+                                                <p className="text-xs text-muted-foreground font-mono">{loan.asset_id || '—'}</p>
                                             </td>
                                             <td className="p-3">
                                                 <div className="flex items-center gap-1.5 text-sm">

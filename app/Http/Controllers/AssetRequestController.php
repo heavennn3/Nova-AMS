@@ -140,8 +140,44 @@ class AssetRequestController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        // Check if viewing a loan request
+        if ($request->input('is_loan') === 'true') {
+            $loan = \App\Models\AssetLoan::with(['asset.fieldValues', 'user', 'site', 'approver'])
+                ->findOrFail($id);
+
+            $fields = $loan->asset ? $loan->asset->getFields() : [];
+            $assetName = $fields['jenis_aset'] ?? $fields['aset_id'] ?? 'Unknown';
+            $assetId = $fields['aset_id'] ?? 'N/A';
+
+            return Inertia::render('Requests/Show', [
+                'assetRequest' => [
+                    'id' => $loan->id,
+                    'request_number' => 'LOAN-' . $loan->id,
+                    'request_type' => 'Loan',
+                    'priority' => 'Normal',
+                    'status' => ucfirst($loan->status),
+                    'reason' => $loan->purpose,
+                    'admin_notes' => $loan->notes,
+                    'user' => $loan->user,
+                    'asset' => $loan->asset,
+                    'site' => $loan->site,
+                    'approver' => $loan->approver,
+                    'created_at' => $loan->created_at,
+                    'required_from' => $loan->loan_date,
+                    'required_until' => $loan->expected_return_date,
+                    'loan_date' => $loan->loan_date,
+                    'expected_return_date' => $loan->expected_return_date,
+                    'condition_status' => $loan->condition_status,
+                    'purpose' => $loan->purpose,
+                    'is_loan_request' => true,
+                    'asset_name' => $assetName,
+                    'asset_id' => $assetId,
+                ],
+            ]);
+        }
+
         $assetRequest = AssetRequest::with([
             'user',
             'asset' => fn($q) => $q->withoutGlobalScope('site_access'),

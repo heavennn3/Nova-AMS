@@ -70,7 +70,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
         <>
             <Head title={`Request ${r.request_number}`} />
 
-            <div className="flex flex-col space-y-6 max-w-4xl mx-auto p-8">
+            <div className="flex flex-col space-y-6 p-8">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
