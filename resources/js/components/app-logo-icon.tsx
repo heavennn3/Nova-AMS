@@ -4,16 +4,16 @@ interface Props {
 }
 
 /**
- * Compact Novatis logo — used wherever a small square icon is needed
- * (sidebar header, mobile sheet, auth pages, etc.)
+ * Compact Nova logo — used wherever a small square icon is needed
+ * (sidebar header when collapsed, mobile sheet, auth pages, etc.)
  */
 export default function AppLogoIcon({ className, style }: Props) {
     return (
-        <img
-            src="/images/novatis-logo.png"
-            alt="Novatis Resources"
-            className={className}
-            style={{ objectFit: 'contain', ...style }}
-        />
+        <div 
+            className={`flex items-center justify-center w-8 h-8 rounded bg-primary text-primary-foreground font-bold text-sm ${className || ''}`}
+            style={style}
+        >
+            NOVA
+        </div>
     );
 }

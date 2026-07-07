@@ -50,13 +50,13 @@ type NavSection = {
 
 const navSections: NavSection[] = [
     {
-        title: 'NOVA AMS',
+        title: 'Asset Management System',
         items: [
             { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
         ],
     },
     {
-        title: 'ASSET MANAGEMENT',
+        title: 'MAIN',
         items: [
 
             {
