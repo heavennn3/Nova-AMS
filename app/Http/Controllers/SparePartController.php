@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SparePart;
 use App\Models\Checkout;
 use App\Models\Site;
+use App\Models\TableConfiguration;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -77,26 +78,22 @@ class SparePartController extends Controller
 
     public function index()
     {
-        $spareParts = SparePart::with(['site', 'assetType'])
+        $configs = TableConfiguration::getAllColumns('spare_parts');
+
+        $spareParts = SparePart::with(['site', 'assetType', 'fieldValues'])
             ->latest()
             ->get()
-            ->map(function ($part) {
-                return [
-                    'id' => $part->id,
-                    'name' => $part->name,
-                    'part_number' => $part->part_number,
-                    'category' => $part->category,
-                    'stock_level' => $part->stock_level,
-                    'minimum_stock_level' => $part->minimum_stock_level,
-                    'unit_cost' => number_format($part->unit_cost, 2),
-                    'location' => $part->location,
-                    'site' => $part->site?->name ?? 'N/A',
-                    'status' => $part->status,
-                    'availability' => $part->availability,
-                    'total_value' => number_format($part->total_value, 2),
-                    'asset_type' => $part->assetType?->name ?? '—',
-                    'asset_type_id' => $part->asset_type_id,
-                ];
+            ->map(function ($part) use ($configs) {
+                $fields = $part->getFields();
+                $row = ['id' => $part->id];
+                foreach ($configs as $cfg) {
+                    $row[$cfg->column_key] = $fields[$cfg->column_key] ?? $part->{$cfg->column_key} ?? null;
+                }
+                $row['site'] = $part->site?->name ?? 'N/A';
+                $row['availability'] = $part->availability;
+                $row['total_value'] = number_format($part->total_value, 2);
+                $row['asset_type'] = $part->assetType?->name ?? '—';
+                return $row;
             });
 
         $categories = SparePart::select('category')
@@ -111,6 +108,7 @@ class SparePartController extends Controller
 
         return Inertia::render('SpareParts/Index', [
             'spareParts' => $spareParts,
+            'configurations' => $configs,
             'categories' => $categories,
             'assetTypes' => $assetTypes,
             'sites' => $sites,
@@ -119,10 +117,10 @@ class SparePartController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
+        $configs = TableConfiguration::getAllColumns('spare_parts');
+
+        $rules = [
             'part_number' => 'required|string|unique:spare_parts,part_number',
-            'category' => 'required|string',
             'stock_level' => 'required|integer|min:0',
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'required|numeric|min:0',
@@ -132,22 +130,37 @@ class SparePartController extends Controller
             'specifications' => 'nullable|array',
             'compatibility' => 'nullable|array',
             'asset_type_id' => 'nullable|exists:asset_types,id',
-        ]);
+        ];
+        // Dynamic field rules
+        foreach ($configs as $c) {
+            $rules[$c->column_key] = $c->is_primary_key ? 'required|string' : 'nullable|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        $dynamicFields = [];
+        foreach ($configs as $c) {
+            if (array_key_exists($c->column_key, $validated)) {
+                $dynamicFields[$c->column_key] = $validated[$c->column_key];
+                unset($validated[$c->column_key]);
+            }
+        }
 
         $validated['specifications'] = $validated['specifications'] ?? [];
         $validated['compatibility'] = $validated['compatibility'] ?? [];
 
-        SparePart::create($validated);
+        $sparePart = SparePart::create($validated);
+        $sparePart->syncFields($dynamicFields);
 
         return redirect()->back()->with('success', 'Spare part added successfully.');
     }
 
     public function update(Request $request, SparePart $sparePart)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
+        $configs = TableConfiguration::getAllColumns('spare_parts');
+
+        $rules = [
             'part_number' => 'required|string|unique:spare_parts,part_number,' . $sparePart->id,
-            'category' => 'required|string',
             'stock_level' => 'required|integer|min:0',
             'minimum_stock_level' => 'required|integer|min:0',
             'unit_cost' => 'required|numeric|min:0',
@@ -157,12 +170,26 @@ class SparePartController extends Controller
             'specifications' => 'nullable|array',
             'compatibility' => 'nullable|array',
             'asset_type_id' => 'nullable|exists:asset_types,id',
-        ]);
+        ];
+        foreach ($configs as $c) {
+            $rules[$c->column_key] = $c->is_primary_key ? 'required|string' : 'nullable|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        $dynamicFields = [];
+        foreach ($configs as $c) {
+            if (array_key_exists($c->column_key, $validated)) {
+                $dynamicFields[$c->column_key] = $validated[$c->column_key];
+                unset($validated[$c->column_key]);
+            }
+        }
 
         $validated['specifications'] = $validated['specifications'] ?? [];
         $validated['compatibility'] = $validated['compatibility'] ?? [];
 
         $sparePart->update($validated);
+        $sparePart->syncFields($dynamicFields);
 
         return redirect()->back()->with('success', 'Spare part updated successfully.');
     }
@@ -217,9 +244,13 @@ class SparePartController extends Controller
 
     public function exportCsv()
     {
-        $spareParts = SparePart::with('site')->get();
+        $configs = TableConfiguration::getAllColumns('spare_parts');
+        $columnKeys = $configs->pluck('column_key')->toArray();
+        $headers = $configs->pluck('column_title', 'column_key')->toArray();
+
+        $spareParts = SparePart::with('fieldValues')->get();
         $filename = "spare_parts_" . date('Y-m-d') . ".csv";
-        $headers = [
+        $responseHeaders = [
             "Content-Type" => "text/csv",
             "Content-Disposition" => "attachment; filename=\"$filename\"",
             "Pragma" => "no-cache",
@@ -227,26 +258,21 @@ class SparePartController extends Controller
             "Expires" => "0",
         ];
 
-        $callback = function() use ($spareParts) {
+        $callback = function() use ($spareParts, $columnKeys, $headers) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Name', 'Part Number', 'Category', 'Stock Level', 'Min Level', 'Unit Cost', 'Location', 'Site', 'Status']);
+            fputcsv($file, array_values($headers));
 
             foreach ($spareParts as $part) {
-                fputcsv($file, [
-                    $part->name,
-                    $part->part_number,
-                    $part->category,
-                    $part->stock_level,
-                    $part->minimum_stock_level,
-                    $part->unit_cost,
-                    $part->location,
-                    $part->site?->name ?? '',
-                    $part->status,
-                ]);
+                $fields = $part->getFields();
+                $row = [];
+                foreach ($columnKeys as $ck) {
+                    $row[] = $fields[$ck] ?? $part->{$ck} ?? '';
+                }
+                fputcsv($file, $row);
             }
             fclose($file);
         };
 
-        return response()->stream($callback, 200, $headers);
+        return response()->stream($callback, 200, $responseHeaders);
     }
 }

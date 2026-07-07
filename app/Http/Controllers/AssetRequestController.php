@@ -41,36 +41,17 @@ class AssetRequestController extends Controller
 
     public function create(Request $request)
     {
-        if ($request->user()->hasRole('Admin')) {
-            abort(403, 'Admins cannot create requests.');
-        }
-
-        $assetTypes = \App\Models\AssetType::select('id', 'name')->get();
-        $assets = Asset::withoutGlobalScope('site_access')
-            ->select('id', 'asset_id', 'product_name', 'type_id', 'status')
-            ->where('status', 'Available')
-            ->get();
-        $categories = AssetCategory::select('id', 'name')->get();
         $licenses = License::select('id', 'name', 'category', 'available_seats')
             ->where('available_seats', '>', 0)
             ->get();
-        $sites = \App\Models\Site::select('id', 'name')->get();
 
         return Inertia::render('Requests/Create', [
-            'assetTypes' => $assetTypes,
-            'assets' => $assets,
-            'categories' => $categories,
             'licenses' => $licenses,
-            'sites' => $sites,
         ]);
     }
 
     public function store(Request $request)
     {
-        if ($request->user()->hasRole('Admin')) {
-            abort(403, 'Admins cannot create requests.');
-        }
-
         $validated = $request->validate([
             'request_type' => 'required|string|in:Borrow,Checkout,Software License,Maintenance Request,Purchase Request,Loan',
             'priority' => 'required|string|in:Normal,High,Urgent',

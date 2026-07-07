@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetLoan;
+use App\Models\AssetType;
 use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AssetLoanController extends Controller
@@ -54,15 +56,69 @@ class AssetLoanController extends Controller
 
     public function create(Request $request)
     {
-        // Redirect to unified request page with loan type pre-selected
-        return redirect()->route('requests.create')
-            ->with('info', 'Loan requests are now managed through the unified request system. Please select "Loan" as the request type.');
+        $user = $request->user();
+        $isAdmin = $user->hasRole('Admin');
+        $userSiteId = $user->site_id;
+
+        $assetTypes = AssetType::select('id', 'name')->get();
+
+        // Get assets with fieldValues, filter by site_id for non-admin
+        $assetsQuery = Asset::withoutGlobalScope('site_access')
+            ->with('fieldValues')
+            ->latest();
+
+        if (!$isAdmin && $userSiteId) {
+            $assetsQuery->where('site_id', $userSiteId);
+        }
+
+        $assets = $assetsQuery->get()
+            ->filter(function ($asset) {
+                $fields = $asset->getFields();
+                $status = $fields['status'] ?? '';
+                return strtolower($status) === 'available';
+            })
+            ->values()
+            ->map(function ($asset) {
+                $fields = $asset->getFields();
+                return [
+                    'id' => $asset->id,
+                    'label' => $fields['asset_id'] ?? $fields['product_name'] ?? $fields['asset_name'] ?? "Asset #{$asset->id}",
+                    'site_id' => $asset->site_id,
+                    'type_id' => $fields['type_id'] ?? null,
+                ];
+            });
+
+        $sites = Site::select('id', 'name')->get();
+
+        return Inertia::render('AssetLoans/Create', [
+            'assetTypes' => $assetTypes,
+            'assets' => $assets,
+            'sites' => $sites,
+            'isAdmin' => $isAdmin,
+            'userSiteId' => $userSiteId,
+        ]);
     }
 
     public function store(Request $request)
     {
-        // Redirect to unified request system
-        return redirect()->route('requests.create')
-            ->with('info', 'Loan requests are now managed through the unified request system. Please select "Loan" as the request type.');
+        $validated = $request->validate([
+            'asset_id' => 'required|exists:assets,id',
+            'site_id' => 'required|exists:sites,id',
+            'loan_date' => 'nullable|date',
+            'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
+            'condition_status' => 'nullable|in:good,semi_faulty,faulty',
+            'purpose' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $validated['user_id'] = $request->user()->id;
+        $validated['status'] = 'pending';
+        $validated['loan_date'] = $validated['loan_date'] ?? now()->format('Y-m-d');
+        $validated['condition_status'] = $validated['condition_status'] ?? 'good';
+
+        AssetLoan::create($validated);
+
+        return redirect()->route('asset-loans.index')
+            ->with('success', 'Loan request submitted successfully.');
     }
 }

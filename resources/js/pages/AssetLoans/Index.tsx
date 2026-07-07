@@ -64,7 +64,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     </div>
                     <Link href="/requests/create">
                         <Button>
-                            <Plus className="mr-2 h-4 w-4" /> New Loan Request
+                            <Plus className="mr-2 h-4 w-4" /> Asset Loan
                         </Button>
                     </Link>
                 </div>

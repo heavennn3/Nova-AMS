@@ -24,16 +24,51 @@ class SparePart extends Model
         'asset_type_id',
     ];
 
+    // ─── EAV Helpers ───────────────────────────────────────────────
+
+    public function fieldValues()
+    {
+        return $this->hasMany(SparePartFieldValue::class);
+    }
+
+    public function getField(string $key): ?string
+    {
+        $fv = $this->fieldValues->firstWhere('column_key', $key);
+        return $fv?->value;
+    }
+
+    public function getFields(): array
+    {
+        return $this->fieldValues->pluck('value', 'column_key')->toArray();
+    }
+
+    public function setField(string $key, ?string $value): void
+    {
+        $this->fieldValues()->updateOrCreate(
+            ['column_key' => $key],
+            ['value' => $value]
+        );
+        $this->load('fieldValues');
+    }
+
+    public function syncFields(array $data): void
+    {
+        $keys = array_keys($data);
+        $this->fieldValues()->whereNotIn('column_key', $keys)->delete();
+        foreach ($data as $key => $value) {
+            $this->fieldValues()->updateOrCreate(
+                ['column_key' => $key],
+                ['value' => $value]
+            );
+        }
+        $this->load('fieldValues');
+    }
+
     protected $casts = [
         'specifications' => 'array',
         'compatibility' => 'array',
         'asset_type_id' => 'integer',
     ];
-
-    public function site()
-    {
-        return $this->belongsTo(Site::class);
-    }
 
     public function checkout()
     {
@@ -43,6 +78,11 @@ class SparePart extends Model
     public function assetType()
     {
         return $this->belongsTo(AssetType::class, 'asset_type_id');
+    }
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
     }
 
     public function getAvailabilityAttribute()

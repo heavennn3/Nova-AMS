@@ -128,7 +128,7 @@ export default function Dashboards({ sites = [] }: { sites: any[] }) {
                 <div className="bg-blue-50 border border-blue-200 p-4 rounded shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h3 className="font-semibold text-blue-900">Operational Sites</h3>
+                            <h3 className="font-semibold text-blue-900">Total Sites</h3>
                             <p className="text-2xl font-bold text-blue-600">{totalSites}</p>
                             <p className="text-xs text-blue-700 mt-1">Monitored locations</p>
                         </div>
@@ -414,19 +414,19 @@ export default function Dashboards({ sites = [] }: { sites: any[] }) {
                                 </div>
                             </div>
 
-                             {/* Action Buttons */}
-                             <div className="pt-2 flex flex-wrap gap-2">
-                                 <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold flex-1" asChild>
-                                     <Link href="/asset-inventory">
-                                         <Package className="mr-1.5 h-3 w-3" /> Log Registry
-                                     </Link>
-                                 </Button>
-                                 <Button size="sm" className="h-8 text-[11px] font-bold flex-1" asChild>
-                                     <Link href="/maintenance/work-orders">
-                                         <Wrench className="mr-1.5 h-3 w-3" /> Dispatch Order
-                                     </Link>
-                                 </Button>
-                             </div>
+                            {/* Action Buttons */}
+                            <div className="pt-2 flex flex-wrap gap-2">
+                                <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold flex-1" asChild>
+                                    <Link href="/asset-inventory">
+                                        <Package className="mr-1.5 h-3 w-3" /> Log Registry
+                                    </Link>
+                                </Button>
+                                <Button size="sm" className="h-8 text-[11px] font-bold flex-1" asChild>
+                                    <Link href="/maintenance/work-orders">
+                                        <Wrench className="mr-1.5 h-3 w-3" /> Dispatch Order
+                                    </Link>
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}

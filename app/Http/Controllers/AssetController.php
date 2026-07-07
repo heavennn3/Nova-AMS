@@ -174,8 +174,7 @@ class AssetController extends Controller
     {
         $request->validate([
             'assets' => 'required|array',
-            'site_name' => 'nullable|string',
-            'site_id' => 'nullable|integer|exists:sites,id',
+            'site_id' => 'required|integer|exists:sites,id',
         ]);
 
         $siteId = $request->site_id;
@@ -183,7 +182,6 @@ class AssetController extends Controller
         $columnKeys = $configs->pluck('column_key')->toArray();
 
         $importedCount = 0;
-        $siteName = $request->site_name;
 
         foreach ($request->assets as $row) {
             $normalized = [];
@@ -203,11 +201,6 @@ class AssetController extends Controller
             if (empty($mapped['status'])) {
                 $defaultS = \App\Models\AssetStatus::orderBy('sort_order')->first();
                 $mapped['status'] = $defaultS ? $defaultS->name : 'NOT UPDATED';
-            }
-
-            // If site selected, set lokasi to site name (overrides CSV lokasi)
-            if ($siteName) {
-                $mapped['lokasi'] = $siteName;
             }
 
             // Find primary key

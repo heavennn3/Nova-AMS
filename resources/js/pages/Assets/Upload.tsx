@@ -3,13 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
-import { ArrowLeft, Upload, FileSpreadsheet, Check, X } from 'lucide-react';
+import { ArrowLeft, Upload, FileSpreadsheet, MapPin } from 'lucide-react';
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 
-export default function AssetUpload() {
+export default function AssetUpload({ sites = [] }: { sites?: any[] }) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewData, setPreviewData] = useState<any[] | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [selectedSiteId, setSelectedSiteId] = useState('');
 
     const parseCsvText = (text: string) => {
         const lines = text.split('\n').filter(l => l.trim());
@@ -42,6 +46,10 @@ export default function AssetUpload() {
             toast.error('Please select a file');
             return;
         }
+        if (!selectedSiteId) {
+            toast.error('Please select a site');
+            return;
+        }
         setIsProcessing(true);
         try {
             if (selectedFile.name.endsWith('.csv')) {
@@ -49,7 +57,7 @@ export default function AssetUpload() {
                 reader.onload = async (e) => {
                     const text = e.target?.result as string;
                     const { rows } = parseCsvText(text);
-                    router.post('/assets/import-bulk', { assets: rows }, {
+                    router.post('/assets/import-bulk', { assets: rows, site_id: Number(selectedSiteId) }, {
                         preserveScroll: true,
                         onSuccess: () => {
                             toast.success(`Imported ${rows.length} assets!`);
@@ -58,7 +66,8 @@ export default function AssetUpload() {
                             setIsProcessing(false);
                         },
                         onError: (err) => {
-                            toast.error('Import failed');
+                            const msg = typeof err === 'object' ? (err as any).site_id || 'Import failed.' : 'Import failed.';
+                            toast.error(msg);
                             console.error(err);
                             setIsProcessing(false);
                         },
@@ -90,20 +99,52 @@ export default function AssetUpload() {
                 </div>
             </div>
 
-            <div className="rounded-lg border border-dashed bg-card p-8 text-center">
-                <FileSpreadsheet className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
-                <Label htmlFor="csv-upload" className="cursor-pointer">
-                    <div className="text-sm font-medium hover:text-primary transition-colors">
-                        {selectedFile ? selectedFile.name : 'Click to select CSV file'}
+            <div className="rounded-lg border bg-card p-6 space-y-4">
+                {sites.length === 0 ? (
+                    <div className="text-center py-6">
+                        <div className="rounded-full bg-amber-100 p-3 w-fit mx-auto mb-3">
+                            <MapPin className="h-6 w-6 text-amber-600" />
+                        </div>
+                        <h3 className="font-semibold text-amber-800">No Sites Yet</h3>
+                        <p className="text-sm text-muted-foreground mt-1">You must create a site before importing assets.</p>
+                        <Button className="mt-4" asChild>
+                            <Link href="/master-data">Create a Site</Link>
+                        </Button>
                     </div>
-                    <Input
-                        id="csv-upload"
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-                    />
-                </Label>
+                ) : (
+                    <>
+                        <div className="space-y-2">
+                            <Label htmlFor="site-select" className="font-medium">Target Site *</Label>
+                            <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
+                                <SelectTrigger id="site-select">
+                                    <SelectValue placeholder="Select a site..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {sites.map((site: any) => (
+                                        <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {!selectedSiteId && <p className="text-xs text-amber-600">You must select a site to import assets into.</p>}
+                        </div>
+
+                        <div className="rounded-lg border border-dashed bg-card p-8 text-center">
+                            <FileSpreadsheet className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
+                            <Label htmlFor="csv-upload" className="cursor-pointer">
+                                <div className="text-sm font-medium hover:text-primary transition-colors">
+                                    {selectedFile ? selectedFile.name : 'Click to select CSV file'}
+                                </div>
+                                <Input
+                                    id="csv-upload"
+                                    type="file"
+                                    accept=".csv"
+                                    className="hidden"
+                                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                                />
+                            </Label>
+                        </div>
+                    </>
+                )}
             </div>
 
             {previewData && (
@@ -121,7 +162,7 @@ export default function AssetUpload() {
                         ))}
                     </div>
                     <div className="mt-3 flex justify-end">
-                        <Button onClick={handleUpload} disabled={isProcessing} className="gap-2">
+                        <Button onClick={handleUpload} disabled={isProcessing || !selectedSiteId} className="gap-2">
                             <Upload className="h-4 w-4" />
                             {isProcessing ? 'Importing…' : 'Confirm & Upload'}
                         </Button>

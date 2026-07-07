@@ -72,7 +72,8 @@ class MasterDataController extends Controller
                 'notes' => $l->notes,
             ]),
             'tableConfigurations' => $tableConfigurations,
-            'configurationTables' => TableConfiguration::select('table_name')->distinct()->pluck('table_name'),
+            'configurationTables' => TableConfiguration::select('table_name')->distinct()->pluck('table_name')
+                ->merge(['spare_parts'])->unique()->values(),
             'currentConfigTable' => $tableName,
             'isAdmin' => $isAdmin,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color', 'sort_order']),
