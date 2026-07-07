@@ -15,7 +15,7 @@ import {
     Percent,
     AlertCircle,
     CheckCircle,
-  } from 'lucide-react';
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -49,7 +49,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
@@ -453,9 +452,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
                             Software Licenses
                         </h1>
-                        <p className="text-muted-foreground">
-                            Manage software licenses and activation keys.
-                        </p>
+
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -477,110 +474,58 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
             {/* Metrics cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <Card className="border-l-4 border-l-blue-500 shadow-sm bg-card">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Total Licenses
-                                </p>
-                                <p className="text-3xl font-bold text-blue-600">
-                                    {totalLicenses}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {totalSeats} total seats
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3 text-blue-600">
-                                <FileKey className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-blue-500/10 p-3">
+                        <FileKey className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Licenses</p>
+                        <p className="text-2xl font-bold">{totalLicenses}</p>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-green-500 shadow-sm bg-card">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Active Licenses
-                                </p>
-                                <p className="text-3xl font-bold text-green-600">
-                                    {activeLicenses}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Not expired
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3 text-green-600">
-                                <CheckCircle className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-green-500/10 p-3">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Active </p>
+                        <p className="text-2xl font-bold">{activeLicenses}</p>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-amber-500 shadow-sm bg-card">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Expiring This Month
-                                </p>
-                                <p className="text-3xl font-bold text-amber-600">
-                                    {expiringThisMonth}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Next 30 days
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 p-3 text-amber-600">
-                                <AlertCircle className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-amber-500/10 p-3">
+                        <AlertCircle className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Expiring This Month</p>
+                        <p className="text-2xl font-bold">{expiringThisMonth}</p>
 
-                <Card className="border-l-4 border-l-red-500 shadow-sm bg-card">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Expired Licenses
-                                </p>
-                                <p className="text-3xl font-bold text-red-600">
-                                    {expiredLicenses}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Need renewal
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 text-red-600">
-                                <AlertCircle className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-purple-500 shadow-sm bg-card">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    In Use Licenses
-                                </p>
-                                <p className="text-3xl font-bold text-purple-600">
-                                    {inUseLicenses}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {totalAssignedSeats} seats assigned
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-purple-50 dark:bg-purple-950/20 p-3 text-purple-600">
-                                <Percent className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-red-500/10 p-3">
+                        <AlertCircle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Expired Licenses</p>
+                        <p className="text-2xl font-bold">{expiredLicenses}</p>
+
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-purple-500/10 p-3">
+                        <Percent className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">In Use</p>
+                        <p className="text-2xl font-bold">{inUseLicenses}</p>
+
+                    </div>
+                </div>
             </div>
 
             <div className="rounded-lg border bg-card shadow-sm">
@@ -635,12 +580,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         </p>
                         <p className="text-sm mb-4">
                             {(selectedVendor !== 'all' || selectedLicenseType !== 'all')
-                                ? 'Try adjusting your filters or add licenses that match your criteria.'
-                                : 'Create your first software license to get started tracking compliance and seats.'}
+                                ? 'Try adjusting your filters or add licenses that match your criteria.' : ''}
                         </p>
                         {(selectedVendor === 'all' && selectedLicenseType === 'all') && (
                             <Button onClick={() => setIsCreateOpen(true)}>
-                                <Plus className="mr-2 h-4 w-4" /> Add Your First License
+                                <Plus className="mr-2 h-4 w-4" /> Add New License
                             </Button>
                         )}
                     </div>
@@ -648,7 +592,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             </div>
 
             {/* ── Create License Modal ── */}
-            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); }}}>
+            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); } }}>
                 <DialogContent className="sm:max-w-lg">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
