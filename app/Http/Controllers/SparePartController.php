@@ -7,6 +7,7 @@ use App\Models\Checkout;
 use App\Models\Site;
 use App\Models\TableConfiguration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class SparePartController extends Controller
@@ -283,5 +284,39 @@ class SparePartController extends Controller
         };
 
         return response()->stream($callback, 200, $responseHeaders);
+    }
+
+    public function importBulk(Request $request)
+    {
+        $request->validate([
+            'spare_parts' => 'required|array',
+        ]);
+
+        $importedCount = 0;
+        $fillable = (new SparePart)->getFillable();
+
+        foreach ($request->spare_parts as $row) {
+            $normalized = [];
+            foreach ($row as $k => $v) {
+                $normalized[strtolower(trim(preg_replace('/\\s+/', '_', $k)))] = $v;
+            }
+
+            $data = [];
+            foreach ($fillable as $field) {
+                if (array_key_exists($field, $normalized)) {
+                    $data[$field] = $normalized[$field];
+                }
+            }
+            if (empty($data)) continue;
+
+            $data['status'] ??= 'available';
+            $data['stock_level'] = (int)($data['stock_level'] ?? 0);
+            $data['minimum_stock_level'] = (int)($data['minimum_stock_level'] ?? 0);
+
+            SparePart::create($data);
+            $importedCount++;
+        }
+
+        return redirect()->back()->with('success', "Successfully imported $importedCount spare parts!");
     }
 }

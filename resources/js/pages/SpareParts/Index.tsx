@@ -69,6 +69,21 @@ export default function SparePartsIndex({
         });
     }, [spareParts, search, selectedCategory, selectedAssetType, selectedStatus]);
 
+    const handleImportCsv = (parsedData: any[]) => {
+        const spare_parts = parsedData.map((row: any) => {
+            const normalized: any = {};
+            for (const [k, v] of Object.entries(row)) {
+                normalized[String(k).toLowerCase().trim().replace(/\s+/g, '_')] = v;
+            }
+            return normalized;
+        });
+        router.post('/spare-parts/import-bulk', { spare_parts }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Import successful!'),
+            onError: (errors) => toast.error('Import failed: ' + (errors.message || 'Unknown error')),
+        });
+    };
+
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
         const data = {
@@ -241,9 +256,7 @@ export default function SparePartsIndex({
                         <h1 className="text-2xl font-bold tracking-tight text-foreground">
                             Spare Parts Inventory
                         </h1>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Manage and track spare parts inventory
-                        </p>
+
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -351,6 +364,7 @@ export default function SparePartsIndex({
                     data={filteredParts}
                     columns={columns}
                     exportFileName="spare_parts_export"
+                    onImportCsv={handleImportCsv}
                 />
             </div>
 
@@ -542,7 +556,7 @@ export default function SparePartsIndex({
                                 {/* Dynamic config-defined fields */}
                                 {configurations
                                     .filter((cfg: any) =>
-                                        !['name','part_number','category','stock_level','minimum_stock_level','unit_cost','location','site_id','asset_type_id','status'].includes(cfg.column_key)
+                                        !['name', 'part_number', 'category', 'stock_level', 'minimum_stock_level', 'unit_cost', 'location', 'site_id', 'asset_type_id', 'status'].includes(cfg.column_key)
                                     )
                                     .map((cfg: any) => {
                                         const key = cfg.column_key;

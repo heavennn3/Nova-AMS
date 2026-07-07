@@ -225,6 +225,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{sparePart}/checkout', [\App\Http\Controllers\SparePartController::class, 'checkout'])->name('spare-parts.checkout');
             Route::post('/checkouts/{checkout}/return', [\App\Http\Controllers\SparePartController::class, 'returnCheckout'])->name('spare-parts.return');
             Route::get('/export', [\App\Http\Controllers\SparePartController::class, 'exportCsv'])->name('spare-parts.export');
+            Route::post('/import-bulk', [\App\Http\Controllers\SparePartController::class, 'importBulk'])->name('spare-parts.import-bulk');
         });
         Route::get('/vendors/slas', [\App\Http\Controllers\OperationsController::class, 'slas']);
         Route::get('/vendors/po', [\App\Http\Controllers\OperationsController::class, 'po']);

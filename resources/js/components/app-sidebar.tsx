@@ -50,13 +50,13 @@ type NavSection = {
 
 const navSections: NavSection[] = [
     {
-        title: 'Asset Management System',
+        title: 'MAIN',
         items: [
             { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
         ],
     },
     {
-        title: 'MAIN',
+        title: 'MANAGEMENT SYSTEM',
         items: [
 
             {
@@ -69,7 +69,7 @@ const navSections: NavSection[] = [
                         title: 'Assets',
                         href: assetInventory(),
                     },
-                {
+                    {
                         title: 'Loan',
                         href: '/asset-loans',
                     },
@@ -126,7 +126,7 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
 
-             {
+            {
                 title: 'Document',
                 href: '#',
                 icon: FileText,
@@ -146,13 +146,13 @@ const navSections: NavSection[] = [
                 ],
             },
 
-            
-            
+
+
 
         ],
     },
 
-    
+
 
     {
         title: 'OTHERS',
@@ -163,7 +163,7 @@ const navSections: NavSection[] = [
                 icon: Database,
                 module: 'Master Data',
             },
-            
+
 
             {
                 title: 'Requests',
@@ -223,7 +223,7 @@ const navSections: NavSection[] = [
                     },
                 ],
             },
-          
+
 
         ],
     },
@@ -235,7 +235,7 @@ const navSections: NavSection[] = [
                 href: '/users',
                 icon: Users,
                 module: 'System Settings',
-              
+
             },
 
             {
@@ -243,7 +243,7 @@ const navSections: NavSection[] = [
                 href: '/security/roles',
                 icon: Shield,
                 module: 'System Settings',
-               
+
             },
 
             {
@@ -258,14 +258,14 @@ const navSections: NavSection[] = [
                 ],
             },
 
-              {
+            {
                 title: 'Settings',
                 href: '/settings',
                 icon: Settings,
                 module: 'System Settings',
-               
+
             },
-           
+
 
 
         ],
