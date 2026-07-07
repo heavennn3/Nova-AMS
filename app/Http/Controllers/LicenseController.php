@@ -478,47 +478,6 @@ class LicenseController extends Controller
         return redirect()->back()->with('success', 'License seat checked in successfully.');
     }
 
-    public function usageReport()
-    {
-        try {
-            $licenses = License::with(['vendor', 'site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset'])
-                ->get()
-                ->map(function ($license) {
-                    $license->updateComplianceStatus();
-
-                    return [
-                        'id' => $license->id,
-                        'name' => $license->name,
-                        'license_type' => $license->license_type,
-                        'total_seats' => $license->total_seats,
-                        'used_seats' => $license->used_seats,
-                        'available_seats' => $license->available_seats,
-                        'compliance_status' => $license->compliance_status,
-                        'utilization_percentage' => $license->total_seats > 0
-                            ? round(($license->used_seats / $license->total_seats) * 100, 1)
-                            : 0,
-                        'vendor' => $license->vendor ? $license->vendor->name : null,
-                        'assignments' => $license->licenseSeats->where('seat_status', 'assigned')->map(function ($seat) {
-                            return [
-                                'seat_number' => $seat->seat_number,
-                                'assignment_type' => $seat->assignment_type,
-                                'assigned_to' => $seat->assigned_to_user_id
-                                    ? ($seat->assignedUser?->name ?? 'Unknown User')
-                                    : ($seat->assignedAsset?->product_name ?? 'Unknown Asset'),
-                                'assigned_at' => $seat->assigned_at?->format('Y-m-d H:i:s'),
-                            ];
-                        })->values()->toArray(),
-                    ];
-                });
-
-            return Inertia::render('Licenses/UsageReport', [
-                'licenses' => $licenses,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Usage report error: ' . $e->getMessage());
-            return back()->with('error', 'Error loading usage report.');
-        }
-    }
 
     public function renewals()
     {

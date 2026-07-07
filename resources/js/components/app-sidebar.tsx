@@ -109,7 +109,6 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
                 items: [
                     { title: 'License Inventory', href: '/licenses' },
-                    { title: 'Usage Report', href: '/licenses/usage-report' },
                     { title: 'Renewals', href: '/licenses/renewals' },
                 ],
             },

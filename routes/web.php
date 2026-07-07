@@ -116,7 +116,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/assets/lookup/{scannedValue}', [\App\Http\Controllers\AssetController::class, 'lookupAsset']);
         
         // Software Licenses Module
-        Route::get('/licenses/usage-report', [\App\Http\Controllers\LicenseController::class, 'usageReport'])->name('licenses.usage-report');
         Route::get('/licenses/renewals', [\App\Http\Controllers\LicenseController::class, 'renewals'])->name('licenses.renewals');
         Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
         Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
