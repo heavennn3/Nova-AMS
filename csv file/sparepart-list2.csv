@@ -1,0 +1,21 @@
+Asset ID,Item Name,Category,Subcategory,Brand,Model/Specification,Quantity,Unit Cost,Serial Number,Location,Status
+NET-0001,WiFi Router,Network Equipment,Router,TP-Link,Archer AX55,5,450.00,,Network Store,Available
+NET-0002,Enterprise Router,Network Equipment,Router,MikroTik,RB5009,2,1850.00,,Server Room,Available
+NET-0003,Network Switch 24 Port,Network Equipment,Switch,Cisco,CBS350-24T,8,2800.00,,Network Store,Available
+NET-0004,Network Switch 8 Port,Network Equipment,Switch,TP-Link,TL-SG108,15,180.00,,Network Store,Available
+NET-0005,Wireless Access Point,Network Equipment,Access Point,Ubiquiti,U6 Lite,10,620.00,,Network Store,Available
+NET-0006,Firewall Appliance,Network Equipment,Firewall,Fortinet,FortiGate 60F,3,5600.00,,Server Room,Available
+NET-0007,Lan Cable Cat6 1 Meter,Network Equipment,Lan Cable,D-Link,Cat6 UTP,100,8.00,,Network Store,Available
+NET-0008,Lan Cable Cat6 5 Meter,Network Equipment,Lan Cable,D-Link,Cat6 UTP,80,20.00,,Network Store,Available
+NET-0009,Fiber Optic Cable,Network Equipment,Fiber Cable,CommScope,Single Mode Fiber,50,45.00,,Network Store,Available
+NET-0010,RJ45 Connector,Network Equipment,Connector,AMP,Cat6 RJ45,500,0.50,,Network Store,Available
+NET-0011,Patch Panel 24 Port,Network Equipment,Patch Panel,Legrand,24 Port Cat6,10,350.00,,Server Room,Available
+NET-0012,Network Rack 12U,Network Equipment,Rack,APC,12U Wall Mount Rack,5,900.00,,Server Room,Available
+NET-0013,Network Rack 42U,Network Equipment,Rack,APC,42U Server Rack,2,3500.00,,Server Room,Available
+NET-0014,UPS Backup Power,Network Equipment,Power Backup,APC,650VA UPS,6,450.00,,Server Room,Available
+NET-0015,PoE Injector,Network Equipment,Power Adapter,Ubiquiti,PoE Adapter,20,80.00,,Network Store,Available
+NET-0016,SFP Module,Network Equipment,Transceiver,Cisco,10G SFP+,15,500.00,,Network Store,Available
+NET-0017,Network Cable Tester,Network Equipment,Testing Tool,Fluke,MS2-100,3,1200.00,,Maintenance Room,Available
+NET-0018,Crimping Tool,Network Equipment,Installation Tool,Pro'sKit,6PK-301E,5,120.00,,Maintenance Room,Available
+NET-0019,Cable Management Tray,Network Equipment,Rack Accessory,APC,1U Cable Tray,20,60.00,,Server Room,Available
+NET-0020,Network Keystone Jack,Network Equipment,Connector,AMP,Cat6 Keystone,200,12.00,,Network Store,Available

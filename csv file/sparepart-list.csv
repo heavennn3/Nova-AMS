@@ -1,0 +1,21 @@
+Part ID,Part Name,Category,Brand,Model/Specification,Part Number,Quantity,Unit Cost,Supplier,Storage Location,Minimum Stock,Status
+SP-0001,16GB DDR5 RAM,RAM,Corsair,Vengeance DDR5 5600MHz,CMK16GX5M1B5600,25,320.00,Tech Supply Sdn Bhd,IT Store Room A,5,Available
+SP-0002,32GB DDR5 RAM,RAM,Kingston,FURY Beast DDR5 6000MHz,KF560C36BBE-32,12,620.00,Tech Supply Sdn Bhd,IT Store Room A,3,Available
+SP-0003,1TB NVMe SSD,SSD,Samsung,990 EVO,MZ-V9E1T0BW,18,450.00,Samsung Malaysia,IT Store Room A,5,Available
+SP-0004,512GB SATA SSD,SSD,Crucial,MX500,CT500MX500SSD1,10,280.00,Crucial Distributor,IT Store Room A,3,Available
+SP-0005,Dell Laptop Battery,Battery,Dell,Type M5Y1K,M5Y1K,8,280.00,Dell Malaysia,IT Store Room B,2,Available
+SP-0006,HP Laptop Battery,Battery,HP,HT03XL,HT03XL,6,260.00,HP Malaysia,IT Store Room B,2,Available
+SP-0007,65W USB-C Charger,Charger,Dell,65W USB-C,LA65NM170,20,180.00,Dell Malaysia,IT Store Room B,5,Available
+SP-0008,90W Laptop Charger,Charger,HP,90W Smart Adapter,H6Y90AA,10,210.00,HP Malaysia,IT Store Room B,3,Available
+SP-0009,USB Keyboard,Keyboard,Logitech,K120,920-002478,30,65.00,Logitech Malaysia,IT Store Room C,10,Available
+SP-0010,Wireless Keyboard,Keyboard,Logitech,MX Keys,920-009416,5,420.00,Logitech Malaysia,IT Store Room C,2,Available
+SP-0011,USB Optical Mouse,Mouse,Logitech,M100,910-001601,40,45.00,Logitech Malaysia,IT Store Room C,10,Available
+SP-0012,Wireless Mouse,Mouse,Logitech,M650,910-006239,15,135.00,Logitech Malaysia,IT Store Room C,5,Available
+SP-0013,Cat6 Ethernet Cable 3m,Cables,D-Link,Cat6 UTP,NCB-C6-3M,50,25.00,D-Link Malaysia,Network Store,15,Available
+SP-0014,HDMI Cable 2m,Cables,Ugreen,HDMI 2.0,HDMI-2M,35,30.00,Ugreen Malaysia,Network Store,10,Available
+SP-0015,120mm Cooling Fan,Fans,Cooler Master,SickleFlow 120,MFX-B2DN-18NPK,15,55.00,Cooler Master,IT Store Room D,5,Available
+SP-0016,92mm CPU Fan,Fans,Noctua,NF-B9 Redux,NF-B9,10,85.00,Noctua Distributor,IT Store Room D,3,Available
+SP-0017,650W Power Supply,Power Supply,Corsair,CX650,CP-9020278,8,390.00,Corsair Malaysia,IT Store Room D,2,Available
+SP-0018,750W Power Supply,Power Supply,Cooler Master,MWE 750 Gold,MPE-7501,5,520.00,Cooler Master,IT Store Room D,2,Available
+SP-0019,CMOS Battery CR2032,CMOS Battery,Panasonic,CR2032,CR2032,50,8.50,Panasonic Malaysia,IT Store Room E,20,Available
+SP-0020,CMOS Battery CR2025,CMOS Battery,Maxell,CR2025,CR2025,30,7.50,Maxell Distributor,IT Store Room E,10,Available

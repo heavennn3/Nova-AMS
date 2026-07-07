@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SparePart;
+use App\Models\SparePartCategory;
 use App\Models\Checkout;
 use App\Models\Site;
 use App\Models\TableConfiguration;
@@ -292,31 +293,140 @@ class SparePartController extends Controller
             'spare_parts' => 'required|array',
         ]);
 
-        $importedCount = 0;
-        $fillable = (new SparePart)->getFillable();
+        $rows = $request->spare_parts;
+        if (empty($rows)) {
+            return redirect()->back()->with('error', 'No data to import.');
+        }
 
-        foreach ($request->spare_parts as $row) {
+        $firstRow = $rows[0];
+        $headers = array_keys($firstRow);
+
+        // ── Auto-create TableConfiguration if empty ──
+        $existingConfigs = TableConfiguration::forTable('spare_parts')->count();
+        if ($existingConfigs === 0) {
+            $this->createConfigsFromHeaders($headers);
+        }
+
+        $fillable = (new SparePart)->getFillable();
+        $configs = TableConfiguration::getAllColumns('spare_parts');
+        $columnKeys = $configs->pluck('column_key')->toArray();
+        $importedCount = 0;
+
+        foreach ($rows as $row) {
             $normalized = [];
             foreach ($row as $k => $v) {
-                $normalized[strtolower(trim(preg_replace('/\\s+/', '_', $k)))] = $v;
+                $normalized[strtolower(trim(preg_replace('/\s+/', '_', $k)))] = $v;
             }
 
+            if (empty($normalized)) continue;
+
+            // Map normalized headers to fillable model fields
             $data = [];
-            foreach ($fillable as $field) {
-                if (array_key_exists($field, $normalized)) {
-                    $data[$field] = $normalized[$field];
+            foreach ($normalized as $nk => $v) {
+                $field = $this->mapHeaderToField($nk);
+                if ($field && in_array($field, $fillable)) {
+                    $data[$field] = $v;
                 }
             }
+
             if (empty($data)) continue;
 
             $data['status'] ??= 'available';
             $data['stock_level'] = (int)($data['stock_level'] ?? 0);
             $data['minimum_stock_level'] = (int)($data['minimum_stock_level'] ?? 0);
 
-            SparePart::create($data);
+            // Auto-register category in master data
+            if (!empty($data['category'])) {
+                $this->ensureCategory($data['category'], $normalized);
+            }
+
+            $part = SparePart::create($data);
+
+            // Store remaining CSV columns as EAV field values
+            $eavData = [];
+            foreach ($columnKeys as $ck) {
+                $mappedField = $this->mapHeaderToField($ck);
+                if ($mappedField && in_array($mappedField, $fillable)) continue;
+                // Also skip if it was already mapped and used in $data
+                if (array_key_exists($ck, $normalized)) {
+                    $eavData[$ck] = $normalized[$ck];
+                }
+            }
+            if (!empty($eavData)) {
+                $part->syncFields($eavData);
+            }
+
             $importedCount++;
         }
 
         return redirect()->back()->with('success', "Successfully imported $importedCount spare parts!");
+    }
+
+    private function mapHeaderToField(string $normalizedKey): ?string
+    {
+        $map = [
+            'name' => 'name',
+            'part_name' => 'name',
+            'item_name' => 'name',
+            'part_id' => 'part_number',
+            'part_number' => 'part_number',
+            'quantity' => 'stock_level',
+            'stock_level' => 'stock_level',
+            'stock' => 'stock_level',
+            'minimum_stock' => 'minimum_stock_level',
+            'minimum_stock_level' => 'minimum_stock_level',
+            'min_stock' => 'minimum_stock_level',
+            'storage_location' => 'location',
+            'location' => 'location',
+            'category' => 'category',
+            'status' => 'status',
+        ];
+        return $map[$normalizedKey] ?? null;
+    }
+
+    private function createConfigsFromHeaders(array $headers): void
+    {
+        $sortOrder = 0;
+        foreach ($headers as $header) {
+            $columnKey = strtolower(trim(preg_replace('/\s+/', '_', $header)));
+            // Skip headers that directly map to hardcoded columns (stock_level already hardcoded)
+            $sortOrder++;
+            TableConfiguration::create([
+                'table_name' => 'spare_parts',
+                'column_key' => $columnKey,
+                'column_title' => $header,
+                'data_type' => $this->inferDataType($columnKey),
+                'is_primary_key' => $sortOrder === 1,
+                'is_sortable' => true,
+                'is_visible' => true,
+                'sort_order' => $sortOrder * 10,
+            ]);
+        }
+    }
+
+    private function inferDataType(string $columnKey): string
+    {
+        $numberHints = ['quantity', 'stock', 'count', 'total', 'amount', 'price', 'cost', 'unit_cost', 'minimum_stock'];
+        foreach ($numberHints as $hint) {
+            if (str_contains($columnKey, $hint)) return 'number';
+        }
+        return 'text';
+    }
+
+    private function ensureCategory(string $categoryName, array $normalized): void
+    {
+        $subCategoryName = $normalized['subcategory'] ?? $normalized['sub_category'] ?? null;
+
+        if ($subCategoryName) {
+            // Category is parent, subcategory is child
+            $parentCat = SparePartCategory::firstOrCreate(['name' => $categoryName]);
+            SparePartCategory::firstOrCreate(
+                ['name' => $subCategoryName],
+                ['parent_id' => $parentCat->id]
+            );
+        } else {
+            // Standalone top-level category
+            SparePartCategory::firstOrCreate(['name' => $categoryName]);
+        }
     }
 }
