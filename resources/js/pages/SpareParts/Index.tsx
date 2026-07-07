@@ -264,105 +264,103 @@ export default function SparePartsIndex({
             </div>
 
             {/* Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Total Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{spareParts.length}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Available</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">
-                            {spareParts.filter((p: any) => p.availability === 'available').length}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-yellow-600">
-                            {spareParts.filter((p: any) => p.availability === 'low').length}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-red-600">
-                            {spareParts.filter((p: any) => p.stock_level === 0).length}
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-primary/10 p-3">
+                        <Package className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Items</p>
+                        <p className="text-2xl font-bold">{spareParts.length}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-green-500/10 p-3">
+                        <CheckCircle className="h-6 w-6 text-green-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Available</p>
+                        <p className="text-2xl font-bold">{spareParts.filter((p: any) => p.availability === 'available').length}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-yellow-500/10 p-3">
+                        <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Low Stock</p>
+                        <p className="text-2xl font-bold">{spareParts.filter((p: any) => p.availability === 'low').length}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-red-500/10 p-3">
+                        <XCircle className="h-6 w-6 text-red-500" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Out of Stock</p>
+                        <p className="text-2xl font-bold">{spareParts.filter((p: any) => p.stock_level === 0).length}</p>
+                    </div>
+                </div>
             </div>
 
             {/* Search and Filters */}
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-1">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search "
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        </div>
-                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                            <SelectTrigger className="w-full md:w-48">
-                                <SelectValue placeholder="Category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Categories</SelectItem>
-                                {categories.map((cat) => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedAssetType} onValueChange={setSelectedAssetType}>
-                            <SelectTrigger className="w-full md:w-48">
-                                <SelectValue placeholder="Asset Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Asset Types</SelectItem>
-                                {assetTypes.map((type: any) => (
-                                    <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                            <SelectTrigger className="w-full md:w-48">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="available">Available</SelectItem>
-                                <SelectItem value="low">Low Stock</SelectItem>
-                                <SelectItem value="out">Out of Stock</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="relative w-[280px]">
+                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                    />
+                </div>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="h-8 w-[180px] text-sm">
+                        <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={selectedAssetType} onValueChange={setSelectedAssetType}>
+                    <SelectTrigger className="h-8 w-[180px] text-sm">
+                        <SelectValue placeholder="Asset Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Asset Types</SelectItem>
+                        {assetTypes.map((type: any) => (
+                            <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="h-8 w-[150px] text-sm">
+                        <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="low">Low Stock</SelectItem>
+                        <SelectItem value="out">Out of Stock</SelectItem>
+                    </SelectContent>
+                </Select>
+                <DataTableActions
+                    data={filteredParts}
+                    columns={columns}
+                    exportFileName="spare_parts_export"
+                />
+            </div>
 
             {/* Data Table */}
             <Card>
-                <CardContent className="pt-6">
+                <CardContent className="p-0">
                     <DataTable
                         columns={columns}
                         data={filteredParts}
+                        hideToolbar
                     />
                 </CardContent>
             </Card>

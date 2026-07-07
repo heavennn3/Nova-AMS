@@ -207,21 +207,49 @@ export default function SparePartsDashboard({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Category Breakdown */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Inventory by Category</CardTitle>
+                <Card className="overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b py-2 px-3">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold">
+                                <Package className="h-3.5 w-3.5 text-emerald-600" />
+                                Inventory by Category
+                            </CardTitle>
+                            <span className="text-[10px] text-muted-foreground bg-white px-1.5 py-0.5 rounded-full border">
+                                {categoryData.length} groups
+                            </span>
+                        </div>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {categoryData.map((cat: any) => (
-                                <div key={cat.category} className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">{cat.category}</p>
-                                        <p className="text-sm text-muted-foreground">{cat.count} items</p>
+                    <CardContent className="p-2">
+                        <div className="space-y-1">
+                            {categoryData.map((cat: any, i: number) => {
+                                const colors = [
+                                    { bg: 'bg-emerald-500', dot: 'bg-emerald-500', light: 'bg-emerald-50', text: 'text-emerald-700' },
+                                    { bg: 'bg-blue-500', dot: 'bg-blue-500', light: 'bg-blue-50', text: 'text-blue-700' },
+                                    { bg: 'bg-purple-500', dot: 'bg-purple-500', light: 'bg-purple-50', text: 'text-purple-700' },
+                                    { bg: 'bg-amber-500', dot: 'bg-amber-500', light: 'bg-amber-50', text: 'text-amber-700' },
+                                    { bg: 'bg-rose-500', dot: 'bg-rose-500', light: 'bg-rose-50', text: 'text-rose-700' },
+                                    { bg: 'bg-cyan-500', dot: 'bg-cyan-500', light: 'bg-cyan-50', text: 'text-cyan-700' },
+                                ];
+                                const c = colors[i % colors.length];
+                                const maxCount = Math.max(...categoryData.map((x: any) => x.count), 1);
+                                const pct = maxCount > 0 ? (cat.count / maxCount) * 100 : 0;
+                                return (
+                                    <div key={cat.category} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted/40 transition-colors">
+                                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${c.light}`}>
+                                            <span className={`text-[10px] font-bold ${c.text}`}>{cat.category[0]}</span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <p className="text-xs font-medium truncate">{cat.category}</p>
+                                                <span className={`text-[10px] font-semibold tabular-nums ${c.text}`}>{cat.count}</span>
+                                            </div>
+                                            <div className="h-1 w-full rounded-full bg-muted overflow-hidden mt-0.5">
+                                                <div className={`h-full rounded-full transition-all ${c.bg}`} style={{ width: `${pct}%` }} />
+                                            </div>
+                                        </div>
                                     </div>
-
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </CardContent>
                 </Card>
