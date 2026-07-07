@@ -67,7 +67,7 @@ class LicenseController extends Controller
 
             $users = User::orderBy('name')->get(['id', 'name', 'email']);
 
-            $assets = Asset::with('site')->orderBy('product_name')->get()
+            $assets = Asset::with('site')->orderBy('id')->get()
                 ->map(function($asset) {
                     return [
                         'id' => $asset->id,

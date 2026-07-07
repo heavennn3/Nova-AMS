@@ -215,9 +215,16 @@ class AssetController extends Controller
             if ($existing) {
                 if ($siteId) $existing->update(['site_id' => $siteId]);
                 $existing->syncFields($mapped);
+                // Sync column status with EAV if present
+                if (isset($mapped['status'])) {
+                    $existing->update(['status' => $mapped['status']]);
+                }
             } else {
                 $asset = Asset::create(['site_id' => $siteId ? (int)$siteId : null]);
                 $asset->syncFields($mapped);
+                // Sync column status with EAV
+                $status = $mapped['status'] ?? 'not_updated';
+                $asset->update(['status' => $status]);
             }
 
             $importedCount++;
@@ -264,6 +271,7 @@ class AssetController extends Controller
         $count = 0;
         foreach (Asset::withoutGlobalScope('site_access')->whereIn('id', $validated['ids'])->cursor() as $asset) {
             $asset->setField('status', $validated['status']);
+            $asset->update(['status' => $validated['status']]);
             $count++;
         }
 

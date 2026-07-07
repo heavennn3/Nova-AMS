@@ -1,6 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import {
+    Check,
+    ChevronsUpDown,
+    PlusCircle,
+    Key,
     FileKey,
     Plus,
     Pencil,
@@ -11,7 +15,7 @@ import {
     Percent,
     AlertCircle,
     CheckCircle,
-} from 'lucide-react';
+  } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +29,19 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -34,6 +51,7 @@ import {
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], vendors = [], licenseTypes = [] }: any) {
     // Error boundary - if data is not in expected format, show simple version
@@ -43,6 +61,9 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedLicense, setSelectedLicense] = useState<any>(null);
     const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
+    const [createKeyVisible, setCreateKeyVisible] = useState(false);
+    const [vendorOpen, setVendorOpen] = useState(false);
+    const [vendorSearch, setVendorSearch] = useState('');
     const [deleteReason, setDeleteReason] = useState('');
     const [selectedVendor, setSelectedVendor] = useState<string>('all');
     const [selectedLicenseType, setSelectedLicenseType] = useState<string>('all');
@@ -65,30 +86,23 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
     const form = useForm({
         name: '',
+        license_type: 'perpetual',
+        vendor_id: '',
         product_key: '',
-        seats: 1, // This will be mapped to total_seats in backend
-        purchase_cost: '',
-        purchase_date: '',
         expiration_date: '',
-        license_email: '',
-        license_name: '',
-        license_type_id: 'all',
-        vendor_id: 'all',
-        site_id: 'all',
-        notes: '',
     });
 
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
+        const isSub = form.data.license_type === 'subscription';
         const data = {
-            ...form.data,
-            vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
-            site_id: form.data.site_id === 'all' ? null : Number(form.data.site_id),
-            license_type_id: form.data.license_type_id === 'all' ? null : Number(form.data.license_type_id),
-            purchase_cost: form.data.purchase_cost ? Number(form.data.purchase_cost) : null,
-            total_seats: form.data.seats,
-            license_type: 'perpetual',
-            pricing_model: 'one_time',
+            name: form.data.name,
+            product_key: form.data.product_key || null,
+            license_type: isSub ? 'subscription' : 'perpetual',
+            pricing_model: isSub ? 'annual' : 'one_time',
+            total_seats: 1,
+            vendor_id: form.data.vendor_id ? Number(form.data.vendor_id) : null,
+            expiration_date: form.data.expiration_date || null,
             auto_renew: false,
             notification_days: 30,
         };
@@ -97,10 +111,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             onSuccess: () => {
                 setIsCreateOpen(false);
                 form.reset();
-                toast.success('Software license added successfully');
+                setCreateKeyVisible(false);
+                toast.success('License added successfully');
             },
             onError: (err) => {
-                toast.error('Failed to create license. Check the form for details.');
+                toast.error(Object.values(err).join(', ') || 'Failed to create license.');
             }
         });
     };
@@ -455,7 +470,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             setIsCreateOpen(true);
                         }}
                     >
-                        <Plus className="mr-2 h-4 w-4" /> Add Software License
+                        <Plus className="mr-2 h-4 w-4" /> Create License
                     </Button>
                 </div>
             </div>
@@ -632,180 +647,164 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 )}
             </div>
 
-            {/* Create License Modal */}
-            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* ── Create License Modal ── */}
+            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); }}}>
+                <DialogContent className="sm:max-w-lg">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
-                            <DialogTitle>Add Software License</DialogTitle>
+                            <DialogTitle>Create License</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">Software / License Name *</label>
-                                    <Input
-                                        required
-                                        placeholder="e.g. Adobe Creative Cloud All Apps"
-                                        value={form.data.name}
-                                        onChange={(e) => form.setData('name', e.target.value)}
-                                    />
-                                    {form.errors.name && <div className="text-xs text-rose-600">{form.errors.name}</div>}
-                                </div>
+                        <div className="space-y-5 py-4">
+                            {/* License Name */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">License Name *</label>
+                                <Input
+                                    required
+                                    placeholder="e.g. Microsoft 365 Business"
+                                    value={form.data.name}
+                                    onChange={(e) => form.setData('name', e.target.value)}
+                                />
+                                {form.errors.name && <p className="text-xs text-rose-600">{form.errors.name}</p>}
+                            </div>
 
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">Product Activation Key</label>
-                                    <Textarea
-                                        placeholder="e.g. AAAA-BBBB-CCCC-DDDD-EEEE"
-                                        value={form.data.product_key}
+                            {/* Vendor (searchable combobox + inline create) */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Vendor</label>
+                                <Popover open={vendorOpen} onOpenChange={setVendorOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            aria-expanded={vendorOpen}
+                                            className="w-full justify-between font-normal"
+                                        >
+                                            {form.data.vendor_id
+                                                ? vendors.find((v: any) => String(v.id) === form.data.vendor_id)?.name
+                                                : 'Select vendor…'}
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                                        <Command>
+                                            <CommandInput
+                                                placeholder="Search vendor…"
+                                                value={vendorSearch}
+                                                onValueChange={setVendorSearch}
+                                            />
+                                            <CommandList>
+                                                <CommandEmpty>
+                                                    <button
+                                                        type="button"
+                                                        className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-primary hover:bg-accent"
+                                                        onClick={async () => {
+                                                            const name = vendorSearch.trim();
+                                                            if (!name) return;
+                                                            try {
+                                                                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                                                                const res = await fetch('/api/quick/vendors', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                                                                    body: JSON.stringify({ name }),
+                                                                });
+                                                                if (!res.ok) throw new Error('Failed to create vendor');
+                                                                const vendor = await res.json();
+                                                                form.setData('vendor_id', String(vendor.id));
+                                                                setVendorOpen(false);
+                                                                setVendorSearch('');
+                                                                toast.success(`Vendor "${name}" created.`);
+                                                            } catch {
+                                                                toast.error('Failed to create vendor.');
+                                                            }
+                                                        }}
+                                                    >
+                                                        <PlusCircle className="h-4 w-4" />
+                                                        Create vendor "<span className="font-medium">{vendorSearch}</span>"
+                                                    </button>
+                                                </CommandEmpty>
+                                                <CommandGroup>
+                                                    {vendors.map((v: any) => (
+                                                        <CommandItem
+                                                            key={v.id}
+                                                            value={v.name}
+                                                            onSelect={() => {
+                                                                form.setData('vendor_id', String(v.id));
+                                                                setVendorOpen(false);
+                                                                setVendorSearch('');
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    'mr-2 h-4 w-4',
+                                                                    form.data.vendor_id === String(v.id) ? 'opacity-100' : 'opacity-0'
+                                                                )}
+                                                            />
+                                                            {v.name}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+
+                            {/* License Type (subscription / perpetual) */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Type *</label>
+                                <Select
+                                    value={form.data.license_type}
+                                    onValueChange={(v) => form.setData('license_type', v)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="perpetual">Perpetual</SelectItem>
+                                        <SelectItem value="subscription">Subscription</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Product Key (hidden by default, toggle) */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Product Key</label>
+                                <div className="relative">
+                                    <Input
+                                        type={createKeyVisible ? 'text' : 'password'}
+                                        placeholder="AAAAA-BBBBB-CCCCC-DDDDD-EEEEE"
+                                        value={form.data.product_key ?? ''}
                                         onChange={(e) => form.setData('product_key', e.target.value)}
-                                        rows={2}
-                                        className="font-mono text-sm"
+                                        className="pr-9 font-mono text-sm"
                                     />
-                                    {form.errors.product_key && <div className="text-xs text-rose-600">{form.errors.product_key}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Total Seats *</label>
-                                    <Input
-                                        required
-                                        type="number"
-                                        min="1"
-                                        max="500"
-                                        value={form.data.seats}
-                                        onChange={(e) => form.setData('seats', parseInt(e.target.value) || 1)}
-                                    />
-                                    {form.errors.seats && <div className="text-xs text-rose-600">{form.errors.seats}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Purchase Cost</label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="0.00"
-                                        value={form.data.purchase_cost}
-                                        onChange={(e) => form.setData('purchase_cost', e.target.value)}
-                                    />
-                                    {form.errors.purchase_cost && <div className="text-xs text-rose-600">{form.errors.purchase_cost}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Purchase Date</label>
-                                    <Input
-                                        type="date"
-                                        value={form.data.purchase_date}
-                                        onChange={(e) => form.setData('purchase_date', e.target.value)}
-                                    />
-                                    {form.errors.purchase_date && <div className="text-xs text-rose-600">{form.errors.purchase_date}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Expiration Date</label>
-                                    <Input
-                                        type="date"
-                                        value={form.data.expiration_date}
-                                        onChange={(e) => form.setData('expiration_date', e.target.value)}
-                                    />
-                                    {form.errors.expiration_date && <div className="text-xs text-rose-600">{form.errors.expiration_date}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">License To Email</label>
-                                    <Input
-                                        type="email"
-                                        placeholder="e.g. billing@company.com"
-                                        value={form.data.license_email}
-                                        onChange={(e) => form.setData('license_email', e.target.value)}
-                                    />
-                                    {form.errors.license_email && <div className="text-xs text-rose-600">{form.errors.license_email}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Licensed To Name</label>
-                                    <Input
-                                        placeholder="e.g. DCA Department"
-                                        value={form.data.license_name}
-                                        onChange={(e) => form.setData('license_name', e.target.value)}
-                                    />
-                                    {form.errors.license_name && <div className="text-xs text-rose-600">{form.errors.license_name}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">License Type</label>
-                                    <Select
-                                        value={form.data.license_type_id}
-                                        onValueChange={(v) => form.setData('license_type_id', v)}
+                                    <button
+                                        type="button"
+                                        onClick={() => setCreateKeyVisible(!createKeyVisible)}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select License Type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">No License Type</SelectItem>
-                                            {licenseTypes.map((lt: any) => (
-                                                <SelectItem key={lt.id} value={String(lt.id)}>{lt.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        {createKeyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
                                 </div>
+                                <p className="text-xs text-muted-foreground">Key is hidden by default. Toggle to reveal.</p>
+                            </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Vendor</label>
-                                    <Select
-                                        value={form.data.vendor_id}
-                                        onValueChange={(v) => form.setData('vendor_id', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Vendor" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">No Vendor</SelectItem>
-                                            {vendors.map((v: any) => (
-                                                <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Site Scope</label>
-                                    <Select
-                                        value={form.data.site_id}
-                                        onValueChange={(v) => form.setData('site_id', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Site" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Global (All Sites)</SelectItem>
-                                            {sites.map((s: any) => (
-                                                <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">Notes</label>
-                                    <Textarea
-                                        placeholder="Any additional procurement details or usage conditions..."
-                                        value={form.data.notes}
-                                        onChange={(e) => form.setData('notes', e.target.value)}
-                                        rows={3}
-                                    />
-                                </div>
+                            {/* Expiry Date */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Expiry Date</label>
+                                <Input
+                                    type="date"
+                                    value={form.data.expiration_date ?? ''}
+                                    onChange={(e) => form.setData('expiration_date', e.target.value)}
+                                />
+                                {form.errors.expiration_date && <p className="text-xs text-rose-600">{form.errors.expiration_date}</p>}
                             </div>
                         </div>
+
                         <DialogFooter>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={() => setIsCreateOpen(false)}
-                            >
+                            <Button variant="outline" type="button" onClick={() => { setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false); }}>
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={form.processing}>
-                                Save License
+                                {form.processing ? 'Creating…' : 'Create License'}
                             </Button>
                         </DialogFooter>
                     </form>

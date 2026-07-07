@@ -1,6 +1,45 @@
-import { Head } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
+import {
+    Plus,
+    Check,
+    ChevronsUpDown,
+    PlusCircle,
+    Eye,
+    EyeOff,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 type SimpleLicensesProps = {
     licenses: any[];
@@ -20,6 +59,45 @@ export default function SimpleLicensesIndex({
     error = '',
 }: SimpleLicensesProps) {
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'expiring' | 'expired' | 'inuse'>('all');
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [createKeyVisible, setCreateKeyVisible] = useState(false);
+    const [vendorOpen, setVendorOpen] = useState(false);
+    const [vendorSearch, setVendorSearch] = useState('');
+
+    const form = useForm({
+        name: '',
+        license_type: 'perpetual',
+        vendor_id: '',
+        product_key: '',
+        expiration_date: '',
+    });
+
+    const handleCreate = (e: React.FormEvent) => {
+        e.preventDefault();
+        const isSub = form.data.license_type === 'subscription';
+        const data = {
+            name: form.data.name,
+            product_key: form.data.product_key || null,
+            license_type: isSub ? 'subscription' : 'perpetual',
+            pricing_model: isSub ? 'annual' : 'one_time',
+            total_seats: 1,
+            vendor_id: form.data.vendor_id ? Number(form.data.vendor_id) : null,
+            expiration_date: form.data.expiration_date || null,
+            auto_renew: false,
+            notification_days: 30,
+        };
+        router.post('/licenses', data, {
+            onSuccess: () => {
+                setIsCreateOpen(false);
+                form.reset();
+                setCreateKeyVisible(false);
+                toast.success('License added successfully');
+            },
+            onError: (err) => {
+                toast.error(Object.values(err).join(', ') || 'Failed to create license.');
+            }
+        });
+    };
 
     // Calculate metrics
     const totalLicenses = licenses.length;
@@ -89,8 +167,10 @@ export default function SimpleLicensesIndex({
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Software Licenses</h1>
-                  
                 </div>
+                <Button onClick={() => setIsCreateOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" /> Create License
+                </Button>
             </div>
 
             
@@ -238,6 +318,98 @@ export default function SimpleLicensesIndex({
                     )}
                 </div>
             </div>
+
+            {/* ── Create License Modal ── */}
+            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); }}}>
+                <DialogContent className="sm:max-w-lg">
+                    <form onSubmit={handleCreate}>
+                        <DialogHeader>
+                            <DialogTitle>Create License</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-5 py-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">License Name *</label>
+                                <Input required placeholder="e.g. Microsoft 365 Business" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
+                                {form.errors.name && <p className="text-xs text-rose-600">{form.errors.name}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Vendor</label>
+                                <Popover open={vendorOpen} onOpenChange={setVendorOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" role="combobox" aria-expanded={vendorOpen} className="w-full justify-between font-normal">
+                                            {form.data.vendor_id ? vendors.find((v: any) => String(v.id) === form.data.vendor_id)?.name : 'Select vendor…'}
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search vendor…" value={vendorSearch} onValueChange={setVendorSearch} />
+                                            <CommandList>
+                                                <CommandEmpty>
+                                                    <button type="button" className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-primary hover:bg-accent"
+                                                        onClick={async () => {
+                                                            const name = vendorSearch.trim();
+                                                            if (!name) return;
+                                                            try {
+                                                                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                                                                const res = await fetch('/api/quick/vendors', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token }, body: JSON.stringify({ name }) });
+                                                                if (!res.ok) throw new Error();
+                                                                const vendor = await res.json();
+                                                                form.setData('vendor_id', String(vendor.id));
+                                                                setVendorOpen(false);
+                                                                setVendorSearch('');
+                                                                toast.success(`Vendor "${name}" created.`);
+                                                            } catch { toast.error('Failed to create vendor.'); }
+                                                        }}
+                                                    >
+                                                        <PlusCircle className="h-4 w-4" /> Create vendor "<span className="font-medium">{vendorSearch}</span>"
+                                                    </button>
+                                                </CommandEmpty>
+                                                <CommandGroup>
+                                                    {vendors.map((v: any) => (
+                                                        <CommandItem key={v.id} value={v.name} onSelect={() => { form.setData('vendor_id', String(v.id)); setVendorOpen(false); setVendorSearch(''); }}>
+                                                            <Check className={cn('mr-2 h-4 w-4', form.data.vendor_id === String(v.id) ? 'opacity-100' : 'opacity-0')} />
+                                                            {v.name}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Type *</label>
+                                <Select value={form.data.license_type} onValueChange={(v) => form.setData('license_type', v)}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="perpetual">Perpetual</SelectItem>
+                                        <SelectItem value="subscription">Subscription</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Product Key</label>
+                                <div className="relative">
+                                    <Input type={createKeyVisible ? 'text' : 'password'} placeholder="AAAAA-BBBBB-CCCCC-DDDDD-EEEEE" value={form.data.product_key ?? ''} onChange={(e) => form.setData('product_key', e.target.value)} className="pr-9 font-mono text-sm" />
+                                    <button type="button" onClick={() => setCreateKeyVisible(!createKeyVisible)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                        {createKeyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">Key is hidden by default. Toggle to reveal.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Expiry Date</label>
+                                <Input type="date" value={form.data.expiration_date ?? ''} onChange={(e) => form.setData('expiration_date', e.target.value)} />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" type="button" onClick={() => { setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false); }}>Cancel</Button>
+                            <Button type="submit" disabled={form.processing}>{form.processing ? 'Creating…' : 'Create License'}</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
