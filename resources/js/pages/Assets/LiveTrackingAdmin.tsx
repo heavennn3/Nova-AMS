@@ -155,7 +155,6 @@ export default function LiveTrackingAdmin({
 
     // Calculate overdue stats
     const overdueAssignments = allAssignments.filter(a => a.is_overdue);
-    const totalOverdue = overdueAssignments.length;
 
     // Handle filter changes
     const handleFilterChange = (siteId: string) => {
@@ -420,7 +419,7 @@ export default function LiveTrackingAdmin({
                 <div>
                     <h1 className="flex items-center text-3xl font-bold tracking-tight text-foreground">
                         <Activity className="mr-3 h-8 w-8 text-primary" />
-                        Asset Withdrawal
+                        Asset Track
                     </h1>
 
                 </div>
@@ -439,117 +438,49 @@ export default function LiveTrackingAdmin({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                <Card className="border-l-4 border-l-blue-500">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
-                                <p className="text-3xl font-bold">{stats.total_assets}</p>
-                            </div>
-                            <Package className="h-5 w-5 text-blue-500" />
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-amber-500/10 p-3">
+                        <Activity className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">In Use</p>
+                        <p className="text-2xl font-bold">{stats.in_use}</p>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-amber-500">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">In Use</p>
-                                <p className="text-3xl font-bold text-amber-600">{stats.in_use}</p>
-                            </div>
-                            <Activity className="h-5 w-5 text-amber-500" />
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-green-500/10 p-3">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Returned</p>
+                        <p className="text-2xl font-bold">{stats.total_returned}</p>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-green-500">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">Available</p>
-                                <p className="text-3xl font-bold text-green-600">{stats.available}</p>
-                            </div>
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-purple-500/10 p-3">
+                        <Calendar className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Returned Today</p>
+                        <p className="text-2xl font-bold">{stats.returned_today}</p>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-purple-500">
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">Returned Today</p>
-                                <p className="text-3xl font-bold text-purple-600">{stats.returned_today}</p>
-                            </div>
-                            <Calendar className="h-5 w-5 text-purple-500" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className={`border-l-4 ${totalOverdue > 0 ? 'border-l-red-500' : 'border-l-gray-500'}`}>
-                    <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium text-muted-foreground">Overdue</p>
-                                <p className={`text-3xl font-bold ${totalOverdue > 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                                    {totalOverdue}
-                                </p>
-                            </div>
-                            <AlertTriangle className={`h-5 w-5 ${totalOverdue > 0 ? 'text-red-500' : 'text-gray-500'}`} />
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className={`rounded-full p-3 ${stats.overdue > 0 ? 'bg-red-500/10' : 'bg-gray-100'}`}>
+                        <AlertTriangle className={`h-6 w-6 ${stats.overdue > 0 ? 'text-red-600' : 'text-gray-400'}`} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Overdue</p>
+                        <p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600' : 'text-gray-500'}`}>{stats.overdue}</p>
+                    </div>
+                </div>
             </div>
 
-            {/* Filters and Bulk Actions */}
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">Filter:</span>
-                                <Select value={localSiteFilter} onValueChange={handleFilterChange}>
-                                    <SelectTrigger className="w-[200px]">
-                                        <SelectValue placeholder="All Sites" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Sites</SelectItem>
-                                        {sites.map((site) => (
-                                            <SelectItem key={site.id} value={site.id.toString()}>
-                                                {site.name} ({site.code})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="relative">
-                                <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search assets, users..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 w-[250px]"
-                                />
-                            </div>
-                        </div>
 
-                        {selectedAssignments.length > 0 && (
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">
-                                    {selectedAssignments.length} selected
-                                </span>
-                                <Button onClick={() => setIsReminderDialogOpen(true)} size="sm">
-                                    <Send className="mr-2 h-4 w-4" />
-                                    Send Reminders
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
 
             {/* Data Table */}
             <Card>

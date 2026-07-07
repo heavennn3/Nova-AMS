@@ -92,12 +92,13 @@ class AssetTrackingController extends Controller
         $sites = \App\Models\Site::select('id', 'name')->orderBy('name')->get();
 
         $stats = [
-            'total_assets'    => Asset::count(),
-            'in_use'          => AssetAssignment::active()->count(),
-            'available'       => Asset::where('status', 'available')->count(),
-            'returned_today'  => AssetAssignment::whereDate('returned_at', today())
+            'in_use'            => AssetAssignment::active()->count(),
+            'total_returned'    => AssetAssignment::where('status', 'returned')->count(),
+            'returned_today'    => AssetAssignment::whereDate('returned_at', today())
                                     ->where('status', 'returned')->count(),
-            'total_history'   => AssetAssignment::where('status', 'returned')->count(),
+            'overdue'           => AssetAssignment::active()
+                                    ->whereDate('assigned_at', '<', today())
+                                    ->count(),
         ];
 
         // Pass first page of history inline
