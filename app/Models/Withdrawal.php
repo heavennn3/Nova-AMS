@@ -12,6 +12,7 @@ class Withdrawal extends Model
     protected $fillable = [
         'asset_id',
         'user_id',
+        'site_id',
         'withdrawal_type',
         'purpose_category',
         'purpose_description',
@@ -79,6 +80,11 @@ class Withdrawal extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class, 'site_id');
     }
 
     /**

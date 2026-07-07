@@ -15,15 +15,28 @@ class AssetLoanController extends Controller
         $user = $request->user();
 
         // Only show current user's loans
-        $loans = AssetLoan::with(['asset', 'site', 'approver'])
+        $loans = AssetLoan::with(['asset.fieldValues', 'site', 'approver'])
             ->where('user_id', $user->id)
             ->latest()
             ->get()
             ->map(function ($loan) {
+                $assetName = 'Unknown';
+                $assetId = 'N/A';
+                
+                if ($loan->asset) {
+                    $assetName = $loan->asset->getField('product_name') 
+                        ?? $loan->asset->getField('asset_name') 
+                        ?? 'Unknown';
+                    $assetId = $loan->asset->getField('asset_id') 
+                        ?? $loan->asset->getField('serial_number') 
+                        ?? 'N/A';
+                }
+
                 return [
                     'id' => $loan->id,
-                    'asset_id' => $loan->asset_id,
-                    'asset_name' => $loan->asset ? $loan->asset->getFields()['product_name'] ?? 'Unknown' : 'Unknown',
+                    'loan_id' => 'LOAN-' . str_pad($loan->id, 6, '0', STR_PAD_LEFT),
+                    'asset_id' => $assetId,
+                    'asset_name' => $assetName,
                     'loan_date' => $loan->loan_date?->format('Y-m-d'),
                     'expected_return_date' => $loan->expected_return_date?->format('Y-m-d'),
                     'condition_status' => $loan->condition_status,

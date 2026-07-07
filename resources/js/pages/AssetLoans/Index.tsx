@@ -41,8 +41,9 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
         const q = search.toLowerCase();
         const matchesSearch =
             !q ||
-            l.asset?.product_name?.toLowerCase().includes(q) ||
-            l.asset?.asset_id?.toLowerCase().includes(q) ||
+            l.asset_name?.toLowerCase().includes(q) ||
+            l.asset_id?.toLowerCase().includes(q) ||
+            l.loan_id?.toLowerCase().includes(q) ||
             l.purpose?.toLowerCase().includes(q);
         const matchesStatus = statusFilter === 'all' || l.status === statusFilter;
         return matchesSearch && matchesStatus;

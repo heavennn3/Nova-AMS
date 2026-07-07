@@ -3,12 +3,35 @@ import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { ArrowLeft, Plus, Package, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
-export default function WithdrawalsIndex({ withdrawals = [] }: { withdrawals: any[] }) {
+export default function WithdrawalsIndex({ withdrawals = [], siteId = null }: { withdrawals: any[]; siteId: string | null }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [siteFilter, setSiteFilter] = useState(siteId || 'all');
+    const [sites, setSites] = useState<{ id: number; name: string }[]>([]);
+
+    // Fetch sites from the Withdrawals data (all unique sites)
+    useEffect(() => {
+        const uniqueSites = Array.from(new Set(withdrawals.map((w: any) => w.site_id)))
+            .filter((id: number | null) => id !== null)
+            .map((id: number) => {
+                const siteWithdrawal = withdrawals.find((w: any) => w.site_id === id);
+                return {
+                    id,
+                    name: siteWithdrawal?.site_name || `Site ${id}`,
+                };
+            });
+        setSites(uniqueSites);
+    }, [withdrawals]);
 
     const filteredWithdrawals = useMemo(() => {
         return withdrawals.filter((w: any) => {
@@ -19,9 +42,11 @@ export default function WithdrawalsIndex({ withdrawals = [] }: { withdrawals: an
 
             const matchesStatus = statusFilter === 'all' || w.status === statusFilter;
 
-            return matchesSearch && matchesStatus;
+            const matchesSite = siteFilter === 'all' || w.site_id === Number(siteFilter);
+
+            return matchesSearch && matchesStatus && matchesSite;
         });
-    }, [withdrawals, search, statusFilter]);
+    }, [withdrawals, search, statusFilter, siteFilter]);
 
     const columns = [
         {
@@ -146,25 +171,42 @@ export default function WithdrawalsIndex({ withdrawals = [] }: { withdrawals: an
             </div>
 
             {/* Filters */}
-            <div className="flex gap-4">
-                <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="flex-1 min-w-[200px]">
                     <Input
                         placeholder="Search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="max-w-sm"
                     />
                 </div>
-                <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 border rounded-md"
-                >
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="returned">Returned</option>
-                    <option value="overdue">Overdue</option>
-                </select>
+                <div className="min-w-[150px]">
+                    <Select value={siteFilter} onValueChange={(val) => setSiteFilter(val)}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Site" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Sites</SelectItem>
+                            {sites.map((site) => (
+                                <SelectItem key={site.id} value={site.id.toString()}>
+                                    {site.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="min-w-[150px]">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="returned">Returned</SelectItem>
+                            <SelectItem value="overdue">Overdue</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             {/* Data Table */}

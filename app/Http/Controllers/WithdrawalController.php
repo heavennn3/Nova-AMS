@@ -9,11 +9,17 @@ use Inertia\Inertia;
 
 class WithdrawalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $withdrawals = Withdrawal::with(['asset', 'user', 'approver'])
-            ->latest()
-            ->get()
+        $siteId = $request->query('site_id');
+        
+        $query = Withdrawal::with(['asset', 'user', 'approver', 'asset.site']);
+        
+        if ($siteId) {
+            $query->where('site_id', $siteId);
+        }
+        
+        $withdrawals = $query->latest()->get()
             ->map(function ($withdrawal) {
                 return [
                     'id' => $withdrawal->id,
@@ -21,6 +27,8 @@ class WithdrawalController extends Controller
                     'asset_id' => $withdrawal->asset?->asset_id ?? 'N/A',
                     'user_name' => $withdrawal->user?->name ?? 'Unknown',
                     'user_email' => $withdrawal->user?->email ?? '',
+                    'site_name' => $withdrawal->asset?->site?->name ?? 'Unknown',
+                    'site_id' => $withdrawal->asset?->site_id ?? null,
                     'withdrawal_type' => $withdrawal->withdrawal_type,
                     'purpose_category' => $withdrawal->purpose_category,
                     'purpose_description' => $withdrawal->purpose_description,
@@ -36,6 +44,7 @@ class WithdrawalController extends Controller
 
         return Inertia::render('Withdrawals/Index', [
             'withdrawals' => $withdrawals,
+            'siteId' => $siteId,
         ]);
     }
 
@@ -96,6 +105,12 @@ class WithdrawalController extends Controller
         // Set user to currently authenticated user
         $validated['user_id'] = auth()->id();
         $validated['status'] = Withdrawal::STATUS_ACTIVE;
+
+        // Get site_id from the selected asset
+        $asset = Asset::find($validated['asset_id']);
+        if ($asset) {
+            $validated['site_id'] = $asset->site_id;
+        }
 
         // Auto-approve for standard withdrawals
         if ($validated['withdrawal_type'] === Withdrawal::TYPE_STANDARD) {
