@@ -209,8 +209,8 @@ class AssetRequestController extends Controller
             if ($loan->asset_id) {
                 $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
                 if ($asset) {
-                    $asset->setField('status', 'Used');
-                    $asset->update(['status' => 'Used']);
+                    $asset->setField('status', 'in_use');
+                    $asset->update(['status' => 'in_use']);
                 }
             }
 
@@ -260,8 +260,8 @@ class AssetRequestController extends Controller
                     'status' => 'active',
                     'remarks' => $assetRequest->reason . ($assetRequest->required_until ? ' | Expected return: ' . $assetRequest->required_until->format('Y-m-d') : ''),
                 ]);
-                $asset->setField('status', 'Used');
-                $asset->update(['status' => 'Used']);
+                $asset->setField('status', 'in_use');
+                $asset->update(['status' => 'in_use']);
             }
         }
 
@@ -282,8 +282,8 @@ class AssetRequestController extends Controller
                     'approved_by' => $request->user()->id,
                     'approved_at' => now(),
                 ]);
-                $asset->setField('status', 'Used');
-                $asset->update(['status' => 'Used']);
+                $asset->setField('status', 'in_use');
+                $asset->update(['status' => 'in_use']);
             }
         }
 

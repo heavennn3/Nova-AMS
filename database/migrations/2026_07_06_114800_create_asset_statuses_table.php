@@ -19,12 +19,11 @@ return new class extends Migration
         // Seed defaults
         $now = now();
         $statuses = [
-            ['name' => 'NOT UPDATED', 'color' => '#6B7280', 'sort_order' => 1],
-            ['name' => 'FAULTY',      'color' => '#EF4444', 'sort_order' => 2],
-            ['name' => 'MOVED',       'color' => '#EAB308', 'sort_order' => 3],
-            ['name' => 'AVAILABLE',   'color' => '#22C55E', 'sort_order' => 4],
-            ['name' => 'USED',        'color' => '#3B82F6', 'sort_order' => 5],
-            ['name' => 'REPAIR',      'color' => '#F97316', 'sort_order' => 6],
+            ['name' => 'not_updated', 'color' => '#14B8A6', 'sort_order' => 1],
+            ['name' => 'faulty',      'color' => '#EF4444', 'sort_order' => 2],
+            ['name' => 'available',   'color' => '#22C55E', 'sort_order' => 4],
+            ['name' => 'in_use',      'color' => '#3B82F6', 'sort_order' => 5],
+            ['name' => 'repair',      'color' => '#F97316', 'sort_order' => 6],
         ];
         DB::table('asset_statuses')->insert(
             array_map(fn($s) => [...$s, 'created_at' => $now, 'updated_at' => $now], $statuses)

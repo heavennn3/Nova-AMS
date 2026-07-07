@@ -102,7 +102,7 @@ export default function AssetInventory({
             filterFn: (row: any, id: string, filterValue: string[]) => filterValue.includes(row.getValue(id)),
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
             cell: ({ row }: any) => {
-                const val = row.getValue('status') ?? 'NOT UPDATED';
+                const val = row.getValue('status') ?? 'not_updated';
                 const color = statusMap[val] || '#6B7280';
                 return (
                     <span

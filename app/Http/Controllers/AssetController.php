@@ -33,7 +33,7 @@ class AssetController extends Controller
             foreach ($configs as $cfg) {
                 $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
             }
-            $row['status'] = $fields['status'] ?? null;
+            $row['status'] = $fields['status'] ?? $asset->status;
             return $row;
         });
 
@@ -78,7 +78,7 @@ class AssetController extends Controller
                 $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
             }
             $row['lokasi'] = $fields['lokasi'] ?? null;
-            $row['status'] = $fields['status'] ?? null;
+            $row['status'] = $fields['status'] ?? $asset->status;
             return $row;
         });
 
@@ -200,7 +200,7 @@ class AssetController extends Controller
             // Set default status if not provided
             if (empty($mapped['status'])) {
                 $defaultS = \App\Models\AssetStatus::orderBy('sort_order')->first();
-                $mapped['status'] = $defaultS ? $defaultS->name : 'NOT UPDATED';
+                $mapped['status'] = $defaultS ? $defaultS->name : 'not_updated';
             }
 
             // Find primary key
@@ -237,6 +237,7 @@ class AssetController extends Controller
         ]);
 
         $asset->setField('status', $validated['status']);
+        $asset->update(['status' => $validated['status']]);
 
         return redirect()->back()->with('success', 'Asset status updated.');
     }

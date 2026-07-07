@@ -228,7 +228,7 @@ export default function AssetIndex({
                 <DataTableColumnHeader column={column} title="Status" />
             ),
             cell: ({ row }: any) => {
-                const val = row.getValue('status') ?? 'NOT UPDATED';
+                const val = row.getValue('status') ?? 'not_updated';
                 const color = statusMap[val] || '#6B7280';
                 if (isAdmin) {
                     return (
