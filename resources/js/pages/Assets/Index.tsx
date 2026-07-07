@@ -191,29 +191,29 @@ export default function AssetIndex({
         const cols: any[] = (configurations || [])
             .filter((cfg: any) => cfg.is_visible)
             .map((cfg: any) => ({
-            accessorKey: cfg.column_key,
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title={titleMap[cfg.id] || cfg.column_title} configId={cfg.id} isAdmin={isAdmin} onTitleChange={handleTitleChange} />
-            ),
-            enableSorting: cfg.is_sortable,
-            cell: ({ row }: any) => {
-                const val = row.getValue(cfg.column_key);
-                if (cfg.is_primary_key) {
-                    return (
-                        <Link
-                            href={`/assets/${row.original.id}`}
-                            className="text-emerald-600 hover:underline font-mono font-medium text-sm"
-                        >
-                            {val}
-                        </Link>
-                    );
-                }
-                if (cfg.data_type === 'number') {
-                    return <div className="text-right font-medium tabular-nums">{val}</div>;
-                }
-                return <span className="text-muted-foreground text-sm font-medium">{val ?? '—'}</span>;
-            },
-        }));
+                accessorKey: cfg.column_key,
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title={titleMap[cfg.id] || cfg.column_title} configId={cfg.id} isAdmin={isAdmin} onTitleChange={handleTitleChange} />
+                ),
+                enableSorting: cfg.is_sortable,
+                cell: ({ row }: any) => {
+                    const val = row.getValue(cfg.column_key);
+                    if (cfg.is_primary_key) {
+                        return (
+                            <Link
+                                href={`/assets/${row.original.id}`}
+                                className="text-emerald-600 hover:underline font-mono font-medium text-sm"
+                            >
+                                {val}
+                            </Link>
+                        );
+                    }
+                    if (cfg.data_type === 'number') {
+                        return <div className="text-right font-medium tabular-nums">{val}</div>;
+                    }
+                    return <span className="text-muted-foreground text-sm font-medium">{val ?? '—'}</span>;
+                },
+            }));
 
         // ── Hardcoded STATUS column (always present) ──
         const statusMap = Object.fromEntries(
@@ -350,7 +350,7 @@ export default function AssetIndex({
                         <Plus className="h-6 w-6 text-blue-500" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Recent Added (30d)</p>
+                        <p className="text-sm text-muted-foreground">Recently Added</p>
                         <p className="text-2xl font-bold">{totalRecentAdded ?? 0}</p>
                     </div>
                 </div>
@@ -477,8 +477,8 @@ export default function AssetIndex({
                             <div
                                 key={h}
                                 className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${primaryKeyHeader === h
-                                        ? 'border-primary bg-primary/5'
-                                        : 'border-border hover:bg-accent/50'
+                                    ? 'border-primary bg-primary/5'
+                                    : 'border-border hover:bg-accent/50'
                                     }`}
                                 onClick={() => setPrimaryKeyHeader(h)}
                             >
