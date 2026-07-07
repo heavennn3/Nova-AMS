@@ -65,7 +65,9 @@ export default function AssetInventory({
     };
 
     const columns = useMemo(() => {
-        const cols: any[] = (configurations || []).map((cfg: any) => ({
+        const cols: any[] = (configurations || [])
+            .filter((cfg: any) => cfg.is_visible)
+            .map((cfg: any) => ({
             accessorKey: cfg.column_key,
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title={cfg.column_title} />

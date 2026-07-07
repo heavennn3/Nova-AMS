@@ -188,7 +188,9 @@ export default function AssetIndex({
 
     // ── Columns ──
     const columns = useMemo(() => {
-        const cols: any[] = (configurations || []).map((cfg: any) => ({
+        const cols: any[] = (configurations || [])
+            .filter((cfg: any) => cfg.is_visible)
+            .map((cfg: any) => ({
             accessorKey: cfg.column_key,
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title={titleMap[cfg.id] || cfg.column_title} configId={cfg.id} isAdmin={isAdmin} onTitleChange={handleTitleChange} />
