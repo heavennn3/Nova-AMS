@@ -91,8 +91,14 @@ class RecycleBinController extends Controller
             return $data;
         })->values()->toArray();
 
+        $stats = [];
+        foreach ($this->models as $key => $modelClass) {
+            $stats[$key] = $modelClass::onlyTrashed()->count();
+        }
+
         return Inertia::render('Security/RecycleBin', [
             'items' => $items,
+            'stats' => $stats,
             'filters' => [
                 'type' => $type,
                 'search' => $request->search ?? ''

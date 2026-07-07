@@ -7,30 +7,43 @@ import {
     CardTitle,
     CardDescription,
 } from '@/components/ui/card';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { RefreshCcw, Trash2, Search } from 'lucide-react';
+import { RefreshCcw, Trash2, Search, Users, Building2, Package, Wrench, FolderOpen, Columns3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface RecycleBinProps {
     items: any[];
+    stats: Record<string, number>;
     filters: {
         type: string;
         search: string;
     };
 }
 
-export default function RecycleBin({ items, filters }: RecycleBinProps) {
+const typeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+    users:               { label: 'Users',        icon: Users,       color: 'blue' },
+    vendors:             { label: 'Vendors',      icon: Building2,   color: 'emerald' },
+    assets:              { label: 'Assets',       icon: Package,     color: 'purple' },
+    spareparts:          { label: 'Spareparts',   icon: Wrench,      color: 'orange' },
+    asset_categories:    { label: 'Categories',   icon: FolderOpen,  color: 'cyan' },
+    table_configurations:{ label: 'Table Configs',icon: Columns3,    color: 'rose' },
+};
+
+const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
+    blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-600',    ring: 'ring-blue-500' },
+    emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-600', ring: 'ring-emerald-500' },
+    purple:  { bg: 'bg-purple-500/10',  text: 'text-purple-600',  ring: 'ring-purple-500' },
+    orange:  { bg: 'bg-orange-500/10',  text: 'text-orange-600',  ring: 'ring-orange-500' },
+    cyan:    { bg: 'bg-cyan-500/10',    text: 'text-cyan-600',    ring: 'ring-cyan-500' },
+    rose:    { bg: 'bg-rose-500/10',    text: 'text-rose-600',    ring: 'ring-rose-500' },
+};
+
+export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
     const [type, setType] = useState(filters.type || 'users');
     const [search, setSearch] = useState(filters.search || '');
 
@@ -66,7 +79,6 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
         }
     };
 
-    // Search functionality
     const handleSearch = () => {
         router.get(
             '/security/recycle-bin',
@@ -81,7 +93,6 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
         }
     };
 
-    // Batch restore functionality
     const handleBatchRestore = (selectedRows: any[]) => {
         if (!type) return;
         const ids = selectedRows.map((r) => r.id).filter(Boolean);
@@ -114,7 +125,6 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
         );
     };
 
-    // Batch delete functionality
     const handleBatchDelete = (selectedRows: any[]) => {
         if (!type) return;
         const ids = selectedRows.map((r) => r.id).filter(Boolean);
@@ -148,22 +158,7 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
     };
 
     const getTypeLabel = (t: string) => {
-        switch (t) {
-            case 'users':
-                return 'Users';
-            case 'vendors':
-                return 'Vendors';
-            case 'assets':
-                return 'Assets';
-            case 'asset_categories':
-                return 'Asset Categories';
-            case 'spareparts':
-                return 'Spareparts';
-            case 'table_configurations':
-                return 'Table Columns';
-            default:
-                return 'Items';
-        }
+        return typeConfig[t]?.label ?? 'Items';
     };
 
     const columns = React.useMemo(
@@ -251,8 +246,38 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                     <h1 className="text-3xl font-bold tracking-tight">
                         Recycle Bin
                     </h1>
-                  
                 </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {Object.entries(typeConfig).map(([key, cfg]) => {
+                    const colors = colorMap[cfg.color];
+                    const Icon = cfg.icon;
+                    const isActive = type === key;
+                    const count = stats?.[key] ?? 0;
+                    return (
+                        <button
+                            key={key}
+                            onClick={() => handleFilterChange(key)}
+                            className={cn(
+                                'flex items-center space-x-4 rounded-lg border bg-card p-4 text-left shadow-sm transition-all hover:shadow-md',
+                                isActive && 'ring-2 ring-offset-2',
+                                isActive && colors.ring,
+                            )}
+                        >
+                            <div className={cn('rounded-full p-3', colors.bg)}>
+                                <Icon className={cn('h-6 w-6', colors.text)} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">{cfg.label}</p>
+                                <p className={cn('text-2xl font-bold', colors.text)}>
+                                    {count}
+                                </p>
+                            </div>
+                        </button>
+                    );
+                })}
             </div>
 
             <Card>
@@ -266,34 +291,6 @@ export default function RecycleBin({ items, filters }: RecycleBinProps) {
                 <CardContent>
                     <div className="mb-6 flex flex-col gap-4 sm:flex-row">
                         <div className="flex items-center gap-4">
-                            <div className="w-[200px]">
-                                <Select
-                                    value={type}
-                                    onValueChange={handleFilterChange}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Filter by type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="users">Users</SelectItem>
-                                        <SelectItem value="vendors">
-                                            Vendors
-                                        </SelectItem>
-                                        <SelectItem value="assets">
-                                            Assets
-                                        </SelectItem>
-                                        <SelectItem value="asset_categories">
-                                            Asset Categories
-                                        </SelectItem>
-                                        <SelectItem value="spareparts">
-                                            Spareparts
-                                        </SelectItem>
-                                        <SelectItem value="table_configurations">
-                                            Table Columns
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                             <div className="relative flex-1">
                                 <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                                 <Input
