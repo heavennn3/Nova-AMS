@@ -12,65 +12,95 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Send, Package, Search, MapPin, Calendar } from 'lucide-react';
+import { ArrowLeft, Send, Package, Search, MapPin, Calendar, CheckSquare, Square } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
+import {
+    Command,
+    CommandEmpty,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 
 export default function AssetLoansCreate({
-    assetTypes = [],
     assets = [],
     sites = [],
     isAdmin = false,
     userSiteId = null,
+    columns = [],
 }: {
-    assetTypes: any[];
     assets: any[];
     sites: any[];
     isAdmin: boolean;
     userSiteId: number | null;
+    columns: string[];
 }) {
     const { data, setData, processing, errors } = useForm({
-        asset_id: '',
+        asset_ids: [] as number[],
         site_id: '',
-        loan_date: '',
+        loan_date: new Date().toISOString().split('T')[0],
         expected_return_date: '',
         condition_status: 'good',
         purpose: '',
         notes: '',
     });
 
-    const [selectedAssetTypeId, setSelectedAssetTypeId] = useState('');
     const [assetSearch, setAssetSearch] = useState('');
+    const [comboOpen, setComboOpen] = useState(false);
+    const [page, setPage] = useState(0);
+    const PER_PAGE = 5;
 
     // Admin can pick a site; non-admin fixed to their site
     const [selectedSiteId, setSelectedSiteId] = useState(isAdmin ? '' : String(userSiteId ?? ''));
 
-    // Sync selectedSiteId to form data
+    // Sync selectedSiteId to form
     React.useEffect(() => {
         if (selectedSiteId) setData('site_id', selectedSiteId);
     }, [selectedSiteId]);
 
-    // Filter assets by selected site
-    const siteFilteredAssets = useMemo(() => {
+    // Filter by site + search
+    const filteredAssets = useMemo(() => {
         let list = assets;
         if (selectedSiteId) {
             list = list.filter((a: any) => a.site_id?.toString() === selectedSiteId);
         }
-        return list;
-    }, [assets, selectedSiteId]);
-
-    // Further filter by asset type and search
-    const filteredAssets = useMemo(() => {
-        let list = siteFilteredAssets;
-        if (selectedAssetTypeId) {
-            list = list.filter((a: any) => a.type_id?.toString() === selectedAssetTypeId);
-        }
         if (assetSearch) {
             const q = assetSearch.toLowerCase();
-            list = list.filter((a: any) => a.label?.toLowerCase().includes(q));
+            list = list.filter((a: any) =>
+                Object.values(a.fields).some((v: any) =>
+                    String(v ?? '').toLowerCase().includes(q)
+                )
+            );
         }
         return list;
-    }, [siteFilteredAssets, selectedAssetTypeId, assetSearch]);
+    }, [assets, selectedSiteId, assetSearch]);
+
+    // Paginate
+    const pageCount = Math.max(1, Math.ceil(filteredAssets.length / PER_PAGE));
+    const paginatedAssets = filteredAssets.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+
+    // Reset page when filters change
+    React.useEffect(() => { setPage(0); }, [selectedSiteId, assetSearch]);
+
+    const toggleAsset = (id: number) => {
+        setData('asset_ids',
+            data.asset_ids.includes(id)
+                ? data.asset_ids.filter(a => a !== id)
+                : [...data.asset_ids, id]
+        );
+    };
+
+    // Columns to display (limit to ~4-5 meaningful ones)
+    const displayColumns = useMemo(() => {
+        const priority = ['aset_id', 'jenis_aset', 'kategori_aset', 'lokasi', 'vendor', 'kuantiti'];
+        return priority.filter(c => columns.includes(c)).slice(0, 5);
+    }, [columns]);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -86,7 +116,7 @@ export default function AssetLoansCreate({
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">New Asset Loan</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Request to borrow or check out an asset.
+                            Select assets to loan out.
                         </p>
                     </div>
                     <Button variant="outline" onClick={() => window.history.back()}>
@@ -112,8 +142,7 @@ export default function AssetLoansCreate({
                                         value={selectedSiteId}
                                         onValueChange={(val) => {
                                             setSelectedSiteId(val);
-                                            setData('asset_id', '');
-                                            setSelectedAssetTypeId('');
+                                            setData('asset_ids', []);
                                         }}
                                     >
                                         <SelectTrigger>
@@ -135,13 +164,18 @@ export default function AssetLoansCreate({
                         </div>
                     </div>
 
-                    {/* Step 2: Select Asset */}
+                    {/* Step 2: Pick Assets (table + search combo) */}
                     <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
                         <div className="bg-muted/30 border-b px-6 py-4 flex items-center gap-2">
                             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">Step 2</Badge>
                             <h2 className="text-lg font-semibold">
                                 <Package className="inline h-4 w-4 mr-1.5" />
-                                Select Asset
+                                Pick Assets
+                                {data.asset_ids.length > 0 && (
+                                    <span className="ml-2 text-sm font-normal text-muted-foreground">
+                                        ({data.asset_ids.length} selected)
+                                    </span>
+                                )}
                             </h2>
                         </div>
                         <div className="p-6 space-y-4">
@@ -151,71 +185,141 @@ export default function AssetLoansCreate({
                                 </div>
                             ) : (
                                 <>
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-semibold">Asset Type <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={selectedAssetTypeId}
-                                            onValueChange={(val) => {
-                                                setSelectedAssetTypeId(val);
-                                                setData('asset_id', '');
-                                            }}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Choose asset type..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {assetTypes.map((t: any) => (
-                                                    <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                    {/* Search + Combo */}
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Search assets..."
+                                                className="pl-8"
+                                                value={assetSearch}
+                                                onChange={(e) => setAssetSearch(e.target.value)}
+                                            />
+                                        </div>
+                                        <Popover open={comboOpen} onOpenChange={setComboOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="gap-2 whitespace-nowrap">
+                                                    <Search className="h-4 w-4" />
+                                                    Quick Pick
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[300px] p-0" align="end">
+                                                <Command>
+                                                    <CommandInput placeholder="Search & pick..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>No assets found.</CommandEmpty>
+                                                        {filteredAssets.map((asset: any) => (
+                                                            <CommandItem
+                                                                key={asset.id}
+                                                                onSelect={() => toggleAsset(asset.id)}
+                                                            >
+                                                                <div className="flex items-center gap-2 w-full">
+                                                                    {data.asset_ids.includes(asset.id) ? (
+                                                                        <CheckSquare className="h-4 w-4 text-primary shrink-0" />
+                                                                    ) : (
+                                                                        <Square className="h-4 w-4 shrink-0" />
+                                                                    )}
+                                                                    <span className="truncate">
+                                                                        {asset.fields.aset_id || asset.fields.jenis_aset || `Asset #${asset.id}`}
+                                                                    </span>
+                                                                </div>
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
 
-                                    {selectedAssetTypeId && (
-                                        <>
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold">
-                                                    Available Assets
-                                                    <span className="text-muted-foreground font-normal ml-1">({filteredAssets.length} available)</span>
-                                                </Label>
-                                                <div className="relative">
-                                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                    <Input
-                                                        placeholder="Search assets..."
-                                                        className="pl-8"
-                                                        value={assetSearch}
-                                                        onChange={(e) => setAssetSearch(e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="max-h-[250px] overflow-y-auto border rounded-lg divide-y">
+                                    {/* Table of available assets */}
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <table className="w-full text-sm">
+                                            <thead>
+                                                <tr className="bg-muted/50 border-b">
+                                                    <th className="w-10 p-3 text-left">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="rounded"
+                                                            checked={filteredAssets.length > 0 && filteredAssets.every((a: any) => data.asset_ids.includes(a.id))}
+                                                            onChange={() => {
+                                                                const allIds = filteredAssets.map((a: any) => a.id);
+                                                                const allSelected = allIds.every(id => data.asset_ids.includes(id));
+                                                                setData('asset_ids', allSelected ? data.asset_ids.filter(id => !allIds.includes(id)) : [...data.asset_ids, ...allIds.filter(id => !data.asset_ids.includes(id))]);
+                                                            }}
+                                                        />
+                                                    </th>
+                                                    <th className="p-3 text-left font-medium text-muted-foreground">#</th>
+                                                    {displayColumns.map(col => (
+                                                        <th key={col} className="p-3 text-left font-medium text-muted-foreground capitalize">
+                                                            {col.replace(/_/g, ' ')}
+                                                        </th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y">
                                                 {filteredAssets.length === 0 ? (
-                                                    <div className="p-4 text-center text-sm text-muted-foreground">
-                                                        No available assets for this type.
-                                                    </div>
+                                                    <tr>
+                                                        <td colSpan={displayColumns.length + 2} className="p-6 text-center text-sm text-muted-foreground">
+                                                            No available assets{selectedSiteId ? '' : '.'}
+                                                        </td>
+                                                    </tr>
                                                 ) : (
-                                                    filteredAssets.map((asset: any) => (
-                                                        <button
+                                                    paginatedAssets.map((asset: any, idx: number) => (
+                                                        <tr
                                                             key={asset.id}
-                                                            type="button"
-                                                            onClick={() => setData('asset_id', asset.id.toString())}
-                                                            className={`w-full flex items-center justify-between p-3 text-left text-sm transition-colors ${data.asset_id === asset.id.toString()
-                                                                    ? 'bg-primary/5 border-l-2 border-l-primary'
-                                                                    : 'hover:bg-muted/30'
-                                                                }`}
+                                                            className={`cursor-pointer transition-colors hover:bg-muted/30 ${data.asset_ids.includes(asset.id) ? 'bg-emerald-50 border-l-2 border-l-emerald-500' : ''}`}
+                                                            onClick={() => toggleAsset(asset.id)}
                                                         >
-                                                            <div className="font-medium">{asset.label}</div>
-                                                            <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 text-xs">
-                                                                Available
-                                                            </Badge>
-                                                        </button>
+                                                            <td className="p-3">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="rounded"
+                                                                    checked={data.asset_ids.includes(asset.id)}
+                                                                    onChange={() => toggleAsset(asset.id)}
+                                                                />
+                                                            </td>
+                                                            <td className="p-3 text-muted-foreground font-mono text-xs">{idx + 1}</td>
+                                                            {displayColumns.map(col => (
+                                                                <td key={col} className="p-3">
+                                                                    {asset.fields[col] || <span className="text-muted-foreground/40">—</span>}
+                                                                </td>
+                                                            ))}
+                                                        </tr>
                                                     ))
                                                 )}
+                                            </tbody>
+                                        </table>
+                                        {/* Pagination */}
+                                        {filteredAssets.length > PER_PAGE && (
+                                            <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/20">
+                                                <span className="text-xs text-muted-foreground">
+                                                    Showing {page * PER_PAGE + 1}–{Math.min((page + 1) * PER_PAGE, filteredAssets.length)} of {filteredAssets.length}
+                                                </span>
+                                                <div className="flex gap-1">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        disabled={page === 0}
+                                                        onClick={() => setPage(p => p - 1)}
+                                                    >
+                                                        Prev
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        disabled={page >= pageCount - 1}
+                                                        onClick={() => setPage(p => p + 1)}
+                                                    >
+                                                        Next
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <InputError message={errors.asset_id} />
-                                        </>
-                                    )}
+                                        )}
+                                    </div>
+
+                                    <InputError message={errors.asset_ids} />
                                 </>
                             )}
                         </div>
@@ -272,7 +376,7 @@ export default function AssetLoansCreate({
                             <div className="space-y-2">
                                 <Label className="text-sm font-semibold">Purpose <span className="text-red-500">*</span></Label>
                                 <Textarea
-                                    placeholder="Why do you need this asset?"
+                                    placeholder="Why do you need this asset(s)?"
                                     value={data.purpose}
                                     onChange={(e) => setData('purpose', e.target.value)}
                                     className="min-h-[80px] resize-y"
@@ -297,10 +401,10 @@ export default function AssetLoansCreate({
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={processing || !data.asset_id || !data.site_id}
+                                    disabled={processing || data.asset_ids.length === 0 || !data.site_id}
                                     className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                                 >
-                                    <Send className="mr-2 h-4 w-4" /> Submit Loan Request
+                                    <Send className="mr-2 h-4 w-4" /> Submit Loan ({data.asset_ids.length} asset{data.asset_ids.length !== 1 ? 's' : ''})
                                 </Button>
                             </div>
                         </div>

@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Asset;
-use App\Models\AssetCategory;
 use App\Models\AssetRequest;
 use App\Models\License;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Str;
 
 class AssetRequestController extends Controller
 {
@@ -53,31 +50,15 @@ class AssetRequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'request_type' => 'required|string|in:Borrow,Checkout,Software License,Maintenance Request,Purchase Request,Loan',
+            'request_type' => 'required|string|in:Software License',
             'priority' => 'required|string|in:Normal,High,Urgent',
-            'asset_id' => 'nullable|exists:assets,id',
-            'asset_category_id' => 'nullable|exists:asset_categories,id',
             'license_id' => 'nullable|exists:licenses,id',
-            'required_from' => 'nullable|date',
-            'required_until' => 'nullable|date|after_or_equal:required_from',
             'reason' => 'required|string',
-            // Loan-specific fields
-            'loan_date' => 'nullable|date',
-            'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
-            'condition_status' => 'nullable|in:good,semi_faulty,faulty',
-            'purpose' => 'nullable|string|max:500',
         ]);
 
         $validated['user_id'] = $request->user()->id;
         $validated['request_number'] = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(6));
         $validated['status'] = 'Pending';
-
-        // Handle loan-specific fields
-        if ($validated['request_type'] === 'Loan') {
-            $validated['loan_date'] = $validated['loan_date'] ?? now();
-            $validated['purpose'] = $validated['purpose'] ?? $validated['reason'];
-            $validated['condition_status'] = $validated['condition_status'] ?? 'good';
-        }
 
         AssetRequest::create($validated);
 

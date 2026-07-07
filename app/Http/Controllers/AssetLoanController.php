@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetLoan;
-use App\Models\AssetType;
 use App\Models\Site;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AssetLoanController extends Controller
@@ -60,8 +58,6 @@ class AssetLoanController extends Controller
         $isAdmin = $user->hasRole('Admin');
         $userSiteId = $user->site_id;
 
-        $assetTypes = AssetType::select('id', 'name')->get();
-
         // Get assets with fieldValues, filter by site_id for non-admin
         $assetsQuery = Asset::withoutGlobalScope('site_access')
             ->with('fieldValues')
@@ -82,27 +78,32 @@ class AssetLoanController extends Controller
                 $fields = $asset->getFields();
                 return [
                     'id' => $asset->id,
-                    'label' => $fields['asset_id'] ?? $fields['product_name'] ?? $fields['asset_name'] ?? "Asset #{$asset->id}",
                     'site_id' => $asset->site_id,
-                    'type_id' => $fields['type_id'] ?? null,
+                    'fields' => $fields,
                 ];
             });
 
         $sites = Site::select('id', 'name')->get();
 
+        // Collect all unique column keys across assets for the table header
+        $allKeys = $assets->reduce(function ($carry, $asset) {
+            return array_unique(array_merge($carry, array_keys($asset['fields'])));
+        }, []);
+
         return Inertia::render('AssetLoans/Create', [
-            'assetTypes' => $assetTypes,
             'assets' => $assets,
             'sites' => $sites,
             'isAdmin' => $isAdmin,
             'userSiteId' => $userSiteId,
+            'columns' => $allKeys,
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'asset_id' => 'required|exists:assets,id',
+            'asset_ids' => 'required|array|min:1',
+            'asset_ids.*' => 'exists:assets,id',
             'site_id' => 'required|exists:sites,id',
             'loan_date' => 'nullable|date',
             'expected_return_date' => 'nullable|date|after_or_equal:loan_date',
@@ -111,14 +112,23 @@ class AssetLoanController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $validated['user_id'] = $request->user()->id;
-        $validated['status'] = 'pending';
-        $validated['loan_date'] = $validated['loan_date'] ?? now()->format('Y-m-d');
-        $validated['condition_status'] = $validated['condition_status'] ?? 'good';
+        $user = $request->user();
 
-        AssetLoan::create($validated);
+        foreach ($validated['asset_ids'] as $assetId) {
+            AssetLoan::create([
+                'asset_id' => $assetId,
+                'user_id' => $user->id,
+                'site_id' => $validated['site_id'],
+                'loan_date' => $validated['loan_date'] ?? now()->format('Y-m-d'),
+                'expected_return_date' => $validated['expected_return_date'] ?? null,
+                'condition_status' => $validated['condition_status'] ?? 'good',
+                'purpose' => $validated['purpose'] ?? '',
+                'notes' => $validated['notes'] ?? '',
+                'status' => 'pending',
+            ]);
+        }
 
         return redirect()->route('asset-loans.index')
-            ->with('success', 'Loan request submitted successfully.');
+            ->with('success', count($validated['asset_ids']) . ' asset loan request(s) submitted and pending approval.');
     }
 }
