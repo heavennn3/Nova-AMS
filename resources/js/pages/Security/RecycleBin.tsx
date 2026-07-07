@@ -26,21 +26,21 @@ interface RecycleBinProps {
 }
 
 const typeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-    users:               { label: 'Users',        icon: Users,       color: 'blue' },
-    vendors:             { label: 'Vendors',      icon: Building2,   color: 'emerald' },
-    assets:              { label: 'Assets',       icon: Package,     color: 'purple' },
-    spareparts:          { label: 'Spareparts',   icon: Wrench,      color: 'orange' },
-    asset_categories:    { label: 'Categories',   icon: FolderOpen,  color: 'cyan' },
-    table_configurations:{ label: 'Table Configs',icon: Columns3,    color: 'rose' },
+    users: { label: 'Users', icon: Users, color: 'blue' },
+    vendors: { label: 'Vendors', icon: Building2, color: 'emerald' },
+    assets: { label: 'Assets', icon: Package, color: 'purple' },
+    spareparts: { label: 'Spareparts', icon: Wrench, color: 'orange' },
+    asset_categories: { label: 'Categories', icon: FolderOpen, color: 'cyan' },
+    table_configurations: { label: 'Table Configs', icon: Columns3, color: 'rose' },
 };
 
 const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
-    blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-600',    ring: 'ring-blue-500' },
+    blue: { bg: 'bg-blue-500/10', text: 'text-blue-600', ring: 'ring-blue-500' },
     emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-600', ring: 'ring-emerald-500' },
-    purple:  { bg: 'bg-purple-500/10',  text: 'text-purple-600',  ring: 'ring-purple-500' },
-    orange:  { bg: 'bg-orange-500/10',  text: 'text-orange-600',  ring: 'ring-orange-500' },
-    cyan:    { bg: 'bg-cyan-500/10',    text: 'text-cyan-600',    ring: 'ring-cyan-500' },
-    rose:    { bg: 'bg-rose-500/10',    text: 'text-rose-600',    ring: 'ring-rose-500' },
+    purple: { bg: 'bg-purple-500/10', text: 'text-purple-600', ring: 'ring-purple-500' },
+    orange: { bg: 'bg-orange-500/10', text: 'text-orange-600', ring: 'ring-orange-500' },
+    cyan: { bg: 'bg-cyan-500/10', text: 'text-cyan-600', ring: 'ring-cyan-500' },
+    rose: { bg: 'bg-rose-500/10', text: 'text-rose-600', ring: 'ring-rose-500' },
 };
 
 export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
@@ -240,11 +240,11 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
 
     return (
         <div className="space-y-6 p-6">
-            <Head title="Recycle Bin" />
+            <Head title="Deleted Item" />
             <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
-                        Recycle Bin
+                        Deleted Item
                     </h1>
                 </div>
             </div>
@@ -283,10 +283,7 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
             <Card>
                 <CardHeader>
                     <CardTitle>Deleted {getTypeLabel(type)}</CardTitle>
-                    <CardDescription>
-                        Review deleted items. Restoring will bring them back,
-                        permanent deletion will erase them forever.
-                    </CardDescription>
+
                 </CardHeader>
                 <CardContent>
                     <div className="mb-6 flex flex-col gap-4 sm:flex-row">

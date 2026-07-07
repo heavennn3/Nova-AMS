@@ -195,31 +195,10 @@ const navSections: NavSection[] = [
             },
             {
                 title: 'Deleted Items',
-                href: '#',
+                href: '/security/recycle-bin',
                 icon: Trash2,
                 module: 'System Settings',
-                items: [
-                    {
-                        title: 'Vendors',
-                        href: '/security/recycle-bin?type=vendors',
-                    },
-                    {
-                        title: 'Spareparts',
-                        href: '/security/recycle-bin?type=spareparts',
-                    },
-                    {
-                        title: 'Users',
-                        href: '/security/recycle-bin?type=users',
-                    },
-                    {
-                        title: 'Assets',
-                        href: '/security/recycle-bin?type=assets',
-                    },
-                    {
-                        title: 'Table Columns',
-                        href: '/security/recycle-bin?type=table_configurations',
-                    },
-                ],
+
             },
 
 
