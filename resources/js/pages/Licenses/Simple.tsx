@@ -89,17 +89,11 @@ export default function SimpleLicensesIndex({
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Software Licenses</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Track software licenses, usage, renewals, and compliance
-                    </p>
+                  
                 </div>
             </div>
 
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded">
-                    <strong>Error:</strong> {error}
-                </div>
-            )}
+            
 
             {/* Clickable Metric Cards - Old Box Style */}
             <div className="grid grid-cols-5 gap-4">
@@ -111,7 +105,7 @@ export default function SimpleLicensesIndex({
                 >
                     <h3 className="font-semibold text-blue-900">Total Licenses</h3>
                     <p className="text-2xl font-bold text-blue-600">{totalLicenses}</p>
-                    <p className="text-xs text-blue-700 mt-1">All licenses</p>
+
                 </div>
 
                 <div 
@@ -122,29 +116,7 @@ export default function SimpleLicensesIndex({
                 >
                     <h3 className="font-semibold text-green-900">Active</h3>
                     <p className="text-2xl font-bold text-green-600">{activeLicenses.length}</p>
-                    <p className="text-xs text-green-700 mt-1">Not expired</p>
-                </div>
 
-                <div 
-                    className={`bg-amber-50 border border-amber-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'expiring' ? 'ring-2 ring-amber-500 shadow-lg' : ''
-                    }`}
-                    onClick={() => setSelectedFilter('expiring')}
-                >
-                    <h3 className="font-semibold text-amber-900">Expiring Soon</h3>
-                    <p className="text-2xl font-bold text-amber-600">{expiringLicenses.length}</p>
-                    <p className="text-xs text-amber-700 mt-1">Next 30 days</p>
-                </div>
-
-                <div 
-                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'expired' ? 'ring-2 ring-red-500 shadow-lg' : ''
-                    }`}
-                    onClick={() => setSelectedFilter('expired')}
-                >
-                    <h3 className="font-semibold text-red-900">Expired </h3>
-                    <p className="text-2xl font-bold text-red-600">{expiredLicenses.length}</p>
-                    <p className="text-xs text-red-700 mt-1">Need renewal</p>
                 </div>
 
                 <div 
@@ -155,8 +127,31 @@ export default function SimpleLicensesIndex({
                 >
                     <h3 className="font-semibold text-purple-900">In Use</h3>
                     <p className="text-2xl font-bold text-purple-600">{inUseLicenses.length}</p>
-                    <p className="text-xs text-purple-700 mt-1">Have assignments</p>
                 </div>
+
+                <div 
+                    className={`bg-amber-50 border border-amber-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                        selectedFilter === 'expiring' ? 'ring-2 ring-amber-500 shadow-lg' : ''
+                    }`}
+                    onClick={() => setSelectedFilter('expiring')}
+                >
+                    <h3 className="font-semibold text-amber-900">Expiring Soon</h3>
+                    <p className="text-2xl font-bold text-amber-600">{expiringLicenses.length}</p>
+
+                </div>
+
+                <div 
+                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                        selectedFilter === 'expired' ? 'ring-2 ring-red-500 shadow-lg' : ''
+                    }`}
+                    onClick={() => setSelectedFilter('expired')}
+                >
+                    <h3 className="font-semibold text-red-900">Expired </h3>
+                    <p className="text-2xl font-bold text-red-600">{expiredLicenses.length}</p>
+
+                </div>
+
+                
             </div>
 
             {/* Filtered License Table */}
@@ -171,9 +166,7 @@ export default function SimpleLicensesIndex({
                              'In Use Licenses'} 
                             ({filteredLicenses.length})
                         </h2>
-                        <p className="text-sm text-muted-foreground">
-                            {selectedFilter !== 'all' && `Filtered from ${totalLicenses} total licenses`}
-                        </p>
+                       
                     </div>
                 </div>
 

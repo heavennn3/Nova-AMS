@@ -117,97 +117,65 @@ export default function Dashboards({ sites = [] }: { sites: any[] }) {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                        Multi-Site Operational Dashboards
+                        Multi-Site Dashboard
                     </h1>
                 </div>
 
             </div>
 
-            {/* Global KPI Summary Grid */}
+            {/* Global KPI Summary Grid - Simple Box Style */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-l-4 border-l-primary bg-card/45 shadow-sm backdrop-blur-sm">
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1.5">
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Operational Sites
-                                </p>
-                                <p className="text-3xl font-extrabold tracking-tight">
-                                    {totalSites}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground font-medium">
-                                    Monitored locations
-                                </p>
-                            </div>
-                            <div className="rounded-full bg-primary/10 p-2.5">
-                                <MapPin className="h-5 w-5 text-primary" />
-                            </div>
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-blue-900">Operational Sites</h3>
+                            <p className="text-2xl font-bold text-blue-600">{totalSites}</p>
+                            <p className="text-xs text-blue-700 mt-1">Monitored locations</p>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="rounded-full bg-blue-100 p-2.5">
+                            <MapPin className="h-5 w-5 text-blue-600" />
+                        </div>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-blue-500 bg-card/45 shadow-sm backdrop-blur-sm">
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1.5">
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Tracked Assets
-                                </p>
-                                <p className="text-3xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">
-                                    {totalAssets}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground font-medium">
-                                    Registered inventory
-                                </p>
-                            </div>
-                            <div className="rounded-full bg-blue-100 p-2.5 dark:bg-blue-950/40">
-                                <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            </div>
+                <div className="bg-green-50 border border-green-200 p-4 rounded shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-green-900">Tracked Assets</h3>
+                            <p className="text-2xl font-bold text-green-600">{totalAssets}</p>
+                            <p className="text-xs text-green-700 mt-1">Registered inventory</p>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="rounded-full bg-green-100 p-2.5">
+                            <Package className="h-5 w-5 text-green-600" />
+                        </div>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-emerald-500 bg-card/45 shadow-sm backdrop-blur-sm">
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1.5">
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Avg SLA Compliance
-                                </p>
-                                <p className="text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">
-                                    {avgSla}%
-                                </p>
-                                <p className="text-[10px] text-muted-foreground font-medium">
-                                    Fleet SLA score
-                                </p>
-                            </div>
-                            <div className="rounded-full bg-emerald-100 p-2.5 dark:bg-emerald-950/40">
-                                <Percent className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
+                <div className="bg-purple-50 border border-purple-200 p-4 rounded shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-purple-900">Avg SLA Compliance</h3>
+                            <p className="text-2xl font-bold text-purple-600">{avgSla}%</p>
+                            <p className="text-xs text-purple-700 mt-1">Fleet SLA score</p>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="rounded-full bg-purple-100 p-2.5">
+                            <Percent className="h-5 w-5 text-purple-600" />
+                        </div>
+                    </div>
+                </div>
 
-                <Card className="border-l-4 border-l-amber-500 bg-card/45 shadow-sm backdrop-blur-sm">
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1.5">
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Active Work Orders
-                                </p>
-                                <p className="text-3xl font-extrabold tracking-tight text-amber-600 dark:text-amber-400">
-                                    {totalWorkOrders}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground font-medium">
-                                    Assigned work orders
-                                </p>
-                            </div>
-                            <div className="rounded-full bg-amber-100 p-2.5 dark:bg-amber-950/40">
-                                <Wrench className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                            </div>
+                <div className="bg-amber-50 border border-amber-200 p-4 rounded shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-amber-900">Active Work Orders</h3>
+                            <p className="text-2xl font-bold text-amber-600">{totalWorkOrders}</p>
+                            <p className="text-xs text-amber-700 mt-1">Assigned work orders</p>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="rounded-full bg-amber-100 p-2.5">
+                            <Wrench className="h-5 w-5 text-amber-600" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Filter & Toolbar Area */}
