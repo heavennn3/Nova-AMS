@@ -228,21 +228,24 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
 
     // Information tab fields definition
     const leftFields = [
-        { label: 'Description', value: getFieldVal(['description', 'keterangan', 'desc']) || '—' },
-        { label: 'Source', value: getFieldVal(['source', 'sumber', 'punca']) || '—' },
-        { label: 'Usage Start Date', value: getFieldVal(['usage_start_date', 'tarikh_mula_guna', 'usage_date']) || '—' },
+        { label: 'Asset Name', value: getFieldVal(['description', 'keterangan', 'desc']) || '—' },
+        { label: 'Asset Type', value: getFieldVal(['source', 'sumber', 'punca']) || '—' },
+        { label: 'Added Date/Time', value: getFieldVal(['usage_start_date', 'tarikh_mula_guna', 'usage_date']) || '—' },
         { label: 'Original Value', value: formatCurrency(getFieldVal(['original_value', 'nilai_asal', 'original_cost'])) },
-        { label: 'Warranty Expiry', value: getFieldVal(['warranty_expiry', 'tamat_waranti', 'warranty_date']) || '—' },
-        { label: 'Insurance Policy #', value: getFieldVal(['insurance_policy_number', 'no_polisi_insurans', 'insurance_policy']) || '—' },
+        { label: 'Asset Tag', value: getFieldVal(['warranty_expiry', 'tamat_waranti', 'warranty_date']) || '—' },
+       
     ];
 
     const rightFields = [
-        { label: 'Notes', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
-        { label: 'Purchase Date', value: getFieldVal(['purchase_date', 'tarikh_beli', 'date_of_purchase']) || '—' },
-        { label: 'Purchase Price', value: formatCurrency(getFieldVal(['purchase_price', 'harga_beli', 'cost'])) },
-        { label: 'Current Value', value: formatCurrency(getFieldVal(['current_value', 'nilai_semasa', 'current_cost'])) },
-        { label: 'Insurance Expiry', value: getFieldVal(['insurance_expiry', 'tamat_insurans', 'insurance_date']) || '—' },
+        { label: 'Description', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+       
+        { label: 'Manufactor / Brand', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+
+        { label: 'Category', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+
         { label: 'Created By', value: creatorName },
+
+
     ];
 
     // Identify custom configuration fields not represented in topCard or matched list
@@ -409,11 +412,11 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                     {/* Metadata details block */}
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800/80 text-sm">
                         <div className="space-y-1">
-                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Department</span>
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Asset ID</span>
                             <span className="font-semibold text-slate-800 dark:text-slate-200">{departmentValue}</span>
                         </div>
                         <div className="space-y-1">
-                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Assigned to</span>
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Status</span>
                             <span className="font-semibold text-slate-800 dark:text-slate-200">{assignedToValue}</span>
                         </div>
                         <div className="space-y-1">
@@ -429,9 +432,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
 
                 {/* Right Card - QR Code (1/3 width) */}
                 <Card className="border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col items-center justify-between print:hidden">
-                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block text-center mt-1">
-                        QR CODE
-                    </span>
+                    
                     <div className="my-4 bg-white p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
                         <img
                             src={qrCodeUrl}
@@ -504,21 +505,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
                             </div>
 
                             {/* Extra custom columns dynamic list */}
-                            {extraFields.length > 0 && (
-                                <div className="col-span-1 md:col-span-2 pt-6 mt-4 border-t border-slate-100 dark:border-slate-800/80">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">
-                                        Additional Specifications
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                                        {extraFields.map((cfg: any) => (
-                                            <div key={cfg.column_key} className="space-y-1 pb-3 border-b border-slate-100/50 dark:border-slate-800/40">
-                                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 block">{cfg.column_title}</span>
-                                                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 block">{fields[cfg.column_key] || '—'}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                         
                         </div>
                     )}
 

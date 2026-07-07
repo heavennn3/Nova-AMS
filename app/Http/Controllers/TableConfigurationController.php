@@ -211,16 +211,7 @@ class TableConfigurationController extends Controller
 
         $tableConfiguration->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Column renamed successfully.',
-                'configuration' => $tableConfiguration->fresh(),
-            ]);
-        }
-
-        return redirect()->route('table-configurations.index', [
-            'tableName' => $tableConfiguration->table_name
-        ])->with('success', 'Column configuration updated successfully.');
+        return redirect()->back()->with('success', 'Column configuration updated successfully.');
     }
 
     /**
