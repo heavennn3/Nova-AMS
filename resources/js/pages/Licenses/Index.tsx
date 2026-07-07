@@ -390,7 +390,16 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const totalAssignedSeats = filteredLicenses.reduce((sum: number, lic: any) => sum + lic.used_seats, 0);
     const totalAvailableSeats = totalSeats - totalAssignedSeats;
 
-    const expiringSoonCount = filteredLicenses.filter((lic: any) => {
+    // Active licenses (not expired)
+    const activeLicenses = filteredLicenses.filter((lic: any) => {
+        if (!lic.expiration_date) return true; // Never expires = active
+        const expiry = new Date(lic.expiration_date);
+        const now = new Date();
+        return expiry.getTime() > now.getTime();
+    }).length;
+
+    // Expiring this month (within 30 days)
+    const expiringThisMonth = filteredLicenses.filter((lic: any) => {
         if (!lic.expiration_date) return false;
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
@@ -398,12 +407,16 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         return diffDays > 0 && diffDays <= 30;
     }).length;
 
-    const expiredCount = filteredLicenses.filter((lic: any) => {
+    // Expired licenses
+    const expiredLicenses = filteredLicenses.filter((lic: any) => {
         if (!lic.expiration_date) return false;
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
         return expiry.getTime() <= now.getTime();
     }).length;
+
+    // In use licenses (has assigned seats)
+    const inUseLicenses = filteredLicenses.filter((lic: any) => lic.used_seats > 0).length;
 
     return (
         <div className="w-full space-y-6 p-8">
@@ -448,86 +461,107 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             </div>
 
             {/* Metrics cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-l-4 border-l-primary shadow-sm bg-card">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <Card className="border-l-4 border-l-blue-500 shadow-sm bg-card">
                     <CardContent className="pt-6">
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Total Licenses (KEYS)
+                                    Total Licenses
                                 </p>
-                                <p className="text-3xl font-bold text-foreground">
+                                <p className="text-3xl font-bold text-blue-600">
                                     {totalLicenses}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    {totalSeats} User per Product Key
+                                    {totalSeats} total seats
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-primary/10 p-3 text-primary">
+                            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3 text-blue-600">
                                 <FileKey className="h-5 w-5" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-blue-500 shadow-sm bg-card">
+                <Card className="border-l-4 border-l-green-500 shadow-sm bg-card">
                     <CardContent className="pt-6">
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    IN USE
+                                    Active Licenses
                                 </p>
-                                <p className="text-3xl font-bold text-blue-600">
-                                    {totalAssignedSeats}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {totalSeats > 0 ? Math.round((totalAssignedSeats / totalSeats) * 100) : 0}% seat utilization
-                                </p>
-                            </div>
-                            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3 text-blue-600">
-                                <Percent className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-emerald-500 shadow-sm bg-card">
-                    <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Available
-                                </p>
-                                <p className="text-3xl font-bold text-emerald-600">
-                                    {totalAvailableSeats}
+                                <p className="text-3xl font-bold text-green-600">
+                                    {activeLicenses}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Free for new assignments
+                                    Not expired
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 p-3 text-emerald-600">
+                            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3 text-green-600">
                                 <CheckCircle className="h-5 w-5" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-rose-500 shadow-sm bg-card">
+                <Card className="border-l-4 border-l-amber-500 shadow-sm bg-card">
                     <CardContent className="pt-6">
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                                    Expiring Alerts
+                                    Expiring This Month
                                 </p>
-                                <p className="text-3xl font-bold text-rose-600">
-                                    {expiredCount + expiringSoonCount}
+                                <p className="text-3xl font-bold text-amber-600">
+                                    {expiringThisMonth}
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-1 text-rose-600 font-semibold">
-                                    {expiredCount} expired · {expiringSoonCount} expiring soon
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Next 30 days
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-rose-50 dark:bg-rose-950/20 p-3 text-rose-600">
+                            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 p-3 text-amber-600">
                                 <AlertCircle className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-red-500 shadow-sm bg-card">
+                    <CardContent className="pt-6">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
+                                    Expired Licenses
+                                </p>
+                                <p className="text-3xl font-bold text-red-600">
+                                    {expiredLicenses}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Need renewal
+                                </p>
+                            </div>
+                            <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 text-red-600">
+                                <AlertCircle className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-purple-500 shadow-sm bg-card">
+                    <CardContent className="pt-6">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="mb-1 text-sm font-medium tracking-wider text-muted-foreground uppercase">
+                                    In Use Licenses
+                                </p>
+                                <p className="text-3xl font-bold text-purple-600">
+                                    {inUseLicenses}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {totalAssignedSeats} seats assigned
+                                </p>
+                            </div>
+                            <div className="rounded-lg bg-purple-50 dark:bg-purple-950/20 p-3 text-purple-600">
+                                <Percent className="h-5 w-5" />
                             </div>
                         </div>
                     </CardContent>

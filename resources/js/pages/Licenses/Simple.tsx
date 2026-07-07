@@ -23,7 +23,7 @@ export default function SimpleLicensesIndex({
 
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Software License Management</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Software Licenses </h1>
                     <p className="text-muted-foreground mt-1">
                         Track software licenses, usage, renewals, and compliance
                     </p>
@@ -80,13 +80,20 @@ export default function SimpleLicensesIndex({
                     <p className="text-2xl font-bold text-blue-600">{licenses.length}</p>
                 </div>
                 <div className="bg-green-50 border border-green-200 p-4 rounded">
-                    <h3 className="font-semibold text-green-900">Total Seats</h3>
+                    <h3 className="font-semibold text-green-900">Current Active</h3>
                     <p className="text-2xl font-bold text-green-600">
                         {licenses.reduce((sum, l) => sum + (l.total_seats || 0), 0)}
                     </p>
                 </div>
                 <div className="bg-purple-50 border border-purple-200 p-4 rounded">
-                    <h3 className="font-semibold text-purple-900">Used Seats</h3>
+                    <h3 className="font-semibold text-purple-900">Expiring Soon</h3>
+                    <p className="text-2xl font-bold text-purple-600">
+                        {licenses.reduce((sum, l) => sum + (l.used_seats || 0), 0)}
+                    </p>
+                </div>
+
+                 <div className="bg-purple-50 border border-purple-200 p-4 rounded">
+                    <h3 className="font-semibold text-purple-900">Expired</h3>
                     <p className="text-2xl font-bold text-purple-600">
                         {licenses.reduce((sum, l) => sum + (l.used_seats || 0), 0)}
                     </p>
