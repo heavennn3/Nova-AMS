@@ -61,10 +61,7 @@ export default function MasterData({
     const [editingItem, setEditingItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>({});
 
-    // Manage Custom Types
-    const [isManageTypesOpen, setIsManageTypesOpen] = useState(false);
-    const [editingType, setEditingType] = useState<any>(null);
-    const [typeFormData, setTypeFormData] = useState<any>({});
+
 
     // Manage Columns
     const [isColumnsOpen, setIsColumnsOpen] = useState(false);
@@ -268,9 +265,7 @@ export default function MasterData({
             <Head title="Master Data" />
             <div className="flex items-center justify-between">
                 <div><h1 className="text-3xl font-bold tracking-tight text-foreground">Master Data</h1></div>
-                <div className="flex items-center gap-3">
-                    {isAdmin && <Button variant="outline" onClick={() => { setEditingType(null); setTypeFormData({}); setIsManageTypesOpen(true); }}>Manage Custom Types</Button>}
-                </div>
+
             </div>
 
             <div className="flex w-full space-x-2 overflow-x-auto border-b border-border pb-1">
@@ -374,47 +369,7 @@ export default function MasterData({
                 </Dialog>
             )}
 
-            {/* Manage Custom Types Dialog */}
-            <Dialog open={isManageTypesOpen} onOpenChange={setIsManageTypesOpen}>
-                <DialogContent className="max-w-3xl">
-                    <DialogHeader><DialogTitle>Manage Custom Master Data Types</DialogTitle></DialogHeader>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="border-r pr-6">
-                            <h3 className="font-semibold mb-4">Existing Types</h3>
-                            <ul className="space-y-2">
-                                {customTypes.map((type: any) => (
-                                    <li key={type.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                                        <div>
-                                            <div className="font-medium">{type.name}</div>
-                                            <div className="text-xs text-muted-foreground">{type.slug}</div>
-                                        </div>
-                                        <div className="flex gap-1">
-                                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setEditingType(type); setTypeFormData(type); }}><Edit className="h-3 w-3 text-blue-600" /></Button>
-                                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-red-50" onClick={() => handleTypeDelete(type.id)}><Trash2 className="h-3 w-3 text-red-600" /></Button>
-                                        </div>
-                                    </li>
-                                ))}
-                                {customTypes.length === 0 && <div className="text-sm text-muted-foreground italic">No custom types created yet.</div>}
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold mb-4">{editingType ? 'Edit Type' : 'Create New Type'}</h3>
-                            <form onSubmit={handleTypeSubmit} className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label>Type Name</Label>
-                                    <Input value={typeFormData.name || ''} onChange={(e) => setTypeFormData({ ...typeFormData, name: e.target.value })} placeholder="e.g., Cost Centers" required />
-                                    <p className="text-xs text-muted-foreground">The tab name that will appear in the UI.</p>
-                                </div>
-                                <div className="grid gap-2"><Label>Description</Label><Input value={typeFormData.description || ''} onChange={(e) => setTypeFormData({ ...typeFormData, description: e.target.value })} /></div>
-                                <div className="flex gap-2 justify-end mt-4">
-                                    {editingType && <Button type="button" variant="ghost" onClick={() => { setEditingType(null); setTypeFormData({}); }}>Cancel Edit</Button>}
-                                    <Button type="submit">{editingType ? 'Update' : 'Create'} Type</Button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+
 
             {/* Manage Columns Dialog */}
             <Dialog open={isColumnsOpen} onOpenChange={setIsColumnsOpen}>
