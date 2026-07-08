@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DataTable } from '@/components/data-table/data-table';
@@ -43,6 +43,9 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingSite, setEditingSite] = useState<Site | null>(null);
     const [formData, setFormData] = useState<any>({});
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => { setMounted(true); }, []);
 
     const handleOpenDialog = (site: Site | null = null) => {
         setEditingSite(site);
@@ -228,7 +231,7 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
 
             {/* Create/Edit Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
                     <DialogHeader>
                         <DialogTitle>
                             {editingSite ? 'Edit Site' : 'Create New Site'}
@@ -266,6 +269,7 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
                                     </div>
                                     <div>
                                         <Label htmlFor="region">Region</Label>
+                                    {mounted && (
                                         <Select
                                             value={formData.region || ''}
                                             onValueChange={(value) => handleInputChange('region', value)}
@@ -278,6 +282,7 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
                                                 <SelectItem value="Sarawak">Sarawak</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                    )}
                                     </div>
                                 </div>
                             </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,15 +67,6 @@ interface Site {
     name: string;
     code: string;
     region: string | null;
-    address: string | null;
-    latitude: string | null;
-    longitude: string | null;
-    contact_email: string | null;
-    contact_phone: string | null;
-    operational_hours: string | null;
-    site_admin_id: number | null;
-    created_at: string;
-    updated_at: string;
     users_count: number;
     assets_count: number;
     spare_parts_count: number;
@@ -98,12 +89,17 @@ export default function Dashboards({ sites, stats }: { sites: Site[]; stats: Sta
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [processing, setProcessing] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
         code: '',
         region: '',
     });
+
+    useEffect(() => { setMounted(true); }, []);
+
+    if (!mounted) return null;
 
     const filteredSites = sites.filter((site) => {
         const query = searchQuery.toLowerCase();
@@ -378,7 +374,7 @@ export default function Dashboards({ sites, stats }: { sites: Site[]; stats: Sta
 
             {/* Create Dialog */}
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-lg" onCloseAutoFocus={(e) => e.preventDefault()}>
                     <DialogHeader>
                         <DialogTitle>Create New Site</DialogTitle>
                         <DialogDescription>
@@ -413,20 +409,22 @@ export default function Dashboards({ sites, stats }: { sites: Site[]; stats: Sta
 
                         <div className="space-y-2">
                             <Label htmlFor="region">Region *</Label>
-                            <Select
-                                value={formData.region}
-                                onValueChange={(value) =>
-                                    setFormData({ ...formData, region: value })
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select region" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Sabah">Sabah</SelectItem>
-                                    <SelectItem value="Sarawak">Sarawak</SelectItem>
-                                </SelectContent>
-                        </Select>
+                            {mounted && (
+                                <Select
+                                    value={formData.region}
+                                    onValueChange={(value) =>
+                                        setFormData({ ...formData, region: value })
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select region" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Sabah">Sabah</SelectItem>
+                                        <SelectItem value="Sarawak">Sarawak</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            )}
                         </div>
                     </div>
 
@@ -447,7 +445,7 @@ export default function Dashboards({ sites, stats }: { sites: Site[]; stats: Sta
 
             {/* Edit Dialog */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-lg" onCloseAutoFocus={(e) => e.preventDefault()}>
                     <DialogHeader>
                         <DialogTitle>Edit Site</DialogTitle>
                         <DialogDescription>
@@ -480,20 +478,22 @@ export default function Dashboards({ sites, stats }: { sites: Site[]; stats: Sta
 
                         <div className="space-y-2">
                             <Label htmlFor="edit-region">Region *</Label>
-                            <Select
-                                value={formData.region}
-                                onValueChange={(value) =>
-                                    setFormData({ ...formData, region: value })
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select region" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Sabah">Sabah</SelectItem>
-                                    <SelectItem value="Sarawak">Sarawak</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            {mounted && (
+                                <Select
+                                    value={formData.region}
+                                    onValueChange={(value) =>
+                                        setFormData({ ...formData, region: value })
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select region" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Sabah">Sabah</SelectItem>
+                                        <SelectItem value="Sarawak">Sarawak</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            )}
                         </div>
                     </div>
 
@@ -514,7 +514,7 @@ export default function Dashboards({ sites, stats }: { sites: Site[]; stats: Sta
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <AlertDialogContent>
+                <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
