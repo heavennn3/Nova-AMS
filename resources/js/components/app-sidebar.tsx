@@ -6,16 +6,12 @@ import {
     Database,
     Wrench,
     MapPin,
-    Activity,
     Shield,
     FileText,
     Users,
-    Headset,
     Trash2,
     Settings,
-    History,
     ClipboardList,
-    ArrowRightLeft,
     Key,
     ScrollText,
 } from 'lucide-react';
@@ -37,9 +33,6 @@ import {
     dashboard,
     assetInventory,
     masterData,
-    operationsMaintenance,
-    userManagement,
-
 } from '@/routes';
 
 import type { NavItem } from '@/types';
@@ -162,26 +155,6 @@ const navSections: NavSection[] = [
                 icon: Database,
                 module: 'Master Data',
             },
-
-
-            {
-                title: 'Requests',
-                href: '/requests',
-                icon: ClipboardList,
-                module: 'Asset Inventory',
-            },
-            {
-                title: 'Check Out / Check In',
-                href: '/checkout',
-                icon: ArrowRightLeft,
-                module: 'Asset Inventory',
-            },
-            {
-                title: 'Transactions',
-                href: '/transactions',
-                icon: History,
-                module: 'Asset Inventory',
-            },
             {
                 title: 'Audit Log',
                 href: '/security/logs',
@@ -193,10 +166,7 @@ const navSections: NavSection[] = [
                 href: '/security/recycle-bin',
                 icon: Trash2,
                 module: 'System Settings',
-
             },
-
-
         ],
     },
     {
@@ -207,39 +177,19 @@ const navSections: NavSection[] = [
                 href: '/users',
                 icon: Users,
                 module: 'System Settings',
-
             },
-
             {
                 title: 'Access Control',
                 href: '/security/roles',
                 icon: Shield,
                 module: 'System Settings',
-
             },
-
-            {
-                title: 'Technician Center',
-                href: '#',
-                icon: Wrench,
-                module: 'Operations & Maintenance',
-                items: [
-                    { title: 'Manage Technicians', href: '/technicians' },
-                    { title: 'Assign Work Orders', href: '/maintenance/work-orders' },
-                    { title: 'Performance Reports', href: '/maintenance/history' },
-                ],
-            },
-
             {
                 title: 'Settings',
                 href: '/settings',
                 icon: Settings,
                 module: 'System Settings',
-
             },
-
-
-
         ],
     },
 ];
@@ -264,61 +214,8 @@ export function AppSidebar() {
             return {
                 ...section,
                 items: section.items.filter((item) => {
-                    const isTechnician = auth.user?.roles?.includes('Technician');
-
-                    if (isTechnician && !isAdmin && !isManager) {
-                        // Technicians should see their own dashboard and relevant items
-                        const allowedForTechnician = [
-                            'Dashboard',
-                            'Asset Inventory',
-                            'Maintenance Operations',
-                            'Comprehensive Maintenance',
-                            'Preventive Scheduling',
-                            'Work Orders',
-                            'Maintenance History',
-                            'Technician Assignment',
-                            'Master Data',
-                            'Spare Parts',
-                            'Requests',
-                            'Check Out / Check In',
-                            'Transactions',
-                            'Activity Logs',
-                        ];
-                        return allowedForTechnician.includes(item.title);
-                    }
-
-                    if (isEmployee && !isAdmin && !isManager && !isTechnician) {
-                        // Regular employees (non-technicians)
-                        const allowedForNormalUser = [
-                            'Dashboard',
-                            'Asset Inventory',
-                            'Maintenance Operations',
-                            'Requests',
-                            'Check Out / Check In',
-                            'Transactions',
-                        ];
-                        return allowedForNormalUser.includes(item.title);
-                    }
-
-                    if (isAdmin || isManager) {
-                        // Admin/Manager: hide user "Requests", "Check Out / Check In", and "Transactions" pages
-                        const hiddenForAdminOrManager = ['Requests', 'Check Out / Check In', 'Transactions'];
-                        if (hiddenForAdminOrManager.includes(item.title)) return false;
-
-                        // Standard module access check
-                        return canAccess((item as any).module);
-                    }
-
-                    // Fallback for any other users
-                    const allowedForNormalUser = [
-                        'Dashboard',
-                        'Asset Inventory',
-                        'Maintenance Operations',
-                        'Requests',
-                        'Check Out / Check In',
-                        'Transactions',
-                    ];
-                    return allowedForNormalUser.includes(item.title);
+                    // Standard module access check
+                    return canAccess((item as any).module);
                 }),
             };
         })

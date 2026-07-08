@@ -12,25 +12,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
-    // Technician Dashboard
-    Route::get('/technician/dashboard', [\App\Http\Controllers\TechnicianController::class, 'dashboard'])->name('technician.dashboard');
-
-    // Technician Management (Admin & Site Manager)
-    Route::prefix('technicians')->group(function () {
-        Route::get('/', [\App\Http\Controllers\TechnicianManagementController::class, 'index'])->name('technicians.index');
-        Route::post('/', [\App\Http\Controllers\TechnicianManagementController::class, 'store'])->name('technicians.store');
-        Route::put('/{id}', [\App\Http\Controllers\TechnicianManagementController::class, 'update'])->name('technicians.update');
-        Route::delete('/{id}', [\App\Http\Controllers\TechnicianManagementController::class, 'destroy'])->name('technicians.destroy');
-        Route::post('/{id}/toggle-active', [\App\Http\Controllers\TechnicianManagementController::class, 'toggleActive'])->name('technicians.toggle-active');
-        Route::get('/export', [\App\Http\Controllers\TechnicianManagementController::class, 'export'])->name('technicians.export');
-    });
-
-    // Asset Requests (User)
-    Route::get('/requests', [\App\Http\Controllers\AssetRequestController::class, 'index'])->name('requests.index');
-    Route::get('/requests/create', [\App\Http\Controllers\AssetRequestController::class, 'create'])->name('requests.create');
-    Route::post('/requests', [\App\Http\Controllers\AssetRequestController::class, 'store'])->name('requests.store');
-    Route::post('/requests/{id}/cancel', [\App\Http\Controllers\AssetRequestController::class, 'cancel'])->name('requests.cancel');
-
     // Asset Requests (Admin)
     Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');
     Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
@@ -45,19 +26,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [\App\Http\Controllers\AssetLoanController::class, 'index'])->name('asset-loans.index');
         Route::get('/create', [\App\Http\Controllers\AssetLoanController::class, 'create'])->name('asset-loans.create');
         Route::post('/', [\App\Http\Controllers\AssetLoanController::class, 'store'])->name('asset-loans.store');
-    });
-
-    // Check Out / Check In (Blocked for Admin users)
-    Route::middleware(['restrict.admin'])->group(function () {
-        Route::get('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'index'])->name('checkout.index');
-        Route::get('/checkout/new', [\App\Http\Controllers\CheckOutInController::class, 'create'])->name('checkout.create');
-        Route::post('/checkout', [\App\Http\Controllers\CheckOutInController::class, 'store'])->name('checkout.store');
-        Route::post('/checkout/{id}/checkin', [\App\Http\Controllers\CheckOutInController::class, 'checkin'])->name('checkout.checkin');
-    });
-
-    // Transactions (User - Blocked for Admin users)
-    Route::middleware(['restrict.admin'])->group(function () {
-        Route::get('/transactions', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transactions.index');
     });
 
     // System Monitoring API

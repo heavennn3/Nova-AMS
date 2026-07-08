@@ -3,7 +3,6 @@ import {
     Bell,
     CheckCheck,
     Loader2,
-    MessageSquare,
     Package,
     AlertTriangle,
     Info,
@@ -23,7 +22,7 @@ interface Notification {
     data: {
         title: string;
         message: string;
-        type: 'info' | 'asset' | 'chat' | 'alert';
+        type: 'info' | 'asset' | 'alert';
         link?: string;
     };
     read_at: string | null;
@@ -127,8 +126,6 @@ export function NotificationBell() {
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'chat':
-                return <MessageSquare className="h-4 w-4 text-blue-500" />;
             case 'asset':
                 return <Package className="h-4 w-4 text-emerald-500" />;
             case 'alert':
