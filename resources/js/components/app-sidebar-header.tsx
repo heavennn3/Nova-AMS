@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -31,7 +31,15 @@ export function AppSidebarHeader({
     const { auth } = usePage().props;
     const getInitials = useInitials();
     const { resolvedAppearance, updateAppearance } = useAppearance();
-    const isDark = resolvedAppearance === 'dark';
+    
+    // Fix SSR hydration mismatch: defer theme-dependent rendering until after mount
+    const [mounted, setMounted] = useState(false);
+    const [isDark, setIsDark] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        setIsDark(resolvedAppearance === 'dark');
+    }, [resolvedAppearance]);
 
     // State to toggle the "Create New" dropdown
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -131,23 +139,36 @@ export function AppSidebarHeader({
                             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                             className={cn(
                                 'relative flex h-7 w-[52px] items-center rounded-full border px-0.5 transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
-                                isDark ? 'border-slate-600 bg-slate-800' : 'border-amber-200 bg-amber-50',
+                                // Use neutral colors until mounted to prevent flash
+                                !mounted 
+                                    ? 'border-border bg-muted' 
+                                    : isDark 
+                                        ? 'border-slate-600 bg-slate-800' 
+                                        : 'border-amber-200 bg-amber-50',
                             )}
                         >
                             <span
                                 className={cn(
                                     'absolute flex h-5 w-5 items-center justify-center rounded-full shadow-sm transition-all duration-300',
-                                    isDark ? 'left-[28px] bg-slate-200' : 'left-[2px] bg-amber-400',
+                                    !mounted
+                                        ? 'left-[2px] bg-muted-foreground/20'
+                                        : isDark 
+                                            ? 'left-[28px] bg-slate-200' 
+                                            : 'left-[2px] bg-amber-400',
                                 )}
                             >
-                                {isDark ? (
+                                {mounted && (isDark ? (
                                     <Moon className="h-3 w-3 text-slate-700" />
                                 ) : (
                                     <Sun className="h-3 w-3 text-white" />
-                                )}
+                                ))}
                             </span>
-                            <Sun className={cn('ml-1 h-3 w-3 transition-opacity duration-300', isDark ? 'text-slate-400 opacity-30' : 'opacity-0')} />
-                            <Moon className={cn('mr-1 ml-auto h-3 w-3 transition-opacity duration-300', isDark ? 'opacity-0' : 'text-amber-400 opacity-30')} />
+                            {mounted && (
+                                <>
+                                    <Sun className={cn('ml-1 h-3 w-3 transition-opacity duration-300', isDark ? 'text-slate-400 opacity-30' : 'opacity-0')} />
+                                    <Moon className={cn('mr-1 ml-auto h-3 w-3 transition-opacity duration-300', isDark ? 'opacity-0' : 'text-amber-400 opacity-30')} />
+                                </>
+                            )}
                         </button>
 
                         <NotificationBell />
