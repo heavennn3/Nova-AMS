@@ -47,12 +47,9 @@ type UserType = {
     id: number;
     name: string;
     email: string;
-    phone: string | null;
-    ic_number: string | null;
-    profile_photo: string | null;
     role: string;
-    site_ids: number[];
-    sites: string[];
+    site_id: number | null;
+    site_name: string | null;
     is_active: boolean;
     created_at: string;
 };
@@ -65,8 +62,8 @@ type ConfirmAction = {
 };
 
 function userBelongsToSite(user: UserType, siteId: number): boolean {
-    if (!user.site_ids?.length) return true;
-    return user.site_ids.includes(siteId);
+    if (!user.site_id) return true;
+    return user.site_id === siteId;
 }
 
 export default function UsersIndex({
@@ -325,46 +322,24 @@ export default function UsersIndex({
 
         if (selectedSiteId === 'all') {
             baseColumns.push({
-                accessorKey: 'sites',
-                headerText: 'Assigned Sites',
+                accessorKey: 'site_name',
+                headerText: 'Site',
                 header: ({ column }: any) => (
                     <DataTableColumnHeader
                         column={column}
-                        title="Assigned Sites"
+                        title="Site"
                     />
                 ),
                 cell: ({ row }: any) => {
-                    const userSites: string[] = row.original.sites || [];
-                    if (userSites.length === 0) {
-                        return (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
-                                <MapPin className="h-3 w-3" />
-                                All Sites
-                            </span>
-                        );
-                    }
+                    const siteName = row.original.site_name;
                     return (
-                        <div className="flex max-w-[220px] flex-wrap gap-1">
-                            {userSites.map((site) => (
-                                <button
-                                    key={site}
-                                    type="button"
-                                    onClick={() => {
-                                        const match = sites.find(
-                                            (s) => s.name === site,
-                                        );
-                                        if (match) {
-                                            setSelectedSiteId(
-                                                match.id.toString(),
-                                            );
-                                        }
-                                    }}
-                                    className="inline-flex items-center rounded border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/40"
-                                >
-                                    {site}
-                                </button>
-                            ))}
-                        </div>
+                        <span className="text-sm text-muted-foreground">
+                            {siteName || (
+                                <span className="text-xs italic text-muted-foreground/50">
+                                    No site
+                                </span>
+                            )}
+                        </span>
                     );
                 },
                 enableSorting: false,

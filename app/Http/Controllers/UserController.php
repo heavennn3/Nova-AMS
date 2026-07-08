@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 
@@ -13,19 +11,16 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with(['roles', 'sites'])->get()
+        $users = User::with('roles')->get()
             ->filter(fn($user) => !$user->hasRole('Admin'))
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'phone' => $user->phone,
-                    'ic_number' => $user->ic_number,
-                    'profile_photo' => $user->profile_photo ? Storage::url($user->profile_photo) : null,
                     'role' => $user->roles->pluck('name')->first() ?? 'None',
-                    'site_ids' => $user->sites->pluck('id')->toArray(),
-                    'sites' => $user->sites->pluck('name')->toArray(),
+                    'site_id' => $user->site_id,
+                    'site_name' => $user->site?->name,
                     'is_active' => (bool) $user->is_active,
                     'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 ];
@@ -36,14 +31,14 @@ class UserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => $users,
             'sites' => $sites,
-            'roles' => Role::where('name', '!=', 'Admin')->pluck('name'),
+            'roles' => ['Employee', 'Manager'],
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Users/Create', [
-            'roles' => Role::where('name', '!=', 'Admin')->pluck('name'),
+            'roles' => ['Employee', 'Manager'],
             'sites' => \DB::table('sites')->select('id', 'name')->get(),
         ]);
     }
@@ -54,31 +49,18 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:50',
-            'ic_number' => 'nullable|string|max:50',
-            'profile_photo' => 'nullable|image|max:2048',
-            'role' => 'nullable|string|exists:roles,name',
-            'site_ids' => 'nullable|array',
-            'site_ids.*' => 'exists:sites,id',
+            'role' => 'required|string|in:Employee,Manager',
+            'site_id' => 'nullable|exists:sites,id',
         ]);
 
         $userData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'phone' => $validated['phone'] ?? null,
-            'ic_number' => $validated['ic_number'] ?? null,
+            'site_id' => $validated['site_id'] ?? null,
         ];
 
-        if ($request->hasFile('profile_photo')) {
-            $userData['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
-        }
-
         $user = User::create($userData);
-
-        if (!empty($validated['site_ids'])) {
-            $user->sites()->sync($validated['site_ids']);
-        }
 
         if (!empty($validated['role'])) {
             $user->assignRole($validated['role']);
@@ -94,13 +76,10 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'phone' => $user->phone,
-                'ic_number' => $user->ic_number,
-                'profile_photo' => $user->profile_photo ? Storage::url($user->profile_photo) : null,
                 'role' => $user->roles->pluck('name')->first() ?? '',
-                'site_ids' => $user->sites->pluck('id')->toArray(),
+                'site_id' => $user->site_id,
             ],
-            'roles' => Role::where('name', '!=', 'Admin')->pluck('name'),
+            'roles' => ['Employee', 'Manager'],
             'sites' => \DB::table('sites')->select('id', 'name')->get(),
         ]);
     }
@@ -111,41 +90,22 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:50',
-            'ic_number' => 'nullable|string|max:50',
-            'profile_photo' => 'nullable|image|max:2048',
-            'role' => 'nullable|string|exists:roles,name',
-            'site_ids' => 'nullable|array',
-            'site_ids.*' => 'exists:sites,id',
+            'role' => 'required|string|in:Employee,Manager',
+            'site_id' => 'nullable|exists:sites,id',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        $user->phone = $validated['phone'] ?? null;
-        $user->ic_number = $validated['ic_number'] ?? null;
+        $user->site_id = $validated['site_id'] ?? null;
 
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
         }
 
-        if ($request->hasFile('profile_photo')) {
-            // Delete old photo if exists
-            if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
-            $user->profile_photo = $request->file('profile_photo')->store('profile-photos', 'public');
-        }
-
         $user->save();
-
-        if (isset($validated['site_ids'])) {
-            $user->sites()->sync($validated['site_ids']);
-        }
 
         if (!empty($validated['role'])) {
             $user->syncRoles([$validated['role']]);
-        } else {
-            $user->syncRoles([]);
         }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');

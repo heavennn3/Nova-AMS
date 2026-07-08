@@ -72,6 +72,10 @@ function SelectContent({
         sideOffset={sideOffset}
         avoidCollisions={false}
         align={align}
+        onCloseAutoFocus={(e) => {
+          // Prevent focus from moving to an aria-hidden element
+          e.preventDefault()
+        }}
         {...props}
       >
         <SelectScrollUpButton />

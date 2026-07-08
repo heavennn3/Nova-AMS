@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,18 +18,14 @@ import {
     DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
-import { User, Upload, X, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 type UserType = {
     id: number;
     name: string;
     email: string;
-    phone: string | null;
-    ic_number: string | null;
-    profile_photo: string | null;
     role: string;
-    site_ids?: number[];
-    sites: string[];
+    site_id: number | null;
     is_active: boolean;
     created_at: string;
 };
@@ -52,10 +48,9 @@ export function UserFormDialog({
     sites,
 }: UserFormDialogProps) {
     const isEditing = !!user;
-    const [preview, setPreview] = useState<string | null>(
-        user?.profile_photo || null,
-    );
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => { setMounted(true); }, []);
 
     const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm({
@@ -64,11 +59,8 @@ export function UserFormDialog({
             email: user?.email || '',
             password: '',
             password_confirmation: '',
-            phone: user?.phone || '',
-            ic_number: user?.ic_number || '',
-            profile_photo: null as File | null,
-            role: user?.role || '',
-            site_ids: (user?.site_ids || []) as number[],
+            role: user?.role === 'None' ? '' : user?.role || '',
+            site_id: user?.site_id?.toString() || '',
         });
 
     // Reset form when dialog opens/closes or user changes
@@ -81,35 +73,16 @@ export function UserFormDialog({
                 email: user?.email || '',
                 password: '',
                 password_confirmation: '',
-                phone: user?.phone || '',
-                ic_number: user?.ic_number || '',
-                profile_photo: null as File | null,
                 role: user?.role === 'None' ? '' : user?.role || '',
-                site_ids: (user?.site_ids || []) as number[],
+                site_id: user?.site_id?.toString() || '',
             } as any);
-            setPreview(user?.profile_photo || null);
         }
     }, [open, user?.id]);
-
-    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setData('profile_photo', file);
-            setPreview(URL.createObjectURL(file));
-        }
-    };
-
-    const removePhoto = () => {
-        setData('profile_photo', null);
-        setPreview(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-    };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         const url = isEditing ? `/users/${user!.id}` : '/users';
         post(url, {
-            forceFormData: true,
             onSuccess: () => {
                 onOpenChange(false);
             },
@@ -118,7 +91,7 @@ export function UserFormDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+            <DialogContent className="sm:max-w-lg" onCloseAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle className="text-xl">
                         {isEditing ? 'Edit User' : 'Add New User'}
@@ -131,58 +104,6 @@ export function UserFormDialog({
                 </DialogHeader>
 
                 <form onSubmit={submit} className="space-y-5">
-                    {/* Profile Photo */}
-                    <div className="flex items-center gap-5">
-                        <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted">
-                            {preview ? (
-                                <>
-                                    <img
-                                        src={preview}
-                                        alt="Preview"
-                                        className="h-full w-full object-cover"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={removePhoto}
-                                        className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
-                                    >
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                </>
-                            ) : (
-                                <User className="h-8 w-8 text-muted-foreground" />
-                            )}
-                        </div>
-                        <div>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <Upload className="h-3.5 w-3.5" />
-                                {preview ? 'Change Photo' : 'Upload Photo'}
-                            </Button>
-                            <p className="mt-1 text-[11px] text-muted-foreground">
-                                PNG, JPG up to 2MB
-                            </p>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handlePhotoChange}
-                            />
-                        </div>
-                    </div>
-                    {errors.profile_photo && (
-                        <p className="text-sm text-red-500">
-                            {errors.profile_photo}
-                        </p>
-                    )}
-
-                    {/* Fields Grid */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-1.5">
                             <Label htmlFor="dlg-name">Full Name *</Label>
@@ -215,40 +136,6 @@ export function UserFormDialog({
                             {errors.email && (
                                 <p className="text-xs text-red-500">
                                     {errors.email}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <Label htmlFor="dlg-phone">Phone</Label>
-                            <Input
-                                id="dlg-phone"
-                                value={data.phone}
-                                onChange={(e) =>
-                                    setData('phone', e.target.value)
-                                }
-                                placeholder="e.g. +60 12-345-6789"
-                            />
-                            {errors.phone && (
-                                <p className="text-xs text-red-500">
-                                    {errors.phone}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <Label htmlFor="dlg-ic">IC Number</Label>
-                            <Input
-                                id="dlg-ic"
-                                value={data.ic_number}
-                                onChange={(e) =>
-                                    setData('ic_number', e.target.value)
-                                }
-                                placeholder="e.g. 900101-01-1234"
-                            />
-                            {errors.ic_number && (
-                                <p className="text-xs text-red-500">
-                                    {errors.ic_number}
                                 </p>
                             )}
                         </div>
@@ -292,70 +179,59 @@ export function UserFormDialog({
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label>Assign Role</Label>
-                            <Select
-                                value={data.role}
-                                onValueChange={(val) => setData('role', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roles.map((role) => (
-                                        <SelectItem key={role} value={role}>
-                                            {role}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Label>Role *</Label>
+                            {mounted && (
+                                <Select
+                                    value={data.role}
+                                    onValueChange={(val) => setData('role', val)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {['Employee', 'Manager'].map((role) => (
+                                            <SelectItem key={role} value={role}>
+                                                {role}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
                             {errors.role && (
                                 <p className="text-xs text-red-500">
                                     {errors.role}
                                 </p>
                             )}
                         </div>
-                    </div>
 
-                    {/* Sites */}
-                    <div className="space-y-2">
-                        <Label>Assign Sites</Label>
-                        <div className="grid grid-cols-2 gap-2 rounded-lg border bg-muted/30 p-3 sm:grid-cols-3">
-                            {sites.map((site) => (
-                                <div
-                                    key={site.id}
-                                    className="flex items-center gap-2"
+                        <div className="space-y-1.5">
+                            <Label>Site *</Label>
+                            {mounted && (
+                                <Select
+                                    value={data.site_id}
+                                    onValueChange={(val) => setData('site_id', val)}
                                 >
-                                    <input
-                                        type="checkbox"
-                                        id={`dlg-site-${site.id}`}
-                                        checked={data.site_ids.includes(
-                                            site.id,
-                                        )}
-                                        onChange={(e) => {
-                                            const ids = [...data.site_ids];
-                                            if (e.target.checked) {
-                                                ids.push(site.id);
-                                            } else {
-                                                const i = ids.indexOf(site.id);
-                                                if (i > -1) ids.splice(i, 1);
-                                            }
-                                            setData('site_ids', ids);
-                                        }}
-                                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                    />
-                                    <label
-                                        htmlFor={`dlg-site-${site.id}`}
-                                        className="cursor-pointer text-sm font-medium"
-                                    >
-                                        {site.name}
-                                    </label>
-                                </div>
-                            ))}
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select site" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {sites.map((site) => (
+                                            <SelectItem
+                                                key={site.id}
+                                                value={site.id.toString()}
+                                            >
+                                                {site.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                            {errors.site_id && (
+                                <p className="text-xs text-red-500">
+                                    {errors.site_id}
+                                </p>
+                            )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground">
-                            User will have access to data across all selected
-                            sites.
-                        </p>
                     </div>
 
                     <DialogFooter>
