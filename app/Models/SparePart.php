@@ -11,25 +11,16 @@ class SparePart extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'spare_part_id',
         'name',
         'part_number',
         'category',
-        'spare_part_category_id',
-        'quantity',
-        'minimum_stock_level',
         'location',
         'site_id',
         'status',
-        'specifications',
-        'compatibility',
-        'asset_type_id',
+        'created_by',
     ];
 
-    public function category()
-    {
-        return $this->belongsTo(SparePartCategory::class, 'spare_part_category_id');
-    }
+    // category is now a string field on the table, not a relationship
 
     // ─── EAV Helpers ───────────────────────────────────────────────
 
@@ -90,6 +81,11 @@ class SparePart extends Model
     public function site()
     {
         return $this->belongsTo(Site::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function getAvailabilityAttribute()

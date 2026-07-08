@@ -16,27 +16,21 @@ class SparePartController extends Controller
     public function dashboard()
     {
         $totalParts = SparePart::count();
-        $totalValue = SparePart::get()->sum(function ($part) {
-            return $part->quantity * $part->unit_cost;
-        });
         $availableParts = SparePart::where('status', 'available')->count();
-        $lowStockParts = SparePart::whereRaw('quantity <= minimum_stock_level')->count();
-        $outOfStockParts = SparePart::where('quantity', 0)->count();
+        $outOfStockParts = SparePart::where('status', 'out')->count();
 
-        // Category breakdown by master data parent groups
-        $parents = \App\Models\SparePartCategory::with('children')->whereNull('parent_id')->get();
-        $categoryData = $parents->map(function ($parent) {
-            $childNames = $parent->children->pluck('name')->toArray();
-            $count = SparePart::whereIn('category', $childNames)->count();
-            $value = SparePart::whereIn('category', $childNames)
-                ->get()
-                ->sum(fn($p) => $p->quantity * $p->unit_cost);
-            return [
-                'category' => $parent->name,
-                'count' => $count,
-                'value' => number_format($value, 2),
-            ];
-        });
+        // Category breakdown
+        $categoryData = SparePart::selectRaw('category, count(*) as count')
+            ->whereNotNull('category')
+            ->groupBy('category')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'category' => $item->category,
+                    'count' => $item->count,
+                    'value' => '0.00',
+                ];
+            });
 
         // Recent checkouts
         $recentCheckouts = Checkout::with(['sparePart', 'user'])
@@ -54,114 +48,63 @@ class SparePartController extends Controller
                 ];
             });
 
-        // Low stock alerts
-        $lowStockAlerts = SparePart::whereRaw('quantity <= minimum_stock_level')
-            ->where('quantity', '>', 0)
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(function ($part) {
-                return [
-                    'name' => $part->name,
-                    'stock_level' => $part->quantity,
-                    'minimum_level' => $part->minimum_stock_level,
-                    'location' => $part->location,
-                ];
-            });
-
-        // All spare parts for filtered table display
-        $allParts = SparePart::select('id', 'name', 'category', 'quantity', 'minimum_stock_level', 'location', 'status')
+        // All spare parts for table display
+        $allParts = SparePart::select('id', 'name', 'category', 'location', 'status')
             ->latest()
             ->get();
 
         return Inertia::render('SpareParts/Dashboard', [
             'totalParts' => $totalParts,
-            'totalValue' => number_format($totalValue, 2),
+            'totalValue' => '0.00',
             'availableParts' => $availableParts,
-            'lowStockParts' => $lowStockParts,
+            'lowStockParts' => 0,
             'outOfStockParts' => $outOfStockParts,
             'categoryData' => $categoryData,
             'recentCheckouts' => $recentCheckouts,
-            'lowStockAlerts' => $lowStockAlerts,
+            'lowStockAlerts' => collect(),
             'allParts' => $allParts,
         ]);
     }
 
     public function index()
     {
-        $configs = TableConfiguration::getAllColumns('spare_parts');
-
-        $spareParts = SparePart::with(['site', 'assetType', 'fieldValues'])
+        $spareParts = SparePart::with(['site', 'creator'])
             ->latest()
             ->get()
-            ->map(function ($part) use ($configs) {
-                $fields = $part->getFields();
-                $row = ['id' => $part->id];
-                foreach ($configs as $cfg) {
-                    $row[$cfg->column_key] = $fields[$cfg->column_key] ?? $part->{$cfg->column_key} ?? null;
-                }
-                $row['site'] = $part->site?->name ?? 'N/A';
-                $row['availability'] = $part->availability;
-                $row['total_value'] = number_format($part->total_value, 2);
-                $row['asset_type'] = $part->assetType?->name ?? '—';
-                return $row;
+            ->map(function ($part) {
+                return [
+                    'id' => $part->id,
+                    'name' => $part->name,
+                    'part_number' => $part->part_number,
+                    'category' => $part->category,
+                    'location' => $part->location,
+                    'site_name' => $part->site?->name ?? 'N/A',
+                    'created_by_name' => $part->creator?->name ?? 'N/A',
+                ];
             });
 
-        $categories = SparePart::select('category')
-            ->distinct()
-            ->whereNotNull('category')
-            ->pluck('category')
-            ->sort()
-            ->values();
-
-        $assetTypes = \App\Models\AssetType::orderBy('name')->get();
         $sites = \App\Models\Site::orderBy('name')->get();
 
         return Inertia::render('SpareParts/Index', [
             'spareParts' => $spareParts,
-            'configurations' => $configs,
-            'categories' => $categories,
-            'assetTypes' => $assetTypes,
             'sites' => $sites,
         ]);
     }
 
     public function store(Request $request)
     {
-        $configs = TableConfiguration::getAllColumns('spare_parts');
-
-        $rules = [
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'part_number' => 'required|string|unique:spare_parts,part_number',
-            'quantity' => 'required|integer|min:0',
-            'minimum_stock_level' => 'required|integer|min:0',
-            'unit_cost' => 'required|numeric|min:0',
-            'location' => 'nullable|string',
+            'category' => 'required|string|in:RAM,MONITOR,STORAGE,CABLE,PSU,RJ45,CABLE TRACER',
             'site_id' => 'nullable|exists:sites,id',
-            'status' => 'required|string',
-            'specifications' => 'nullable|array',
-            'compatibility' => 'nullable|array',
-            'asset_type_id' => 'nullable|exists:asset_types,id',
-        ];
-        // Dynamic field rules
-        foreach ($configs as $c) {
-            $rules[$c->column_key] = $c->is_primary_key ? 'required|string' : 'nullable|string';
-        }
+            'location' => 'required|string|max:255',
+        ]);
 
-        $validated = $request->validate($rules);
-
-        $dynamicFields = [];
-        foreach ($configs as $c) {
-            if (array_key_exists($c->column_key, $validated)) {
-                $dynamicFields[$c->column_key] = $validated[$c->column_key];
-                unset($validated[$c->column_key]);
-            }
-        }
-
-        $validated['specifications'] = $validated['specifications'] ?? [];
-        $validated['compatibility'] = $validated['compatibility'] ?? [];
+        $validated['status'] = 'available';
+        $validated['created_by'] = auth()->id();
 
         $sparePart = SparePart::create($validated);
-        $sparePart->syncFields($dynamicFields);
 
         return redirect()->back()->with('success', 'Spare part added successfully.');
     }
