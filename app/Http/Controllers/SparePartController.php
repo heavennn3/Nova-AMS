@@ -51,13 +51,14 @@ class SparePartController extends Controller
                 ];
             });
 
+        $recentlyAdded = SparePart::where('created_at', '>=', now()->subDays(7))->count();
+
         return Inertia::render('SpareParts/Dashboard', [
             'totalParts' => $totalParts,
             'availableParts' => $availableParts,
-            'lowStockParts' => 0,
             'outOfStockParts' => $faultyParts,
+            'recentlyAdded' => $recentlyAdded,
             'categoryData' => $categoryData,
-            'recentCheckouts' => [],
             'lowStockAlerts' => collect(),
             'allParts' => $allParts,
         ]);

@@ -9,6 +9,7 @@ export default function SparePartsDashboard({
     totalParts = 0,
     availableParts = 0,
     outOfStockParts = 0,
+    recentlyAdded = 0,
     categoryData = [],
     lowStockAlerts = [],
     allParts = [],
@@ -16,6 +17,7 @@ export default function SparePartsDashboard({
     totalParts: number;
     availableParts: number;
     outOfStockParts: number;
+    recentlyAdded: number;
     categoryData: any[];
     lowStockAlerts: any[];
     allParts: any[];
@@ -117,7 +119,7 @@ export default function SparePartsDashboard({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-blue-500/10 p-3">
                         <Package className="h-6 w-6 text-blue-600" />
@@ -143,6 +145,15 @@ export default function SparePartsDashboard({
                     <div>
                         <p className="text-sm text-muted-foreground">Faulty</p>
                         <p className="text-2xl font-bold">{outOfStockParts}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-purple-500/10 p-3">
+                        <Package className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Recently Added</p>
+                        <p className="text-2xl font-bold">{recentlyAdded}</p>
                     </div>
                 </div>
             </div>
@@ -231,9 +242,15 @@ export default function SparePartsDashboard({
             </div>
 
             {/* All Spare Parts Table */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>All Spare Parts</CardTitle>
+            <Card className="overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b py-3">
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                            <Package className="h-4 w-4 text-slate-600" />
+                            All Spare Parts
+                        </CardTitle>
+
+                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     <DataTable
