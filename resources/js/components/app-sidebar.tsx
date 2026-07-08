@@ -7,7 +7,6 @@ import {
     Wrench,
     MapPin,
     Shield,
-    FileText,
     Users,
     Trash2,
     Settings,
@@ -118,25 +117,6 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
 
-            {
-                title: 'Document',
-                href: '#',
-                icon: FileText,
-                module: 'Document Management',
-                items: [
-                    { title: 'Asset Documentation', href: '/documents/assets' },
-                    {
-                        title: 'Maintenance Records',
-                        href: '/documents/maintenance',
-                    },
-                    {
-                        title: 'Contract Documents',
-                        href: '/documents/contracts',
-                    },
-                    { title: 'Version Control', href: '/documents/versions' },
-                    { title: 'Expiration Alerts', href: '/documents/alerts' },
-                ],
-            },
 
 
 

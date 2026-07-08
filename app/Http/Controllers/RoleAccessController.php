@@ -20,7 +20,6 @@ class RoleAccessController extends Controller
         'Operations & Maintenance'=> 'module.operations',
         'Financial Management'    => 'module.finance',
         'Analytics & Reporting'   => 'module.analytics',
-        'Document Management'     => 'module.documents',
         'Advanced Features'       => 'module.advanced',
         'System Settings'         => 'module.system-settings',
     ];

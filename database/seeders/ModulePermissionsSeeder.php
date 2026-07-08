@@ -18,7 +18,6 @@ class ModulePermissionsSeeder extends Seeder
             'module.asset-inventory',
             'module.master-data',
             'module.multi-site',
-            'module.documents',
             'module.system-settings',
         ];
 
@@ -36,7 +35,6 @@ class ModulePermissionsSeeder extends Seeder
             'module.asset-inventory',
             'module.master-data',
             'module.multi-site',
-            'module.documents',
         ]);
 
         // Assign basic permissions to Employee role

@@ -42,9 +42,6 @@ class PagePermissionSeeder extends Seeder
             ['name' => 'finance-valuation', 'route' => '/finance/valuation', 'description' => 'Asset valuation', 'module' => 'module.finance'],
             ['name' => 'finance-budgets', 'route' => '/finance/budgets', 'description' => 'Budget management', 'module' => 'module.finance'],
 
-            // Documents Module
-            ['name' => 'documents-assets', 'route' => '/documents/assets', 'description' => 'Asset documents', 'module' => 'module.documents'],
-            ['name' => 'documents-maintenance', 'route' => '/documents/maintenance', 'description' => 'Maintenance documents', 'module' => 'module.documents'],
 
             // System Settings Module
             ['name' => 'settings', 'route' => '/settings', 'description' => 'System settings', 'module' => 'module.system-settings'],

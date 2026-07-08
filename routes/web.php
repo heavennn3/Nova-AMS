@@ -160,14 +160,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/import-bulk', [\App\Http\Controllers\SparePartController::class, 'importBulk'])->name('spare-parts.import-bulk');
     });
 
-    // Documents Module
-    Route::middleware(['permission:module.documents'])->group(function () {
-        Route::get('/documents/assets', [\App\Http\Controllers\DocumentManagementController::class, 'assets']);
-        Route::get('/documents/maintenance', [\App\Http\Controllers\DocumentManagementController::class, 'maintenance']);
-        Route::get('/documents/contracts', [\App\Http\Controllers\DocumentManagementController::class, 'contracts']);
-        Route::get('/documents/versions', [\App\Http\Controllers\DocumentManagementController::class, 'versions']);
-        Route::get('/documents/alerts', [\App\Http\Controllers\DocumentManagementController::class, 'alerts']);
-    });
 
     // System Settings Module
     Route::middleware(['permission:module.system-settings'])->group(function () {

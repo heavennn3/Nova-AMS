@@ -17,7 +17,7 @@ class RolesAndSitesSeeder extends Seeder
         $modulePermissions = [
             'module.asset-inventory', 'module.master-data', 'module.multi-site',
             'module.operations', 'module.finance', 'module.analytics',
-            'module.documents', 'module.advanced', 'module.system-settings',
+            'module.advanced', 'module.system-settings',
         ];
 
         foreach ($modulePermissions as $permission) {
@@ -38,13 +38,13 @@ class RolesAndSitesSeeder extends Seeder
         $siteManagerRole->syncPermissions([
             'manage assets', 'view assets', 'approve transfers',
             'module.asset-inventory', 'module.master-data', 'module.operations',
-            'module.analytics', 'module.documents',
+            'module.analytics',
         ]);
 
         $technicianRole = Role::firstOrCreate(['name' => 'Technician']);
         $technicianRole->syncPermissions([
             'view assets', 'module.asset-inventory', 'module.operations',
-            'module.analytics', 'module.documents',
+            'module.analytics',
         ]);
 
         $viewerRole = Role::firstOrCreate(['name' => 'Viewer']);

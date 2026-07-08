@@ -18,7 +18,6 @@ class HandleInertiaRequests extends Middleware
         'module.operations'      => 'Operations & Maintenance',
         'module.finance'         => 'Financial Management',
         'module.analytics'       => 'Analytics & Reporting',
-        'module.documents'       => 'Document Management',
         'module.advanced'        => 'Advanced Features',
         'module.system-settings' => 'System Settings',
     ];
