@@ -415,45 +415,77 @@ export default function LiveTrackingAdmin({
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-amber-500/10 p-3">
-                        <Activity className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">In Use</p>
-                        <p className="text-2xl font-bold">{stats.in_use}</p>
-                    </div>
-                </div>
+                <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-200 dark:border-amber-800">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                                    In Use
+                                </p>
+                                <p className="text-3xl font-bold text-amber-900 dark:text-amber-100">
+                                    {stats.in_use}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-amber-200 dark:bg-amber-800 rounded-full">
+                                <Activity className="h-8 w-8 text-amber-700 dark:text-amber-300" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-green-500/10 p-3">
-                        <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Returned</p>
-                        <p className="text-2xl font-bold">{stats.total_returned}</p>
-                    </div>
-                </div>
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                                    Total Returned
+                                </p>
+                                <p className="text-3xl font-bold text-green-900 dark:text-green-100">
+                                    {stats.total_returned}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-green-200 dark:bg-green-800 rounded-full">
+                                <CheckCircle className="h-8 w-8 text-green-700 dark:text-green-300" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-purple-500/10 p-3">
-                        <Calendar className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Returned Today</p>
-                        <p className="text-2xl font-bold">{stats.returned_today}</p>
-                    </div>
-                </div>
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                    Returned Today
+                                </p>
+                                <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">
+                                    {stats.returned_today}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-purple-200 dark:bg-purple-800 rounded-full">
+                                <Calendar className="h-8 w-8 text-purple-700 dark:text-purple-300" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className={`rounded-full p-3 ${stats.overdue > 0 ? 'bg-red-500/10' : 'bg-gray-100'}`}>
-                        <AlertTriangle className={`h-6 w-6 ${stats.overdue > 0 ? 'text-red-600' : 'text-gray-400'}`} />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Overdue</p>
-                        <p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600' : 'text-gray-500'}`}>{stats.overdue}</p>
-                    </div>
-                </div>
+                <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 border-red-200 dark:border-red-800">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                                    Overdue
+                                </p>
+                                <p className="text-3xl font-bold text-red-900 dark:text-red-100">
+                                    {stats.overdue}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-red-200 dark:bg-red-800 rounded-full">
+                                <AlertTriangle className="h-8 w-8 text-red-700 dark:text-red-300" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
 

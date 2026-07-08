@@ -14,25 +14,14 @@ class AdminSiteManagementController extends Controller
      */
     public function index()
     {
-        $sites = Site::with(['users', 'siteAdmin'])->get()->map(function ($site) {
+        $sites = Site::withCount('users')->get()->map(function ($site) {
             return [
                 'id' => $site->id,
                 'name' => $site->name,
                 'code' => $site->code,
                 'region' => $site->region,
-                'latitude' => $site->latitude,
-                'longitude' => $site->longitude,
-                'contact_email' => $site->contact_email,
-                'contact_phone' => $site->contact_phone,
-                'operational_hours' => $site->operational_hours,
-                'address' => $site->address,
-                'site_admin_id' => $site->site_admin_id,
-                'site_admin' => $site->siteAdmin ? [
-                    'id' => $site->siteAdmin->id,
-                    'name' => $site->siteAdmin->name,
-                    'email' => $site->siteAdmin->email,
-                ] : null,
-                'users_count' => $site->users->count(),
+                'users_count' => $site->users_count,
+                'is_active' => $site->is_active,
                 'created_at' => $site->created_at->toIso8601String(),
                 'updated_at' => $site->updated_at->toIso8601String(),
             ];
@@ -62,13 +51,6 @@ class AdminSiteManagementController extends Controller
             'name' => 'required|string|max:255|unique:sites',
             'code' => 'nullable|string|max:255|unique:sites',
             'region' => 'nullable|string|max:255',
-            'latitude' => 'nullable|decimal:8,6',
-            'longitude' => 'nullable|decimal:9,6',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:50',
-            'operational_hours' => 'nullable|string',
-            'address' => 'nullable|string',
-            'site_admin_id' => 'nullable|exists:users,id',
         ]);
 
         Site::create($validated);
@@ -87,13 +69,6 @@ class AdminSiteManagementController extends Controller
             'name' => 'required|string|max:255|unique:sites,name,' . $site->id,
             'code' => 'nullable|string|max:255|unique:sites,code,' . $site->id,
             'region' => 'nullable|string|max:255',
-            'latitude' => 'nullable|decimal:8,6',
-            'longitude' => 'nullable|decimal:9,6',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:50',
-            'operational_hours' => 'nullable|string',
-            'address' => 'nullable|string',
-            'site_admin_id' => 'nullable|exists:users,id',
         ]);
 
         $site->update($validated);
@@ -155,5 +130,13 @@ class AdminSiteManagementController extends Controller
         $site->update($validated);
 
         return back()->with('success', 'Site administrator assigned successfully.');
+    }
+
+    public function toggleActive($id)
+    {
+        $site = Site::findOrFail($id);
+        $site->update(['is_active' => !$site->is_active]);
+
+        return back()->with('success', $site->is_active ? 'Site activated successfully.' : 'Site disabled successfully.');
     }
 }

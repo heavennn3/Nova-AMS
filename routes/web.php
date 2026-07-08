@@ -190,6 +190,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/sites/{id}', [\App\Http\Controllers\AdminSiteManagementController::class, 'destroy'])->name('admin.sites.destroy');
             Route::get('/sites/{id}/users', [\App\Http\Controllers\AdminSiteManagementController::class, 'getSiteUsers'])->name('admin.sites.users');
             Route::post('/sites/{id}/admin', [\App\Http\Controllers\AdminSiteManagementController::class, 'assignSiteAdmin'])->name('admin.sites.assign-admin');
+            Route::patch('/sites/{id}/toggle-active', [\App\Http\Controllers\AdminSiteManagementController::class, 'toggleActive'])->name('admin.sites.toggle-active');
 
             // Page Permissions Management Routes
             Route::get('/page-permissions', [\App\Http\Controllers\PagePermissionController::class, 'index'])->name('admin.page-permissions');

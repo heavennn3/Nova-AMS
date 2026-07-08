@@ -11,7 +11,7 @@ class Site extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'region', 'latitude', 'longitude', 'contact_email', 'contact_phone', 'operational_hours', 'address', 'site_admin_id'];
+    protected $fillable = ['name', 'code', 'region', 'is_active'];
 
     public function users()
     {

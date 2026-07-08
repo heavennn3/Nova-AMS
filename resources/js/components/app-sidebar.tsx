@@ -73,13 +73,13 @@ const navSections: NavSection[] = [
             { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
 
             {
-                title: 'Multi-Site Management',
+                title: 'Site Management',
                 href: '#',
                 icon: MapPin,
                 module: 'Multi-Site Management',
                 items: [
                     {
-                        title: 'Site Dashboards',
+                        title: 'Dashboards',
                         href: '/multi-site/dashboards',
                     },
                     {

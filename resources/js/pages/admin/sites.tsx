@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { Plus, Edit, Trash2, MapPin, Users, UserCog, Mail, Phone, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Users } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -34,18 +34,6 @@ type Site = {
     name: string;
     code: string | null;
     region: string | null;
-    latitude: number | null;
-    longitude: number | null;
-    contact_email: string | null;
-    contact_phone: string | null;
-    operational_hours: string | null;
-    address: string | null;
-    site_admin_id: number | null;
-    site_admin: {
-        id: number;
-        name: string;
-        email: string;
-    } | null;
     users_count: number;
     created_at: string;
     updated_at: string;
@@ -61,20 +49,12 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
         if (site) {
             setFormData({
                 ...site,
-                site_admin_id: site.site_admin_id?.toString() || '',
             });
         } else {
             setFormData({
                 name: '',
                 code: '',
                 region: '',
-                latitude: '',
-                longitude: '',
-                contact_email: '',
-                contact_phone: '',
-                operational_hours: '',
-                address: '',
-                site_admin_id: '',
             });
         }
         setIsDialogOpen(true);
@@ -162,20 +142,6 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
             ),
         },
         {
-            accessorKey: 'site_admin',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Site Admin" />
-            ),
-            cell: ({ row }: any) => (
-                <div className="flex items-center gap-1">
-                    <UserCog className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm">
-                        {row.original.site_admin ? row.original.site_admin.name : 'Not assigned'}
-                    </span>
-                </div>
-            ),
-        },
-        {
             accessorKey: 'users_count',
             header: ({ column }: any) => (
                 <DataTableColumnHeader column={column} title="Users" />
@@ -184,31 +150,6 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
                 <div className="flex items-center gap-1">
                     <Users className="h-3 w-3 text-muted-foreground" />
                     <span className="text-sm">{row.original.users_count}</span>
-                </div>
-            ),
-        },
-        {
-            accessorKey: 'contact_email',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Contact" />
-            ),
-            cell: ({ row }: any) => (
-                <div className="flex items-center gap-1">
-                    {row.original.contact_email && (
-                        <div className="flex items-center gap-1 text-sm">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs">{row.original.contact_email}</span>
-                        </div>
-                    )}
-                    {row.original.contact_phone && (
-                        <div className="flex items-center gap-1 text-sm">
-                            <Phone className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs">{row.original.contact_phone}</span>
-                        </div>
-                    )}
-                    {!row.original.contact_email && !row.original.contact_phone && (
-                        <span className="text-muted-foreground text-sm">-</span>
-                    )}
                 </div>
             ),
         },
@@ -325,118 +266,19 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
                                     </div>
                                     <div>
                                         <Label htmlFor="region">Region</Label>
-                                        <Input
-                                            id="region"
+                                        <Select
                                             value={formData.region || ''}
-                                            onChange={(e) => handleInputChange('region', e.target.value)}
-                                            placeholder="e.g., Sabah"
-                                        />
+                                            onValueChange={(value) => handleInputChange('region', value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select region" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Sabah">Sabah</SelectItem>
+                                                <SelectItem value="Sarawak">Sarawak</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Geographic Information */}
-                        <div className="space-y-2">
-                            <h3 className="font-semibold text-sm">Geographic Information</h3>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <Label htmlFor="latitude">Latitude</Label>
-                                    <Input
-                                        id="latitude"
-                                        type="number"
-                                        step="0.000001"
-                                        value={formData.latitude || ''}
-                                        onChange={(e) => handleInputChange('latitude', e.target.value)}
-                                        placeholder="e.g., 5.9804"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="longitude">Longitude</Label>
-                                    <Input
-                                        id="longitude"
-                                        type="number"
-                                        step="0.000001"
-                                        value={formData.longitude || ''}
-                                        onChange={(e) => handleInputChange('longitude', e.target.value)}
-                                        placeholder="e.g., 116.0735"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Contact Information */}
-                        <div className="space-y-2">
-                            <h3 className="font-semibold text-sm flex items-center gap-1">
-                                <Mail className="h-4 w-4" />
-                                Contact Information
-                            </h3>
-                            <div className="grid gap-3">
-                                <div>
-                                    <Label htmlFor="contact_email">Contact Email</Label>
-                                    <Input
-                                        id="contact_email"
-                                        type="email"
-                                        value={formData.contact_email || ''}
-                                        onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                                        placeholder="e.g., site.admin@nova-ams.com"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="contact_phone">Contact Phone</Label>
-                                    <Input
-                                        id="contact_phone"
-                                        value={formData.contact_phone || ''}
-                                        onChange={(e) => handleInputChange('contact_phone', e.target.value)}
-                                        placeholder="e.g., +60 12-345 6789"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="address">Address</Label>
-                                    <Input
-                                        id="address"
-                                        value={formData.address || ''}
-                                        onChange={(e) => handleInputChange('address', e.target.value)}
-                                        placeholder="Site physical address"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Operational Information */}
-                        <div className="space-y-2">
-                            <h3 className="font-semibold text-sm flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                Operational Information
-                            </h3>
-                            <div className="grid gap-3">
-                                <div>
-                                    <Label htmlFor="operational_hours">Operational Hours</Label>
-                                    <Input
-                                        id="operational_hours"
-                                        value={formData.operational_hours || ''}
-                                        onChange={(e) => handleInputChange('operational_hours', e.target.value)}
-                                        placeholder="e.g., Mon-Fri: 8AM-5PM"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="site_admin_id">Site Administrator</Label>
-                                    <Select
-                                        value={formData.site_admin_id || ''}
-                                        onValueChange={(value) => handleInputChange('site_admin_id', value)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select site administrator" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">No site admin</SelectItem>
-                                            {users.map((user) => (
-                                                <SelectItem key={user.id} value={user.id.toString()}>
-                                                    {user.name} ({user.email})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
                                 </div>
                             </div>
                         </div>

@@ -19,87 +19,36 @@ class MultiSiteController extends Controller
 
     public function dashboards()
     {
-        $sites = Site::with(['assets.fieldValues'])->get()->map(function ($site) {
-            $assets = $site->assets;
-            
-            // Get asset IDs for work order queries
-            $assetIds = $assets->pluck('id');
-            
-            $workOrders = \App\Models\WorkOrder::whereIn('asset_id', $assetIds)->get();
-            
-            $activeWorkOrdersCount = $workOrders->whereIn('status', ['open', 'in_progress'])->count();
-            $completedWorkOrdersCount = $workOrders->whereIn('status', ['completed', 'closed'])->count();
-            
-            // Count unique assigned active technicians
-            $activeTechsCount = $workOrders->whereIn('status', ['open', 'in_progress'])
-                ->pluck('assigned_to')
-                ->filter()
-                ->unique()
-                ->count();
-            
-            // Calculate actual Asset Health score from asset condition
-            $totalAssets = $assets->count();
-            if ($totalAssets > 0) {
-                $totalScore = $assets->reduce(function ($carry, $asset) {
-                    $conditionStatus = $asset->getField('condition_status') ?? 'good';
-                    switch ($conditionStatus) {
-                        case 'excellent':
-                        case 'good': return $carry + 100;
-                        case 'fair': return $carry + 75;
-                        case 'poor': return $carry + 50;
-                        case 'damaged':
-                        case 'faulty': return $carry + 25;
-                        default: return $carry + 100;
-                    }
-                }, 0);
-                $healthScore = round($totalScore / $totalAssets);
-            } else {
-                $healthScore = 100;
-            }
-
-            // Calculate actual SLA Compliance
-            $totalWorkOrders = $workOrders->count();
-            if ($totalWorkOrders > 0) {
-                $slaCompliance = round(($completedWorkOrdersCount / $totalWorkOrders) * 100, 2);
-                $slaCompliance = max(85, min(100, $slaCompliance));
-            } else {
-                $slaCompliance = 100.00;
-            }
-
-            // Calculate average Response Time in minutes
-            $avgResponseTime = 0;
-            $completedWithTime = $workOrders->filter(function($wo) {
-                return $wo->status === 'completed' && $wo->completed_at && $wo->reported_at;
+        $sites = Site::withCount(['users', 'assets'])
+            ->get()
+            ->map(function ($site) {
+                // Count spare parts for this site
+                $sparePartsCount = \App\Models\SparePart::where('site_id', $site->id)->count();
+                
+                return [
+                    'id' => $site->id,
+                    'name' => $site->name,
+                    'code' => $site->code,
+                    'region' => $site->region,
+                    'users_count' => $site->users_count,
+                    'assets_count' => $site->assets_count,
+                    'spare_parts_count' => $sparePartsCount,
+                    'is_active' => $site->is_active,
+                ];
             });
-            if ($completedWithTime->count() > 0) {
-                $totalMinutes = $completedWithTime->reduce(function($carry, $wo) {
-                    return $carry + $wo->completed_at->diffInMinutes($wo->reported_at);
-                }, 0);
-                $avgResponseTime = round($totalMinutes / $completedWithTime->count());
-            }
-            if ($avgResponseTime <= 0) {
-                // Realistic fallback average speed in minutes based on site properties
-                $avgResponseTime = 15 + ($site->id % 5) * 4;
-            }
-
-            return [
-                'id' => $site->id,
-                'name' => $site->name,
-                'code' => $site->code,
-                'region' => $site->region,
-                'latitude' => $site->latitude,
-                'longitude' => $site->longitude,
-                'assets_count' => $totalAssets,
-                'activeWorkOrders' => $activeWorkOrdersCount,
-                'activeTechs' => max(1, $activeTechsCount),
-                'slaCompliance' => $slaCompliance,
-                'healthScore' => $healthScore,
-                'responseTime' => $avgResponseTime,
-            ];
-        });
+        
+        $stats = [
+            'total_sites' => $sites->count(),
+            'active_sites' => $sites->where('is_active', true)->count(),
+            'disabled_sites' => $sites->where('is_active', false)->count(),
+            'total_users' => $sites->sum('users_count'),
+            'total_assets' => $sites->sum('assets_count'),
+            'total_spare_parts' => $sites->sum('spare_parts_count'),
+        ];
         
         return Inertia::render('MultiSite/Dashboards', [
-            'sites' => $sites
+            'sites' => $sites,
+            'stats' => $stats,
         ]);
     }
 
