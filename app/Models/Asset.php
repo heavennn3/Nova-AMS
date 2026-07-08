@@ -10,13 +10,23 @@ class Asset extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable, SoftDeletes;
 
-    protected $fillable = ['site_id', 'status'];
+    protected $fillable = ['asset_id', 'site_id', 'region_id', 'status', 'added_by'];
 
     // ─── Relationships ─────────────────────────────────────────────
 
     public function site()
     {
         return $this->belongsTo(Site::class);
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function addedBy()
+    {
+        return $this->belongsTo(User::class, 'added_by');
     }
 
     public function category()
