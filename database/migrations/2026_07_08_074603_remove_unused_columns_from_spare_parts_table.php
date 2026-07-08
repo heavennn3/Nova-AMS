@@ -8,8 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Drop FK constraint first (MySQL 8 requires this before dropping FK column)
-        DB::statement('ALTER TABLE spare_parts DROP FOREIGN KEY spare_parts_spare_part_category_id_foreign');
+        // Drop FK constraint if it still exists (schema may have been partially applied)
+        try {
+            DB::statement('ALTER TABLE spare_parts DROP FOREIGN KEY spare_parts_spare_part_category_id_foreign');
+        } catch (\Exception $e) {
+            // FK already gone, proceed
+        }
 
         Schema::table('spare_parts', function (Blueprint $table) {
             $table->dropColumn([

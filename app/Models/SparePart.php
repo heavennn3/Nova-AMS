@@ -18,6 +18,7 @@ class SparePart extends Model
         'site_id',
         'status',
         'created_by',
+        'used_by',
     ];
 
     // category is now a string field on the table, not a relationship
@@ -88,16 +89,10 @@ class SparePart extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function getAvailabilityAttribute()
+    public function user()
     {
-        if ($this->quantity <= $this->minimum_stock_level) {
-            return 'low';
-        } elseif ($this->quantity == 0) {
-            return 'out_of_stock';
-        }
-        return 'available';
+        return $this->belongsTo(User::class, 'used_by');
     }
-
 
     /**
      * The "booted" method of the model.

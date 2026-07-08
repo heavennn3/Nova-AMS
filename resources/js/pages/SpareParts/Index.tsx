@@ -20,13 +20,23 @@ import { toast } from 'sonner';
 export default function SparePartsIndex({
     spareParts = [],
     sites = [],
+    users = [],
 }: {
     spareParts: any[];
     sites?: any[];
+    users?: any[];
 }) {
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editingPart, setEditingPart] = useState<any>(null);
+
+    const editForm = useForm(() => ({
+        name: '', part_number: '', category: '',
+        location: '', site_id: '',
+        status: 'available', used_by: '',
+    }));
 
     const form = useForm(() => {
         const initial: Record<string, any> = {
@@ -127,6 +137,32 @@ export default function SparePartsIndex({
                 cell: ({ row }: any) => <span>{row.getValue('site_name') ?? 'N/A'}</span>,
             },
             {
+                accessorKey: 'status',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Status" />
+                ),
+                cell: ({ row }: any) => {
+                    const status = row.getValue('status') as string;
+                    const colors: Record<string, string> = {
+                        available: 'bg-green-100 text-green-700',
+                        in_used: 'bg-blue-100 text-blue-700',
+                        faulty: 'bg-red-100 text-red-700',
+                    };
+                    return (
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
+                            {status?.replace('_', ' ')}
+                        </span>
+                    );
+                },
+            },
+            {
+                accessorKey: 'used_by_name',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Used By" />
+                ),
+                cell: ({ row }: any) => <span>{row.getValue('used_by_name') ?? '—'}</span>,
+            },
+            {
                 accessorKey: 'created_by_name',
                 header: ({ column }: any) => (
                     <DataTableColumnHeader column={column} title="Added By" />
@@ -140,11 +176,24 @@ export default function SparePartsIndex({
                     const part = row.original;
                     return (
                         <div className="flex items-center gap-2">
-                            <Link href={`/spare-parts/${part.id}/edit`}>
-                                <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
-                                    <Edit className="mr-1 h-4 w-4" /> Edit
-                                </Button>
-                            </Link>
+                            <Button
+                                variant="ghost" size="sm" className="h-8 px-2 text-blue-600"
+                                onClick={() => {
+                                    setEditingPart(part);
+                                    editForm.setData({
+                                        name: part.name,
+                                        part_number: part.part_number,
+                                        category: part.category,
+                                        location: part.location,
+                                        site_id: part.site_id || '',
+                                        status: part.status,
+                                        used_by: part.used_by || '',
+                                    });
+                                    setEditDialogOpen(true);
+                                }}
+                            >
+                                <Edit className="mr-1 h-4 w-4" /> Edit
+                            </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -184,46 +233,24 @@ export default function SparePartsIndex({
 
                     </div>
                 </div>
-                    <div className="flex items-center gap-2">
-                        <Link href="/spare-parts/dashboard">
-                            <Button variant="outline">
-                                <Package className="mr-2 h-4 w-4" />
-                                Dashboard
-                            </Button>
-                        </Link>
-                        <Button onClick={() => {
-                            form.reset();
-                            setCreateDialogOpen(true);
-                        }}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Part
+                <div className="flex items-center gap-2">
+                    <Link href="/spare-parts/dashboard">
+                        <Button variant="outline">
+                            <Package className="mr-2 h-4 w-4" />
+                            Dashboard
                         </Button>
-                    </div>
+                    </Link>
+                    <Button onClick={() => {
+                        form.reset();
+                        setCreateDialogOpen(true);
+                    }}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Part
+                    </Button>
+                </div>
             </div>
 
-            {/* Search and Filters */}
-            <div className="flex flex-wrap items-center gap-3">
-                <div className="relative w-[280px]">
-                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                        placeholder="Search"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="h-8 pl-8 text-sm"
-                    />
-                </div>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="h-8 w-[180px] text-sm">
-                        <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((cat) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+
 
             {/* Data Table */}
             <Card>
@@ -323,6 +350,138 @@ export default function SparePartsIndex({
                             </Button>
                             <Button type="submit" disabled={form.processing}>
                                 {form.processing ? 'Saving...' : 'Save Part'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Spare Part Dialog */}
+            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const data = {
+                            ...editForm.data,
+                            site_id: editForm.data.site_id || null,
+                            used_by: editForm.data.used_by || null,
+                        };
+                        router.put(`/spare-parts/${editingPart?.id}`, data, {
+                            onSuccess: () => {
+                                setEditDialogOpen(false);
+                                toast.success('Spare part updated successfully');
+                            },
+                            onError: () => {
+                                toast.error('Failed to update spare part');
+                            }
+                        });
+                    }}>
+                        <DialogHeader>
+                            <DialogTitle>Edit Spare Part</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Spare Part Name *</Label>
+                                    <Input
+                                        required
+                                        value={editForm.data.name}
+                                        onChange={(e) => editForm.setData('name', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Serial Number *</Label>
+                                    <Input
+                                        required
+                                        value={editForm.data.part_number}
+                                        onChange={(e) => editForm.setData('part_number', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Category *</Label>
+                                    <Select
+                                        value={editForm.data.category}
+                                        onValueChange={(v) => editForm.setData('category', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((cat) => (
+                                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Site</Label>
+                                    <Select
+                                        value={editForm.data.site_id}
+                                        onValueChange={(v) => editForm.setData('site_id', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select site" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {sites.map((site: any) => (
+                                                <SelectItem key={site.id} value={String(site.id)}>
+                                                    {site.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Place (Where Kept) *</Label>
+                                    <Input
+                                        required
+                                        value={editForm.data.location}
+                                        onChange={(e) => editForm.setData('location', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Status</Label>
+                                    <Select
+                                        value={editForm.data.status}
+                                        onValueChange={(v) => editForm.setData('status', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="available">Available</SelectItem>
+                                            <SelectItem value="in_used">In Used</SelectItem>
+                                            <SelectItem value="faulty">Faulty</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Used By</Label>
+                                    <Select
+                                        value={editForm.data.used_by}
+                                        onValueChange={(v) => editForm.setData('used_by', v)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Not assigned" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">None</SelectItem>
+                                            {users.map((user: any) => (
+                                                <SelectItem key={user.id} value={String(user.id)}>
+                                                    {user.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={editForm.processing}>
+                                {editForm.processing ? 'Saving...' : 'Update'}
                             </Button>
                         </DialogFooter>
                     </form>

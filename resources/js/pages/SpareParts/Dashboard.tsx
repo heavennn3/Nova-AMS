@@ -1,127 +1,98 @@
-import { useState, useMemo } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, DollarSign, AlertTriangle, CheckCircle, TrendingUp, ArrowRight, X } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function SparePartsDashboard({
     totalParts = 0,
-    totalValue = '0.00',
     availableParts = 0,
-    lowStockParts = 0,
     outOfStockParts = 0,
     categoryData = [],
-    recentCheckouts = [],
     lowStockAlerts = [],
     allParts = [],
 }: {
     totalParts: number;
-    totalValue: string;
     availableParts: number;
-    lowStockParts: number;
     outOfStockParts: number;
     categoryData: any[];
-    recentCheckouts: any[];
     lowStockAlerts: any[];
     allParts: any[];
 }) {
-    const [activeStat, setActiveStat] = useState<string | null>(null);
-
-    const statFilters: Record<string, (p: any) => boolean> = {
-        'Total Spare Parts': () => true,
-        'Available': (p) => p.status === 'available',
-        'Low Stock': (p) => p.stock_level > 0 && p.stock_level <= p.minimum_stock_level,
-        'Out of Stock': (p) => p.stock_level <= 0,
-        'Faulty Parts': (p) => p.status === 'faulty',
-    };
-
-    const filteredParts = useMemo(() => {
-        const filterFn = statFilters[activeStat || ''];
-        return filterFn ? allParts.filter(filterFn) : [];
-    }, [activeStat, allParts]);
-
-    const statsCards = [
+    const sparePartColumns = [
         {
-            title: 'Total Spare Parts',
-            value: totalParts.toString(),
-            icon: Package,
-            color: 'text-blue-600',
-            bgColor: 'bg-blue-100',
-        },
-
-        {
-            title: 'Available',
-            value: availableParts.toString(),
-            icon: CheckCircle,
-            color: 'text-green-600',
-            bgColor: 'bg-green-100',
+            accessorKey: 'name',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Spare Part Name" />,
+            cell: ({ row }: any) => <span className="font-semibold">{row.getValue('name')}</span>,
         },
         {
-            title: 'Low Stock',
-            value: lowStockParts.toString(),
-            icon: AlertTriangle,
-            color: 'text-yellow-600',
-            bgColor: 'bg-yellow-100',
+            accessorKey: 'part_number',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Serial Number" />,
+            cell: ({ row }: any) => <span className="font-mono">{row.getValue('part_number')}</span>,
         },
         {
-            title: 'Out of Stock',
-            value: outOfStockParts.toString(),
-            icon: AlertTriangle,
-            color: 'text-red-600',
-            bgColor: 'bg-red-100',
+            accessorKey: 'category',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
         },
         {
-            title: 'Faulty Parts',
-            value: outOfStockParts.toString(),
-            icon: AlertTriangle,
-            color: 'text-red-600',
-            bgColor: 'bg-red-100',
-        },
-    ];
-
-    const checkoutColumns = [
-        {
-            accessorKey: 'part_name',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Part Name" />
-            ),
+            accessorKey: 'location',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Place" />,
         },
         {
-            accessorKey: 'user_name',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="User" />
-            ),
-        },
-        {
-            accessorKey: 'quantity',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Quantity" />
-            ),
-        },
-        {
-            accessorKey: 'checkout_date',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Checkout Date" />
-            ),
+            accessorKey: 'site_name',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Site" />,
         },
         {
             accessorKey: 'status',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Status" />
-            ),
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
             cell: ({ row }: any) => {
-                const status = row.getValue('status');
-                const statusStyles = {
-                    checked_out: 'bg-blue-100 text-blue-700',
-                    returned: 'bg-green-100 text-green-700',
-                    overdue: 'bg-red-100 text-red-700',
+                const status = row.getValue('status') as string;
+                const colors: Record<string, string> = {
+                    available: 'bg-green-100 text-green-700',
+                    in_used: 'bg-blue-100 text-blue-700',
+                    faulty: 'bg-red-100 text-red-700',
                 };
                 return (
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[status as keyof typeof statusStyles] || 'bg-gray-100 text-gray-700'}`}>
-                        {status.replace('_', ' ').toUpperCase()}
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
+                        {status?.replace('_', ' ')}
                     </span>
+                );
+            },
+        },
+        {
+            accessorKey: 'used_by_name',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Used By" />,
+            cell: ({ row }: any) => <span>{row.getValue('used_by_name') ?? '—'}</span>,
+        },
+        {
+            accessorKey: 'created_by_name',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Added By" />,
+            cell: ({ row }: any) => <span>{row.getValue('created_by_name') ?? 'N/A'}</span>,
+        },
+        {
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }: any) => {
+                const part = row.original;
+                const nextStatus = part.status === 'available' ? 'faulty' : 'available';
+                return (
+                    <Button
+                        variant="outline" size="sm"
+                        onClick={() => {
+                            if (confirm(`Set "${part.name}" to ${nextStatus}?`)) {
+                                router.put(`/spare-parts/${part.id}`, {
+                                    name: part.name,
+                                    part_number: part.part_number,
+                                    category: part.category,
+                                    location: part.location,
+                                    status: nextStatus,
+                                });
+                            }
+                        }}
+                    >
+                        Set {nextStatus.replace('_', ' ')}
+                    </Button>
                 );
             },
         },
@@ -136,7 +107,6 @@ export default function SparePartsDashboard({
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
                         Spare Parts Inventory
                     </h1>
-
                 </div>
                 <Link href="/spare-parts">
                     <Button>
@@ -145,65 +115,13 @@ export default function SparePartsDashboard({
                     </Button>
                 </Link>
             </div>
+
             {/* Stats Cards */}
             <div className="grid grid-cols-5 gap-3">
-                {statsCards.map((stat) => {
-                    const Icon = stat.icon;
-                    const isActive = activeStat === stat.title;
-                    return (
-                        <button
-                            key={stat.title}
-                            type="button"
-                            onClick={() => setActiveStat(activeStat === stat.title ? null : stat.title)}
-                            className={`text-left rounded-xl border transition-all duration-200 ${isActive
-                                ? 'ring-2 ring-offset-2 shadow-lg scale-[1.02]'
-                                : 'hover:shadow-md hover:scale-[1.01]'
-                                }`}
-                        >
-                            <Card className={`border-0 shadow-none ${isActive ? stat.bgColor : ''}`}>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">
-                                        {stat.title}
-                                    </CardTitle>
-                                    <div className={`p-3 rounded-xl ${stat.bgColor}`}>
-                                        <Icon className={`h-5 w-5 ${stat.color}`} />
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className={`text-3xl font-bold tracking-tight ${stat.color}`}>{stat.value}</div>
-                                </CardContent>
-                            </Card>
-                        </button>
-                    );
-                })}
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Items</CardTitle><Package className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-3xl font-bold">{totalParts}</div></CardContent></Card>
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Available</CardTitle><CheckCircle className="h-4 w-4 text-green-500" /></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{availableParts}</div></CardContent></Card>
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Faulty</CardTitle><AlertTriangle className="h-4 w-4 text-red-500" /></CardHeader><CardContent><div className="text-3xl font-bold text-red-600">{outOfStockParts}</div></CardContent></Card>
             </div>
-
-            {/* Filtered Parts Table */}
-            {activeStat && (
-                <Card className="overflow-hidden border-emerald-200">
-                    <CardHeader className="flex flex-row items-center justify-between bg-muted/30 py-3">
-                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                            <span className={`inline-block h-2 w-2 rounded-full ${statsCards.find(s => s.title === activeStat)?.color.replace('text-', 'bg-')}`} />
-                            {activeStat}
-                        </CardTitle>
-                        <button type="button" onClick={() => setActiveStat(null)} className="text-muted-foreground hover:text-foreground">
-                            <X className="h-4 w-4" />
-                        </button>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <DataTable
-                            columns={[
-                                { accessorKey: 'name', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" /> },
-                                { accessorKey: 'category', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" /> },
-                                { accessorKey: 'stock_level', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Stock" /> },
-                                { accessorKey: 'location', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Location" /> },
-                            ]}
-                            data={filteredParts}
-                            hideToolbar
-                        />
-                    </CardContent>
-                </Card>
-            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Category Breakdown */}
@@ -288,29 +206,16 @@ export default function SparePartsDashboard({
                 </Card>
             </div>
 
-            {/* Recent Checkouts */}
+            {/* All Spare Parts Table */}
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Recent Checkouts</CardTitle>
-                    <Link href="/spare-parts">
-                        <Button variant="outline" size="sm">
-                            View All
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </Link>
+                <CardHeader>
+                    <CardTitle>All Spare Parts</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    {recentCheckouts.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-8">
-                            No recent checkouts
-                        </p>
-                    ) : (
-                        <DataTable
-                            columns={checkoutColumns}
-                            data={recentCheckouts}
-                            hideToolbar
-                        />
-                    )}
+                <CardContent className="p-0">
+                    <DataTable
+                        columns={sparePartColumns}
+                        data={allParts}
+                    />
                 </CardContent>
             </Card>
         </div>

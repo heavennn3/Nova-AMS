@@ -17,7 +17,7 @@ class SparePartController extends Controller
     {
         $totalParts = SparePart::count();
         $availableParts = SparePart::where('status', 'available')->count();
-        $outOfStockParts = SparePart::where('status', 'out')->count();
+        $faultyParts = SparePart::where('status', 'faulty')->count();
 
         // Category breakdown
         $categoryData = SparePart::selectRaw('category, count(*) as count')
@@ -32,35 +32,32 @@ class SparePartController extends Controller
                 ];
             });
 
-        // Recent checkouts
-        $recentCheckouts = Checkout::with(['sparePart', 'user'])
+        // All spare parts for table display
+        $allParts = SparePart::with(['site', 'creator', 'user'])
             ->latest()
-            ->limit(5)
             ->get()
-            ->map(function ($checkout) {
+            ->map(function ($part) {
                 return [
-                    'id' => $checkout->id,
-                    'part_name' => $checkout->sparePart?->name ?? 'Unknown',
-                    'user_name' => $checkout->user?->name ?? 'Unknown',
-                    'quantity' => $checkout->quantity,
-                    'checkout_date' => $checkout->checkout_date?->format('Y-m-d'),
-                    'status' => $checkout->status,
+                    'id' => $part->id,
+                    'name' => $part->name,
+                    'part_number' => $part->part_number,
+                    'category' => $part->category,
+                    'location' => $part->location,
+                    'site_name' => $part->site?->name ?? 'N/A',
+                    'status' => $part->status,
+                    'used_by' => $part->used_by,
+                    'used_by_name' => $part->user?->name ?? '—',
+                    'created_by_name' => $part->creator?->name ?? 'N/A',
                 ];
             });
 
-        // All spare parts for table display
-        $allParts = SparePart::select('id', 'name', 'category', 'location', 'status')
-            ->latest()
-            ->get();
-
         return Inertia::render('SpareParts/Dashboard', [
             'totalParts' => $totalParts,
-            'totalValue' => '0.00',
             'availableParts' => $availableParts,
             'lowStockParts' => 0,
-            'outOfStockParts' => $outOfStockParts,
+            'outOfStockParts' => $faultyParts,
             'categoryData' => $categoryData,
-            'recentCheckouts' => $recentCheckouts,
+            'recentCheckouts' => [],
             'lowStockAlerts' => collect(),
             'allParts' => $allParts,
         ]);
@@ -78,16 +75,22 @@ class SparePartController extends Controller
                     'part_number' => $part->part_number,
                     'category' => $part->category,
                     'location' => $part->location,
+                    'site_id' => $part->site_id,
                     'site_name' => $part->site?->name ?? 'N/A',
+                    'status' => $part->status,
+                    'used_by' => $part->used_by,
+                    'used_by_name' => $part->user?->name ?? '—',
                     'created_by_name' => $part->creator?->name ?? 'N/A',
                 ];
             });
 
         $sites = \App\Models\Site::orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
 
         return Inertia::render('SpareParts/Index', [
             'spareParts' => $spareParts,
             'sites' => $sites,
+            'users' => $users,
         ]);
     }
 
@@ -111,39 +114,17 @@ class SparePartController extends Controller
 
     public function update(Request $request, SparePart $sparePart)
     {
-        $configs = TableConfiguration::getAllColumns('spare_parts');
-
-        $rules = [
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'part_number' => 'required|string|unique:spare_parts,part_number,' . $sparePart->id,
-            'quantity' => 'required|integer|min:0',
-            'minimum_stock_level' => 'required|integer|min:0',
-            'unit_cost' => 'required|numeric|min:0',
-            'location' => 'nullable|string',
+            'category' => 'required|string|in:RAM,MONITOR,STORAGE,CABLE,PSU,RJ45,CABLE TRACER',
             'site_id' => 'nullable|exists:sites,id',
-            'status' => 'required|string',
-            'specifications' => 'nullable|array',
-            'compatibility' => 'nullable|array',
-            'asset_type_id' => 'nullable|exists:asset_types,id',
-        ];
-        foreach ($configs as $c) {
-            $rules[$c->column_key] = $c->is_primary_key ? 'required|string' : 'nullable|string';
-        }
-
-        $validated = $request->validate($rules);
-
-        $dynamicFields = [];
-        foreach ($configs as $c) {
-            if (array_key_exists($c->column_key, $validated)) {
-                $dynamicFields[$c->column_key] = $validated[$c->column_key];
-                unset($validated[$c->column_key]);
-            }
-        }
-
-        $validated['specifications'] = $validated['specifications'] ?? [];
-        $validated['compatibility'] = $validated['compatibility'] ?? [];
+            'location' => 'required|string|max:255',
+            'status' => 'required|string|in:available,in_used,faulty',
+            'used_by' => 'nullable|exists:users,id',
+        ]);
 
         $sparePart->update($validated);
-        $sparePart->syncFields($dynamicFields);
 
         return redirect()->back()->with('success', 'Spare part updated successfully.');
     }
