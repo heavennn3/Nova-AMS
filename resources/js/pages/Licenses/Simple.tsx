@@ -229,6 +229,12 @@ export default function SimpleLicensesIndex({
 
             </div>
 
+
+
+
+
+
+
             {/* Filtered License Table */}
             <div className="bg-white border rounded-lg">
                 <div className="p-6 border-b">

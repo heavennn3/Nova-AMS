@@ -400,7 +400,8 @@ export default function LiveTrackingAdmin({
         <div className="w-full space-y-6 p-8">
             <Head title="Asset Withdrawal Tracking" />
 
-            {/* Header */}
+
+
             <div className="flex items-start justify-between border-b pb-4">
                 <div>
                     <h1 className="flex items-center text-3xl font-bold tracking-tight text-foreground">
@@ -414,79 +415,47 @@ export default function LiveTrackingAdmin({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-200 dark:border-amber-800">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                                    In Use
-                                </p>
-                                <p className="text-3xl font-bold text-amber-900 dark:text-amber-100">
-                                    {stats.in_use}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-amber-200 dark:bg-amber-800 rounded-full">
-                                <Activity className="h-8 w-8 text-amber-700 dark:text-amber-300" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-5 gap-4">
+                <div
+                    className={`bg-blue-50 border border-blue-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `} >
+                    <h3 className="font-semibold text-blue-900">In Use</h3>
+                    <p className="text-2xl font-bold text-blue-600">{stats.in_use}</p>
+                </div>
 
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                                    Total Returned
-                                </p>
-                                <p className="text-3xl font-bold text-green-900 dark:text-green-100">
-                                    {stats.total_returned}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-green-200 dark:bg-green-800 rounded-full">
-                                <CheckCircle className="h-8 w-8 text-green-700 dark:text-green-300" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
-                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                                    Returned Today
-                                </p>
-                                <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">
-                                    {stats.returned_today}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-purple-200 dark:bg-purple-800 rounded-full">
-                                <Calendar className="h-8 w-8 text-purple-700 dark:text-purple-300" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
-                <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 border-red-200 dark:border-red-800">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-red-600 dark:text-red-400">
-                                    Overdue
-                                </p>
-                                <p className="text-3xl font-bold text-red-900 dark:text-red-100">
-                                    {stats.overdue}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-red-200 dark:bg-red-800 rounded-full">
-                                <AlertTriangle className="h-8 w-8 text-red-700 dark:text-red-300" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+
+
+                <div
+                    className={`bg-green-50 border border-green-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `}
+
+                >
+                    <h3 className="font-semibold text-green-900">Returned Today</h3>
+
+
+                    <p className="text-2xl font-bold text-green-600">{stats.returned_today}</p>
+
+                </div>
+
+
+                <div
+                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `}
+
+                >
+                    <h3 className="font-semibold text-red-900">Overdue </h3>
+                    <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
+
+                </div>
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
