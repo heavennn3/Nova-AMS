@@ -147,39 +147,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/multi-site/access', [\App\Http\Controllers\MultiSiteController::class, 'access'])->name('multi-site.access');
     });
 
-    // Operations Module
-    Route::middleware(['permission:module.operations'])->group(function () {
-        Route::get('/operations-maintanance', [\App\Http\Controllers\OperationsController::class, 'dashboard'])->name('operations-maintenance');
-        Route::get('/maintenance/scheduling', [\App\Http\Controllers\OperationsController::class, 'scheduling']);
-        Route::get('/maintenance/work-orders', [\App\Http\Controllers\OperationsController::class, 'workOrders']);
-        Route::post('/maintenance/work-orders', [\App\Http\Controllers\OperationsController::class, 'storeWorkOrder'])->name('maintenance.work-orders.store');
-        Route::patch('/maintenance/work-orders/{id}/status', [\App\Http\Controllers\OperationsController::class, 'updateWorkOrderStatus'])->name('maintenance.work-orders.status');
-        Route::get('/maintenance/history', [\App\Http\Controllers\OperationsController::class, 'history']);
-        Route::get('/maintenance/parts', [\App\Http\Controllers\OperationsController::class, 'parts']);
-        Route::post('/maintenance/parts', [\App\Http\Controllers\OperationsController::class, 'storePart'])->name('maintenance.parts.store');
-        Route::put('/maintenance/parts/{id}', [\App\Http\Controllers\OperationsController::class, 'updatePart'])->name('maintenance.parts.update');
-        Route::delete('/maintenance/parts/{id}', [\App\Http\Controllers\OperationsController::class, 'destroyPart'])->name('maintenance.parts.destroy');
-        Route::get('/maintenance/technicians', [\App\Http\Controllers\OperationsController::class, 'technicians']);
-
-        Route::get('/vendors/performance', [\App\Http\Controllers\OperationsController::class, 'performance']);
-        Route::get('/vendors/alerts', [\App\Http\Controllers\OperationsController::class, 'alerts']);
-
-        // Spare Parts Module
-        Route::prefix('spare-parts')->group(function () {
-            Route::get('/dashboard', [\App\Http\Controllers\SparePartController::class, 'dashboard'])->name('spare-parts.dashboard');
-            Route::get('/', [\App\Http\Controllers\SparePartController::class, 'index'])->name('spare-parts.index');
-            Route::post('/', [\App\Http\Controllers\SparePartController::class, 'store'])->name('spare-parts.store');
-            Route::put('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'update'])->name('spare-parts.update');
-            Route::delete('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'destroy'])->name('spare-parts.destroy');
-            Route::post('/{sparePart}/checkout', [\App\Http\Controllers\SparePartController::class, 'checkout'])->name('spare-parts.checkout');
-            Route::post('/checkouts/{checkout}/return', [\App\Http\Controllers\SparePartController::class, 'returnCheckout'])->name('spare-parts.return');
-            Route::get('/export', [\App\Http\Controllers\SparePartController::class, 'exportCsv'])->name('spare-parts.export');
-            Route::post('/import-bulk', [\App\Http\Controllers\SparePartController::class, 'importBulk'])->name('spare-parts.import-bulk');
-        });
-        Route::get('/vendors/slas', [\App\Http\Controllers\OperationsController::class, 'slas']);
-        Route::get('/vendors/po', [\App\Http\Controllers\OperationsController::class, 'po']);
-        Route::get('/vendors/portal', [\App\Http\Controllers\OperationsController::class, 'portal']);
-
+    // Spare Parts Module (moved outside Operations module)
+    Route::prefix('spare-parts')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\SparePartController::class, 'dashboard'])->name('spare-parts.dashboard');
+        Route::get('/', [\App\Http\Controllers\SparePartController::class, 'index'])->name('spare-parts.index');
+        Route::post('/', [\App\Http\Controllers\SparePartController::class, 'store'])->name('spare-parts.store');
+        Route::put('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'update'])->name('spare-parts.update');
+        Route::delete('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'destroy'])->name('spare-parts.destroy');
+        Route::post('/{sparePart}/checkout', [\App\Http\Controllers\SparePartController::class, 'checkout'])->name('spare-parts.checkout');
+        Route::post('/checkouts/{checkout}/return', [\App\Http\Controllers\SparePartController::class, 'returnCheckout'])->name('spare-parts.return');
+        Route::get('/export', [\App\Http\Controllers\SparePartController::class, 'exportCsv'])->name('spare-parts.export');
+        Route::post('/import-bulk', [\App\Http\Controllers\SparePartController::class, 'importBulk'])->name('spare-parts.import-bulk');
     });
 
     // Documents Module
