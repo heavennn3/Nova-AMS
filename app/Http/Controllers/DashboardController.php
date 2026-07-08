@@ -27,7 +27,7 @@ class DashboardController extends Controller
         $totalSites = Site::count();
         $totalUsers = \App\Models\User::count();
         $totalRecentAdded = Asset::where('created_at', '>=', Carbon::now()->subDays(30))->count();
-        $openTickets = SupportTicket::whereIn('status', ['Open', 'In Progress'])->count();
+
 
         // Low Spare Parts Alert
         $lowSpareParts = \App\Models\SparePart::with('site')
@@ -103,7 +103,7 @@ class DashboardController extends Controller
                 'totalSites' => $totalSites,
                 'totalUsers' => $totalUsers,
                 'totalRecentAdded' => $totalRecentAdded,
-                'openTickets' => $openTickets,
+
                 'lowSpareParts' => $lowSpareParts,
                 'sitesWithStats' => $sitesWithStats,
                 'pendingRequests' => $pendingRequestsCount,
