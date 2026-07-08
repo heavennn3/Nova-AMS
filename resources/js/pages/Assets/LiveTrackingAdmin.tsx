@@ -415,7 +415,7 @@ export default function LiveTrackingAdmin({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 <div
                     className={`bg-blue-50 border border-blue-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `} >
                     <h3 className="font-semibold text-blue-900">In Use</h3>
