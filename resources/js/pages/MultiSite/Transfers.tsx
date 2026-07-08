@@ -159,7 +159,7 @@ export default function Transfers({
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                         <ArrowRightLeft className="h-8 w-8 text-primary" />
-                        Inter-Site Transfer Workflows
+                        Asset Transfer
                     </h1>
                 </div>
             </div>
