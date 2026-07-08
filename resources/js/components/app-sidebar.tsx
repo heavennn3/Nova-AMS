@@ -83,7 +83,7 @@ const navSections: NavSection[] = [
                         href: '/multi-site/dashboards',
                     },
                     {
-                        title: 'Transfer Workflows',
+                        title: 'Asset Transfer',
                         href: '/multi-site/transfers',
                     },
                 ],
