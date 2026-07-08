@@ -117,10 +117,34 @@ export default function SparePartsDashboard({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-5 gap-3">
-                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Items</CardTitle><Package className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-3xl font-bold">{totalParts}</div></CardContent></Card>
-                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Available</CardTitle><CheckCircle className="h-4 w-4 text-green-500" /></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{availableParts}</div></CardContent></Card>
-                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Faulty</CardTitle><AlertTriangle className="h-4 w-4 text-red-500" /></CardHeader><CardContent><div className="text-3xl font-bold text-red-600">{outOfStockParts}</div></CardContent></Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-blue-500/10 p-3">
+                        <Package className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Items</p>
+                        <p className="text-2xl font-bold">{totalParts}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-green-500/10 p-3">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Available</p>
+                        <p className="text-2xl font-bold">{availableParts}</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-red-500/10 p-3">
+                        <AlertTriangle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Faulty</p>
+                        <p className="text-2xl font-bold">{outOfStockParts}</p>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
