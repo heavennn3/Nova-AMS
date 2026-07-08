@@ -101,7 +101,7 @@ export default function SimpleLicensesIndex({
 
     // Calculate metrics
     const totalLicenses = licenses.length;
-    
+
     const activeLicenses = licenses.filter((lic: any) => {
         if (!lic.expiration_date) return true; // Never expires = active
         const expiry = new Date(lic.expiration_date);
@@ -146,11 +146,11 @@ export default function SimpleLicensesIndex({
         if (!license.expiration_date) {
             return <Badge variant="secondary">Never Expires</Badge>;
         }
-        
+
         const expiry = new Date(license.expiration_date);
         const now = new Date();
         const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays <= 0) {
             return <Badge variant="destructive">Expired</Badge>;
         } else if (diffDays <= 30) {
@@ -173,14 +173,13 @@ export default function SimpleLicensesIndex({
                 </Button>
             </div>
 
-            
+
 
             {/* Clickable Metric Cards - Old Box Style */}
             <div className="grid grid-cols-5 gap-4">
-                <div 
-                    className={`bg-blue-50 border border-blue-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'all' ? 'ring-2 ring-blue-500 shadow-lg' : ''
-                    }`}
+                <div
+                    className={`bg-blue-50 border border-blue-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedFilter === 'all' ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                        }`}
                     onClick={() => setSelectedFilter('all')}
                 >
                     <h3 className="font-semibold text-blue-900">Total Licenses</h3>
@@ -188,10 +187,9 @@ export default function SimpleLicensesIndex({
 
                 </div>
 
-                <div 
-                    className={`bg-green-50 border border-green-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'active' ? 'ring-2 ring-green-500 shadow-lg' : ''
-                    }`}
+                <div
+                    className={`bg-green-50 border border-green-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedFilter === 'active' ? 'ring-2 ring-green-500 shadow-lg' : ''
+                        }`}
                     onClick={() => setSelectedFilter('active')}
                 >
                     <h3 className="font-semibold text-green-900">Active</h3>
@@ -199,20 +197,18 @@ export default function SimpleLicensesIndex({
 
                 </div>
 
-                <div 
-                    className={`bg-purple-50 border border-purple-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'inuse' ? 'ring-2 ring-purple-500 shadow-lg' : ''
-                    }`}
+                <div
+                    className={`bg-purple-50 border border-purple-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedFilter === 'inuse' ? 'ring-2 ring-purple-500 shadow-lg' : ''
+                        }`}
                     onClick={() => setSelectedFilter('inuse')}
                 >
                     <h3 className="font-semibold text-purple-900">In Use</h3>
                     <p className="text-2xl font-bold text-purple-600">{inUseLicenses.length}</p>
                 </div>
 
-                <div 
-                    className={`bg-amber-50 border border-amber-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'expiring' ? 'ring-2 ring-amber-500 shadow-lg' : ''
-                    }`}
+                <div
+                    className={`bg-amber-50 border border-amber-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedFilter === 'expiring' ? 'ring-2 ring-amber-500 shadow-lg' : ''
+                        }`}
                     onClick={() => setSelectedFilter('expiring')}
                 >
                     <h3 className="font-semibold text-amber-900">Expiring Soon</h3>
@@ -220,10 +216,9 @@ export default function SimpleLicensesIndex({
 
                 </div>
 
-                <div 
-                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        selectedFilter === 'expired' ? 'ring-2 ring-red-500 shadow-lg' : ''
-                    }`}
+                <div
+                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedFilter === 'expired' ? 'ring-2 ring-red-500 shadow-lg' : ''
+                        }`}
                     onClick={() => setSelectedFilter('expired')}
                 >
                     <h3 className="font-semibold text-red-900">Expired </h3>
@@ -231,7 +226,7 @@ export default function SimpleLicensesIndex({
 
                 </div>
 
-                
+
             </div>
 
             {/* Filtered License Table */}
@@ -240,13 +235,13 @@ export default function SimpleLicensesIndex({
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-semibold">
                             {selectedFilter === 'all' ? 'All Licenses' :
-                             selectedFilter === 'active' ? 'Active Licenses' :
-                             selectedFilter === 'expiring' ? 'Expiring This Month' :
-                             selectedFilter === 'expired' ? 'Expired Licenses' :
-                             'In Use Licenses'} 
+                                selectedFilter === 'active' ? 'Active Licenses' :
+                                    selectedFilter === 'expiring' ? 'Expiring This Month' :
+                                        selectedFilter === 'expired' ? 'Expired Licenses' :
+                                            'In Use Licenses'}
                             ({filteredLicenses.length})
                         </h2>
-                       
+
                     </div>
                 </div>
 
@@ -257,16 +252,13 @@ export default function SimpleLicensesIndex({
                                 <span className="text-2xl">📄</span>
                             </div>
                             <p className="text-lg font-medium text-muted-foreground mb-2">
-                                No {selectedFilter === 'all' ? '' : 
+                                No {selectedFilter === 'all' ? '' :
                                     selectedFilter === 'active' ? 'active ' :
-                                    selectedFilter === 'expiring' ? 'expiring ' :
-                                    selectedFilter === 'expired' ? 'expired ' :
-                                    'in-use '}licenses found
+                                        selectedFilter === 'expiring' ? 'expiring ' :
+                                            selectedFilter === 'expired' ? 'expired ' :
+                                                'in-use '}licenses found
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                                {selectedFilter === 'all' ? 'Create your first license to get started.' :
-                                 'Try selecting a different filter or add more licenses.'}
-                            </p>
+
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -300,7 +292,7 @@ export default function SimpleLicensesIndex({
                                                 </div>
                                             )}
                                         </div>
-                                        
+
                                         <div className="text-right">
                                             <div className="text-sm font-medium text-gray-900">
                                                 {license.purchase_cost ? `$${license.purchase_cost}` : 'No cost'}
@@ -320,7 +312,7 @@ export default function SimpleLicensesIndex({
             </div>
 
             {/* ── Create License Modal ── */}
-            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); }}}>
+            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); } }}>
                 <DialogContent className="sm:max-w-lg">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
