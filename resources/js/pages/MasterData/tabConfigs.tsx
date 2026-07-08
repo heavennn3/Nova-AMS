@@ -239,7 +239,7 @@ export function assetStatusesTab(opts: any) {
     const { assetStatuses, formData, setFormData, handleOpenDialog, handleDelete, isAdmin } = opts;
     const presetColors = ['#6B7280', '#EF4444', '#EAB308', '#22C55E', '#3B82F6', '#F97316', '#8B5CF6', '#EC4899', '#14B8A6', '#F43F5E'];
     return {
-        title: 'Asset Status (Color)',
+        title: 'Asset Statuses',
         columns: [
             {
                 accessorKey: 'color', header: ({ column }: any) => <DataTableColumnHeader column={column} title="Color" />,
@@ -254,18 +254,63 @@ export function assetStatusesTab(opts: any) {
         data: assetStatuses || [],
         renderForm: () => (
             <>
-                <div className="grid gap-2"><Label>Status Name <span className="text-rose-500">*</span></Label><Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. IN TRANSIT" required /></div>
-                <div className="grid gap-2"><Label>Badge Color</Label>
+                <div className="grid gap-2">
+                    <Label>Status Name <span className="text-rose-500">*</span></Label>
+                    <Input value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. IN TRANSIT" required />
+                </div>
+                <div className="grid gap-2">
+                    <Label>Badge Color</Label>
+                    
+                    {/* Preset colors */}
                     <div className="flex flex-wrap gap-2">
                         {presetColors.map(c => (
-                            <button key={c} type="button" onClick={() => setFormData({ ...formData, color: c })}
-                                className={`h-8 w-8 rounded-full border-2 transition-all ${formData.color === c ? 'border-foreground scale-110' : 'border-transparent'}`}
-                                style={{ backgroundColor: c }} />
+                            <button 
+                                key={c} 
+                                type="button" 
+                                onClick={() => setFormData({ ...formData, color: c })}
+                                className={`h-8 w-8 rounded-full border-2 transition-all hover:scale-110 ${formData.color === c ? 'border-foreground scale-110 ring-2 ring-offset-2 ring-foreground' : 'border-gray-300'}`}
+                                style={{ backgroundColor: c }} 
+                                title={c}
+                            />
                         ))}
                     </div>
-                    <Input value={formData.color || '#6B7280'} onChange={(e) => setFormData({ ...formData, color: e.target.value })} placeholder="#HEX" className="mt-1 font-mono" />
+                    
+                    {/* Custom color picker */}
+                    <div className="flex gap-2 mt-2">
+                        <div className="flex-1">
+                            <Input 
+                                value={formData.color || '#6B7280'} 
+                                onChange={(e) => setFormData({ ...formData, color: e.target.value })} 
+                                placeholder="#HEX" 
+                                className="font-mono"
+                            />
+                        </div>
+                        <div className="relative">
+                            <input 
+                                type="color" 
+                                value={formData.color || '#6B7280'}
+                                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                                className="h-10 w-20 cursor-pointer rounded-md border border-input"
+                                title="Choose custom color"
+                            />
+                        </div>
+                    </div>
+                    
+                    {/* Color preview */}
+                    <div className="mt-2 p-3 rounded-md border bg-muted/20">
+                        <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                        <span 
+                            className="inline-block rounded-md px-3 py-1 text-sm font-semibold text-white" 
+                            style={{ backgroundColor: formData.color || '#6B7280' }}
+                        >
+                            {formData.name || 'Status Name'}
+                        </span>
+                    </div>
                 </div>
-                <div className="grid gap-2"><Label>Sort Order</Label><Input type="number" value={formData.sort_order ?? 0} onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })} /></div>
+                <div className="grid gap-2">
+                    <Label>Sort Order</Label>
+                    <Input type="number" value={formData.sort_order ?? 0} onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })} />
+                </div>
             </>
         ),
     };

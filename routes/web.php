@@ -60,13 +60,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/transactions', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transactions.index');
     });
 
-    // Support Tickets
-    Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets');
-    Route::post('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'store'])->name('support.tickets.store');
-    Route::get('/support/tickets/{ticket}', [\App\Http\Controllers\SupportTicketController::class, 'show'])->name('support.tickets.show');
-    Route::post('/support/tickets/{ticket}/message', [\App\Http\Controllers\SupportTicketController::class, 'message'])->name('support.tickets.message');
-    Route::patch('/support/tickets/{ticket}/status', [\App\Http\Controllers\SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
-
     // System Monitoring API
     Route::get('/api/system/monitoring', function () {
         $diskFree  = disk_free_space('/');

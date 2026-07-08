@@ -14,7 +14,6 @@ import {
     Trash2,
     Settings,
     History,
-    MessageSquare,
     ClipboardList,
     ArrowRightLeft,
     Key,
@@ -184,12 +183,6 @@ const navSections: NavSection[] = [
                 module: 'Asset Inventory',
             },
             {
-                title: 'Chat',
-                href: '/support/tickets',
-                icon: MessageSquare,
-                module: 'Asset Inventory',
-            },
-            {
                 title: 'Audit Log',
                 href: '/security/logs',
                 icon: ScrollText,
@@ -289,7 +282,6 @@ export function AppSidebar() {
                             'Requests',
                             'Check Out / Check In',
                             'Transactions',
-                            'Chat',
                             'Activity Logs',
                         ];
                         return allowedForTechnician.includes(item.title);
@@ -304,7 +296,6 @@ export function AppSidebar() {
                             'Requests',
                             'Check Out / Check In',
                             'Transactions',
-                            'Chat',
                         ];
                         return allowedForNormalUser.includes(item.title);
                     }
@@ -326,7 +317,6 @@ export function AppSidebar() {
                         'Requests',
                         'Check Out / Check In',
                         'Transactions',
-                        'Chat',
                     ];
                     return allowedForNormalUser.includes(item.title);
                 }),
