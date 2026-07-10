@@ -123,9 +123,19 @@ class ImportAssetCsv extends Command
                 continue;
             }
 
-            $existing = Asset::whereHas('fieldValues', function ($q) use ($pkConfig, $pkValue) {
-                $q->where('column_key', $pkConfig->column_key)->where('value', $pkValue);
-            })->first();
+            $fixedPkKeys = ['category_id', 'type_id', 'oem_id', 'location', 'quantity',
+                'asset_name', 'purchase_year', 'serial_number', 'part_number', 'asset_id',
+            ];
+
+            $existing = null;
+            if (in_array($pkConfig->column_key, $fixedPkKeys, true)) {
+                $existing = Asset::where($pkConfig->column_key, $pkValue)->first();
+            }
+            if (!$existing) {
+                $existing = Asset::whereHas('fieldValues', function ($q) use ($pkConfig, $pkValue) {
+                    $q->where('column_key', $pkConfig->column_key)->where('value', $pkValue);
+                })->first();
+            }
 
             if ($existing) {
                 $existing->syncFields($mapped);

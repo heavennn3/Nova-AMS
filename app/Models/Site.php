@@ -11,7 +11,12 @@ class Site extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'region', 'is_active'];
+    protected $fillable = ['name', 'code', 'region_id', 'is_active'];
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
 
     public function users()
     {

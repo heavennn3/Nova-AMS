@@ -3,7 +3,6 @@ import {
     LayoutGrid,
     Map,
     Package,
-    Database,
     Wrench,
     MapPin,
     Shield,
@@ -31,7 +30,6 @@ import {
 import {
     dashboard,
     assetInventory,
-    masterData,
 } from '@/routes';
 
 import type { NavItem } from '@/types';
@@ -129,12 +127,6 @@ const navSections: NavSection[] = [
     {
         title: 'OTHERS',
         items: [
-            {
-                title: 'Master Data',
-                href: masterData(),
-                icon: Database,
-                module: 'Master Data',
-            },
             {
                 title: 'Audit Log',
                 href: '/security/logs',

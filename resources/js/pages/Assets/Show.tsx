@@ -48,7 +48,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-export default function Show({ asset, users = [], configurations = [] }: { asset: any; users?: any[]; configurations?: any[] }) {
+export default function Show({ asset, users = [] }: { asset: any; users?: any[] }) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
 
@@ -76,19 +76,6 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
 
     const fields = asset;
 
-    // Helper to search asset fields case-insensitively or with synonyms
-    const getFieldVal = (keys: string[]) => {
-        for (const key of keys) {
-            const foundKey = Object.keys(fields).find(
-                (k) => k.toLowerCase() === key.toLowerCase()
-            );
-            if (foundKey && fields[foundKey] !== undefined && fields[foundKey] !== null) {
-                return fields[foundKey];
-            }
-        }
-        return null;
-    };
-
     const formatCurrency = (val: any) => {
         if (!val || val === '—') return '—';
         const cleanVal = String(val).trim();
@@ -102,40 +89,31 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
         return cleanVal;
     };
 
-    // Primary Key value
-    const pkConfig = configurations?.find((c: any) => c.is_primary_key);
-    const pkKey = pkConfig?.column_key || 'asset_id';
-    const assetCode = fields[pkKey] || asset.asset_id || asset.aset_id || `AS-${asset.id}`;
+    const assetCode = asset.asset_id || `AS-${asset.id}`;
 
     // Asset Name/Title
-    const nameKeys = ['asset_name', 'product', 'jenis_aset', 'nama_aset', 'brand', 'model', 'product_name'];
-    const nameKey = configurations?.find((c: any) => nameKeys.includes(c.column_key.toLowerCase()))?.column_key;
-    const assetTitle = nameKey ? fields[nameKey] : (getFieldVal(nameKeys) || assetCode);
+    const assetTitle = asset.asset_name || assetCode;
 
-    // Subtitle under Asset Title (e.g. brand + model or product_name or jenis_aset)
-    const brandVal = getFieldVal(['brand', 'manufacturer', 'pengeluar']) || '';
-    const modelVal = getFieldVal(['model', 'product_model']) || '';
-    const brandModel = (brandVal || modelVal)
-        ? `${brandVal} ${modelVal}`.trim()
-        : (getFieldVal(['kategori_aset', 'category', 'jenis_aset']) || '');
+    // Subtitle
+    const brandModel = [asset.type?.name, asset.oem?.name].filter(Boolean).join(' / ') || '';
 
     // Badges:
     // Status Badge value and styling
-    const statusValue = fields.status || 'available';
-    // Condition Badge: Good/Broken/etc.
-    const conditionValue = getFieldVal(['condition', 'kondisi', 'keadaan', 'status_fizikal']) || 'Good';
+    const statusValue = asset.status || 'available';
+    // Condition Badge
+    const conditionValue = asset.condition || 'Good';
     // Category Badge
-    const categoryValue = getFieldVal(['category', 'kategori_aset', 'kategori']) || 'IT Equipment';
+    const categoryValue = asset.category?.name || '—';
 
     // Top Summary Card Columns:
     // Department
-    const departmentValue = getFieldVal(['department', 'jabatan', 'department_name']) || (activeAssignment?.user?.department?.name) || '—';
+    const departmentValue = asset.department || (activeAssignment?.user?.department?.name) || '—';
     // Assigned to
     const assignedToValue = activeAssignment ? (activeAssignment.user?.name || '—') : '—';
     // Location
-    const locationValue = getFieldVal(['location', 'lokasi', 'tempat']) || asset.site?.name || '—';
+    const locationValue = asset.location || asset.site?.name || '—';
     // Serial Number
-    const serialNumberValue = getFieldVal(['serial_number', 'no_siri', 'serial']) || '—';
+    const serialNumberValue = asset.serial_number || '—';
 
     const handleCheckoutSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -189,33 +167,33 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
     const getStatusStyle = (status: string) => {
         const s = status.toLowerCase();
         if (s.includes('avail') || s.includes('sedia') || s.includes('good') || s.includes('elok')) {
-            return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+            return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-green-600' };
         }
         if (s.includes('use') || s.includes('assign') || s.includes('guna') || s.includes('pinjam') || s.includes('aktif')) {
-            return { bg: 'bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+            return { bg: 'bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-blue-600' };
         }
         if (s.includes('maint') || s.includes('repair') || s.includes('selenggara') || s.includes('baiki')) {
-            return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+            return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-amber-600' };
         }
         if (s.includes('fault') || s.includes('damage') || s.includes('broke') || s.includes('rosak')) {
-            return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+            return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-red-600' };
         }
-        return { bg: 'bg-slate-50 text-slate-650 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        return { bg: 'bg-slate-50 text-slate-650 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-slate-600' };
     };
 
     const getConditionStyle = (cond: string) => {
         const c = cond.toLowerCase();
         if (c.includes('good') || c.includes('elok') || c.includes('baik') || c.includes('new')) {
-            return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+            return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-green-600' };
         }
         if (c.includes('fair') || c.includes('sederhana')) {
-            return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+            return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-amber-600' };
         }
-        return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-red-600' };
     };
 
     const getCategoryStyle = () => {
-        return { bg: 'bg-purple-50 text-purple-600 border border-purple-200 px-2.5 py-0.5 rounded-full text-xs font-semibold' };
+        return { bg: 'bg-purple-50 text-purple-600 border border-purple-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-purple-600' };
     };
 
     // QR Code URL generator
@@ -228,20 +206,20 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
 
     // Information tab fields definition
     const leftFields = [
-        { label: 'Asset Name', value: getFieldVal(['description', 'keterangan', 'desc']) || '—' },
-        { label: 'Asset Type', value: getFieldVal(['source', 'sumber', 'punca']) || '—' },
-        { label: 'Added Date/Time', value: getFieldVal(['usage_start_date', 'tarikh_mula_guna', 'usage_date']) || '—' },
-        { label: 'Original Value', value: formatCurrency(getFieldVal(['original_value', 'nilai_asal', 'original_cost'])) },
-        { label: 'Asset Tag', value: getFieldVal(['warranty_expiry', 'tamat_waranti', 'warranty_date']) || '—' },
+        { label: 'Asset Name', value: asset.asset_name || '—' },
+        { label: 'Type', value: asset.type?.name || '—' },
+        { label: 'Added Date/Time', value: asset.created_at ? new Date(asset.created_at).toLocaleString() : '—' },
+        { label: 'Original Value', value: formatCurrency(asset.original_value) },
+        { label: 'Asset ID', value: asset.asset_id || '—' },
        
     ];
 
     const rightFields = [
-        { label: 'Description', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+        { label: 'Description', value: asset.description || '—' },
        
-        { label: 'Manufactor / Brand', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+        { label: 'Manufacturer / Brand', value: asset.oem?.name || '—' },
 
-        { label: 'Category', value: getFieldVal(['notes', 'nota', 'catatan']) || '—' },
+        { label: 'Category', value: asset.category?.name || '—' },
 
         { label: 'Created By', value: creatorName },
 
@@ -271,10 +249,7 @@ export default function Show({ asset, users = [], configurations = [] }: { asset
         'insurance_expiry', 'tamat_insurans', 'insurance_date'
     ];
 
-    const extraFields = (configurations || []).filter((cfg: any) => {
-        const keyLower = cfg.column_key.toLowerCase();
-        return !topCardKeysLower.includes(keyLower) && !matchedKeysLower.includes(keyLower);
-    });
+    const extraFields = [];
 
     return (
         <div className="w-full p-8 space-y-6 print:p-0 bg-slate-50/40 dark:bg-transparent min-h-screen">

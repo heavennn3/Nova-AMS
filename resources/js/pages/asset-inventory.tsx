@@ -1,18 +1,9 @@
-import { useState, useMemo } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { useState, useMemo, useEffect } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-    Plus,
-    Edit,
-    Trash2,
-    Search,
-    Upload,
-    Table2,
-    MapPin,
-} from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Upload, Package, Building2, Layers, Clock } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -20,40 +11,28 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogDescription,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import Papa from 'papaparse';
 import { toast } from 'sonner';
 
 export default function AssetInventory({
     assets = [],
-    configurations = [],
     sites = [],
     currentSiteId = null,
     assetStatuses = [],
+    totalSites = 0,
+    typeSummary = [],
+    totalRecentAdded = 0,
 }: any) {
+    const { props } = usePage();
+    const { flash } = props as any;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.warning) toast.warning(flash.warning);
+    }, [flash]);
+
     const [search, setSearch] = useState('');
     const [siteFilter, setSiteFilter] = useState(currentSiteId || 'all');
-
-    // ── Import ──
-    const [pendingImportData, setPendingImportData] = useState<any[] | null>(null);
-    const [importSiteId, setImportSiteId] = useState<string>('none');
-
-    // ── No-config flow: detect CSV headers → pick PK → create configs ──
-    const [csvConfigOpen, setCsvConfigOpen] = useState(false);
-    const [detectedHeaders, setDetectedHeaders] = useState<string[]>([]);
-    const [primaryKeyHeader, setPrimaryKeyHeader] = useState<string>('');
-    const [csvRawData, setCsvRawData] = useState<any[] | null>(null);
-    const [configuring, setConfiguring] = useState(false);
-
-    const hasConfig = configurations.length > 0;
 
     const handleSiteFilterChange = (value: string) => {
         setSiteFilter(value);
@@ -65,88 +44,80 @@ export default function AssetInventory({
     };
 
     const columns = useMemo(() => {
-        const cols: any[] = (configurations || [])
-            .filter((cfg: any) => cfg.is_visible)
-            .map((cfg: any) => ({
-                accessorKey: cfg.column_key,
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title={cfg.column_title} />
-                ),
-                enableSorting: cfg.is_sortable,
-                cell: ({ row }: any) => {
-                    const val = row.getValue(cfg.column_key);
-
-                    if (cfg.is_primary_key) {
-                        return (
-                            <Link href={`/assets/${row.original.id}`} className="text-primary hover:underline font-mono font-semibold">
-                                {val ?? '—'}
-                            </Link>
-                        );
-                    }
-
-                    if (cfg.data_type === 'number') {
-                        return <div className="text-right font-medium">{val ?? '—'}</div>;
-                    }
-
-                    return <span>{val ?? '—'}</span>;
-                },
-            }));
-
-        // ── Hardcoded STATUS column ──
-        const statusMap = Object.fromEntries(
-            (assetStatuses || []).map((s: any) => [s.name, s.color])
-        );
-        cols.push({
-            id: 'status',
-            accessorKey: 'status',
-            filterFn: (row: any, id: string, filterValue: string[]) => filterValue.includes(row.getValue(id)),
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
-            cell: ({ row }: any) => {
-                const val = row.getValue('status') ?? 'not_updated';
-                const color = statusMap[val] || '#6B7280';
-                return (
-                    <span
-                        className="inline-block rounded-md px-2 py-0.5 text-xs font-semibold text-white"
-                        style={{ backgroundColor: color }}
-                    >
-                        {val}
-                    </span>
-                );
+        const cols: any[] = [
+            {
+                id: 'no',
+                header: '#',
+                cell: ({ row }: any) => <span className="text-muted-foreground text-sm">{row.index + 1}</span>,
+                enableSorting: false,
             },
-        });
-
-        cols.push({
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }: any) => (
-                <div className="flex items-center space-x-2">
-                    <Link href={`/assets/${row.original.id}/edit`}>
-                        <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
-                            <Edit className="mr-1 h-4 w-4" /> Edit
-                        </Button>
+            {
+                accessorKey: 'asset_id',
+                header: 'Asset ID',
+                cell: ({ row }: any) => (
+                    <Link href={`/assets/${row.original.id}`} className="text-primary hover:underline font-mono font-semibold">
+                        {row.getValue('asset_id') ?? '—'}
                     </Link>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-red-600"
-                        onClick={() => {
-                            if (confirm('Delete this asset?')) {
-                                router.delete(`/assets/${row.original.id}`, {
-                                    preserveScroll: true,
-                                });
-                            }
-                        }}
-                    >
-                        <Trash2 className="mr-1 h-4 w-4" /> Delete
-                    </Button>
-                </div>
-            ),
-        });
+                ),
+            },
+            { accessorKey: 'asset_name', header: 'Asset Name' },
+            { accessorKey: 'category', header: 'Category' },
+            { accessorKey: 'type', header: 'Type' },
+            { accessorKey: 'location', header: 'Location' },
+            { accessorKey: 'oem', header: 'OEM' },
+            { accessorKey: 'purchase_year', header: 'Purchase Year' },
+            { accessorKey: 'serial_number', header: 'Serial Number' },
+            { accessorKey: 'part_number', header: 'Part Number' },
+            {
+                id: 'status',
+                accessorKey: 'status',
+                filterFn: (row: any, id: string, filterValue: string[]) => filterValue.includes(row.getValue(id)),
+                header: 'Status',
+                cell: ({ row }: any) => {
+                    const val = row.getValue('status') ?? 'stored';
+                    const bgColor = row.original.status_color || '#6B7280';
+                    return (
+                        <span
+                            className="inline-block rounded-md px-2.5 py-1 text-xs font-semibold text-white"
+                            style={{ backgroundColor: bgColor }}
+                        >
+                            {val}
+                        </span>
+                    );
+                },
+            },
+            {
+                id: 'actions',
+                header: 'Actions',
+                cell: ({ row }: any) => (
+                    <div className="flex items-center space-x-2">
+                        <Link href={`/assets/${row.original.id}/edit`}>
+                            <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
+                                <Edit className="mr-1 h-4 w-4" /> Edit
+                            </Button>
+                        </Link>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-red-600"
+                            onClick={() => {
+                                if (confirm('Delete this asset?')) {
+                                    router.delete(`/assets/${row.original.id}`, {
+                                        preserveScroll: true,
+                                    });
+                                }
+                            }}
+                        >
+                            <Trash2 className="mr-1 h-4 w-4" /> Delete
+                        </Button>
+                    </div>
+                ),
+            },
+        ];
 
         return cols;
-    }, [configurations, assetStatuses]);
+    }, []);
 
-    const configKeys = configurations?.map((c: any) => c.column_key) || [];
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
             if (siteFilter === 'all') return true;
@@ -155,8 +126,9 @@ export default function AssetInventory({
 
         const q = search.toLowerCase();
         if (q) {
+            const searchKeys = ['asset_id', 'asset_name', 'category', 'type', 'location', 'oem', 'serial_number', 'part_number'];
             result = result.filter((a: any) =>
-                configKeys.some((key: string) => {
+                searchKeys.some((key: string) => {
                     const v = a[key];
                     return v && String(v).toLowerCase().includes(q);
                 }),
@@ -164,112 +136,33 @@ export default function AssetInventory({
         }
 
         return result;
-    }, [assets, search, configKeys, siteFilter, sites]);
+    }, [assets, search, siteFilter]);
 
-    // ── CSV: no-config setup ──
+    // ── CSV Import ──
 
-    const handleCsvForSetup = (importedData: any[]) => {
-        if (importedData.length === 0) return;
-        const headers = Object.keys(importedData[0]).filter(
-            (h) => h !== 'Bil' && h !== 'bil',
-        );
-        setDetectedHeaders(headers);
-        setPrimaryKeyHeader(headers[0] || '');
-        setCsvRawData(importedData);
-        setImportSiteId(currentSiteId || 'none');
-        setCsvConfigOpen(true);
-    };
-
-    const confirmCsvSetup = async () => {
-        if (!primaryKeyHeader || !csvRawData) return;
-        setConfiguring(true);
-
-        try {
-            const res = await fetch('/master-data/table-configurations/generate-from-headers', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN':
-                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    Accept: 'application/json',
-                },
-                body: JSON.stringify({
-                    table_name: 'assets',
-                    headers: detectedHeaders,
-                    primary_key_header: primaryKeyHeader,
-                    site_id: importSiteId === 'none' ? null : importSiteId,
-                }),
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message || 'Failed to create columns');
-            }
-
-            setCsvConfigOpen(false);
-            toast.success('Table configured from CSV. Now importing data…');
-
-            const selectedSite = sites.find((s: any) => String(s.id) === importSiteId);
-            router.post(
-                '/assets/import-bulk',
-                { assets: csvRawData, site_name: selectedSite?.name || '', site_id: importSiteId === 'none' ? null : importSiteId },
-                {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        toast.success(`Table configured and ${csvRawData.length} assets imported!`);
-                        setCsvRawData(null);
-                        setImportSiteId('none');
-                        router.reload({ only: ['assets', 'configurations', 'currentSiteId'] });
-                    },
-                    onError: (err) => {
-                        console.error(err);
-                        toast.error('Columns created but data import failed.');
-                        router.reload({ only: ['assets', 'configurations', 'currentSiteId'] });
-                    },
-                },
-            );
-        } catch (e: any) {
-            toast.error(e.message || 'Failed to configure from CSV');
-        } finally {
-            setConfiguring(false);
-        }
-    };
-
-    // ── CSV: standard import (configs exist) ──
-
-    const handleImportCsv = (importedData: any[]) => {
-        if (!hasConfig) {
-            handleCsvForSetup(importedData);
+    const confirmImport = (importedData: any[]) => {
+        if (!importedData || importedData.length === 0) {
+            toast.error('CSV file is empty.');
             return;
         }
-        setPendingImportData(importedData);
-    };
-
-    const confirmImport = () => {
-        if (!pendingImportData) return;
-        const selectedSite = sites.find((s: any) => String(s.id) === importSiteId);
-        const siteName = selectedSite?.name || '';
 
         router.post(
             '/assets/import-bulk',
-            { assets: pendingImportData, site_name: siteName, site_id: importSiteId === 'none' ? null : importSiteId },
+            { assets: importedData, site_id: siteFilter === 'all' ? null : siteFilter },
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success(`Imported ${pendingImportData.length} assets!`);
-                    setPendingImportData(null);
-                    setImportSiteId('none');
+                    toast.success(`Imported ${importedData.length} assets!`);
+                    // Refresh the page to show imported data
+                    router.reload({ only: ['assets'] });
                 },
-                onError: (err) => {
+                onError: (err: any) => {
                     console.error(err);
-                    toast.error('Import failed.');
-                    setPendingImportData(null);
+                    toast.error(typeof err === 'string' ? err : 'Import failed.');
                 },
             },
         );
     };
-
-    // ── File picker trigger ──
 
     const openFilePicker = () => {
         const input = document.createElement('input');
@@ -279,47 +172,27 @@ export default function AssetInventory({
             const file = e.target?.files?.[0];
             if (!file) return;
             Papa.parse(file, {
-                header: false,
+                header: true,
                 skipEmptyLines: true,
                 complete: (results) => {
-                    const rows = results.data as string[][];
-                    let headerRowIndex = 0;
-                    for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                        const row = rows[i];
-                        if (
-                            row.some((cell) => {
-                                const c = (cell || '').trim().toLowerCase();
-                                return (
-                                    c === 'aset id' ||
-                                    c === 'asset id' ||
-                                    c === 'asset_id' ||
-                                    c === 'name' ||
-                                    c === 'nama'
-                                );
-                            })
-                        ) {
-                            headerRowIndex = i;
-                            break;
-                        }
-                    }
-                    if (headerRowIndex >= rows.length) {
-                        toast.error('Could not detect headers in CSV.');
-                        return;
-                    }
-                    const headers = rows[headerRowIndex].map((h) => h.trim());
-                    const dataRows = rows.slice(headerRowIndex + 1);
-                    const parsedData = dataRows.map((row) => {
-                        const obj: any = {};
-                        headers.forEach((header, index) => {
-                            obj[header] = row[index];
-                        });
-                        return obj;
-                    });
-                    handleImportCsv(parsedData);
+                    confirmImport(results.data);
                 },
             });
         };
         input.click();
+    };
+
+    const downloadCsvTemplate = () => {
+        const headers = ['Asset ID', 'Asset Name', 'Category', 'Type', 'Location', 'OEM', 'Purchase Year', 'Serial Number', 'Part Number', 'Quantity', 'Status'];
+        const sampleData = ['', '', '', '', '', '', '', '', '', '', ''];
+        const csvContent = [headers.join(','), sampleData.join(',')].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'asset_inventory_template.csv';
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -329,218 +202,104 @@ export default function AssetInventory({
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
-                    <p className="text-sm text-muted-foreground">
-                        {!hasConfig
-                            ? currentSiteId
-                                ? `Site not configured — import a CSV to set up the asset table`
-                                : 'Configure your asset table to get started'
-                            : currentSiteId
-                                ? `Assets for ${sites.find((s: any) => String(s.id) === currentSiteId)?.name || 'selected site'
-                                }`
-                                : 'All registered assets across all sites'}
-                    </p>
                 </div>
                 <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={downloadCsvTemplate}>
+                        <Upload className="mr-2 h-4 w-4" /> CSV Template
+                    </Button>
                     <Button variant="outline" size="sm" onClick={openFilePicker}>
                         <Upload className="mr-2 h-4 w-4" /> Import CSV
                     </Button>
-                    {hasConfig && (
-                        <Link href="/assets/create">
-                            <Button size="sm">
-                                <Plus className="mr-2 h-4 w-4" /> New Asset
-                            </Button>
-                        </Link>
-                    )}
+                    <Link href="/assets/create">
+                        <Button size="sm">
+                            <Plus className="mr-2 h-4 w-4" /> New Asset
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
-            {!hasConfig ? (
-                /* ── Empty state: no columns configured yet ── */
-                <div className="space-y-4">
-                    {sites.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
-                                <SelectTrigger className="h-8 w-[200px] text-sm">
-                                    <SelectValue placeholder="All Sites" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map((site: any) => (
-                                        <SelectItem key={site.id} value={String(site.id)}>
-                                            {site.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
-                    <div className="rounded-xl border-2 border-dashed bg-card p-16 text-center">
-                        <Table2 className="mx-auto h-16 w-16 text-muted-foreground/40 mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Columns Configured</h3>
-                        <p className="text-sm text-muted-foreground max-w-md mx-auto mb-8">
-                            {currentSiteId
-                                ? `This site has no table configured. Import a CSV to auto-configure it.`
-                                : `Start by creating a site in Master Data, then import a CSV to
-automatically detect and configure your columns.`}
-                        </p>
-                        <div className="flex items-center justify-center gap-3">
-                            {!currentSiteId && (
-                                <Button variant="outline" onClick={() => router.get('/master-data')}>
-                                    <MapPin className="mr-2 h-4 w-4" /> Create Site
-                                </Button>
+            {/* Metrics cards */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-blue-500/10 p-3">
+                        <Package className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Total Assets</p>
+                        <p className="text-2xl font-bold">{assets.length}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-green-500/10 p-3">
+                        <Building2 className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Sites</p>
+                        <p className="text-2xl font-bold">{totalSites}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-violet-500/10 p-3">
+                        <Layers className="h-6 w-6 text-violet-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Type Summary</p>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+                            {typeSummary.slice(0, 3).map((t: any) => (
+                                <span key={t.id}>
+                                    <span className="font-semibold">{t.assets_count}</span> {t.name}
+                                </span>
+                            ))}
+                            {typeSummary.length > 3 && (
+                                <span className="text-muted-foreground/60">+{typeSummary.length - 3} more</span>
                             )}
-                            <Button onClick={openFilePicker}>
-                                <Upload className="mr-2 h-4 w-4" /> Import CSV &amp; Configure
-                            </Button>
                         </div>
                     </div>
                 </div>
-            ) : (
-                <>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <div className="relative w-[280px]">
-                            <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                placeholder="Search..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="h-8 pl-8 text-sm"
-                            />
-                        </div>
 
-                        {sites.length > 0 && (
-                            <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
-                                <SelectTrigger className="h-8 w-[200px] text-sm">
-                                    <SelectValue placeholder="All Sites" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map((site: any) => (
-                                        <SelectItem key={site.id} value={String(site.id)}>
-                                            {site.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        )}
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-amber-500/10 p-3">
+                        <Clock className="h-6 w-6 text-amber-600" />
                     </div>
-
-                    <DataTable columns={columns} data={filteredAssets} hideToolbar />
-                </>
-            )}
-
-            {/* ── CSV Config dialog (no config → pick PK) ── */}
-            <Dialog open={csvConfigOpen} onOpenChange={(v) => !v && setCsvConfigOpen(false)}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Configure from CSV</DialogTitle>
-                        <DialogDescription>
-                            {detectedHeaders.length} columns detected. Select which one is the
-                            unique identifier (primary key).
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-3 py-2 max-h-64 overflow-y-auto">
-                        <Label>Detected Columns</Label>
-                        {detectedHeaders.map((h) => (
-                            <div
-                                key={h}
-                                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${primaryKeyHeader === h
-                                        ? 'border-primary bg-primary/5'
-                                        : 'border-border hover:bg-accent/50'
-                                    }`}
-                                onClick={() => setPrimaryKeyHeader(h)}
-                            >
-                                <input
-                                    type="radio"
-                                    name="pk"
-                                    checked={primaryKeyHeader === h}
-                                    onChange={() => setPrimaryKeyHeader(h)}
-                                    className="h-4 w-4 text-primary"
-                                />
-                                <div className="flex-1">
-                                    <div className="text-sm font-medium">{h}</div>
-                                    <div className="text-xs text-muted-foreground">
-                                        {primaryKeyHeader === h ? 'Primary key' : 'Click to set as primary key'}
-                                    </div>
-                                </div>
-                                {primaryKeyHeader === h && (
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground font-medium">
-                                        PK
-                                    </span>
-                                )}
-                            </div>
-                        ))}
+                    <div>
+                        <p className="text-sm text-muted-foreground">Recently Added</p>
+                        <p className="text-2xl font-bold">{totalRecentAdded}</p>
+                        <p className="text-xs text-muted-foreground">last 30 days</p>
                     </div>
+                </div>
+            </div>
 
-                    {sites.length > 0 && (
-                        <div className="space-y-2">
-                            <Label htmlFor="csv-config-site">Assign to Site (optional)</Label>
-                            <Select value={importSiteId} onValueChange={setImportSiteId}>
-                                <SelectTrigger id="csv-config-site">
-                                    <SelectValue placeholder="No site" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">No site</SelectItem>
-                                    {sites.map((site: any) => (
-                                        <SelectItem key={site.id} value={String(site.id)}>
-                                            {site.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-[280px]">
+                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                    />
+                </div>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => { setCsvConfigOpen(false); setCsvRawData(null); }}>
-                            Cancel
-                        </Button>
-                        <Button onClick={confirmCsvSetup} disabled={configuring}>
-                            {configuring ? 'Creating…' : 'Save & Import'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                {sites.length > 0 && (
+                    <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
+                        <SelectTrigger className="h-8 w-[200px] text-sm">
+                            <SelectValue placeholder="All Sites" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Sites</SelectItem>
+                            {sites.map((site: any) => (
+                                <SelectItem key={site.id} value={String(site.id)}>
+                                    {site.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+            </div>
 
-            {/* ── Standard import confirmation dialog ── */}
-            <Dialog open={!!pendingImportData} onOpenChange={(o) => !o && setPendingImportData(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Import CSV</DialogTitle>
-                        <DialogDescription>
-                            {pendingImportData?.length} assets detected in CSV.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {sites.length > 0 && (
-                        <div className="space-y-2 py-2">
-                            <Label htmlFor="import-site">Assign to Site (optional)</Label>
-                            <Select value={importSiteId} onValueChange={setImportSiteId}>
-                                <SelectTrigger id="import-site">
-                                    <SelectValue placeholder="No site (use CSV Lokasi)" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">No site (use CSV data)</SelectItem>
-                                    {sites.map((site: any) => (
-                                        <SelectItem key={site.id} value={String(site.id)}>
-                                            {site.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">
-                                If the CSV already has a "Lokasi" column, this won't override it.
-                            </p>
-                        </div>
-                    )}
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setPendingImportData(null)}>Cancel</Button>
-                        <Button onClick={confirmImport}>Confirm Import</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <DataTable columns={columns} data={filteredAssets} hideToolbar />
         </div>
     );
 }

@@ -6,10 +6,6 @@ export function assetInventory() {
     return '/asset-inventory';
 }
 
-export function masterData() {
-    return '/master-data';
-}
-
 export function operationsMaintenance() {
     return '/operations-maintanance';
 }

@@ -10,7 +10,20 @@ class Asset extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable, SoftDeletes;
 
-    protected $fillable = ['asset_id', 'site_id', 'region_id', 'status', 'added_by'];
+    protected $fillable = [
+        'asset_id', 'site_id', 'region_id', 'status_id', 'added_by',
+        'category_id', 'type_id', 'oem_id', 'location', 'quantity',
+        'asset_name', 'purchase_year', 'serial_number', 'part_number',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'quantity' => 'integer',
+            'purchase_year' => 'integer',
+            'status_id' => 'integer',
+        ];
+    }
 
     // ─── Relationships ─────────────────────────────────────────────
 
@@ -34,6 +47,21 @@ class Asset extends Model implements Auditable
         return $this->belongsTo(AssetCategory::class);
     }
 
+    public function type()
+    {
+        return $this->belongsTo(AssetType::class);
+    }
+
+    public function oem()
+    {
+        return $this->belongsTo(Oem::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(AssetStatus::class, 'status_id');
+    }
+
     // ─── EAV Helpers ───────────────────────────────────────────────
 
     public function fieldValues()
@@ -41,22 +69,44 @@ class Asset extends Model implements Auditable
         return $this->hasMany(AssetFieldValue::class);
     }
 
-    /** Get a single dynamic field value. */
+    /** Keys now stored as fixed columns. */
+    protected array $fixedKeys = [
+        'category_id', 'type_id', 'oem_id', 'location', 'quantity',
+        'asset_name', 'purchase_year', 'serial_number', 'part_number',
+    ];
+
+    /** Get a single field: fixed columns first, fallback to EAV. */
     public function getField(string $key): ?string
     {
+        if (in_array($key, $this->fixedKeys, true)) {
+            $val = $this->getAttribute($key);
+            return $val !== null ? (string) $val : null;
+        }
         $fv = $this->fieldValues->firstWhere('column_key', $key);
         return $fv?->value;
     }
 
-    /** Get all dynamic fields as key → value array. */
+    /** Get all fields: merge fixed + EAV. */
     public function getFields(): array
     {
-        return $this->fieldValues->pluck('value', 'column_key')->toArray();
+        $fixed = [];
+        foreach ($this->fixedKeys as $key) {
+            $val = $this->getAttribute($key);
+            $fixed[$key] = $val !== null ? (string) $val : null;
+        }
+        return array_merge(
+            $fixed,
+            $this->fieldValues->pluck('value', 'column_key')->toArray()
+        );
     }
 
-    /** Set a single dynamic field (saves immediately). */
+    /** Set a single field: direct to model if fixed, else EAV. */
     public function setField(string $key, ?string $value): void
     {
+        if (in_array($key, $this->fixedKeys, true)) {
+            $this->update([$key => $value]);
+            return;
+        }
         $this->fieldValues()->updateOrCreate(
             ['column_key' => $key],
             ['value' => $value]
@@ -64,14 +114,33 @@ class Asset extends Model implements Auditable
         $this->load('fieldValues');
     }
 
-    /** Bulk sync dynamic fields from a key→value array. */
+    /** Bulk sync fields: fixed columns go to model, rest to EAV. */
     public function syncFields(array $data): void
     {
-        $keys = array_keys($data);
-        // Delete removed keys
-        $this->fieldValues()->whereNotIn('column_key', $keys)->delete();
-        // Upsert each
+        $fixedData = [];
+        $eavData = [];
         foreach ($data as $key => $value) {
+            if (in_array($key, $this->fixedKeys, true)) {
+                if ($key === 'quantity') {
+                    $fixedData[$key] = $value !== null && $value !== '' ? (int) $value : 1;
+                } elseif ($key === 'purchase_year') {
+                    $fixedData[$key] = $value !== null && $value !== '' ? (int) $value : null;
+                } else {
+                    $fixedData[$key] = $value !== '' ? $value : null;
+                }
+            } else {
+                $eavData[$key] = $value;
+            }
+        }
+
+        if (!empty($fixedData)) {
+            $this->update($fixedData);
+        }
+
+        // EAV: delete removed keys, upsert each
+        $eavKeys = array_keys($eavData);
+        $this->fieldValues()->whereNotIn('column_key', $eavKeys)->delete();
+        foreach ($eavData as $key => $value) {
             $this->fieldValues()->updateOrCreate(
                 ['column_key' => $key],
                 ['value' => $value]

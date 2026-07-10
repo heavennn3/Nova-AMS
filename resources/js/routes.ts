@@ -3,11 +3,7 @@ export function dashboard() {
 }
 
 export function assetInventory() {
-    return '/assets';
-}
-
-export function masterData() {
-    return '/master-data';
+    return '/asset-inventory';
 }
 
 export function operationsMaintenance() {

@@ -19,35 +19,46 @@ class MultiSiteController extends Controller
 
     public function dashboards()
     {
-        $sites = Site::withCount(['users', 'assets'])
+        $regions = \App\Models\Region::with('sites.users', 'sites.assets')
+            ->orderBy('name')
             ->get()
-            ->map(function ($site) {
-                // Count spare parts for this site
-                $sparePartsCount = \App\Models\SparePart::where('site_id', $site->id)->count();
-                
+            ->map(function ($region) {
+                $sites = $region->sites->map(function ($site) {
+                    $sparePartsCount = \App\Models\SparePart::where('site_id', $site->id)->count();
+                    return [
+                        'id' => $site->id,
+                        'name' => $site->name,
+                        'code' => $site->code,
+                        'region_id' => $site->region_id,
+                        'users_count' => $site->users->count(),
+                        'assets_count' => $site->assets->count(),
+                        'spare_parts_count' => $sparePartsCount,
+                        'is_active' => $site->is_active,
+                    ];
+                })->toArray();
+
                 return [
-                    'id' => $site->id,
-                    'name' => $site->name,
-                    'code' => $site->code,
-                    'region' => $site->region,
-                    'users_count' => $site->users_count,
-                    'assets_count' => $site->assets_count,
-                    'spare_parts_count' => $sparePartsCount,
-                    'is_active' => $site->is_active,
+                    'id' => $region->id,
+                    'name' => $region->name,
+                    'sites' => $sites,
+                    'sites_count' => count($sites),
+                    'users_count' => array_sum(array_column($sites, 'users_count')),
+                    'assets_count' => array_sum(array_column($sites, 'assets_count')),
                 ];
             });
-        
+
+        $allSites = collect($regions->pluck('sites')->flatten(1));
         $stats = [
-            'total_sites' => $sites->count(),
-            'active_sites' => $sites->where('is_active', true)->count(),
-            'disabled_sites' => $sites->where('is_active', false)->count(),
-            'total_users' => $sites->sum('users_count'),
-            'total_assets' => $sites->sum('assets_count'),
-            'total_spare_parts' => $sites->sum('spare_parts_count'),
+            'total_sites' => $allSites->count(),
+            'active_sites' => $allSites->where('is_active', true)->count(),
+            'disabled_sites' => $allSites->where('is_active', false)->count(),
+            'total_users' => $allSites->sum('users_count'),
+            'total_assets' => $allSites->sum('assets_count'),
+            'total_spare_parts' => $allSites->sum('spare_parts_count'),
         ];
-        
+
         return Inertia::render('MultiSite/Dashboards', [
-            'sites' => $sites,
+            'regions' => $regions,
             'stats' => $stats,
         ]);
     }

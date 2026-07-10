@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Region extends Model
+class Oem extends Model
 {
     protected $fillable = ['name'];
 
-    public function sites()
+    public function assets()
     {
-        return $this->hasMany(Site::class);
+        return $this->hasMany(Asset::class);
     }
 }

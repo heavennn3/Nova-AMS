@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
-use App\Models\TableConfiguration;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,7 +12,6 @@ class AssetController extends Controller
     {
         $siteId = $request->query('site_id');
 
-        // Default to first site if none selected
         if (!$siteId) {
             $firstSite = \App\Models\Site::orderBy('name')->first();
             if ($firstSite) {
@@ -21,36 +19,37 @@ class AssetController extends Controller
             }
         }
 
-        $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
-
-        $assetsQuery = Asset::with('fieldValues')->latest();
+        $assetsQuery = Asset::with('category', 'type', 'oem', 'site')->latest();
         if ($siteId) {
             $assetsQuery->where('site_id', $siteId);
         }
-        $assets = $assetsQuery->get()->map(function ($asset) use ($configs) {
-            $fields = $asset->getFields();
-            $row = ['id' => $asset->id, 'site_id' => $asset->site_id];
-            foreach ($configs as $cfg) {
-                $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
-            }
-            $row['status'] = $fields['status'] ?? $asset->status;
-            return $row;
+        $assets = $assetsQuery->get()->map(function ($asset) {
+            return [
+                'id' => $asset->id,
+                'site_id' => $asset->site_id,
+                'asset_id' => $asset->asset_id,
+                'asset_name' => $asset->asset_name,
+                'category' => $asset->category?->name,
+                'type' => $asset->type?->name,
+                'location' => $asset->location,
+                'oem' => $asset->oem?->name,
+                'purchase_year' => $asset->purchase_year,
+                'serial_number' => $asset->serial_number,
+                'part_number' => $asset->part_number,
+                'quantity' => $asset->quantity,
+                'status' => $asset->status?->name,
+                'status_color' => $asset->status?->color,
+                'status_id' => $asset->status_id,
+                'site' => $asset->site?->name,
+            ];
         });
 
         return Inertia::render('Assets/Index', [
             'assets' => $assets,
-            'configurations' => $configs,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
             'totalSites' => \App\Models\Site::count(),
-            'totalFaulty' => \App\Models\AssetFieldValue::where('column_key', 'status')
-                ->whereRaw('LOWER(value) IN (?, ?, ?, ?)', ['faulty', 'rusak', 'broken', 'damaged'])
-                ->distinct('asset_id')
-                ->count('asset_id'),
+            'totalFaulty' => Asset::where('status_id', 5)->count(),
             'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
-            'configuredSiteIds' => \App\Models\TableConfiguration::where('table_name', 'assets')
-                ->whereNotNull('site_id')
-                ->distinct('site_id')
-                ->pluck('site_id'),
             'currentSiteId' => $siteId ? (int)$siteId : null,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color']),
         ]);
@@ -60,32 +59,39 @@ class AssetController extends Controller
     {
         $siteId = $request->query('site_id');
 
-        $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
-
-        $assetsQuery = Asset::with('fieldValues')->latest();
+        $assetsQuery = Asset::with('category', 'type', 'oem', 'site')->latest();
 
         if ($siteId) {
             $assetsQuery->where('site_id', $siteId);
         }
 
-        $assets = $assetsQuery->get()->map(function ($asset) use ($configs) {
-            $fields = $asset->getFields();
-            $row = [
+        $assets = $assetsQuery->get()->map(function ($asset) {
+            return [
                 'id' => $asset->id,
                 'site_id' => $asset->site_id,
+                'asset_id' => $asset->asset_id,
+                'asset_name' => $asset->asset_name,
+                'category' => $asset->category?->name,
+                'type' => $asset->type?->name,
+                'location' => $asset->location,
+                'oem' => $asset->oem?->name,
+                'purchase_year' => $asset->purchase_year,
+                'serial_number' => $asset->serial_number,
+                'part_number' => $asset->part_number,
+                'quantity' => $asset->quantity,
+                'status' => $asset->status?->name,
+                'status_color' => $asset->status?->color,
+                'status_id' => $asset->status_id,
+                'site' => $asset->site?->name,
             ];
-            foreach ($configs as $cfg) {
-                $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
-            }
-            $row['lokasi'] = $fields['lokasi'] ?? null;
-            $row['status'] = $fields['status'] ?? $asset->status;
-            return $row;
         });
 
         return Inertia::render('asset-inventory', [
             'assets' => $assets,
-            'configurations' => $configs,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
+            'totalSites' => \App\Models\Site::count(),
+            'typeSummary' => \App\Models\AssetType::withCount('assets')->orderBy('name')->get(['id', 'name']),
+            'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
             'currentSiteId' => $siteId ? (int)$siteId : null,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color']),
         ]);
@@ -94,70 +100,70 @@ class AssetController extends Controller
     public function create()
     {
         return Inertia::render('Assets/Create', [
-            'configurations' => TableConfiguration::getAllColumns('assets'),
+            'categories' => \App\Models\AssetCategory::orderBy('name')->get(['id', 'name']),
+            'types' => \App\Models\AssetType::orderBy('name')->get(['id', 'name']),
+            'oems' => \App\Models\Oem::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function store(Request $request)
     {
-        $configs = TableConfiguration::getAllColumns('assets');
+        $validated = $request->validate([
+            'asset_id' => 'required|string|max:255',
+            'asset_name' => 'nullable|string|max:255',
+            'category_id' => 'nullable|integer|exists:asset_categories,id',
+            'type_id' => 'nullable|integer|exists:asset_types,id',
+            'oem_id' => 'nullable|integer|exists:oems,id',
+            'location' => 'nullable|string|max:255',
+            'purchase_year' => 'nullable|integer|min:1900|max:2099',
+            'serial_number' => 'nullable|string|max:255',
+            'part_number' => 'nullable|string|max:255',
+            'quantity' => 'nullable|integer|min:0',
+        ]);
 
-        $rules = [];
-        foreach ($configs as $c) {
-            $rules[$c->column_key] = $c->is_primary_key ? 'required|string' : 'nullable|string';
-        }
-
-        $validated = $request->validate($rules);
-
-        $asset = Asset::create(['site_id' => $request->site_id]);
-        $asset->syncFields($validated);
+        $asset = Asset::create($validated);
 
         return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
     }
 
     public function show(Asset $asset)
     {
-        $asset->load('fieldValues', 'assignments.user', 'assignments.location', 'audits.user');
+        $asset->load('category', 'type', 'oem', 'site', 'assignments.user', 'assignments.location', 'audits.user');
 
         $users = \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get();
-        $configs = TableConfiguration::getAllColumns('assets');
-        $fields = $asset->getFields();
-
-        $row = ['id' => $asset->id, 'site_id' => $asset->site_id];
-        foreach ($configs as $cfg) {
-            $row[$cfg->column_key] = $fields[$cfg->column_key] ?? null;
-        }
 
         return Inertia::render('Assets/Show', [
-            'asset' => array_merge($row, $asset->toArray()),
+            'asset' => $asset,
             'users' => $users,
-            'configurations' => $configs,
         ]);
     }
 
     public function edit(Asset $asset)
     {
-        $asset->load('fieldValues');
-        $configs = TableConfiguration::getAllColumns('assets');
-        $fields = $asset->getFields();
-
         return Inertia::render('Assets/Edit', [
-            'asset' => array_merge(['id' => $asset->id, 'site_id' => $asset->site_id], $fields),
-            'configurations' => $configs,
+            'asset' => $asset,
+            'categories' => \App\Models\AssetCategory::orderBy('name')->get(['id', 'name']),
+            'types' => \App\Models\AssetType::orderBy('name')->get(['id', 'name']),
+            'oems' => \App\Models\Oem::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function update(Request $request, Asset $asset)
     {
-        $configs = TableConfiguration::getAllColumns('assets');
+        $validated = $request->validate([
+            'asset_id' => 'required|string|max:255',
+            'asset_name' => 'nullable|string|max:255',
+            'category_id' => 'nullable|integer|exists:asset_categories,id',
+            'type_id' => 'nullable|integer|exists:asset_types,id',
+            'oem_id' => 'nullable|integer|exists:oems,id',
+            'location' => 'nullable|string|max:255',
+            'purchase_year' => 'nullable|integer|min:1900|max:2099',
+            'serial_number' => 'nullable|string|max:255',
+            'part_number' => 'nullable|string|max:255',
+            'quantity' => 'nullable|integer|min:0',
+        ]);
 
-        $rules = [];
-        foreach ($configs as $c) {
-            $rules[$c->column_key] = $c->is_primary_key ? 'required|string' : 'nullable|string';
-        }
-
-        $validated = $request->validate($rules);
-        $asset->syncFields($validated);
+        $asset->update($validated);
 
         return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
     }
@@ -174,63 +180,103 @@ class AssetController extends Controller
     {
         $request->validate([
             'assets' => 'required|array',
-            'site_id' => 'required|integer|exists:sites,id',
+            'site_id' => 'nullable|integer|exists:sites,id',
         ]);
 
         $siteId = $request->site_id;
-        $configs = TableConfiguration::getAllColumns('assets', $siteId ? (int)$siteId : null);
-        $columnKeys = $configs->pluck('column_key')->toArray();
-
+        $errors = [];
         $importedCount = 0;
+        $lineNum = 1;
+
+        // Column mapping: display header (lowercased, underscored) → DB column
+        $headerMap = [
+            'asset_id'       => 'asset_id',
+            'asset_name'     => 'asset_name',
+            'category'       => 'category_lookup',
+            'type'           => 'type_lookup',
+            'location'       => 'location',
+            'oem'            => 'oem_lookup',
+            'purchase_year'  => 'purchase_year',
+            'serial_number'  => 'serial_number',
+            'part_number'    => 'part_number',
+            'quantity'       => 'quantity',
+            'status'         => 'status',
+        ];
 
         foreach ($request->assets as $row) {
+            $lineNum++;
+
+            // Normalise keys: lowercase, strip whitespace, underscore
             $normalized = [];
             foreach ($row as $k => $v) {
-                $normalized[strtolower(trim(preg_replace('/\s+/', '_', $k)))] = $v;
+                $normalized[preg_replace('/\s+/', '_', strtolower(trim($k)))] = trim((string)$v);
             }
 
             $mapped = [];
-            foreach ($columnKeys as $ck) {
-                $searchKey = strtolower($ck);
-                if (array_key_exists($searchKey, $normalized)) {
-                    $mapped[$ck] = $normalized[$searchKey];
+            foreach ($headerMap as $searchKey => $dbCol) {
+                if (!empty($normalized[$searchKey])) {
+                    $mapped[$dbCol] = $normalized[$searchKey];
                 }
             }
 
-            // Set default status if not provided
-            if (empty($mapped['status'])) {
-                $defaultS = \App\Models\AssetStatus::orderBy('sort_order')->first();
-                $mapped['status'] = $defaultS ? $defaultS->name : 'not_updated';
+            // Resolve or auto-create Category
+            if (isset($mapped['category_lookup'])) {
+                $catName = $mapped['category_lookup'];
+                $cat = \App\Models\AssetCategory::firstOrCreate(['name' => $catName]);
+                $mapped['category_id'] = $cat->id;
+                unset($mapped['category_lookup']);
             }
 
-            // Find primary key
-            $pkColumn = $configs->firstWhere('is_primary_key', true);
-            $pkValue = $pkColumn ? ($mapped[$pkColumn->column_key] ?? null) : null;
-            if (!$pkValue) continue;
+            // Resolve or auto-create Type
+            if (isset($mapped['type_lookup'])) {
+                $typeName = $mapped['type_lookup'];
+                $type = \App\Models\AssetType::firstOrCreate(['name' => $typeName]);
+                $mapped['type_id'] = $type->id;
+                unset($mapped['type_lookup']);
+            }
 
-            $existing = Asset::whereHas('fieldValues', function ($q) use ($pkColumn, $pkValue) {
-                $q->where('column_key', $pkColumn->column_key)->where('value', $pkValue);
-            })->first();
+            // Resolve or auto-create OEM
+            if (isset($mapped['oem_lookup'])) {
+                $oemName = $mapped['oem_lookup'];
+                $oem = \App\Models\Oem::firstOrCreate(['name' => $oemName]);
+                $mapped['oem_id'] = $oem->id;
+                unset($mapped['oem_lookup']);
+            }
+
+            // Map CSV status name → status_id, default 1 (stored)
+            if (!empty($mapped['status'])) {
+                $statusRow = \App\Models\AssetStatus::where('name', $mapped['status'])->first();
+                $mapped['status_id'] = $statusRow?->id ?? 1;
+                unset($mapped['status']);
+            } else {
+                $mapped['status_id'] = 1;
+            }
+
+            $pkValue = $mapped['asset_id'] ?? null;
+            if (!$pkValue) {
+                $errors[] = "Row $lineNum: missing Asset ID, skipped";
+                continue;
+            }
+
+            $existing = Asset::where('asset_id', $pkValue)->first();
 
             if ($existing) {
-                if ($siteId) $existing->update(['site_id' => $siteId]);
-                $existing->syncFields($mapped);
-                // Sync column status with EAV if present
-                if (isset($mapped['status'])) {
-                    $existing->update(['status' => $mapped['status']]);
-                }
+                if ($siteId) $mapped['site_id'] = (int)$siteId;
+                $existing->update($mapped);
             } else {
-                $asset = Asset::create(['site_id' => $siteId ? (int)$siteId : null]);
-                $asset->syncFields($mapped);
-                // Sync column status with EAV
-                $status = $mapped['status'] ?? 'not_updated';
-                $asset->update(['status' => $status]);
+                if ($siteId) $mapped['site_id'] = (int)$siteId;
+                Asset::create($mapped);
             }
 
             $importedCount++;
         }
 
-        return redirect()->back()->with('success', "Successfully imported $importedCount assets!");
+        $message = "Imported $importedCount assets.";
+        if (!empty($errors)) {
+            $message .= ' Warnings: ' . implode(' | ', $errors);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function updateStatus(Request $request, Asset $asset)
@@ -240,11 +286,10 @@ class AssetController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|string|max:255',
+            'status_id' => 'required|integer|exists:asset_statuses,id',
         ]);
 
-        $asset->setField('status', $validated['status']);
-        $asset->update(['status' => $validated['status']]);
+        $asset->update(['status_id' => $validated['status_id']]);
 
         return redirect()->back()->with('success', 'Asset status updated.');
     }
@@ -270,7 +315,6 @@ class AssetController extends Controller
 
         $count = 0;
         foreach (Asset::withoutGlobalScope('site_access')->whereIn('id', $validated['ids'])->cursor() as $asset) {
-            $asset->setField('status', $validated['status']);
             $asset->update(['status' => $validated['status']]);
             $count++;
         }
@@ -282,11 +326,22 @@ class AssetController extends Controller
 
     public function exportCsv()
     {
-        $configs = TableConfiguration::getAllColumns('assets');
-        $columnKeys = $configs->pluck('column_key')->toArray();
-        $headers = $configs->pluck('column_title', 'column_key')->toArray();
+        $columnKeys = ['asset_id', 'asset_name', 'category', 'type', 'location', 'oem', 'purchase_year', 'serial_number', 'part_number', 'quantity', 'status'];
+        $headers = [
+            'asset_id' => 'Asset ID',
+            'asset_name' => 'Asset Name',
+            'category' => 'Category',
+            'type' => 'Type',
+            'location' => 'Location',
+            'oem' => 'OEM',
+            'purchase_year' => 'Purchase Year',
+            'serial_number' => 'Serial Number',
+            'part_number' => 'Part Number',
+            'quantity' => 'Quantity',
+            'status' => 'Status',
+        ];
 
-        $assets = Asset::with('fieldValues')->latest()->get();
+        $assets = Asset::with('category', 'type', 'oem')->latest()->get();
 
         $filename = "asset_inventory_" . date('Y-m-d') . ".csv";
         $responseHeaders = [
@@ -299,15 +354,22 @@ class AssetController extends Controller
         $callback = function () use ($assets, $columnKeys, $headers) {
             $handle = fopen('php://output', 'w');
 
-            // Header row using column titles
             fputcsv($handle, array_values($headers));
 
             foreach ($assets as $asset) {
-                $fields = $asset->getFields();
-                $row = [];
-                foreach ($columnKeys as $ck) {
-                    $row[] = $fields[$ck] ?? '';
-                }
+                $row = [
+                    $asset->asset_id,
+                    $asset->asset_name,
+                    $asset->category?->name,
+                    $asset->type?->name,
+                    $asset->location,
+                    $asset->oem?->name,
+                    $asset->purchase_year,
+                    $asset->serial_number,
+                    $asset->part_number,
+                    $asset->quantity,
+                    $asset->status,
+                ];
                 fputcsv($handle, $row);
             }
 
@@ -322,11 +384,9 @@ class AssetController extends Controller
     public function dashboard()
     {
         $totalAssets = Asset::count();
-        $configs = TableConfiguration::getAllColumns('assets');
 
         return Inertia::render('dashboard', [
             'totalAssets' => $totalAssets,
-            'configurations' => $configs,
         ]);
     }
 
@@ -342,9 +402,14 @@ class AssetController extends Controller
 
         $scannedValue = trim($validated['scanned_data']);
 
-        // Try to find by matching any field value
+        // Try to find by matching any field value (EAV or fixed column)
         $asset = Asset::with('fieldValues')
-            ->whereHas('fieldValues', fn($q) => $q->where('value', $scannedValue))
+            ->where(function ($q) use ($scannedValue) {
+                $q->whereHas('fieldValues', fn($q) => $q->where('value', $scannedValue))
+                  ->orWhere('serial_number', $scannedValue)
+                  ->orWhere('asset_name', $scannedValue)
+                  ->orWhere('asset_id', $scannedValue);
+            })
             ->first();
 
         if ($asset) {
@@ -379,7 +444,12 @@ class AssetController extends Controller
                     continue;
                 }
 
-                $existing = Asset::whereHas('fieldValues', fn($q) => $q->where('value', $assetId))->first();
+                $existing = Asset::where(function ($q) use ($assetId) {
+                    $q->whereHas('fieldValues', fn($q) => $q->where('value', $assetId))
+                      ->orWhere('serial_number', $assetId)
+                      ->orWhere('asset_name', $assetId)
+                      ->orWhere('asset_id', $assetId);
+                })->first();
                 if ($existing) {
                     $results['duplicates'][] = ['asset_id' => $assetId, 'asset' => $existing];
                     continue;
@@ -402,7 +472,12 @@ class AssetController extends Controller
     public function lookupAsset($scannedValue)
     {
         $asset = Asset::with('fieldValues')
-            ->whereHas('fieldValues', fn($q) => $q->where('value', $scannedValue))
+            ->where(function ($q) use ($scannedValue) {
+                $q->whereHas('fieldValues', fn($q) => $q->where('value', $scannedValue))
+                  ->orWhere('serial_number', $scannedValue)
+                  ->orWhere('asset_name', $scannedValue)
+                  ->orWhere('asset_id', $scannedValue);
+            })
             ->first();
 
         if (!$asset) {
