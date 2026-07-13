@@ -38,6 +38,7 @@ const statusColors: Record<string, string> = {
     approved: 'bg-blue-100 text-blue-800 border-blue-200',
     rejected: 'bg-red-100 text-red-800 border-red-200',
     returned: 'bg-green-100 text-green-800 border-green-200',
+    return_pending: 'bg-amber-100 text-amber-800 border-amber-200',
     cancelled: 'bg-gray-100 text-gray-800 border-gray-200',
 };
 
@@ -94,6 +95,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
             approved: loans.filter((l) => l.status === 'approved').length,
             overdue: overdue.length,
             returned: loans.filter((l) => l.status === 'returned').length,
+            return_pending: loans.filter((l) => l.status === 'return_pending').length,
         };
     }, [loans]);
 
@@ -122,14 +124,15 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">My Asset Loans</h1>
-                        <p className="mt-1 text-sm text-muted-foreground">View your asset loan status and history</p>
+                        <p className="mt-1 text-sm text-muted-foreground">View loan status, return proof, and admin review state</p>
                     </div>
                     <Link href="/asset-loans/create"><Button><Plus className="mr-2 h-4 w-4" /> Asset Loan</Button></Link>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-5 gap-4">
                     <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold text-yellow-600">{stats.pending}</p></div>
                     <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Active Loans</p><p className="text-2xl font-bold text-blue-600">{stats.approved}</p></div>
+                    <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Return Review</p><p className="text-2xl font-bold text-amber-600">{stats.return_pending}</p></div>
                     <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Overdue</p><p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600' : 'text-muted-foreground'}`}>{stats.overdue}{stats.overdue > 0 && <AlertTriangle className="ml-1 inline h-5 w-5 animate-pulse text-red-500" />}</p></div>
                     <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Returned</p><p className="text-2xl font-bold text-green-600">{stats.returned}</p></div>
                 </div>
@@ -145,6 +148,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                             <SelectItem value="all">All Status</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="return_pending">Return Review</SelectItem>
                             <SelectItem value="rejected">Rejected</SelectItem>
                             <SelectItem value="returned">Returned</SelectItem>
                         </SelectContent>
@@ -196,8 +200,8 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
             <Dialog open={!!returnLoan} onOpenChange={(open) => !open && setReturnLoan(null)}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Return loaned asset</DialogTitle>
-                        <DialogDescription>Optional proof photo allowed. Return will mark asset as available.</DialogDescription>
+                        <DialogTitle>Submit return for review</DialogTitle>
+                        <DialogDescription>Upload proof optional. Asset stays active until admin approves return.</DialogDescription>
                     </DialogHeader>
 
                     <form onSubmit={submitReturn} className="space-y-4">
@@ -231,7 +235,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
 
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setReturnLoan(null)}><X className="mr-2 h-4 w-4" />Cancel</Button>
-                            <Button type="submit" disabled={returnForm.processing}>{returnForm.processing ? 'Returning...' : 'Submit return'}</Button>
+                            <Button type="submit" disabled={returnForm.processing}>{returnForm.processing ? 'Submitting...' : 'Submit return'}</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
