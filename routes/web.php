@@ -71,7 +71,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/asset-track/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('asset-track.bulk-reminders');
 
         // Asset Withdrawals Module
-        // Removed
     });
 
     // Multi-Site Module
@@ -82,6 +81,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'storeTransfer'])->name('multi-site.transfers.store');
         Route::patch('/multi-site/transfers/{id}/status', [\App\Http\Controllers\MultiSiteController::class, 'updateTransferStatus'])->name('multi-site.transfers.status');
         Route::get('/multi-site/access', [\App\Http\Controllers\MultiSiteController::class, 'access'])->name('multi-site.access');
+
+        // Regions + Sites API (needs sessions, not api middleware)
+        Route::get('/api/sites', [\App\Http\Controllers\Api\SiteApiController::class, 'index']);
+        Route::post('/api/sites', [\App\Http\Controllers\Api\SiteApiController::class, 'store']);
+        Route::get('/api/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'show']);
+        Route::put('/api/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'update']);
+        Route::delete('/api/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'destroy']);
+        Route::apiResource('/api/regions', \App\Http\Controllers\Api\RegionApiController::class);
     });
 
     // Spare Parts Module (moved outside Operations module)

@@ -58,15 +58,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/references/locations', [\App\Http\Controllers\Api\ReferenceApiController::class, 'locations']);
     Route::get('/references/asset-statuses', [\App\Http\Controllers\Api\ReferenceApiController::class, 'assetStatuses']);
 
-    // Regions
-    Route::apiResource('regions', \App\Http\Controllers\Api\RegionApiController::class);
-
-    // Sites
-    Route::get('/sites', [\App\Http\Controllers\Api\SiteApiController::class, 'index']);
-    Route::post('/sites', [\App\Http\Controllers\Api\SiteApiController::class, 'store']);
-    Route::get('/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'show']);
-    Route::put('/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'update']);
-    Route::delete('/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'destroy']);
+    // Regions — moved to web.php (needs sessions)
+    // Sites — moved to web.php (needs sessions)
 
     // Quick creation (inline forms)
     Route::post('/quick/vendors', [\App\Http\Controllers\Api\QuickApiController::class, 'storeVendor']);

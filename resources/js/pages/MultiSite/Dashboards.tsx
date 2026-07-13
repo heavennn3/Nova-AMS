@@ -153,7 +153,8 @@ export default function Dashboards({
             if (regionModal.mode === 'create') {
                 const res = await fetch('/api/regions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify(regionForm),
                 });
                 if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
@@ -161,7 +162,8 @@ export default function Dashboards({
             } else if (regionModal.mode === 'edit' && regionModal.region) {
                 const res = await fetch(`/api/regions/${regionModal.region.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify(regionForm),
                 });
                 if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
@@ -182,7 +184,8 @@ export default function Dashboards({
         try {
             const res = await fetch(`/api/regions/${deleteRegion.id}`, {
                 method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
             });
             if (!res.ok) throw new Error((await res.json()).message ?? 'Cannot delete');
             toast.success('Region deleted');
@@ -218,7 +221,8 @@ export default function Dashboards({
             if (siteModal.mode === 'create') {
                 const res = await fetch('/api/sites', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify({ ...siteForm, region_id: siteForm.region_id ? Number(siteForm.region_id) : null }),
                 });
                 if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
@@ -226,7 +230,8 @@ export default function Dashboards({
             } else if (siteModal.mode === 'edit' && siteModal.site) {
                 const res = await fetch(`/api/sites/${siteModal.site.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify({ ...siteForm, region_id: siteForm.region_id ? Number(siteForm.region_id) : null }),
                 });
                 if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
@@ -247,7 +252,8 @@ export default function Dashboards({
         try {
             const res = await fetch(`/api/sites/${deleteSite.id}`, {
                 method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
             });
             if (!res.ok) throw new Error((await res.json()).message ?? 'Cannot delete');
             toast.success('Site deleted');
@@ -263,7 +269,8 @@ export default function Dashboards({
     const toggleSiteActive = async (site: SiteData) => {
         const res = await fetch(`/api/sites/${site.id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
             body: JSON.stringify({ name: site.name, code: site.code, region_id: site.region_id, is_active: !site.is_active }),
         });
         if (res.ok) {
@@ -276,7 +283,7 @@ export default function Dashboards({
 
     const refreshRegions = async () => {
         try {
-            const res = await fetch('/api/regions');
+            const res = await fetch('/api/regions', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
             if (res.ok) {
                 const data = await res.json();
                 // data includes nested sites
