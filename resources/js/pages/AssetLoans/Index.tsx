@@ -109,7 +109,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const submitReturn = (e: React.FormEvent) => {
         e.preventDefault();
         if (!returnLoan) return;
-        returnForm.post(route('asset-loans.return', returnLoan.id), {
+        returnForm.post(`/asset-loans/${returnLoan.id}/return`, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => setReturnLoan(null),

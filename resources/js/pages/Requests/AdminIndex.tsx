@@ -123,6 +123,7 @@ return;
             Returned: { color: 'text-violet-700', bg: 'bg-violet-50', border: 'border-violet-200', icon: RotateCcw },
             Rejected: { color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200', icon: XCircle },
             Cancelled: { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', icon: XCircle },
+            'Return_pending': { color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200', icon: BellRing },
         };
 
         return config[status] || { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', icon: Clock };
@@ -193,9 +194,11 @@ return;
     // Stats
     const pendingCount = requests.filter(r => r.status === 'Pending' || r.status === 'pending').length;
     const urgentPendingCount = requests.filter(r => (r.status === 'Pending' || r.status === 'pending') && r.priority === 'Urgent').length;
+    const returnPendingCount = requests.filter(r => r.status === 'Return_pending').length;
     const stats = [
         { label: 'Pending Review', value: pendingCount, color: 'text-amber-700', bg: 'from-amber-50 to-amber-100/50', iconBg: 'bg-amber-100', icon: Clock, ring: pendingCount > 0 ? 'ring-2 ring-amber-300/50' : '' },
         { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-700', bg: 'from-emerald-50 to-emerald-100/50', iconBg: 'bg-emerald-100', icon: CheckCircle2, ring: '' },
+        { label: 'Return Review', value: returnPendingCount, color: 'text-orange-700', bg: 'from-orange-50 to-orange-100/50', iconBg: 'bg-orange-100', icon: BellRing, ring: returnPendingCount > 0 ? 'ring-2 ring-orange-300/50' : '' },
         { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-700', bg: 'from-blue-50 to-blue-100/50', iconBg: 'bg-blue-100', icon: Package, ring: '' },
         { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-700', bg: 'from-rose-50 to-rose-100/50', iconBg: 'bg-rose-100', icon: XCircle, ring: '' },
     ];
@@ -225,11 +228,13 @@ return;
                                 Review, approve, and manage all user requests
                             </p>
                         </div>
-                        {pendingCount > 0 && (
+                        {(pendingCount > 0 || returnPendingCount > 0) && (
                             <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 animate-pulse">
                                 <Bell className="h-4 w-4 text-amber-600" />
                                 <span className="text-sm font-semibold text-amber-700">
-                                    {pendingCount} pending
+                                    {pendingCount > 0 && `${pendingCount} pending`}
+                                    {pendingCount > 0 && returnPendingCount > 0 && ' • '}
+                                    {returnPendingCount > 0 && `${returnPendingCount} return review`}
                                     {urgentPendingCount > 0 && (
                                         <span className="text-rose-600"> ({urgentPendingCount} urgent)</span>
                                     )}
@@ -240,7 +245,7 @@ return;
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-5 gap-4">
                     {stats.map(s => (
                         <div key={s.label} className={`rounded-xl border p-4 bg-gradient-to-br ${s.bg} ${s.ring} flex items-center gap-3 transition-all`}>
                             <div className={`rounded-lg p-2.5 ${s.iconBg}`}>
@@ -297,6 +302,7 @@ return;
                                 <SelectItem value="Approved">Approved</SelectItem>
                                 <SelectItem value="Fulfilled">Fulfilled</SelectItem>
                                 <SelectItem value="Returned">Returned</SelectItem>
+                                <SelectItem value="Return_pending">Return Review</SelectItem>
                                 <SelectItem value="Rejected">Rejected</SelectItem>
                                 <SelectItem value="Cancelled">Cancelled</SelectItem>
                             </SelectContent>
@@ -391,6 +397,7 @@ return;
                             <tbody className="divide-y">
                                 {filteredRequests.map((r) => {
                                     const isPending = r.status === 'Pending';
+                                    const isReturnPending = r.status === 'Return_pending';
                                     const isUrgent = isPending && r.priority === 'Urgent';
                                     const isHigh = isPending && r.priority === 'High';
 
@@ -399,6 +406,7 @@ return;
                                             key={r.id}
                                             className={`transition-colors ${isUrgent ? 'bg-rose-50/50 hover:bg-rose-50' :
                                                     isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50' :
+                                                        isReturnPending ? 'bg-orange-50/30 hover:bg-orange-50/50' :
                                                         isPending ? 'bg-amber-50/20 hover:bg-amber-50/30' :
                                                             'hover:bg-muted/30'
                                                 }`}
@@ -415,6 +423,9 @@ return;
                                                 <div className="flex items-center gap-2">
                                                     {isPending && (
                                                         <span className={`h-2 w-2 rounded-full ${isUrgent ? 'bg-rose-500 animate-pulse' : 'bg-amber-400'}`} />
+                                                    )}
+                                                    {isReturnPending && (
+                                                        <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
                                                     )}
                                                     <span className="font-mono text-xs font-semibold text-emerald-700">{r.request_number}</span>
                                                 </div>
@@ -478,6 +489,11 @@ return;
                                                     {r.status === 'Fulfilled' && ['Borrow', 'Checkout'].includes(r.request_type) && (
                                                         <Button size="sm" className="h-7 bg-violet-600 hover:bg-violet-700 text-white text-xs px-2" onClick={() => openAction(r, 'return')}>
                                                             <RotateCcw className="h-3 w-3 mr-1" /> Return
+                                                        </Button>
+                                                    )}
+                                                    {r.status === 'Return_pending' && r.type === 'loan' && (
+                                                        <Button size="sm" className="h-7 bg-orange-600 hover:bg-orange-700 text-white text-xs px-2" onClick={() => openAction(r, 'return')}>
+                                                            <CheckCircle className="h-3 w-3 mr-1" /> Approve Return
                                                         </Button>
                                                     )}
                                                 </div>
