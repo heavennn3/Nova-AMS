@@ -147,7 +147,7 @@ export default function AssetLoansCreate({
                                 </Badge>
                                 <div>
                                     <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Create asset loan</h1>
-                                    <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Pick dates, filter stored assets, and submit request from allowed site inventory.</p>
+
                                 </div>
                                 <div className="grid gap-3 sm:grid-cols-3">
                                     <div className="rounded-lg border bg-background p-4">
@@ -201,7 +201,7 @@ export default function AssetLoansCreate({
                                 <div className={`grid gap-3 ${isAdmin ? 'lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto]' : 'lg:grid-cols-[1.4fr_1fr_1fr_auto]'}`}>
                                     <div className="relative">
                                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                        <Input id="asset-search" placeholder="Search asset ID, serial, name, location..." value={search} onChange={(e) => resetPage(() => setSearch(e.target.value))} className="bg-background pl-10" />
+                                        <Input id="asset-search" placeholder="Search " value={search} onChange={(e) => resetPage(() => setSearch(e.target.value))} className="bg-background pl-10" />
                                     </div>
                                     {isAdmin && (
                                         <Select value={siteFilter} onValueChange={(value) => resetPage(() => setSiteFilter(value))} disabled={data.asset_ids.length > 0}>
@@ -228,7 +228,7 @@ export default function AssetLoansCreate({
                                     </Select>
                                     <Button type="button" variant="outline" onClick={clearFilters} className="bg-background"><X className="mr-2 h-4 w-4" /> Clear</Button>
                                 </div>
-                                {data.asset_ids.length > 0 && <p className="mt-3 text-xs text-muted-foreground">More assets can be selected from same site only. Clear selected assets to switch site.</p>}
+
                             </div>
 
                             <InputError message={errors.asset_ids} />
@@ -283,7 +283,7 @@ export default function AssetLoansCreate({
                         <aside className="space-y-5">
                             <section className="sticky top-6 rounded-2xl border bg-card p-5 shadow-sm">
                                 <h2 className="text-lg font-semibold text-foreground">Loan summary</h2>
-                                <p className="mt-1 text-sm text-muted-foreground">Review details before submit.</p>
+                                <p className="mt-1 text-sm text-muted-foreground">Fill details before submit.</p>
 
                                 <div className="mt-5 space-y-3">
                                     <div className="rounded-lg border bg-background p-4">
@@ -304,7 +304,7 @@ export default function AssetLoansCreate({
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="loan-purpose" className="font-medium">Purpose <span className="text-red-500">*</span></Label>
-                                        <Textarea id="loan-purpose" placeholder="Explain why asset loan needed." value={data.purpose} onChange={(e) => setData('purpose', e.target.value)} className="min-h-28 resize-y" />
+                                        <Textarea id="loan-purpose" placeholder="Reason to withdraw" value={data.purpose} onChange={(e) => setData('purpose', e.target.value)} className="min-h-28 resize-y" />
                                         <InputError message={errors.purpose} />
                                     </div>
                                     <div className="space-y-2">
