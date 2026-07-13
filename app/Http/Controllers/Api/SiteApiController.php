@@ -26,6 +26,11 @@ class SiteApiController extends Controller
             'region_id' => 'nullable|integer|exists:regions,id',
             'is_active' => 'boolean',
         ]);
+
+        if (empty($validated['code'])) {
+            $validated['code'] = null;
+        }
+
         return response()->json(Site::create($validated), 201);
     }
 
@@ -43,6 +48,11 @@ class SiteApiController extends Controller
             'region_id' => 'nullable|integer|exists:regions,id',
             'is_active' => 'boolean',
         ]);
+
+        if (empty($validated['code'])) {
+            $validated['code'] = null;
+        }
+
         $site->update($validated);
         return response()->json($site);
     }

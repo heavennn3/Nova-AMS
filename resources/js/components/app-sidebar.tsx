@@ -47,56 +47,47 @@ const navSections: NavSection[] = [
         ],
     },
     {
-        title: 'MANAGEMENT SYSTEM',
+        title: 'INVENTORY',
+
+
         items: [
 
-            {
-                title: 'Inventory',
-                href: '#',
-                icon: Package,
-                module: 'Asset Inventory',
-                items: [
-                    {
-                        title: 'Assets',
-                        href: assetInventory(),
-                    },
-                    {
-                        title: 'Loan',
-                        href: '/asset-loans',
-                    },
-                ],
-            },
 
-            { title: 'Spare Parts', href: '/spare-parts/dashboard', icon: Wrench },
+            { title: 'ICT Asset List', href: assetInventory(), icon: Package },
+            { title: 'Asset Loan', href: '/asset-loans', icon: Package },
 
-            {
-                title: 'Site Management',
-                href: '#',
-                icon: MapPin,
-                module: 'Multi-Site Management',
-                items: [
-                    {
-                        title: 'Dashboards',
-                        href: '/multi-site/dashboards',
-                    },
-                    {
-                        title: 'Asset Transfer',
-                        href: '/multi-site/transfers',
-                    },
-                ],
-            },
-            {
-                title: 'Software Licenses',
-                href: '/licenses',
-                icon: Key,
-                module: 'Asset Inventory',
-                items: [
-                    { title: 'License Inventory', href: '/licenses' },
-                    { title: 'Renewals', href: '/licenses/renewals' },
-                ],
-            },
+            { title: 'Spare Part ', href: '/spare-parts/dashboard', icon: Wrench },
+
+
+
+
         ],
     },
+
+    {
+        title: 'SOFTWARE LICENSES',
+
+        items: [
+
+            { title: 'Key & Licenses', href: '/licenses', icon: Key },
+
+            { title: 'License Usage', href: '/licenses/usage', icon: Key },
+
+        ],
+    },
+
+    {
+        title: 'SITES MANAGEMENT',
+
+        items: [
+            { title: 'Site Dashboard', href: '/multi-site/dashboards', icon: MapPin },
+
+            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: MapPin },
+
+        ],
+    },
+
+
     {
         title: 'OPERATIONS',
 
@@ -114,9 +105,6 @@ const navSections: NavSection[] = [
                 icon: Map,
                 module: 'Asset Inventory',
             },
-
-
-
 
 
         ],

@@ -55,11 +55,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // QR/Barcode Scanning routes — now in routes/api.php
 
         
+        Route::post('/licenses/bulk-update-status', [\App\Http\Controllers\LicenseController::class, 'bulkUpdateStatus'])->name('licenses.bulk-update-status');
         Route::post('/licenses/import-bulk', [\App\Http\Controllers\LicenseController::class, 'importBulk'])->name('licenses.import-bulk');
-        Route::get('/licenses/renewals', [\App\Http\Controllers\LicenseController::class, 'renewals'])->name('licenses.renewals');
         Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
         Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
-        Route::post('/licenses/{license}/record-renewal', [\App\Http\Controllers\LicenseController::class, 'recordRenewal'])->name('licenses.record-renewal');
         Route::get('/licenses/trash', [\App\Http\Controllers\LicenseController::class, 'trash'])->name('licenses.trash');
         Route::post('/licenses/{id}/restore', [\App\Http\Controllers\LicenseController::class, 'restore'])->name('licenses.restore');
         Route::delete('/licenses/{id}/force', [\App\Http\Controllers\LicenseController::class, 'forceDelete'])->name('licenses.force-delete');

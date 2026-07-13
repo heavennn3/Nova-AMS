@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Head, useForm, router, Link } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import {
     Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
     Package, CheckCircle2, AlertTriangle, Clock, Users, Layers,
@@ -40,6 +40,8 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedLicense, setSelectedLicense] = useState<any>(null);
+    const [viewLicense, setViewLicense] = useState<any>(null);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
     const [createKeyVisible, setCreateKeyVisible] = useState(false);
     const [deleteReason, setDeleteReason] = useState('');
@@ -230,9 +232,9 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             accessorKey: 'name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
             cell: ({ row }: any) => (
-                <Link href={`/licenses/${row.original.id}`} className="font-semibold text-primary hover:underline">
+                <button onClick={() => { setViewLicense(row.original); setIsViewOpen(true); }} className="font-semibold text-primary hover:underline text-left">
                     {row.getValue('name')}
-                </Link>
+                </button>
             ),
         },
         {
@@ -457,7 +459,101 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             </div>
 
             {/* Table */}
-            <DataTable columns={columns} data={filteredLicenses} hideToolbar />
+            <DataTable columns={columns} data={filteredLicenses} />
+
+            {/* ── License Detail Dialog ── */}
+            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader><DialogTitle className="text-xl">{viewLicense?.name}</DialogTitle></DialogHeader>
+                    {viewLicense && (
+                        <div className="space-y-6">
+                            {/* Key + Basic Info */}
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">License Key</div>
+                                    <div className="font-mono text-xs bg-muted/60 px-2 py-1 rounded border break-all">
+                                        {viewLicense.license_key || '—'}
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Status</div>
+                                    <Badge className={statusConfig[viewLicense.status]?.bg || ''}>{statusConfig[viewLicense.status]?.label || viewLicense.status}</Badge>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Category</div>
+                                    <div>{viewLicense.category || '—'}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Type</div>
+                                    <div className="capitalize">{viewLicense.type || '—'}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Seats</div>
+                                    <div>{viewLicense.used_seat}/{viewLicense.total_seat} used</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Site</div>
+                                    <div>{viewLicense.site || '—'}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Active Date</div>
+                                    <div>{viewLicense.active_date || '—'}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">End Date</div>
+                                    <div>{viewLicense.end_date || '—'}</div>
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            {viewLicense.notes && (
+                                <div className="text-sm border-t pt-3">
+                                    <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Notes</div>
+                                    <div className="text-muted-foreground text-xs whitespace-pre-wrap">{viewLicense.notes}</div>
+                                </div>
+                            )}
+
+                            {/* Seat Assignments */}
+                            <div className="border-t pt-3">
+                                <h3 className="text-sm font-semibold mb-2">Seat Assignments</h3>
+                                {viewLicense.seats?.length > 0 ? (
+                                    <div className="space-y-1.5">
+                                        {viewLicense.seats.map((seat: any) => (
+                                            <div key={seat.seat_number} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                                                <span className="font-medium text-muted-foreground">Seat #{seat.seat_number}</span>
+                                                {seat.assigned_user_name ? (
+                                                    <div className="flex items-center gap-2 text-right">
+                                                        <div>
+                                                            <div className="font-medium">{seat.assigned_user_name}</div>
+                                                            <div className="text-xs text-muted-foreground">{seat.assigned_user_email}</div>
+                                                        </div>
+                                                        <div className="h-2 w-2 rounded-full bg-rose-500" />
+                                                    </div>
+                                                ) : seat.assigned_asset_name ? (
+                                                    <div className="flex items-center gap-2 text-right">
+                                                        <div>
+                                                            <div className="font-medium">{seat.assigned_asset_name}</div>
+                                                            <div className="text-xs text-muted-foreground">SN: {seat.assigned_asset_serial || '—'}</div>
+                                                        </div>
+                                                        <div className="h-2 w-2 rounded-full bg-amber-500" />
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground italic">Available</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground italic">No seat data available.</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* ── Import CSV Dialog ── */}
             <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>

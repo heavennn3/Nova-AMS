@@ -213,6 +213,11 @@ export function DataTable<TData, TValue>({
                 preserveScroll: true,
                 onSuccess: () => { table.resetRowSelection(); router.reload(); },
             });
+        } else if (resourceType === 'licenses') {
+            router.post('/licenses/bulk-update-status', { ids, status: statusVal }, {
+                preserveScroll: true,
+                onSuccess: () => { table.resetRowSelection(); router.reload(); },
+            });
         } else {
             router.post('/assets/bulk-update-status', { ids, status_id: statusVal }, {
                 preserveScroll: true,
@@ -269,7 +274,7 @@ export function DataTable<TData, TValue>({
                         >
                             Export Selected
                         </Button>
-                        {canUpdateStatus && ['assets', 'work-orders', 'users', 'spare-parts'].includes(resourceType || '') && (
+                        {canUpdateStatus && ['assets', 'work-orders', 'users', 'spare-parts', 'licenses'].includes(resourceType || '') && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">
@@ -312,6 +317,22 @@ export function DataTable<TData, TValue>({
                                             <DropdownMenuItem onClick={() => handleBulkStatusUpdate('faulty')}>
                                                 <AlertTriangle className="mr-2 h-4 w-4 text-red-600" />
                                                 Faulty
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                    {resourceType === 'licenses' && (
+                                        <>
+                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('available')}>
+                                                <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                                                Available
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('full')}>
+                                                <Package className="mr-2 h-4 w-4 text-blue-600" />
+                                                Full
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('expired')}>
+                                                <AlertTriangle className="mr-2 h-4 w-4 text-red-600" />
+                                                Expired
                                             </DropdownMenuItem>
                                         </>
                                     )}

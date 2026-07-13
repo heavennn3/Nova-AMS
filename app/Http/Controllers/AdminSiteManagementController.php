@@ -53,6 +53,10 @@ class AdminSiteManagementController extends Controller
             'region' => 'nullable|string|max:255',
         ]);
 
+        if (empty($validated['code'])) {
+            $validated['code'] = null;
+        }
+
         Site::create($validated);
 
         return back()->with('success', 'Site created successfully.');

@@ -28,7 +28,7 @@ class LicenseController extends Controller
                 }
             }
 
-            $licenses = License::with(['site', 'licenseSeats'])
+            $licenses = License::with(['site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset'])
                 ->when($siteId, fn($q) => $q->where('site_id', $siteId))
                 ->get()
                 ->map(function ($license) {
@@ -51,6 +51,16 @@ class LicenseController extends Controller
                             'site_id' => $license->site_id,
                             'notes' => $license->notes,
                             'created_at' => $license->created_at->format('Y-m-d H:i:s'),
+                            'seats' => $license->licenseSeats->map(function ($seat) {
+                                return [
+                                    'seat_number' => $seat->seat_number,
+                                    'seat_status' => $seat->seat_status,
+                                    'assigned_user_name' => $seat->assignedUser?->name,
+                                    'assigned_user_email' => $seat->assignedUser?->email,
+                                    'assigned_asset_name' => $seat->assignedAsset?->product_name,
+                                    'assigned_asset_serial' => $seat->assignedAsset?->serial_number,
+                                ];
+                            })->values()->toArray(),
                         ];
                     } catch (\Exception $e) {
                         Log::error('Error processing license: ' . $e->getMessage(), ['license_id' => $license->id]);
@@ -427,73 +437,6 @@ class LicenseController extends Controller
     }
 
 
-    public function renewals()
-    {
-        try {
-            $licenses = License::with(['renewals'])
-                ->whereNotNull('end_date')
-                ->orderBy('end_date')
-                ->get()
-                ->map(function ($license) {
-                    return [
-                        'id' => $license->id,
-                        'name' => $license->name,
-                        'end_date' => $license->end_date?->format('Y-m-d'),
-                        'status' => $license->status,
-                        'type' => $license->type,
-                        'renewals_history' => $license->renewals->map(function ($renewal) {
-                            return [
-                                'id' => $renewal->id,
-                                'previous_expiration' => $renewal->previous_expiration?->format('Y-m-d'),
-                                'new_expiration' => $renewal->new_expiration?->format('Y-m-d'),
-                                'renewal_cost' => $renewal->renewal_cost,
-                                'renewal_type' => $renewal->renewal_type,
-                                'renewed_at' => $renewal->created_at?->format('Y-m-d'),
-                                'renewed_by' => $renewal->renewedBy?->name,
-                            ];
-                        })->sortByDesc('created_at')->values()->toArray(),
-                    ];
-                });
-
-            return Inertia::render('Licenses/Renewals', [
-                'licenses' => $licenses,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Renewals error: ' . $e->getMessage());
-            return back()->with('error', 'Error loading renewals.');
-        }
-    }
-
-    public function recordRenewal(Request $request, License $license)
-    {
-        $validated = $request->validate([
-            'new_expiration' => 'required|date',
-            'renewal_cost' => 'nullable|numeric|min:0',
-            'renewal_type' => 'required|in:automatic,manual,upgrade,downgrade',
-            'notes' => 'nullable|string',
-        ]);
-
-        DB::transaction(function () use ($license, $validated) {
-            $license->renewals()->create([
-                'previous_expiration' => $license->expiration_date,
-                'new_expiration' => $validated['new_expiration'],
-                'renewal_cost' => $validated['renewal_cost'],
-                'renewal_type' => $validated['renewal_type'],
-                'notes' => $validated['notes'],
-                'renewed_by_user_id' => $request->user()->id,
-            ]);
-
-            $license->update([
-                'expiration_date' => $validated['new_expiration'],
-                'renewal_date' => now()->toDateString(),
-            ]);
-
-            $license->updateComplianceStatus();
-        });
-
-        return redirect()->back()->with('success', 'License renewal recorded successfully.');
-    }
-
     public function create()
     {
         return redirect()->route('licenses.index');
@@ -564,6 +507,21 @@ class LicenseController extends Controller
                 ? "Imported {$imported} licenses with " . count($errors) . " errors."
                 : "Successfully imported {$imported} licenses."
         );
+    }
+
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:licenses,id',
+            'status' => 'required|string|in:available,full,expired,expiring_soon',
+        ]);
+
+        License::whereIn('id', $request->ids)->update([
+            'status' => $request->status,
+        ]);
+
+        return redirect()->back()->with('success', 'License statuses updated successfully.');
     }
 
     public function edit(License $license)
