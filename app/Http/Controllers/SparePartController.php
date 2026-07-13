@@ -296,6 +296,46 @@ class SparePartController extends Controller
         return redirect()->back()->with('success', "Successfully imported $importedCount spare parts!");
     }
 
+    public function show(SparePart $sparePart)
+    {
+        $sparePart->load(['site', 'creator', 'user', 'fieldValues']);
+
+        $fields = $sparePart->getFields();
+
+        return Inertia::render('SpareParts/Show', [
+            'part' => [
+                'id' => $sparePart->id,
+                'name' => $sparePart->name,
+                'part_number' => $sparePart->part_number,
+                'category' => $sparePart->category,
+                'location' => $sparePart->location,
+                'site_name' => $sparePart->site?->name ?? 'N/A',
+                'site_id' => $sparePart->site_id,
+                'status' => $sparePart->status,
+                'used_by' => $sparePart->used_by,
+                'used_by_name' => $sparePart->user?->name ?? '—',
+                'created_by_name' => $sparePart->creator?->name ?? 'N/A',
+                'created_at' => $sparePart->created_at?->toISOString(),
+                'updated_at' => $sparePart->updated_at?->toISOString(),
+                'fields' => $fields,
+            ],
+            'sites' => \App\Models\Site::orderBy('name')->get(),
+        ]);
+    }
+
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:spare_parts,id',
+            'status' => 'required|string|in:available,in_used,faulty',
+        ]);
+
+        $count = SparePart::whereIn('id', $request->ids)->update(['status' => $request->status]);
+
+        return redirect()->back()->with('success', "$count spare parts updated to {$request->status}.");
+    }
+
     private function mapHeaderToField(string $normalizedKey): ?string
     {
         $map = [

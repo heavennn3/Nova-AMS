@@ -7,31 +7,38 @@ import {
     Layers,
     Building2,
     User,
-    Clock,
     Calendar,
+    Clock,
     CheckCircle2,
     AlertTriangle,
+    FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-const statusColors: Record<string, string> = {
-    available: 'bg-green-100 text-green-700 border-green-200',
-    in_used: 'bg-blue-100 text-blue-700 border-blue-200',
-    faulty: 'bg-red-100 text-red-700 border-red-200',
+const statusConfig: Record<string, { bg: string; text: string; icon: any }> = {
+    available: { bg: 'bg-green-100 text-green-700 border-green-200', text: 'text-green-600', icon: CheckCircle2 },
+    in_used: { bg: 'bg-blue-100 text-blue-700 border-blue-200', text: 'text-blue-600', icon: Package },
+    faulty: { bg: 'bg-red-100 text-red-700 border-red-200', text: 'text-red-600', icon: AlertTriangle },
 };
 
 export default function Show({ part, sites = [] }: { part: any; sites?: any[] }) {
-    const details = [
-        { icon: Tag, label: 'Part Number', value: part.part_number },
-        { icon: Layers, label: 'Category', value: part.category },
-        { icon: MapPin, label: 'Location', value: part.location },
-        { icon: Building2, label: 'Site', value: part.site_name },
-        { icon: User, label: 'Used By', value: part.used_by_name },
-        { icon: User, label: 'Created By', value: part.created_by_name },
-        { icon: Calendar, label: 'Created At', value: part.created_at ? new Date(part.created_at).toLocaleDateString() : '—' },
-        { icon: Clock, label: 'Updated At', value: part.updated_at ? new Date(part.updated_at).toLocaleDateString() : '—' },
+    const cfg = statusConfig[part.status] || statusConfig.available;
+    const StatusIcon = cfg.icon;
+
+    const summaryFields = [
+        { label: 'Part Number', value: part.part_number, icon: Tag },
+        { label: 'Category', value: part.category, icon: Layers },
+        { label: 'Location', value: part.location, icon: MapPin },
+        { label: 'Site', value: part.site_name, icon: Building2 },
+    ];
+
+    const infoFields = [
+        { label: 'Used By', value: part.used_by_name, icon: User },
+        { label: 'Created By', value: part.created_by_name, icon: User },
+        { label: 'Created At', value: part.created_at ? new Date(part.created_at).toLocaleDateString() : '—', icon: Calendar },
+        { label: 'Updated At', value: part.updated_at ? new Date(part.updated_at).toLocaleDateString() : '—', icon: Clock },
     ];
 
     return (
@@ -40,46 +47,66 @@ export default function Show({ part, sites = [] }: { part: any; sites?: any[] })
 
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-4">
-                <div className="flex items-center gap-4">
-                    <Link href="/spare-parts/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                <div className="flex items-center gap-4 min-w-0">
+                    <Link href="/spare-parts/dashboard" className="text-muted-foreground hover:text-foreground shrink-0">
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
-                            <Package className="h-6 w-6 text-primary" />
-                            {part.name}
-                        </h1>
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="rounded-full bg-primary/10 p-2 shrink-0">
+                            <Package className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                            <h1 className="text-xl font-bold tracking-tight truncate">{part.name}</h1>
+                        </div>
                     </div>
-                    <Badge className={`text-xs px-3 py-1 ${statusColors[part.status] || 'bg-gray-100 text-gray-700'}`}>
+                    <Badge className={`text-xs px-3 py-1 ${cfg.bg}`}>
+                        <StatusIcon className="h-3 w-3 mr-1 inline" />
                         {part.status?.replace('_', ' ')}
                     </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => router.get(`/spare-parts/dashboard`)}>
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                    </Button>
-                </div>
+                <Button variant="outline" size="sm" onClick={() => router.get('/spare-parts/dashboard')}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                </Button>
             </div>
 
-            {/* Info Cards */}
+            {/* Top Summary Cards */}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {summaryFields.map(f => (
+                    <Card key={f.label} className="overflow-hidden">
+                        <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-lg bg-muted p-2 shrink-0">
+                                    <f.icon className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs text-muted-foreground">{f.label}</p>
+                                    <p className="text-sm font-semibold truncate mt-0.5">{f.value || '—'}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {/* Details + Status Actions */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Details */}
+                {/* Info Fields */}
                 <Card className="lg:col-span-2">
                     <CardHeader className="border-b py-3 px-4">
                         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                            <Package className="h-4 w-4 text-primary" />
-                            Spare Part Details
+                            <FileText className="h-4 w-4 text-primary" />
+                            Spare Part Information
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <dl className="divide-y">
-                            {details.map(d => (
-                                <div key={d.label} className="flex items-center gap-4 px-4 py-3 sm:px-6">
-                                    <dt className="flex items-center gap-2 text-sm text-muted-foreground min-w-[140px]">
-                                        <d.icon className="h-4 w-4 shrink-0" />
-                                        {d.label}
+                            {infoFields.map(f => (
+                                <div key={f.label} className="flex items-center gap-4 px-4 py-3 sm:px-6">
+                                    <dt className="flex items-center gap-2 text-sm text-muted-foreground min-w-[130px]">
+                                        <f.icon className="h-4 w-4 shrink-0" />
+                                        {f.label}
                                     </dt>
-                                    <dd className="text-sm font-medium truncate">{d.value || '—'}</dd>
+                                    <dd className="text-sm font-medium truncate">{f.value || '—'}</dd>
                                 </div>
                             ))}
                         </dl>
@@ -95,35 +122,37 @@ export default function Show({ part, sites = [] }: { part: any; sites?: any[] })
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 space-y-3">
-                        {['available', 'in_used', 'faulty'].map(s => (
-                            <Button
-                                key={s}
-                                variant={part.status === s ? 'default' : 'outline'}
-                                size="sm"
-                                className="w-full justify-start"
-                                disabled={part.status === s}
-                                onClick={() => {
-                                    if (confirm(`Set "${part.name}" status to ${s.replace('_', ' ')}?`)) {
-                                        router.put(`/spare-parts/${part.id}`, {
-                                            name: part.name,
-                                            part_number: part.part_number,
-                                            category: part.category,
-                                            location: part.location,
-                                            site_id: part.site_id,
-                                            status: s,
-                                        }, {
-                                            preserveScroll: true,
-                                            onSuccess: () => router.reload(),
-                                        });
-                                    }
-                                }}
-                            >
-                                {s === 'available' && <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
-                                {s === 'in_used' && <Package className="mr-2 h-4 w-4 text-blue-600" />}
-                                {s === 'faulty' && <AlertTriangle className="mr-2 h-4 w-4 text-red-600" />}
-                                Set {s.replace('_', ' ')}
-                            </Button>
-                        ))}
+                        {['available', 'in_used', 'faulty'].map(s => {
+                            const Icon = s === 'available' ? CheckCircle2 : s === 'in_used' ? Package : AlertTriangle;
+                            const color = s === 'available' ? 'text-green-600' : s === 'in_used' ? 'text-blue-600' : 'text-red-600';
+                            return (
+                                <Button
+                                    key={s}
+                                    variant={part.status === s ? 'default' : 'outline'}
+                                    size="sm"
+                                    className="w-full justify-start"
+                                    disabled={part.status === s}
+                                    onClick={() => {
+                                        if (confirm(`Set "${part.name}" status to ${s.replace('_', ' ')}?`)) {
+                                            router.put(`/spare-parts/${part.id}`, {
+                                                name: part.name,
+                                                part_number: part.part_number,
+                                                category: part.category,
+                                                location: part.location,
+                                                site_id: part.site_id,
+                                                status: s,
+                                            }, {
+                                                preserveScroll: true,
+                                                onSuccess: () => router.reload(),
+                                            });
+                                        }
+                                    }}
+                                >
+                                    <Icon className={`mr-2 h-4 w-4 ${color}`} />
+                                    Set {s.replace('_', ' ')}
+                                </Button>
+                            );
+                        })}
                     </CardContent>
                 </Card>
             </div>
@@ -132,13 +161,17 @@ export default function Show({ part, sites = [] }: { part: any; sites?: any[] })
             {part.fields && Object.keys(part.fields).length > 0 && (
                 <Card>
                     <CardHeader className="border-b py-3 px-4">
-                        <CardTitle className="text-sm font-semibold">Additional Fields</CardTitle>
+                        <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-primary" />
+                            Additional Fields
+                        </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <dl className="divide-y">
                             {Object.entries(part.fields).map(([key, value]) => (
                                 <div key={key} className="flex items-center gap-4 px-4 py-3 sm:px-6">
-                                    <dt className="text-sm text-muted-foreground min-w-[140px] capitalize">
+                                    <dt className="text-sm text-muted-foreground min-w-[140px] capitalize flex items-center gap-2">
+                                        <FileText className="h-4 w-4 shrink-0" />
                                         {key.replace(/_/g, ' ')}
                                     </dt>
                                     <dd className="text-sm font-medium">{String(value) || '—'}</dd>
