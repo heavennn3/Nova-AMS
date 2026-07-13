@@ -46,15 +46,15 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
                 ),
             },
             {
-                accessorKey: 'vendor',
-                header: 'Vendor',
-                cell: ({ row }: any) => row.original.vendor || 'N/A',
+                accessorKey: 'oem',
+                header: 'OEM',
+                cell: ({ row }: any) => row.original.oem || 'N/A',
             },
             {
-                accessorKey: 'expiration_date',
-                header: 'Current Expiration',
+                accessorKey: 'end_date',
+                header: ({ column }: any) => <DataTableColumnHeader column={column} title="Expiration" />,
                 cell: ({ row }: any) => {
-                    const date = row.getValue('expiration_date');
+                    const date = row.getValue('end_date');
                     if (!date) return <span className="text-muted-foreground">No expiration</span>;
 
                     const dateObj = new Date(date);
@@ -78,50 +78,28 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
                 },
             },
             {
-                accessorKey: 'auto_renew',
-                header: 'Auto Renew',
+                accessorKey: 'status',
+                header: 'Status',
                 cell: ({ row }: any) => {
-                    const autoRenew = row.original.auto_renew;
-                    return (
-                        <Badge variant="secondary" className={autoRenew ? "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-300 dark:border-emerald-900/30" : ""}>
-                            {autoRenew ? 'Enabled' : 'Disabled'}
-                        </Badge>
-                    );
-                },
-            },
-            {
-                accessorKey: 'pricing_model',
-                header: 'Pricing',
-                cell: ({ row }: any) => {
-                    const model = row.original.pricing_model;
-                    const cycle = row.original.billing_cycle;
-                    const modelLabels: Record<string, string> = {
-                        one_time: 'One-time',
-                        annual: 'Annual',
-                        monthly: 'Monthly',
-                        quarterly: 'Quarterly',
+                    const status = row.original.status;
+                    const colors: Record<string, string> = {
+                        available: 'bg-green-100 text-green-700 border-green-200',
+                        full: 'bg-blue-100 text-blue-700 border-blue-200',
+                        expiring_soon: 'bg-amber-100 text-amber-700 border-amber-200',
+                        expired: 'bg-red-100 text-red-700 border-red-200',
                     };
-                    return (
-                        <div className="flex flex-col">
-                            <span>{modelLabels[model] || model}</span>
-                            {cycle && <span className="text-xs text-muted-foreground">{cycle}</span>}
-                        </div>
-                    );
+                    return <Badge className={`text-xs ${colors[status] || ''}`}>{status?.replace(/_/g, ' ')}</Badge>;
                 },
             },
             {
-                accessorKey: 'subscription_id',
-                header: 'Subscription',
-                cell: ({ row }: any) => {
-                    const subId = row.original.subscription_id;
-                    return subId ? (
-                        <Badge variant="outline" className="font-mono text-xs">
-                            {subId}
-                        </Badge>
-                    ) : (
-                        <span className="text-muted-foreground">-</span>
-                    );
-                },
+                accessorKey: 'type',
+                header: 'Type',
+                cell: ({ row }: any) => <span className="capitalize">{row.original.type || '—'}</span>,
+            },
+            {
+                accessorKey: 'oem',
+                header: 'OEM',
+                cell: ({ row }: any) => <span>{row.original.oem || '—'}</span>,
             },
             {
                 accessorKey: 'renewals_history',
@@ -184,29 +162,21 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
     // Statistics
     const stats = React.useMemo(() => {
         const total = licenses.length;
-        const expiringSoon = licenses.filter(l => {
-            if (!l.expiration_date) return false;
-            const expDate = new Date(l.expiration_date);
-            const today = new Date();
-            const daysUntilExpiry = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-            return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
-        }).length;
-
         const expired = licenses.filter(l => {
-            if (!l.expiration_date) return false;
-            return new Date(l.expiration_date) < new Date();
+            return l.status === 'expired';
+        }).length;
+        const expiringSoon = licenses.filter(l => {
+            return l.status === 'expiring_soon';
         }).length;
 
-        const autoRenewEnabled = licenses.filter(l => l.auto_renew).length;
-
-        return { total, expiringSoon, expired, autoRenewEnabled };
+        return { total, expired, expiringSoon };
     }, [licenses]);
 
     const handleRecordRenewal = (license: any) => {
         setSelectedLicense(license);
         setRenewalFormData({
             license_id: license.id,
-            new_expiration: license.expiration_date || '',
+            new_expiration: license.end_date || '',
             renewal_cost: '',
             renewal_type: 'manual',
             notes: '',
@@ -284,8 +254,8 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
                                 <RefreshCw className="h-6 w-6 text-emerald-600" />
                             </div>
                             <div>
-                                <p className="text-2xl font-bold">{stats.autoRenewEnabled}</p>
-                                <p className="text-sm text-muted-foreground">Auto-Renew Enabled</p>
+                                <p className="text-2xl font-bold">{licenses.length}</p>
+                                <p className="text-sm text-muted-foreground">Total Licenses</p>
                             </div>
                         </div>
                     </CardContent>
@@ -327,7 +297,7 @@ export default function Renewals({ licenses = [] }: RenewalsProps) {
                         <div className="grid gap-2">
                             <Label>Current Expiration</Label>
                             <Input
-                                value={selectedLicense?.expiration_date ? new Date(selectedLicense.expiration_date).toLocaleDateString() : 'N/A'}
+                                value={selectedLicense?.end_date ? new Date(selectedLicense.end_date).toLocaleDateString() : 'N/A'}
                                 disabled
                                 className="bg-muted"
                             />

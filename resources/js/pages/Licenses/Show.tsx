@@ -4,7 +4,6 @@ import {
     FileKey,
     ArrowLeft,
     Calendar,
-    Building2,
     Mail,
     User as UserIcon,
     Laptop,
@@ -109,8 +108,8 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
     };
 
     const copyToClipboard = () => {
-        if (license.product_key) {
-            navigator.clipboard.writeText(license.product_key);
+        if (license.license_key) {
+            navigator.clipboard.writeText(license.license_key);
             toast.success('Product key copied to clipboard');
         }
     };
@@ -280,9 +279,9 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                             <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Product Key</div>
                             <div className="flex items-center gap-1.5">
                                 <span className="font-mono text-xs bg-muted/60 px-2 py-1 rounded border overflow-x-auto max-w-[280px]">
-                                    {keyVisible ? (license.product_key || 'No key provided') : '••••-••••-••••-••••'}
+                                    {keyVisible ? (license.license_key || 'No key provided') : '••••-••••-••••-••••'}
                                 </span>
-                                {license.product_key && (
+                                {license.license_key && (
                                     <>
                                         <button
                                             onClick={() => setKeyVisible(!keyVisible)}
@@ -304,25 +303,6 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                         </div>
 
                         <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Licensed To</div>
-                            <div className="flex items-center gap-1 text-foreground">
-                                {license.license_name ? (
-                                    <span>{license.license_name} {license.license_email && `(${license.license_email})`}</span>
-                                ) : (
-                                    <span className="italic text-muted-foreground">Not assigned</span>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vendor</div>
-                            <div className="flex items-center gap-1 text-foreground">
-                                <Building2 className="h-4 w-4 text-muted-foreground" />
-                                <span>{license.vendor || 'No vendor linked'}</span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
                             <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Scope / Site Scope</div>
                             <div className="text-foreground font-medium">
                                 {license.site || 'Global (All Sites)'}
@@ -330,20 +310,37 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                         </div>
 
                         <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Purchase Details</div>
-                            <div className="text-foreground">
-                                {license.purchase_cost ? `$${Number(license.purchase_cost).toFixed(2)}` : '—'}
-                                {license.purchase_date && ` on ${license.purchase_date}`}
+                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Expiration Date</div>
+                            <div className="flex items-center gap-1.5">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                                <span className={license.end_date ? '' : 'italic text-muted-foreground'}>
+                                    {license.end_date || 'Never Expires'}
+                                </span>
                             </div>
                         </div>
 
                         <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Expiration Date</div>
-                            <div className="flex items-center gap-1.5">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className={license.expiration_date ? '' : 'italic text-muted-foreground'}>
-                                    {license.expiration_date || 'Never Expires'}
-                                </span>
+                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Active Date</div>
+                            <div className="text-foreground">{license.active_date || '—'}</div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Category</div>
+                            <div className="text-foreground">{license.category || '—'}</div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Type</div>
+                            <div className="text-foreground capitalize">{license.type || '—'}</div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Status</div>
+                            <div className="text-foreground">
+                                {license.status === 'available' && <span className="text-green-600 font-medium">Available</span>}
+                                {license.status === 'full' && <span className="text-blue-600 font-medium">Full</span>}
+                                {license.status === 'expiring_soon' && <span className="text-amber-600 font-medium">Expiring Soon</span>}
+                                {license.status === 'expired' && <span className="text-red-600 font-medium">Expired</span>}
                             </div>
                         </div>
 

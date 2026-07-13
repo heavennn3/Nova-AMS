@@ -1,20 +1,8 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import {
-    Check,
-    ChevronsUpDown,
-    PlusCircle,
-    Key,
-    FileKey,
-    Plus,
-    Pencil,
-    Trash2,
-    Calendar,
-    Eye,
-    EyeOff,
-    Percent,
-    AlertCircle,
-    CheckCircle,
+    Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
+    Package, CheckCircle2, AlertTriangle, Clock, Users, Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,19 +17,6 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command';
-import {
     Select,
     SelectContent,
     SelectItem,
@@ -49,11 +24,17 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], vendors = [], licenseTypes = [] }: any) {
-    // Error boundary - if data is not in expected format, show simple version
+const statusConfig: Record<string, { bg: string; label: string }> = {
+    available: { bg: 'bg-green-100 text-green-700 border-green-200', label: 'Available' },
+    expired: { bg: 'bg-red-100 text-red-700 border-red-200', label: 'Expired' },
+    expiring_soon: { bg: 'bg-amber-100 text-amber-700 border-amber-200', label: 'Expiring Soon' },
+    full: { bg: 'bg-blue-100 text-blue-700 border-blue-200', label: 'Full' },
+};
+
+export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], currentSiteId = null }: any) {
     const [error, setError] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -61,58 +42,65 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const [selectedLicense, setSelectedLicense] = useState<any>(null);
     const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
     const [createKeyVisible, setCreateKeyVisible] = useState(false);
-    const [vendorOpen, setVendorOpen] = useState(false);
-    const [vendorSearch, setVendorSearch] = useState('');
     const [deleteReason, setDeleteReason] = useState('');
-    const [selectedVendor, setSelectedVendor] = useState<string>('all');
-    const [selectedLicenseType, setSelectedLicenseType] = useState<string>('all');
+    const [search, setSearch] = useState('');
+    const [filterSite, setFilterSite] = useState('all');
+    const [filterCategory, setFilterCategory] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
 
-    // Validate data format
     useEffect(() => {
         try {
             if (!Array.isArray(licenses)) {
-                console.error('Licenses is not an array:', typeof licenses);
                 setError('Invalid data format received from server');
             } else {
-                console.log('Licenses data loaded successfully:', licenses.length, 'licenses');
-                setError(null); // Clear any previous errors
+                setError(null);
             }
         } catch (e) {
-            console.error('Error validating data:', e);
             setError('Error processing license data');
         }
     }, [licenses]);
 
+    // ── Categories extracted from data ──
+    const categories = useMemo(
+        () => [...new Set(licenses.map((l: any) => l.category).filter(Boolean))] as string[],
+        [licenses]
+    );
+
+    // ── Filtered data ──
+    const filteredLicenses = useMemo(() => {
+        let filtered = licenses;
+        if (filterSite !== 'all') filtered = filtered.filter((l: any) => String(l.site_id) === filterSite);
+        if (filterCategory !== 'all') filtered = filtered.filter((l: any) => l.category === filterCategory);
+        if (filterStatus !== 'all') filtered = filtered.filter((l: any) => l.status === filterStatus);
+        if (search.trim()) {
+            const q = search.toLowerCase();
+            filtered = filtered.filter((l: any) =>
+                [l.name, l.category, l.type, l.license_key].some(v => String(v ?? '').toLowerCase().includes(q))
+            );
+        }
+        return filtered;
+    }, [licenses, filterSite, filterCategory, filterStatus, search]);
+
+    // ── Create Form ──
     const form = useForm({
         name: '',
-        license_type: 'perpetual',
-        vendor_id: '',
-        product_key: '',
-        expiration_date: '',
-        seats: 1,
-        purchase_cost: '',
-        purchase_date: '',
-        license_email: '',
-        license_name: '',
-        license_type_id: 'all',
-        site_id: 'all',
+        category: '',
+        type: '',
+        total_seat: 1,
+        site_id: '',
+        license_key: '',
+        active_date: '',
+        end_date: '',
         notes: '',
     });
 
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
-        const isSub = form.data.license_type === 'subscription';
-        const data = {
-            name: form.data.name,
-            product_key: form.data.product_key || null,
-            license_type: isSub ? 'subscription' : 'perpetual',
-            pricing_model: isSub ? 'annual' : 'one_time',
-            total_seats: 1,
-            vendor_id: form.data.vendor_id ? Number(form.data.vendor_id) : null,
-            expiration_date: form.data.expiration_date || null,
-            auto_renew: false,
-            notification_days: 30,
-        };
+        const data = { ...form.data };
+        if (data.total_seat) data.total_seat = Number(data.total_seat);
+        if (data.site_id) data.site_id = Number(data.site_id);
 
         router.post('/licenses', data, {
             onSuccess: () => {
@@ -127,857 +115,556 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         });
     };
 
+    // ── Edit Form ──
+    const editForm = useForm({
+        name: '',
+        category: '',
+        type: '',
+        total_seat: 1,
+        site_id: '',
+        license_key: '',
+        active_date: '',
+        end_date: '',
+        notes: '',
+    });
+
+    const openEdit = (license: any) => {
+        setSelectedLicense(license);
+        editForm.setData({
+            name: license.name || '',
+            category: license.category || '',
+            type: license.type || '',
+            total_seat: license.total_seat || 1,
+            site_id: license.site_id ? String(license.site_id) : '',
+            license_key: license.license_key || '',
+            active_date: license.active_date || '',
+            end_date: license.end_date || '',
+            notes: license.notes || '',
+        });
+        setIsEditOpen(true);
+    };
+
     const handleEdit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedLicense) {
-            toast.error('No license selected');
-            return;
-        }
-
-        const data = {
-            ...form.data,
-            vendor_id: form.data.vendor_id === 'all' ? null : Number(form.data.vendor_id),
-            site_id: form.data.site_id === 'all' ? null : Number(form.data.site_id),
-            license_type_id: form.data.license_type_id === 'all' ? null : Number(form.data.license_type_id),
-            purchase_cost: form.data.purchase_cost ? Number(form.data.purchase_cost) : null,
-            total_seats: form.data.seats,
-            license_type: 'perpetual',
-            pricing_model: 'one_time',
-            auto_renew: false,
-            notification_days: 30,
-        };
+        if (!selectedLicense) return;
+        const data = { ...editForm.data };
+        if (data.total_seat) data.total_seat = Number(data.total_seat);
+        if (data.site_id) data.site_id = Number(data.site_id);
 
         router.put(`/licenses/${selectedLicense.id}`, data, {
             onSuccess: () => {
                 setIsEditOpen(false);
                 setSelectedLicense(null);
-                toast.success('Software license updated successfully');
+                toast.success('License updated successfully');
             },
             onError: (err) => {
-                // If standard validation error or custom warning
-                if (err.total_seats) {
-                    toast.error(err.total_seats);
-                } else {
-                    toast.error('Failed to update license.');
-                }
+                toast.error(Object.values(err).join(', ') || 'Failed to update license.');
             }
         });
     };
 
+    // ── Delete ──
     const handleDelete = () => {
-        if (!selectedLicense) {
-            toast.error('No license selected');
-            return;
-        }
-        if (!deleteReason.trim()) {
-            toast.error('Please provide a reason for deletion');
-            return;
-        }
-
+        if (!selectedLicense) return;
         router.delete(`/licenses/${selectedLicense.id}`, {
             data: { delete_reason: deleteReason },
             onSuccess: () => {
                 setIsDeleteOpen(false);
                 setSelectedLicense(null);
                 setDeleteReason('');
-                toast.success('Software license deleted successfully');
+                toast.success('License deleted');
             },
-            onError: (err) => {
-                toast.error(err.error || 'Failed to delete license. Ensure no seats are currently assigned.');
-            }
+            onError: () => toast.error('Failed to delete license'),
         });
     };
 
-    const openEdit = useCallback(
-        (license: any) => {
-            setSelectedLicense(license);
-            form.setData({
-                name: license.name || '',
-                product_key: license.product_key || '',
-                seats: license.total_seats || 1,
-                purchase_cost: license.purchase_cost ? String(license.purchase_cost) : '',
-                purchase_date: license.purchase_date || '',
-                expiration_date: license.expiration_date || '',
-                license_email: license.license_email || '',
-                license_name: license.license_name || '',
-                license_type_id: license.license_type_id ? String(license.license_type_id) : 'all',
-                vendor_id: license.vendor_id ? String(license.vendor_id) : 'all',
-                site_id: license.site_id ? String(license.site_id) : 'all',
-                notes: license.notes || '',
-            });
-            setIsEditOpen(true);
-        },
-        [form],
-    );
+    const handleImport = () => {
+        if (!importFile) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target?.result as string;
+                const lines = text.split('\n').filter(l => l.trim());
+                if (lines.length < 2) {
+                    toast.error('CSV must have a header row and at least one data row.');
+                    return;
+                }
+                const headers = lines[0].split(',').map(h => h.trim());
+                const licenses = lines.slice(1).map(line => {
+                    const vals = line.split(',').map(v => v.trim());
+                    const row: Record<string, string> = {};
+                    headers.forEach((h, i) => { row[h] = vals[i] ?? ''; });
+                    return row;
+                });
+                router.post('/licenses/import-bulk', { licenses }, {
+                    onSuccess: () => {
+                        setIsImportOpen(false);
+                        setImportFile(null);
+                        toast.success('Import completed successfully');
+                    },
+                    onError: (err) => {
+                        toast.error(Object.values(err).join(', ') || 'Import failed');
+                    },
+                });
+            } catch (err) {
+                toast.error('Failed to parse CSV file.');
+            }
+        };
+        reader.readAsText(importFile);
+    };
 
     const toggleKeyVisibility = (id: number) => {
         setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
-    // Filter licenses by selected vendor and license type
-    const filteredLicenses = useMemo(() => {
-        let filtered = licenses;
-
-        if (selectedVendor !== 'all') {
-            filtered = filtered.filter((license: any) =>
-                license.vendor_id === parseInt(selectedVendor)
-            );
-        }
-
-        if (selectedLicenseType !== 'all') {
-            filtered = filtered.filter((license: any) =>
-                license.license_type_id === parseInt(selectedLicenseType)
-            );
-        }
-
-        return filtered;
-    }, [licenses, selectedVendor, selectedLicenseType]);
-
-    const columns = useMemo(
-        () => [
-            {
-                accessorKey: 'name',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Software License" />
-                ),
-                cell: ({ row }: any) => (
-                    <Link
-                        href={`/licenses/${row.original.id}`}
-                        className="font-semibold text-primary hover:underline hover:text-primary/80"
-                    >
-                        {row.getValue('name')}
-                    </Link>
-                ),
-            },
-            {
-                accessorKey: 'product_key',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Product Key" />
-                ),
-                cell: ({ row }: any) => {
-                    const key = row.getValue('product_key') as string;
-                    if (!key) return <span className="text-xs text-muted-foreground italic">No key provided</span>;
-                    const isVisible = visibleKeys[row.original.id];
-                    return (
-                        <div className="flex items-center gap-1.5 font-mono text-xs max-w-[200px] truncate">
-                            <span>{isVisible ? key : '••••-••••-••••-••••'}</span>
-                            <button
-                                onClick={() => toggleKeyVisibility(row.original.id)}
-                                className="text-muted-foreground hover:text-foreground p-0.5"
-                                type="button"
-                            >
-                                {isVisible ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+    // ── Columns ──
+    const columns = [
+        {
+            accessorKey: 'id',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="ID" />,
+            cell: ({ row }: any) => <span className="font-mono text-xs text-muted-foreground">#{row.getValue('id')}</span>,
+        },
+        {
+            accessorKey: 'name',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
+            cell: ({ row }: any) => (
+                <Link href={`/licenses/${row.original.id}`} className="font-semibold text-primary hover:underline">
+                    {row.getValue('name')}
+                </Link>
+            ),
+        },
+        {
+            accessorKey: 'category',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
+        },
+        {
+            accessorKey: 'type',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Type" />,
+        },
+        {
+            accessorKey: 'total_seat',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Total Seats" />,
+            cell: ({ row }: any) => <span className="font-medium">{row.getValue('total_seat')}</span>,
+        },
+        {
+            accessorKey: 'used_seat',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Used" />,
+            cell: ({ row }: any) => <span className="font-medium">{row.getValue('used_seat') ?? 0}</span>,
+        },
+        {
+            accessorKey: 'site',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Site" />,
+            cell: ({ row }: any) => <span className="text-muted-foreground">{row.getValue('site') || '—'}</span>,
+        },
+        {
+            accessorKey: 'license_key',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Key" />,
+            cell: ({ row }: any) => {
+                const key = row.getValue('license_key') as string;
+                const id = row.original.id;
+                const visible = visibleKeys[id];
+                return (
+                    <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-xs truncate max-w-[100px]">
+                            {visible ? (key || '—') : (key ? '••••••••' : '—')}
+                        </span>
+                        {key && (
+                            <button onClick={() => toggleKeyVisibility(id)} className="text-muted-foreground hover:text-foreground">
+                                {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                             </button>
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'utilization',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Seat Allocation" />
-                ),
-                cell: ({ row }: any) => {
-                    const total = row.original.total_seats;
-                    const assigned = row.original.used_seats;
-                    const percent = total > 0 ? (assigned / total) * 100 : 0;
-                    return (
-                        <div className="w-[160px] space-y-1.5">
-                            <div className="flex justify-between text-xs font-medium text-muted-foreground">
-                                <span>{assigned} / {total} Seats</span>
-                                <span>{Math.round(percent)}%</span>
-                            </div>
-                            <Progress value={percent} className="h-1.5" />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'cost',
-                accessorKey: 'purchase_cost',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Cost" />
-                ),
-                cell: ({ row }: any) =>
-                    row.getValue('purchase_cost')
-                        ? `$${Number(row.getValue('purchase_cost')).toFixed(2)}`
-                        : '—',
-            },
-            {
-                id: 'site',
-                accessorFn: (row: any) => row.site || 'Global',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Site / Scope" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="inline-flex items-center rounded bg-muted/60 px-2 py-0.5 text-xs font-medium border border-border/40">
-                        {row.original.site || 'Global'}
-                    </span>
-                ),
-            },
-            {
-                id: 'vendor',
-                accessorFn: (row: any) => row.vendor || 'No Vendor',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Vendor" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="inline-flex items-center rounded bg-blue-50 dark:bg-blue-950/20 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400 border border-blue-200/50">
-                        {row.original.vendor || 'No Vendor'}
-                    </span>
-                ),
-            },
-            {
-                id: 'license_type',
-                accessorFn: (row: any) => row.license_type_name || 'Uncategorized',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="License Type" />
-                ),
-                cell: ({ row }: any) => (
-                    <span className="inline-flex items-center rounded bg-purple-50 dark:bg-purple-950/20 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-400 border border-purple-200/50">
-                        {row.original.license_type_name || 'Uncategorized'}
-                    </span>
-                ),
-            },
-            {
-                accessorKey: 'expiration_date',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Expiration" />
-                ),
-                cell: ({ row }: any) => {
-                    const dateStr = row.getValue('expiration_date') as string;
-                    if (!dateStr) return <span className="text-xs text-muted-foreground italic">Never Expires</span>;
-
-                    const expiry = new Date(dateStr);
-                    const now = new Date();
-                    const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-                    let badgeClass = "text-muted-foreground";
-                    if (diffDays <= 0) {
-                        badgeClass = "text-rose-600 font-semibold bg-rose-50 dark:bg-rose-950/20 px-1.5 py-0.5 rounded border border-rose-200/50";
-                    } else if (diffDays <= 30) {
-                        badgeClass = "text-amber-600 font-semibold bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-200/50";
-                    }
-
-                    return (
-                        <div className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5 text-muted-foreground/80" />
-                            <span className={`text-xs ${badgeClass}`}>
-                                {dateStr}
-                                {diffDays <= 0 && ' (Expired)'}
-                                {diffDays > 0 && diffDays <= 30 && ' (Expiring)'}
-                            </span>
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'actions',
-                cell: ({ row }: any) => (
-                    <div className="flex items-center justify-end gap-1">
-                        <Link href={`/licenses/${row.original.id}`}>
-                            <Button variant="ghost" size="sm" className="h-8 text-primary">
-                                View
-                            </Button>
-                        </Link>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8"
-                            onClick={() => openEdit(row.original)}
-                        >
-                            <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-                            onClick={() => {
-                                setSelectedLicense(row.original);
-                                setIsDeleteOpen(true);
-                            }}
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
+                        )}
                     </div>
-                ),
+                );
             },
-        ],
-        [openEdit, visibleKeys],
-    );
+        },
+        {
+            accessorKey: 'active_date',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Active" />,
+            cell: ({ row }: any) => <span className="text-xs">{row.getValue('active_date') || '—'}</span>,
+        },
+        {
+            accessorKey: 'end_date',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="End" />,
+            cell: ({ row }: any) => <span className="text-xs">{row.getValue('end_date') || '—'}</span>,
+        },
+        {
+            accessorKey: 'status',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
+            cell: ({ row }: any) => {
+                const status = row.getValue('status') as string;
+                const cfg = statusConfig[status] || { bg: 'bg-gray-100 text-gray-700 border-gray-200', label: status };
+                return <Badge className={`text-xs px-2 py-0.5 ${cfg.bg}`}>{cfg.label}</Badge>;
+            },
+        },
+        {
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }: any) => (
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openEdit(row.original)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+                        onClick={() => { setSelectedLicense(row.original); setIsDeleteOpen(true); }}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                </div>
+            ),
+        },
+    ];
 
-    // Calc Summary Stats
-    const totalLicenses = filteredLicenses.length;
-    const totalSeats = filteredLicenses.reduce((sum: number, lic: any) => sum + lic.total_seats, 0);
-    const totalAssignedSeats = filteredLicenses.reduce((sum: number, lic: any) => sum + lic.used_seats, 0);
-    const totalAvailableSeats = totalSeats - totalAssignedSeats;
+    // ── Stats ──
+    const stats = useMemo(() => {
+        const total = filteredLicenses.length;
+        const totalSeats = filteredLicenses.reduce((s: number, l: any) => s + (l.total_seat || 0), 0);
+        const used = filteredLicenses.reduce((s: number, l: any) => s + (l.used_seat || 0), 0);
+        const available = filteredLicenses.filter((l: any) => l.status === 'available').length;
+        const expired = filteredLicenses.filter((l: any) => l.status === 'expired').length;
+        const expiring = filteredLicenses.filter((l: any) => l.status === 'expiring_soon').length;
+        const full = filteredLicenses.filter((l: any) => l.status === 'full').length;
+        return { total, totalSeats, used, available, expired, expiring, full };
+    }, [filteredLicenses]);
 
-    // Active licenses (not expired)
-    const activeLicenses = filteredLicenses.filter((lic: any) => {
-        if (!lic.expiration_date) return true; // Never expires = active
-        const expiry = new Date(lic.expiration_date);
-        const now = new Date();
-        return expiry.getTime() > now.getTime();
-    }).length;
-
-    // Expiring this month (within 30 days)
-    const expiringThisMonth = filteredLicenses.filter((lic: any) => {
-        if (!lic.expiration_date) return false;
-        const expiry = new Date(lic.expiration_date);
-        const now = new Date();
-        const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        return diffDays > 0 && diffDays <= 30;
-    }).length;
-
-    // Expired licenses
-    const expiredLicenses = filteredLicenses.filter((lic: any) => {
-        if (!lic.expiration_date) return false;
-        const expiry = new Date(lic.expiration_date);
-        const now = new Date();
-        return expiry.getTime() <= now.getTime();
-    }).length;
-
-    // In use licenses (has assigned seats)
-    const inUseLicenses = filteredLicenses.filter((lic: any) => lic.used_seats > 0).length;
+    if (error) {
+        return (
+            <div className="w-full p-8">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full space-y-6 p-8">
-            <Head title="Software Licenses Dashboard" />
+            <Head title="Software Licenses" />
 
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded mb-4">
-                    <strong>Error:</strong> {error}
-                    <div className="mt-2 text-sm">
-                        Please check the browser console for more details and refresh the page.
-                    </div>
-                </div>
-            )}
-
-            <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <FileKey className="mr-3 h-8 w-8 text-primary" />
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                            Software Licenses
-                        </h1>
-
-                    </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold tracking-tight">Software Licenses</h1>
+                    {sites.length > 0 && (
+                        <Select
+                            value={currentSiteId ? String(currentSiteId) : ''}
+                            onValueChange={(v) => router.get('/licenses', { site_id: v })}
+                        >
+                            <SelectTrigger className="h-9 w-[200px] text-sm">
+                                <SelectValue
+                                    placeholder={sites.find((s: any) => String(s.id) === String(currentSiteId))?.name || 'Select site'}
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {sites.map((site: any) => (
+                                    <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
-
-                    <Button
-                        onClick={() => {
-                            form.reset();
-                            setIsCreateOpen(true);
-                        }}
-                    >
-                        <Plus className="mr-2 h-4 w-4" /> Create License
+                    <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
+                        <Upload className="mr-2 h-4 w-4" /> Import CSV
+                    </Button>
+                    <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Add License
                     </Button>
                 </div>
             </div>
 
-            {/* Metrics cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-blue-500/10 p-3">
-                        <FileKey className="h-6 w-6 text-blue-600" />
+                        <Package className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Total Licenses</p>
-                        <p className="text-2xl font-bold">{totalLicenses}</p>
+                        <p className="text-sm text-muted-foreground">Total</p>
+                        <p className="text-2xl font-bold">{stats.total}</p>
                     </div>
                 </div>
-
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-green-500/10 p-3">
-                        <CheckCircle className="h-6 w-6 text-green-600" />
+                        <CheckCircle2 className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Active </p>
-                        <p className="text-2xl font-bold">{activeLicenses}</p>
+                        <p className="text-sm text-muted-foreground">Available</p>
+                        <p className="text-2xl font-bold">{stats.available}</p>
                     </div>
                 </div>
-
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className="rounded-full bg-blue-500/10 p-3">
+                        <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Full</p>
+                        <p className="text-2xl font-bold">{stats.full}</p>
+                    </div>
+                </div>
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-amber-500/10 p-3">
-                        <AlertCircle className="h-6 w-6 text-amber-600" />
+                        <Clock className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Expiring This Month</p>
-                        <p className="text-2xl font-bold">{expiringThisMonth}</p>
-
+                        <p className="text-sm text-muted-foreground">Expiring</p>
+                        <p className="text-2xl font-bold">{stats.expiring}</p>
                     </div>
                 </div>
-
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-red-500/10 p-3">
-                        <AlertCircle className="h-6 w-6 text-red-600" />
+                        <AlertTriangle className="h-6 w-6 text-red-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Expired Licenses</p>
-                        <p className="text-2xl font-bold">{expiredLicenses}</p>
-
+                        <p className="text-sm text-muted-foreground">Expired</p>
+                        <p className="text-2xl font-bold">{stats.expired}</p>
                     </div>
                 </div>
-
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-purple-500/10 p-3">
-                        <Percent className="h-6 w-6 text-purple-600" />
+                    <div className="rounded-full bg-violet-500/10 p-3">
+                        <Layers className="h-6 w-6 text-violet-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">In Use</p>
-                        <p className="text-2xl font-bold">{inUseLicenses}</p>
-
+                        <p className="text-sm text-muted-foreground">Seats Used</p>
+                        <p className="text-2xl font-bold">{stats.used}/{stats.totalSeats}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="p-4 border-b flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-3 flex-wrap">
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium">License Type:</label>
-                            <Select value={selectedLicenseType} onValueChange={setSelectedLicenseType}>
-                                <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="All Types" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Types</SelectItem>
-                                    {licenseTypes.map((lt: any) => (
-                                        <SelectItem key={lt.id} value={String(lt.id)}>{lt.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium">Vendor:</label>
-                            <Select value={selectedVendor} onValueChange={setSelectedVendor}>
-                                <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="All Vendors" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Vendors</SelectItem>
-                                    {vendors.map((v: any) => (
-                                        <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                        {filteredLicenses.length} {filteredLicenses.length === 1 ? 'license' : 'licenses'} {(selectedVendor !== 'all' || selectedLicenseType !== 'all') ? 'filtered' : ''}
-                    </div>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-[240px]">
+                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm" />
                 </div>
-                {error ? (
-                    <div className="p-8 text-center text-red-600">
-                        <p className="font-semibold">Unable to display licenses</p>
-                        <p className="text-sm mt-2">{error}</p>
-                        <p className="text-xs mt-4 text-muted-foreground">Please refresh the page or contact support if the problem persists.</p>
-                    </div>
-                ) : filteredLicenses.length > 0 ? (
-                    <DataTable columns={columns} data={filteredLicenses} searchKey="name" />
-                ) : (
-                    <div className="p-8 text-center text-muted-foreground">
-                        <FileKey className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                        <p className="text-lg font-medium mb-2">
-                            {(selectedVendor !== 'all' || selectedLicenseType !== 'all') ? 'No licenses found for the selected filters' : 'No licenses found'}
-                        </p>
-                        <p className="text-sm mb-4">
-                            {(selectedVendor !== 'all' || selectedLicenseType !== 'all')
-                                ? 'Try adjusting your filters or add licenses that match your criteria.' : ''}
-                        </p>
-                        {(selectedVendor === 'all' && selectedLicenseType === 'all') && (
-                            <Button onClick={() => setIsCreateOpen(true)}>
-                                <Plus className="mr-2 h-4 w-4" /> Add New License
-                            </Button>
-                        )}
-                    </div>
+                <Select value={filterSite} onValueChange={setFilterSite}>
+                    <SelectTrigger className="h-8 w-[130px] text-sm"><SelectValue placeholder="Site" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Sites</SelectItem>
+                        {sites.map((s: any) => (
+                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                    <SelectTrigger className="h-8 w-[130px] text-sm"><SelectValue placeholder="Category" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((c: string) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="h-8 w-[130px] text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="full">Full</SelectItem>
+                        <SelectItem value="expiring_soon">Expiring Soon</SelectItem>
+                        <SelectItem value="expired">Expired</SelectItem>
+                    </SelectContent>
+                </Select>
+                {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
+                    <Button variant="ghost" size="sm" className="h-8 text-xs"
+                        onClick={() => { setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); }}>
+                        Clear
+                    </Button>
                 )}
+                <span className="text-xs text-muted-foreground ml-auto tabular-nums">{filteredLicenses.length} of {licenses.length}</span>
             </div>
 
-            {/* ── Create License Modal ── */}
-            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); } }}>
-                <DialogContent className="sm:max-w-lg">
+            {/* Table */}
+            <DataTable columns={columns} data={filteredLicenses} hideToolbar />
+
+            {/* ── Import CSV Dialog ── */}
+            <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Import Licenses from CSV</DialogTitle></DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Upload a CSV file with columns: name, category, type, total_seat, site_id, license_key, active_date, end_date, status
+                        </p>
+                        <Input type="file" accept=".csv" onChange={e => setImportFile(e.target.files?.[0] ?? null)} className="h-9" />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsImportOpen(false)}>Cancel</Button>
+                        <Button onClick={handleImport} disabled={!importFile}>Import</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* ── Create Dialog ── */}
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <DialogContent className="max-w-lg">
                     <form onSubmit={handleCreate}>
-                        <DialogHeader>
-                            <DialogTitle>Create License</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-5 py-4">
-                            {/* License Name */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">License Name *</label>
-                                <Input
-                                    required
-                                    placeholder="e.g. Microsoft 365 Business"
-                                    value={form.data.name}
-                                    onChange={(e) => form.setData('name', e.target.value)}
-                                />
-                                {form.errors.name && <p className="text-xs text-rose-600">{form.errors.name}</p>}
+                        <DialogHeader><DialogTitle>Add New License</DialogTitle></DialogHeader>
+                        <div className="grid grid-cols-2 gap-4 py-4">
+                            <div className="space-y-1.5 col-span-2">
+                                <label className="text-sm font-medium">Name *</label>
+                                <Input value={form.data.name} onChange={e => form.setData('name', e.target.value)} required className="h-9" />
                             </div>
-
-                            {/* Vendor (searchable combobox + inline create) */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Vendor</label>
-                                <Popover open={vendorOpen} onOpenChange={setVendorOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            aria-expanded={vendorOpen}
-                                            className="w-full justify-between font-normal"
-                                        >
-                                            {form.data.vendor_id
-                                                ? vendors.find((v: any) => String(v.id) === form.data.vendor_id)?.name
-                                                : 'Select vendor…'}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-                                        <Command>
-                                            <CommandInput
-                                                placeholder="Search vendor…"
-                                                value={vendorSearch}
-                                                onValueChange={setVendorSearch}
-                                            />
-                                            <CommandList>
-                                                <CommandEmpty>
-                                                    <button
-                                                        type="button"
-                                                        className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-primary hover:bg-accent"
-                                                        onClick={async () => {
-                                                            const name = vendorSearch.trim();
-                                                            if (!name) return;
-                                                            try {
-                                                                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                                                                const res = await fetch('/api/quick/vendors', {
-                                                                    method: 'POST',
-                                                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
-                                                                    body: JSON.stringify({ name }),
-                                                                });
-                                                                if (!res.ok) throw new Error('Failed to create vendor');
-                                                                const vendor = await res.json();
-                                                                form.setData('vendor_id', String(vendor.id));
-                                                                setVendorOpen(false);
-                                                                setVendorSearch('');
-                                                                toast.success(`Vendor "${name}" created.`);
-                                                            } catch {
-                                                                toast.error('Failed to create vendor.');
-                                                            }
-                                                        }}
-                                                    >
-                                                        <PlusCircle className="h-4 w-4" />
-                                                        Create vendor "<span className="font-medium">{vendorSearch}</span>"
-                                                    </button>
-                                                </CommandEmpty>
-                                                <CommandGroup>
-                                                    {vendors.map((v: any) => (
-                                                        <CommandItem
-                                                            key={v.id}
-                                                            value={v.name}
-                                                            onSelect={() => {
-                                                                form.setData('vendor_id', String(v.id));
-                                                                setVendorOpen(false);
-                                                                setVendorSearch('');
-                                                            }}
-                                                        >
-                                                            <Check
-                                                                className={cn(
-                                                                    'mr-2 h-4 w-4',
-                                                                    form.data.vendor_id === String(v.id) ? 'opacity-100' : 'opacity-0'
-                                                                )}
-                                                            />
-                                                            {v.name}
-                                                        </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Category</label>
+                                <Input value={form.data.category} onChange={e => form.setData('category', e.target.value)} className="h-9" />
                             </div>
-
-                            {/* License Type (subscription / perpetual) */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Type *</label>
-                                <Select
-                                    value={form.data.license_type}
-                                    onValueChange={(v) => form.setData('license_type', v)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Type</label>
+                                <Select value={form.data.type} onValueChange={v => form.setData('type', v)}>
+                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="perpetual">Perpetual</SelectItem>
+                                        <SelectItem value="per_user">Per User</SelectItem>
+                                        <SelectItem value="per_device">Per Device</SelectItem>
+                                        <SelectItem value="concurrent">Concurrent</SelectItem>
                                         <SelectItem value="subscription">Subscription</SelectItem>
+                                        <SelectItem value="perpetual">Perpetual</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
-
-                            {/* Product Key (hidden by default, toggle) */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Product Key</label>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Allowed Seats *</label>
+                                <Input type="number" min={1} value={form.data.total_seat}
+                                    onChange={e => form.setData('total_seat', Number(e.target.value))} required className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">License Key</label>
                                 <div className="relative">
-                                    <Input
-                                        type={createKeyVisible ? 'text' : 'password'}
-                                        placeholder="AAAAA-BBBBB-CCCCC-DDDDD-EEEEE"
-                                        value={form.data.product_key ?? ''}
-                                        onChange={(e) => form.setData('product_key', e.target.value)}
-                                        className="pr-9 font-mono text-sm"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setCreateKeyVisible(!createKeyVisible)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                    >
-                                        {createKeyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    <Input type={createKeyVisible ? 'text' : 'password'} value={form.data.license_key}
+                                        onChange={e => form.setData('license_key', e.target.value)} className="h-9 pr-8" />
+                                    <button type="button" onClick={() => setCreateKeyVisible(!createKeyVisible)}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        {createKeyVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                                     </button>
                                 </div>
-                                <p className="text-xs text-muted-foreground">Key is hidden by default. Toggle to reveal.</p>
                             </div>
-
-                            {/* Expiry Date */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Expiry Date</label>
-                                <Input
-                                    type="date"
-                                    value={form.data.expiration_date ?? ''}
-                                    onChange={(e) => form.setData('expiration_date', e.target.value)}
-                                />
-                                {form.errors.expiration_date && <p className="text-xs text-rose-600">{form.errors.expiration_date}</p>}
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Site</label>
+                                <Select value={form.data.site_id} onValueChange={v => form.setData('site_id', v)}>
+                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                    <SelectContent>
+                                        {sites.map((s: any) => (
+                                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Active Date</label>
+                                <Input type="date" value={form.data.active_date}
+                                    onChange={e => form.setData('active_date', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">End Date</label>
+                                <Input type="date" value={form.data.end_date}
+                                    onChange={e => form.setData('end_date', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Duration (months)</label>
+                                <Input type="number" min={1} value={form.data.duration_months}
+                                    onChange={e => form.setData('duration_months', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5 col-span-2">
+                                <label className="text-sm font-medium">Notes</label>
+                                <Textarea value={form.data.notes} onChange={e => form.setData('notes', e.target.value)} rows={2} />
                             </div>
                         </div>
-
                         <DialogFooter>
-                            <Button variant="outline" type="button" onClick={() => { setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false); }}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={form.processing}>
-                                {form.processing ? 'Creating…' : 'Create License'}
-                            </Button>
+                            <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                            <Button type="submit">Create License</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            {/* Edit License Modal */}
+            {/* ── Edit Dialog ── */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-lg">
                     <form onSubmit={handleEdit}>
-                        <DialogHeader>
-                            <DialogTitle>Edit Software License</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">Software / License Name *</label>
-                                    <Input
-                                        required
-                                        value={form.data.name}
-                                        onChange={(e) => form.setData('name', e.target.value)}
-                                    />
-                                    {form.errors.name && <div className="text-xs text-rose-600">{form.errors.name}</div>}
-                                </div>
-
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">Product Activation Key</label>
-                                    <Textarea
-                                        value={form.data.product_key}
-                                        onChange={(e) => form.setData('product_key', e.target.value)}
-                                        rows={2}
-                                        className="font-mono text-sm"
-                                    />
-                                    {form.errors.product_key && <div className="text-xs text-rose-600">{form.errors.product_key}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Total Seats *</label>
-                                    <Input
-                                        required
-                                        type="number"
-                                        min="1"
-                                        max="500"
-                                        value={form.data.seats}
-                                        onChange={(e) => form.setData('seats', parseInt(e.target.value) || 1)}
-                                    />
-                                    {form.errors.seats && <div className="text-xs text-rose-600">{form.errors.seats}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Purchase Cost</label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={form.data.purchase_cost}
-                                        onChange={(e) => form.setData('purchase_cost', e.target.value)}
-                                    />
-                                    {form.errors.purchase_cost && <div className="text-xs text-rose-600">{form.errors.purchase_cost}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Purchase Date</label>
-                                    <Input
-                                        type="date"
-                                        value={form.data.purchase_date}
-                                        onChange={(e) => form.setData('purchase_date', e.target.value)}
-                                    />
-                                    {form.errors.purchase_date && <div className="text-xs text-rose-600">{form.errors.purchase_date}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Expiration Date</label>
-                                    <Input
-                                        type="date"
-                                        value={form.data.expiration_date}
-                                        onChange={(e) => form.setData('expiration_date', e.target.value)}
-                                    />
-                                    {form.errors.expiration_date && <div className="text-xs text-rose-600">{form.errors.expiration_date}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">License To Email</label>
-                                    <Input
-                                        type="email"
-                                        value={form.data.license_email}
-                                        onChange={(e) => form.setData('license_email', e.target.value)}
-                                    />
-                                    {form.errors.license_email && <div className="text-xs text-rose-600">{form.errors.license_email}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Licensed To Name</label>
-                                    <Input
-                                        value={form.data.license_name}
-                                        onChange={(e) => form.setData('license_name', e.target.value)}
-                                    />
-                                    {form.errors.license_name && <div className="text-xs text-rose-600">{form.errors.license_name}</div>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">License Type</label>
-                                    <Select
-                                        value={form.data.license_type_id}
-                                        onValueChange={(v) => form.setData('license_type_id', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select License Type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">No License Type</SelectItem>
-                                            {licenseTypes.map((lt: any) => (
-                                                <SelectItem key={lt.id} value={String(lt.id)}>{lt.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Vendor</label>
-                                    <Select
-                                        value={form.data.vendor_id}
-                                        onValueChange={(v) => form.setData('vendor_id', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Vendor" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">No Vendor</SelectItem>
-                                            {vendors.map((v: any) => (
-                                                <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Site Scope</label>
-                                    <Select
-                                        value={form.data.site_id}
-                                        onValueChange={(v) => form.setData('site_id', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Site" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Global (All Sites)</SelectItem>
-                                            {sites.map((s: any) => (
-                                                <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">Notes</label>
-                                    <Textarea
-                                        value={form.data.notes}
-                                        onChange={(e) => form.setData('notes', e.target.value)}
-                                        rows={3}
-                                    />
-                                </div>
+                        <DialogHeader><DialogTitle>Edit License</DialogTitle></DialogHeader>
+                        <div className="grid grid-cols-2 gap-4 py-4">
+                            <div className="space-y-1.5 col-span-2">
+                                <label className="text-sm font-medium">Name *</label>
+                                <Input value={editForm.data.name} onChange={e => editForm.setData('name', e.target.value)} required className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Category</label>
+                                <Input value={editForm.data.category} onChange={e => editForm.setData('category', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Type</label>
+                                <Select value={editForm.data.type} onValueChange={v => editForm.setData('type', v)}>
+                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="per_user">Per User</SelectItem>
+                                        <SelectItem value="per_device">Per Device</SelectItem>
+                                        <SelectItem value="concurrent">Concurrent</SelectItem>
+                                        <SelectItem value="subscription">Subscription</SelectItem>
+                                        <SelectItem value="perpetual">Perpetual</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Allowed Seats *</label>
+                                <Input type="number" min={1} value={editForm.data.total_seat}
+                                    onChange={e => editForm.setData('total_seat', Number(e.target.value))} required className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">License Key</label>
+                                <Input value={editForm.data.license_key} onChange={e => editForm.setData('license_key', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Site</label>
+                                <Select value={editForm.data.site_id} onValueChange={v => editForm.setData('site_id', v)}>
+                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                    <SelectContent>
+                                        {sites.map((s: any) => (
+                                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Active Date</label>
+                                <Input type="date" value={editForm.data.active_date} onChange={e => editForm.setData('active_date', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">End Date</label>
+                                <Input type="date" value={editForm.data.end_date} onChange={e => editForm.setData('end_date', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Duration (months)</label>
+                                <Input type="number" min={1} value={editForm.data.duration_months} onChange={e => editForm.setData('duration_months', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5 col-span-2">
+                                <label className="text-sm font-medium">Notes</label>
+                                <Textarea value={editForm.data.notes} onChange={e => editForm.setData('notes', e.target.value)} rows={2} />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={() => setIsEditOpen(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={form.processing}>
-                                Update License
-                            </Button>
+                            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            <Button type="submit">Update License</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            {/* Delete Confirmation Modal */}
+            {/* ── Delete Dialog ── */}
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle className="text-rose-600 flex items-center gap-2">
-                            <Trash2 className="h-5 w-5" /> Delete License
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4 space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                            Are you sure you want to delete the license <strong>{selectedLicense?.name}</strong>?
-                            This will move the license to the trash bin.
-                        </p>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Reason for deletion *</label>
-                            <Textarea
-                                required
-                                placeholder="Please provide a reason for deleting this license..."
-                                value={deleteReason}
-                                onChange={(e) => setDeleteReason(e.target.value)}
-                            />
+                    <DialogHeader><DialogTitle>Delete License</DialogTitle></DialogHeader>
+                    {selectedLicense && (
+                        <div className="py-4 space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                Are you sure you want to delete <strong>{selectedLicense.name}</strong>?
+                            </p>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Reason (optional)</label>
+                                <Textarea value={deleteReason} onChange={e => setDeleteReason(e.target.value)} placeholder="Enter reason for deletion..." rows={2} />
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setIsDeleteOpen(false)}
-                        >
-                            Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={handleDelete} disabled={!deleteReason.trim()}>
-                            Confirm Delete
-                        </Button>
+                        <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
+                        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
     );
 }
-
-LicensesIndex.layout = {
-    breadcrumbs: [
-        {
-            title: 'Software Licenses',
-            href: '/licenses',
-        },
-    ],
-};

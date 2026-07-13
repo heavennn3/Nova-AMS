@@ -55,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // QR/Barcode Scanning routes — now in routes/api.php
 
         
-        // Software Licenses Module
+        Route::post('/licenses/import-bulk', [\App\Http\Controllers\LicenseController::class, 'importBulk'])->name('licenses.import-bulk');
         Route::get('/licenses/renewals', [\App\Http\Controllers\LicenseController::class, 'renewals'])->name('licenses.renewals');
         Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
         Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');

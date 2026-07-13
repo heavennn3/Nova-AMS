@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\LicenseAssignment;
-use App\Models\LicenseRenewal;
-use App\Models\LicenseUsageLog;
-use App\Models\LicenseType;
 use App\Models\User;
 use App\Models\Asset;
 use Illuminate\Http\Request;
@@ -17,44 +14,40 @@ use Illuminate\Support\Facades\Log;
 
 class LicenseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             Log::info('License index method called');
 
-            $licenses = License::with(['vendor', 'site', 'licenseSeats', 'licenseType'])
+            $siteId = $request->query('site_id');
+
+            if (!$siteId) {
+                $firstSite = \App\Models\Site::orderBy('name')->first();
+                if ($firstSite) {
+                    return redirect()->to('/licenses?site_id=' . $firstSite->id);
+                }
+            }
+
+            $licenses = License::with(['site', 'licenseSeats'])
+                ->when($siteId, fn($q) => $q->where('site_id', $siteId))
                 ->get()
                 ->map(function ($license) {
                     try {
-                        $license->updateComplianceStatus();
+                        $license->updateStatus();
 
                         return [
                             'id' => $license->id,
                             'name' => $license->name,
-                            'product_key' => $license->product_key,
-                            'version' => $license->version,
+                            'license_key' => $license->license_key,
                             'category' => $license->category,
-                            'license_type' => $license->license_type,
-                            'license_type_id' => $license->license_type_id,
-                            'license_type_name' => $license->licenseType ? $license->licenseType->name : null,
-                            'pricing_model' => $license->pricing_model,
-                            'total_seats' => $license->total_seats,
-                            'used_seats' => $license->used_seats,
+                            'type' => $license->type,
+                            'total_seat' => $license->total_seat,
+                            'used_seat' => $license->used_seat,
                             'available_seats' => $license->available_seats,
-                            'purchase_cost' => $license->purchase_cost,
-                            'purchase_date' => $license->purchase_date ? $license->purchase_date->format('Y-m-d') : null,
-                            'expiration_date' => $license->expiration_date ? $license->expiration_date->format('Y-m-d') : null,
-                            'support_expiry' => $license->support_expiry ? $license->support_expiry->format('Y-m-d') : null,
-                            'renewal_date' => $license->renewal_date ? $license->renewal_date->format('Y-m-d') : null,
-                            'auto_renew' => $license->auto_renew,
-                            'subscription_id' => $license->subscription_id,
-                            'billing_cycle' => $license->billing_cycle,
-                            'compliance_status' => $license->compliance_status,
-                            'license_email' => $license->license_email,
-                            'license_name' => $license->license_name,
-                            'vendor' => $license->vendor ? $license->vendor->name : null,
-                            'vendor_id' => $license->vendor_id,
-                            'site' => $license->site ? $license->site->name : null,
+                            'active_date' => $license->active_date?->format('Y-m-d'),
+                            'end_date' => $license->end_date?->format('Y-m-d'),
+                            'status' => $license->status,
+                            'site' => $license->site?->name,
                             'site_id' => $license->site_id,
                             'notes' => $license->notes,
                             'created_at' => $license->created_at->format('Y-m-d H:i:s'),
@@ -77,15 +70,12 @@ class LicenseController extends Controller
                 });
 
             $sites = DB::table('sites')->select('id', 'name')->orderBy('name')->get();
-            $vendors = DB::table('vendors')->select('id', 'name')->orderBy('name')->get();
-            $licenseTypes = LicenseType::active()->ordered()->get();
 
             Log::info('License page loaded successfully', [
                 'licenses_count' => $licenses->count(),
                 'users_count' => $users->count(),
                 'assets_count' => $assets->count(),
                 'sites_count' => $sites->count(),
-                'vendors_count' => $vendors->count(),
             ]);
 
             return Inertia::render('Licenses/Index', [
@@ -93,8 +83,7 @@ class LicenseController extends Controller
                 'users' => $users,
                 'assets' => $assets,
                 'sites' => $sites,
-                'vendors' => $vendors,
-                'licenseTypes' => $licenseTypes,
+                'currentSiteId' => $siteId ? (int)$siteId : null,
             ]);
 
         } catch (\Exception $e) {
@@ -103,12 +92,12 @@ class LicenseController extends Controller
             ]);
 
             // Return a simple error page
-            return Inertia::render('Licenses/Simple', [
+            return Inertia::render('Licenses/Index', [
                 'licenses' => [],
                 'users' => [],
                 'assets' => [],
                 'sites' => [],
-                'vendors' => [],
+                'currentSiteId' => null,
                 'error' => 'Error loading licenses: ' . $e->getMessage(),
             ]);
         }
@@ -118,40 +107,26 @@ class LicenseController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'product_key' => 'nullable|string',
-            'version' => 'nullable|string',
             'category' => 'nullable|string',
-            'license_type' => 'required|in:per_user,per_device,concurrent,subscription,perpetual',
-            'license_type_id' => 'nullable|exists:license_types,id',
-            'pricing_model' => 'required|in:one_time,annual,monthly,quarterly',
-            'total_seats' => 'required|integer|min:1|max:500',
-            'purchase_cost' => 'nullable|numeric|min:0',
-            'purchase_date' => 'nullable|date',
-            'expiration_date' => 'nullable|date',
-            'support_expiry' => 'nullable|date',
-            'renewal_date' => 'nullable|date',
-            'auto_renew' => 'boolean',
-            'subscription_id' => 'nullable|string',
-            'billing_cycle' => 'nullable|in:monthly,quarterly,annual,custom',
-            'notification_days' => 'nullable|integer|min:1|max:365',
-            'license_email' => 'nullable|email|max:255',
-            'license_name' => 'nullable|string|max:255',
-            'vendor_id' => 'nullable|exists:vendors,id',
+            'type' => 'nullable|string',
+            'total_seat' => 'required|integer|min:1|max:500',
             'site_id' => 'nullable|exists:sites,id',
+            'license_key' => 'nullable|string',
+            'active_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($validated) {
             $licenseData = array_merge($validated, [
-                'used_seats' => 0,
-                'available_seats' => $validated['total_seats'],
-                'compliance_status' => 'compliant',
+                'used_seat' => 0,
+                'status' => 'available',
             ]);
 
             $license = License::create($licenseData);
 
             // Generate Seats
-            for ($i = 1; $i <= $validated['total_seats']; $i++) {
+            for ($i = 1; $i <= $validated['total_seat']; $i++) {
                 LicenseSeat::create([
                     'license_id' => $license->id,
                     'seat_number' => $i,
@@ -166,35 +141,26 @@ class LicenseController extends Controller
     public function show(License $license)
     {
         try {
-            $license->load(['vendor', 'site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset']);
-            $license->updateComplianceStatus();
+            $license->load(['site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset']);
+            $license->updateStatus();
 
             $formattedLicense = [
                 'id' => $license->id,
                 'name' => $license->name,
-                'product_key' => $license->product_key,
-                'version' => $license->version,
+                'license_key' => $license->license_key,
                 'category' => $license->category,
-                'license_type' => $license->license_type,
-                'pricing_model' => $license->pricing_model,
-                'purchase_cost' => $license->purchase_cost,
-                'purchase_date' => $license->purchase_date ? $license->purchase_date->format('Y-m-d') : null,
-                'expiration_date' => $license->expiration_date ? $license->expiration_date->format('Y-m-d') : null,
-                'support_expiry' => $license->support_expiry ? $license->support_expiry->format('Y-m-d') : null,
-                'renewal_date' => $license->renewal_date ? $license->renewal_date->format('Y-m-d') : null,
-                'auto_renew' => $license->auto_renew,
-                'subscription_id' => $license->subscription_id,
-                'billing_cycle' => $license->billing_cycle,
-                'compliance_status' => $license->compliance_status,
-                'license_email' => $license->license_email,
-                'license_name' => $license->license_name,
-                'vendor' => $license->vendor ? $license->vendor->name : null,
-                'vendor_id' => $license->vendor_id,
-                'site' => $license->site ? $license->site->name : null,
+                'type' => $license->type,
+                'total_seat' => $license->total_seat,
+                'used_seat' => $license->used_seat,
+                'available_seats' => $license->available_seats,
+                'active_date' => $license->active_date?->format('Y-m-d'),
+                'end_date' => $license->end_date?->format('Y-m-d'),
+                'status' => $license->status,
+                'site' => $license->site?->name,
                 'site_id' => $license->site_id,
                 'notes' => $license->notes,
-                'seats' => $license->total_seats,
-                'assigned_seats_count' => $license->used_seats,
+                'seats' => $license->total_seat,
+                'assigned_seats_count' => $license->used_seat,
                 'available_seats_count' => $license->available_seats,
                 'seats_list' => $license->licenseSeats->map(function ($seat) {
                     return [
@@ -233,8 +199,7 @@ class LicenseController extends Controller
                             'site' => $asset->site ? $asset->site->name : 'No Site',
                         ];
                     }),
-                'sites' => DB::table('sites')->select('id', 'name')->orderBy('name')->get(),
-                'vendors' => DB::table('vendors')->select('id', 'name')->orderBy('name')->get(),
+                'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
             ]);
         } catch (\Exception $e) {
             Log::error('License show error: ' . $e->getMessage());
@@ -246,32 +211,19 @@ class LicenseController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'product_key' => 'nullable|string',
-            'version' => 'nullable|string',
             'category' => 'nullable|string',
-            'license_type' => 'required|in:per_user,per_device,concurrent,subscription,perpetual',
-            'license_type_id' => 'nullable|exists:license_types,id',
-            'pricing_model' => 'required|in:one_time,annual,monthly,quarterly',
-            'total_seats' => 'required|integer|min:1|max:500',
-            'purchase_cost' => 'nullable|numeric|min:0',
-            'purchase_date' => 'nullable|date',
-            'expiration_date' => 'nullable|date',
-            'support_expiry' => 'nullable|date',
-            'renewal_date' => 'nullable|date',
-            'auto_renew' => 'boolean',
-            'subscription_id' => 'nullable|string',
-            'billing_cycle' => 'nullable|in:monthly,quarterly,annual,custom',
-            'notification_days' => 'nullable|integer|min:1|max:365',
-            'license_email' => 'nullable|email|max:255',
-            'license_name' => 'nullable|string|max:255',
-            'vendor_id' => 'nullable|exists:vendors,id',
+            'type' => 'nullable|string',
+            'total_seat' => 'required|integer|min:1|max:500',
             'site_id' => 'nullable|exists:sites,id',
+            'license_key' => 'nullable|string',
+            'active_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 
         $error = DB::transaction(function () use ($license, $validated) {
             $oldSeatsCount = $license->licenseSeats()->count();
-            $newSeatsCount = (int)$validated['total_seats'];
+            $newSeatsCount = (int)$validated['total_seat'];
 
             if ($newSeatsCount < $oldSeatsCount) {
                 $assignedSeatsCount = $license->licenseSeats()
@@ -291,8 +243,6 @@ class LicenseController extends Controller
                 foreach ($seatsToDelete as $seat) {
                     $seat->delete();
                 }
-
-                $validated['available_seats'] = $newSeatsCount - $assignedSeatsCount;
             } elseif ($newSeatsCount > $oldSeatsCount) {
                 for ($i = $oldSeatsCount + 1; $i <= $newSeatsCount; $i++) {
                     LicenseSeat::create([
@@ -301,12 +251,10 @@ class LicenseController extends Controller
                         'seat_status' => 'available',
                     ]);
                 }
-
-                $validated['available_seats'] = $license->available_seats + ($newSeatsCount - $oldSeatsCount);
             }
 
             $license->update($validated);
-            $license->updateComplianceStatus();
+            $license->updateStatus();
             return null;
         });
 
@@ -482,21 +430,17 @@ class LicenseController extends Controller
     public function renewals()
     {
         try {
-            $licenses = License::with(['vendor', 'renewals'])
-                ->whereNotNull('expiration_date')
-                ->orderBy('expiration_date')
+            $licenses = License::with(['renewals'])
+                ->whereNotNull('end_date')
+                ->orderBy('end_date')
                 ->get()
                 ->map(function ($license) {
                     return [
                         'id' => $license->id,
                         'name' => $license->name,
-                        'expiration_date' => $license->expiration_date?->format('Y-m-d'),
-                        'renewal_date' => $license->renewal_date?->format('Y-m-d'),
-                        'auto_renew' => $license->auto_renew,
-                        'subscription_id' => $license->subscription_id,
-                        'billing_cycle' => $license->billing_cycle,
-                        'pricing_model' => $license->pricing_model,
-                        'vendor' => $license->vendor ? $license->vendor->name : null,
+                        'end_date' => $license->end_date?->format('Y-m-d'),
+                        'status' => $license->status,
+                        'type' => $license->type,
                         'renewals_history' => $license->renewals->map(function ($renewal) {
                             return [
                                 'id' => $renewal->id,
@@ -553,6 +497,71 @@ class LicenseController extends Controller
     public function create()
     {
         return redirect()->route('licenses.index');
+    }
+
+    public function importBulk(Request $request)
+    {
+        $request->validate([
+            'licenses' => 'required|array',
+        ]);
+
+        $errors = [];
+        $imported = 0;
+
+        foreach ($request->licenses as $idx => $row) {
+            $line = $idx + 2;
+            try {
+                $normalized = [];
+                foreach ($row as $k => $v) {
+                    $normalized[preg_replace('/\s+/', '_', strtolower(trim($k)))] = trim((string)$v);
+                }
+
+                $data = [
+                    'name' => $normalized['name'] ?? null,
+                    'license_key' => $normalized['license_key'] ?? null,
+                    'category' => $normalized['category'] ?? null,
+                    'type' => $normalized['type'] ?? null,
+                    'total_seat' => (int)($normalized['total_seat'] ?? 0),
+                    'used_seat' => (int)($normalized['used_seat'] ?? 0),
+                    'active_date' => $normalized['active_date'] ?? null,
+                    'end_date' => $normalized['end_date'] ?? null,
+                    'site_id' => !empty($normalized['site_id']) ? (int)$normalized['site_id'] : null,
+                    'status' => $normalized['status'] ?? 'available',
+                ];
+
+                if (empty($data['name'])) {
+                    $errors[] = "Row {$line}: name is required";
+                    continue;
+                }
+                if ($data['total_seat'] < 1) {
+                    $errors[] = "Row {$line}: total_seat must be >= 1";
+                    continue;
+                }
+
+                DB::transaction(function () use ($data) {
+                    $license = License::create($data);
+
+                    for ($i = 1; $i <= $data['total_seat']; $i++) {
+                        LicenseSeat::create([
+                            'license_id' => $license->id,
+                            'seat_number' => $i,
+                            'seat_status' => $i <= $data['used_seat'] ? 'assigned' : 'available',
+                        ]);
+                    }
+                });
+
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "Row {$line}: {$e->getMessage()}";
+            }
+        }
+
+        return redirect()->route('licenses.index')->with(
+            $errors ? 'warning' : 'success',
+            $errors
+                ? "Imported {$imported} licenses with " . count($errors) . " errors."
+                : "Successfully imported {$imported} licenses."
+        );
     }
 
     public function edit(License $license)

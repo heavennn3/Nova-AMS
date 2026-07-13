@@ -11,55 +11,24 @@ class License extends Model
 
     protected $fillable = [
         'name',
-        'product_key',
-        'version',
         'category',
-        'license_type',
-        'license_type_id',
-        'pricing_model',
-        'total_seats',
-        'used_seats',
-        'available_seats',
-        'purchase_date',
-        'expiration_date',
-        'support_expiry',
-        'renewal_date',
-        'auto_renew',
-        'subscription_id',
-        'billing_cycle',
-        'compliance_status',
-        'last_audit_date',
-        'notification_days',
-        'license_email',
-        'license_name',
-        'vendor_id',
+        'type',
+        'total_seat',
+        'used_seat',
         'site_id',
+        'license_key',
+        'active_date',
+        'end_date',
+        'status',
         'notes',
-        'delete_reason',
     ];
 
     protected $casts = [
-        'purchase_date' => 'date',
-        'expiration_date' => 'date',
-        'support_expiry' => 'date',
-        'renewal_date' => 'date',
-        'last_audit_date' => 'date',
-        'total_seats' => 'integer',
-        'used_seats' => 'integer',
-        'available_seats' => 'integer',
-        'auto_renew' => 'boolean',
-        'notification_days' => 'integer',
+        'active_date' => 'date',
+        'end_date' => 'date',
+        'total_seat' => 'integer',
+        'used_seat' => 'integer',
     ];
-
-    public function vendor()
-    {
-        return $this->belongsTo(Vendor::class);
-    }
-
-    public function licenseType()
-    {
-        return $this->belongsTo(LicenseType::class);
-    }
 
     public function site()
     {
@@ -91,53 +60,41 @@ class License extends Model
      */
     public function getAvailableSeatsAttribute(): int
     {
-        return max(0, $this->total_seats - $this->used_seats);
+        return max(0, ($this->total_seat ?? 0) - ($this->used_seat ?? 0));
     }
 
-    /**
-     * Check if license is expiring soon
-     */
     public function isExpiringSoon(int $days = 30): bool
     {
-        if (!$this->expiration_date) return false;
-
-        return $this->expiration_date->lte(now()->addDays($days))
-            && $this->expiration_date->gt(now());
+        if (!$this->end_date) return false;
+        return $this->end_date->lte(now()->addDays($days)) && $this->end_date->gt(now());
     }
 
-    /**
-     * Check if license is expired
-     */
     public function isExpired(): bool
     {
-        if (!$this->expiration_date) return false;
-
-        return $this->expiration_date->lt(now());
+        if (!$this->end_date) return false;
+        return $this->end_date->lt(now());
     }
 
-    /**
-     * Check if license is compliant
-     */
-    public function isCompliant(): bool
+    public function isFull(): bool
     {
-        return !$this->isExpired() && $this->used_seats <= $this->total_seats;
+        return $this->used_seat >= $this->total_seat;
     }
 
-    /**
-     * Update compliance status
-     */
-    public function updateComplianceStatus(): void
+    public function computeStatus(): string
     {
-        if ($this->isExpired()) {
-            $this->compliance_status = 'expired';
-        } elseif ($this->isExpiringSoon($this->notification_days)) {
-            $this->compliance_status = 'expiring_soon';
-        } elseif ($this->used_seats > $this->total_seats) {
-            $this->compliance_status = 'non_compliant';
-        } else {
-            $this->compliance_status = 'compliant';
+        if ($this->isExpired()) return 'expired';
+        if ($this->isExpiringSoon()) return 'expiring_soon';
+        if ($this->isFull()) return 'full';
+        return 'available';
+    }
+
+    public function updateStatus(): void
+    {
+        $newStatus = $this->computeStatus();
+        if ($this->status !== $newStatus) {
+            $this->status = $newStatus;
+            $this->saveQuietly();
         }
-        $this->save();
     }
 
     /**
@@ -184,8 +141,8 @@ class License extends Model
         ]);
 
         // Update seat counts
-        $this->increment('used_seats');
-        $this->updateComplianceStatus();
+        $this->increment('used_seat');
+        $this->updateStatus();
 
         return $seat;
     }
@@ -221,8 +178,8 @@ class License extends Model
         }
 
         // Update seat counts
-        $this->decrement('used_seats');
-        $this->updateComplianceStatus();
+        $this->decrement('used_seat');
+        $this->updateStatus();
     }
 
     /**
