@@ -16,7 +16,6 @@ class AssetLoanController extends Controller
     {
         $user = $request->user();
 
-        // Only show current user's loans
         $loans = AssetLoan::with(['asset.fieldValues', 'site', 'approver'])
             ->where('user_id', $user->id)
             ->latest()
@@ -24,17 +23,11 @@ class AssetLoanController extends Controller
             ->map(function ($loan) {
                 $assetName = 'Unknown';
                 $assetId = 'N/A';
-                
+
                 if ($loan->asset) {
                     $fields = $loan->asset->getFields();
-                    $assetName = $fields['asset_name']
-                        ?? $fields['jenis_aset']
-                        ?? $fields['aset_id']
-                        ?? 'Unknown';
-                    $assetId = $fields['aset_id']
-                        ?? $fields['asset_id']
-                        ?? $fields['serial_number']
-                        ?? 'N/A';
+                    $assetName = $fields['asset_name'] ?? $fields['jenis_aset'] ?? $fields['aset_id'] ?? 'Unknown';
+                    $assetId = $fields['aset_id'] ?? $fields['asset_id'] ?? $fields['serial_number'] ?? 'N/A';
                 }
 
                 return [
@@ -52,9 +45,7 @@ class AssetLoanController extends Controller
                 ];
             });
 
-        return Inertia::render('AssetLoans/Index', [
-            'loans' => $loans,
-        ]);
+        return Inertia::render('AssetLoans/Index', ['loans' => $loans]);
     }
 
     public function create(Request $request)
@@ -63,8 +54,6 @@ class AssetLoanController extends Controller
         $isAdmin = $user->hasRole('Admin');
         $userSiteId = $user->site_id;
 
-        // Asset loans can only be requested for stored assets.
-        // Keep legacy EAV status support because older imports may not have status_id.
         $assetsQuery = Asset::withoutGlobalScope('site_access')
             ->with(['fieldValues', 'status'])
             ->where(function ($query) {
@@ -81,31 +70,27 @@ class AssetLoanController extends Controller
             $assetsQuery->where('site_id', $userSiteId);
         }
 
-        $assets = $assetsQuery->get()
-            ->map(function ($asset) {
-                $fields = $asset->getFields();
-                return [
-                    'id' => $asset->id,
-                    'site_id' => $asset->site_id,
-                    'fields' => $fields,
-                    'asset_name' => $fields['asset_name'] ?? null,
-                    'asset_id' => $fields['asset_id'] ?? $fields['aset_id'] ?? null,
-                    'serial_number' => $fields['serial_number'] ?? null,
-                    'part_number' => $fields['part_number'] ?? null,
-                    'location' => $fields['location'] ?? null,
-                    'category_name' => $asset->category?->name,
-                    'type_name' => $asset->type?->name,
-                    'oem_name' => $asset->oem?->name,
-                    'site_name' => $asset->site?->name,
-                ];
-            });
+        $assets = $assetsQuery->get()->map(function ($asset) {
+            $fields = $asset->getFields();
+
+            return [
+                'id' => $asset->id,
+                'site_id' => $asset->site_id,
+                'fields' => $fields,
+                'asset_name' => $fields['asset_name'] ?? null,
+                'asset_id' => $fields['asset_id'] ?? $fields['aset_id'] ?? null,
+                'serial_number' => $fields['serial_number'] ?? null,
+                'part_number' => $fields['part_number'] ?? null,
+                'location' => $fields['location'] ?? null,
+                'category_name' => $asset->category?->name,
+                'type_name' => $asset->type?->name,
+                'oem_name' => $asset->oem?->name,
+                'site_name' => $asset->site?->name,
+            ];
+        });
 
         $sites = Site::select('id', 'name')->get();
-
-        // Collect all unique column keys across assets for the table header
-        $allKeys = $assets->reduce(function ($carry, $asset) {
-            return array_unique(array_merge($carry, array_keys($asset['fields'])));
-        }, []);
+        $allKeys = $assets->reduce(fn ($carry, $asset) => array_unique(array_merge($carry, array_keys($asset['fields']))), []);
 
         return Inertia::render('AssetLoans/Create', [
             'assets' => $assets,
@@ -124,22 +109,14 @@ class AssetLoanController extends Controller
             ->with('success', count($created) . ' asset loan request(s) submitted and pending approval.');
     }
 
-    /**
-     * Quick JSON API for creating loans from the inventory page.
-     */
     public function quickStore(Request $request)
     {
-        $created = $this->createLoanRequests($request, true);
-
-        return $this->loanResponse($created);
+        return $this->loanResponse($this->createLoanRequests($request, true));
     }
 
-    /** Create a loan request through the public JSON API. */
     public function apiStore(Request $request)
     {
-        $created = $this->createLoanRequests($request);
-
-        return $this->loanResponse($created);
+        return $this->loanResponse($this->createLoanRequests($request));
     }
 
     private function loanResponse($created)
@@ -154,11 +131,6 @@ class AssetLoanController extends Controller
         ], 201);
     }
 
-    /**
-     * Create pending requests only for assets the requester may borrow.
-     * This method is shared by the Inertia form and JSON API to keep their
-     * validation and availability rules identical.
-     */
     private function createLoanRequests(Request $request, bool $useAccountSite = false)
     {
         $request->merge([
@@ -234,5 +206,31 @@ class AssetLoanController extends Controller
                 'status' => 'pending',
             ]));
         });
+    }
+
+    public function returnLoan(Request $request, AssetLoan $loan)
+    {
+        abort_unless($loan->status === 'approved', 403, 'Only approved loans can be returned.');
+
+        $validated = $request->validate([
+            'return_notes' => ['nullable', 'string', 'max:1000'],
+            'proof_photo' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $loan->update([
+            'status' => 'returned',
+            'returned_at' => now(),
+            'return_proof_path' => $request->hasFile('proof_photo')
+                ? $request->file('proof_photo')->store('asset-loans/returns', 'public')
+                : null,
+            'notes' => trim((string) ($loan->notes ? $loan->notes . "\n" : '') . ($validated['return_notes'] ?? '')) ?: $loan->notes,
+        ]);
+
+        $asset = Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
+        if ($asset) {
+            $asset->updateStatus('available');
+        }
+
+        return back()->with('success', 'Asset loan marked as returned.');
     }
 }

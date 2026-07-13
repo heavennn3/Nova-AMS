@@ -20,6 +20,7 @@ class AssetLoan extends Model
         'approved_by',
         'approved_at',
         'returned_at',
+        'return_proof_path',
     ];
 
     protected $casts = [
