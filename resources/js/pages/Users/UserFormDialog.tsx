@@ -41,6 +41,9 @@ interface UserFormDialogProps {
     sites: SiteType[];
 }
 
+// Filter out Admin role for regular user management
+const availableRoles = ['Manager', 'Employee'];
+
 export function UserFormDialog({
     open,
     onOpenChange,
@@ -59,7 +62,6 @@ export function UserFormDialog({
     const getRoleIdFromName = (roleName: string | undefined): string => {
         if (!roleName || roleName === 'None') return '';
         const roleMap: Record<string, string> = {
-            'Admin': '1',
             'Manager': '2',
             'Employee': '3',
         };
@@ -203,8 +205,8 @@ export function UserFormDialog({
                                         <SelectValue placeholder="Select role" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {roles.map((role, index) => (
-                                            <SelectItem key={role} value={String(index + 1)}>
+                                        {availableRoles.map((role, index) => (
+                                            <SelectItem key={role} value={String(index + 2)}>
                                                 {role}
                                             </SelectItem>
                                         ))}

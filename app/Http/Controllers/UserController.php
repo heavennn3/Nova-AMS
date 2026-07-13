@@ -19,7 +19,6 @@ class UserController extends Controller
 
                 // Map role name to ID for frontend compatibility
                 $roleMap = [
-                    'Admin' => '1',
                     'Manager' => '2',
                     'Employee' => '3',
                 ];
@@ -43,14 +42,14 @@ class UserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => $users,
             'sites' => $sites,
-            'roles' => ['Admin', 'Manager', 'Employee'],
+            'roles' => ['Manager', 'Employee'],
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Users/Create', [
-            'roles' => ['Admin', 'Manager', 'Employee'],
+            'roles' => ['Manager', 'Employee'],
             'sites' => \DB::table('sites')->select('id', 'name')->get(),
         ]);
     }
@@ -58,7 +57,6 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $roleMap = [
-            '1' => 'Admin',
             '2' => 'Manager',
             '3' => 'Employee',
         ];
@@ -67,7 +65,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role_id' => 'required|in:1,2,3',
+            'role_id' => 'required|in:2,3',
             'site_id' => 'nullable|exists:sites,id',
         ]);
 
@@ -91,7 +89,6 @@ class UserController extends Controller
     {
         $roleName = $user->roles->pluck('name')->first() ?? 'Employee';
         $roleMap = [
-            'Admin' => '1',
             'Manager' => '2',
             'Employee' => '3',
         ];
@@ -106,7 +103,7 @@ class UserController extends Controller
                 'role' => $roleName,
                 'site_id' => $user->site_id,
             ],
-            'roles' => ['Admin', 'Manager', 'Employee'],
+            'roles' => ['Manager', 'Employee'],
             'sites' => \DB::table('sites')->select('id', 'name')->get(),
         ]);
     }
@@ -114,7 +111,6 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $roleMap = [
-            '1' => 'Admin',
             '2' => 'Manager',
             '3' => 'Employee',
         ];
@@ -123,14 +119,13 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'role_id' => 'required|in:1,2,3',
+            'role_id' => 'required|in:2,3',
             'site_id' => 'nullable|exists:sites,id',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->site_id = $validated['site_id'] ?? null;
-        $user->role_id = $validated['role_id'];
 
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
@@ -173,7 +168,7 @@ class UserController extends Controller
             'user_ids' => 'required|array',
             'user_ids.*' => 'integer|exists:users,id',
             'action' => 'required|in:activate,deactivate,delete,role,site',
-            'role_id' => 'nullable|in:1,2,3',
+            'role_id' => 'nullable|in:2,3',
             'site_id' => 'nullable|exists:sites,id',
         ]);
 
@@ -182,7 +177,6 @@ class UserController extends Controller
         $count = 0;
 
         $roleMap = [
-            '1' => 'Admin',
             '2' => 'Manager',
             '3' => 'Employee',
         ];
