@@ -75,6 +75,17 @@ export default function AssetInventory({
     });
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+    // ── Edit Asset Modal ──
+    const [showEdit, setShowEdit] = useState(false);
+    const [editingAsset, setEditingAsset] = useState<any>(null);
+    const [updating, setUpdating] = useState(false);
+    const [editForm, setEditForm] = useState({
+        asset_id: '', asset_name: '', category_id: '', type_id: '',
+        oem_id: '', location: '', purchase_year: '', serial_number: '',
+        part_number: '', quantity: '',
+    });
+    const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
+
     // ── Loan Request Modal ──
     const [showLoan, setShowLoan] = useState(false);
     const [loanSubmitting, setLoanSubmitting] = useState(false);
@@ -159,6 +170,89 @@ export default function AssetInventory({
             toast.error('Network error');
         } finally {
             setCreating(false);
+        }
+    };
+
+    const openEditModal = useCallback(async (asset: any) => {
+        setEditingAsset(asset);
+        setEditFormErrors({});
+        setEditForm({
+            asset_id: asset.asset_id || '',
+            asset_name: asset.asset_name || '',
+            category_id: asset.category_id?.toString() || '',
+            type_id: asset.type_id?.toString() || '',
+            oem_id: asset.oem_id?.toString() || '',
+            location: asset.location || '',
+            purchase_year: asset.purchase_year?.toString() || '',
+            serial_number: asset.serial_number || '',
+            part_number: asset.part_number || '',
+            quantity: asset.quantity?.toString() || '',
+        });
+        setShowEdit(true);
+
+        if (!refs.categories.length || !refs.types.length || !refs.oems.length) {
+            try {
+                const [catRes, typeRes, oemRes] = await Promise.all([
+                    fetch('/api/references/categories'),
+                    fetch('/api/references/types'),
+                    fetch('/api/references/oems'),
+                ]);
+                setRefs({
+                    categories: await catRes.json(),
+                    types: await typeRes.json(),
+                    oems: await oemRes.json(),
+                });
+            } catch {
+                toast.error('Failed to load reference data');
+            }
+        }
+    }, [refs]);
+
+    const handleEditFormChange = (key: string, value: string) => {
+        setEditForm((prev) => ({ ...prev, [key]: value }));
+
+        if (editFormErrors[key]) {
+            setEditFormErrors((prev) => ({ ...prev, [key]: '' }));
+        }
+    };
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!editForm.asset_id.trim()) {
+            setEditFormErrors({ asset_id: 'Asset ID is required' });
+            return;
+        }
+
+        setUpdating(true);
+        try {
+            const res = await fetch(`/api/assets/${editingAsset.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+                body: JSON.stringify(editForm),
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                if (data.errors) {
+                    const fieldErrors: Record<string, string> = {};
+                    for (const [key, messages] of Object.entries(data.errors)) {
+                        fieldErrors[key] = (messages as string[])[0];
+                    }
+                    setEditFormErrors(fieldErrors);
+                } else {
+                    toast.error(data.message || 'Failed to update asset');
+                }
+                return;
+            }
+
+            toast.success('Asset updated!');
+            setShowEdit(false);
+            router.reload({ only: ['assets'] });
+        } catch {
+            toast.error('Network error');
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -283,11 +377,14 @@ export default function AssetInventory({
                 header: 'Actions',
                 cell: ({ row }: any) => (
                     <div className="flex items-center space-x-2">
-                        <Link href={`/assets/${row.original.id}/edit`}>
-                            <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600">
-                                <Edit className="mr-1 h-4 w-4" /> Edit
-                            </Button>
-                        </Link>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-blue-600"
+                            onClick={() => openEditModal(row.original)}
+                        >
+                            <Edit className="mr-1 h-4 w-4" /> Edit
+                        </Button>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -308,7 +405,7 @@ export default function AssetInventory({
         ];
 
         return cols;
-    }, []);
+    }, [openEditModal]);
 
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
@@ -430,6 +527,24 @@ export default function AssetInventory({
                 placeholder={`Enter ${label.toLowerCase()}`}
             />
             {formErrors[key] && <p className="text-xs text-red-500">{formErrors[key]}</p>}
+        </div>
+    );
+
+    const renderEditField = (key: string, label: string, required = false, type = 'text') => (
+        <div className="space-y-1.5">
+            <Label htmlFor={`edit-${key}`} className="text-sm font-medium">
+                {label}
+                {required && <span className="ml-1 text-red-500">*</span>}
+            </Label>
+            <Input
+                id={`edit-${key}`}
+                type={type}
+                value={editForm[key as keyof typeof editForm]}
+                onChange={(e) => handleEditFormChange(key, e.target.value)}
+                className="h-9"
+                placeholder={`Enter ${label.toLowerCase()}`}
+            />
+            {editFormErrors[key] && <p className="text-xs text-red-500">{editFormErrors[key]}</p>}
         </div>
     );
 
@@ -563,10 +678,10 @@ export default function AssetInventory({
 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="h-8 w-[180px] text-sm">
-                        <SelectValue placeholder="All Statuses" />
+                        <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="all">Status</SelectItem>
                         {[...(new Set((assets || []).map((a: any) => String(a.status ?? a.asset_status ?? '').trim()).filter(Boolean)))].map((status) => (
                             <SelectItem key={status} value={status.toLowerCase()}>
                                 {status}
@@ -678,6 +793,82 @@ export default function AssetInventory({
                             <Button type="submit" disabled={creating}>
                                 {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {creating ? 'Creating...' : 'Create Asset'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* ── Edit Asset Modal ── */}
+            <Dialog open={showEdit} onOpenChange={setShowEdit}>
+                <DialogContent className="sm:max-w-lg">
+                    <form onSubmit={handleUpdate}>
+                        <DialogHeader>
+                            <DialogTitle>Edit Asset</DialogTitle>
+                            <DialogDescription>
+                                Update the details for {editingAsset?.asset_id || 'this asset'}.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                {renderEditField('asset_id', 'Asset ID', true)}
+                                {renderEditField('asset_name', 'Asset Name')}
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="edit-category" className="text-sm font-medium">Category</Label>
+                                    <Select value={editForm.category_id} onValueChange={(value) => handleEditFormChange('category_id', value)}>
+                                        <SelectTrigger id="edit-category" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                        <SelectContent>
+                                            {refs.categories.map((category: any) => (
+                                                <SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {editFormErrors.category_id && <p className="text-xs text-red-500">{editFormErrors.category_id}</p>}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="edit-type" className="text-sm font-medium">Type</Label>
+                                    <Select value={editForm.type_id} onValueChange={(value) => handleEditFormChange('type_id', value)}>
+                                        <SelectTrigger id="edit-type" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                        <SelectContent>
+                                            {refs.types.map((type: any) => (
+                                                <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {editFormErrors.type_id && <p className="text-xs text-red-500">{editFormErrors.type_id}</p>}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="edit-oem" className="text-sm font-medium">OEM</Label>
+                                    <Select value={editForm.oem_id} onValueChange={(value) => handleEditFormChange('oem_id', value)}>
+                                        <SelectTrigger id="edit-oem" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                        <SelectContent>
+                                            {refs.oems.map((oem: any) => (
+                                                <SelectItem key={oem.id} value={String(oem.id)}>{oem.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {editFormErrors.oem_id && <p className="text-xs text-red-500">{editFormErrors.oem_id}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {renderEditField('location', 'Location')}
+                                {renderEditField('purchase_year', 'Purchase Year', false, 'number')}
+                                {renderEditField('serial_number', 'Serial Number')}
+                                {renderEditField('part_number', 'Part Number')}
+                                {renderEditField('quantity', 'Quantity', false, 'number')}
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setShowEdit(false)} disabled={updating}>Cancel</Button>
+                            <Button type="submit" disabled={updating}>
+                                {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {updating ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>
                     </form>

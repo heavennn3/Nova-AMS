@@ -78,8 +78,8 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
 
     const handleCancel = (id: number) => {
         if (!confirm('Are you sure you want to cancel this request?')) {
-return;
-}
+            return;
+        }
 
         router.post(`/requests/${id}/cancel`, {}, { preserveScroll: true });
     };
@@ -140,10 +140,10 @@ return;
                     </div>
                     <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                         <SelectTrigger className="w-[150px]">
-                            <SelectValue placeholder="All statuses" />
+                            <SelectValue placeholder="All status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="all">All Status</SelectItem>
                             <SelectItem value="Pending">Pending</SelectItem>
                             <SelectItem value="Approved">Approved</SelectItem>
                             <SelectItem value="Fulfilled">Fulfilled</SelectItem>

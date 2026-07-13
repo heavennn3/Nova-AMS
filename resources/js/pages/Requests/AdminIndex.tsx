@@ -82,15 +82,15 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
 
     const submitBatchAction = () => {
         if (!batchAction || pendingSelected.length === 0) {
-return;
-}
+            return;
+        }
 
         const url = `/requests/batch-${batchAction}`;
         router.post(url, { ids: pendingSelected, admin_notes: batchNotes }, {
             preserveScroll: true,
             onSuccess: () => {
- setBatchAction(null); setBatchNotes(''); setSelectedRows(new Set()); 
-},
+                setBatchAction(null); setBatchNotes(''); setSelectedRows(new Set());
+            },
         });
     };
 
@@ -168,8 +168,8 @@ return;
 
     const submitAction = () => {
         if (!actionRequest || !actionType) {
-return;
-}
+            return;
+        }
 
         // Check if this is a loan request
         const isLoanRequest = actionRequest.type === 'loan' || actionRequest.original_model === 'AssetLoan';
@@ -180,8 +180,8 @@ return;
         }, {
             preserveScroll: true,
             onSuccess: () => {
- setActionRequest(null); setActionType(null); setAdminNotes(''); 
-},
+                setActionRequest(null); setActionType(null); setAdminNotes('');
+            },
         });
     };
 
@@ -294,10 +294,10 @@ return;
                         </Select>
                         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                             <SelectTrigger className="h-9 text-sm">
-                                <SelectValue placeholder="All Statuses" />
+                                <SelectValue placeholder="All Status" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="all">All Status</SelectItem>
                                 <SelectItem value="Pending">Pending</SelectItem>
                                 <SelectItem value="Approved">Approved</SelectItem>
                                 <SelectItem value="Fulfilled">Fulfilled</SelectItem>
@@ -350,13 +350,13 @@ return;
                         <span className="text-sm font-semibold">{pendingSelected.length} pending request(s) selected</span>
                         <div className="ml-auto flex gap-2">
                             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
- setBatchAction('approve'); setBatchNotes(''); 
-}}>
+                                setBatchAction('approve'); setBatchNotes('');
+                            }}>
                                 <CheckCircle className="h-3.5 w-3.5 mr-1" /> Batch Approve
                             </Button>
                             <Button size="sm" variant="destructive" onClick={() => {
- setBatchAction('reject'); setBatchNotes(''); 
-}}>
+                                setBatchAction('reject'); setBatchNotes('');
+                            }}>
                                 <XCircle className="h-3.5 w-3.5 mr-1" /> Batch Reject
                             </Button>
                             <Button size="sm" variant="ghost" onClick={() => setSelectedRows(new Set())}>
@@ -405,8 +405,8 @@ return;
                                         <tr
                                             key={r.id}
                                             className={`transition-colors ${isUrgent ? 'bg-rose-50/50 hover:bg-rose-50' :
-                                                    isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50' :
-                                                        isReturnPending ? 'bg-orange-50/30 hover:bg-orange-50/50' :
+                                                isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50' :
+                                                    isReturnPending ? 'bg-orange-50/30 hover:bg-orange-50/50' :
                                                         isPending ? 'bg-amber-50/20 hover:bg-amber-50/30' :
                                                             'hover:bg-muted/30'
                                                 }`}
@@ -522,8 +522,8 @@ return;
 
             {/* Action Dialog */}
             <Dialog open={!!actionType} onOpenChange={() => {
- setActionType(null); setActionRequest(null); 
-}}>
+                setActionType(null); setActionRequest(null);
+            }}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{actionType && actionConfig[actionType]?.title}</DialogTitle>
@@ -591,8 +591,8 @@ return;
                     )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => {
- setActionType(null); setActionRequest(null); 
-}}>
+                            setActionType(null); setActionRequest(null);
+                        }}>
                             Cancel
                         </Button>
                         <Button
