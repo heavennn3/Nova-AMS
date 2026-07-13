@@ -21,7 +21,7 @@ import {
     Wrench,
     LineChart,
     RefreshCw,
-    QrCode,
+    Monitor,
 } from 'lucide-react';
 import * as React from 'react';
 import { useState } from 'react';
@@ -224,14 +224,6 @@ return;
         return { bg: 'bg-purple-50 text-purple-600 border border-purple-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-purple-600' };
     };
 
-    // QR Code URL generator
-    const detailUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/assets/${asset.id}`
-        : `/assets/${asset.id}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-        detailUrl
-    )}`;
-
     // Information tab fields definition
     const leftFields = [
         { label: 'Asset Name', value: asset.asset_name || '—' },
@@ -368,7 +360,7 @@ return;
                     <div className="flex flex-col md:flex-row md:items-start gap-6">
                         {/* Rounded Square Asset Icon Container */}
                         <div className="h-20 w-20 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750 flex items-center justify-center shrink-0">
-                            <QrCode className="h-9 w-9 text-slate-400 dark:text-slate-500" />
+                            <Monitor className="h-9 w-9 text-slate-400 dark:text-slate-500" />
                         </div>
 
                         {/* Title, Subtitle, Badges */}
@@ -433,18 +425,10 @@ return;
                     </div>
                 </Card>
 
-                {/* Right Card - QR Code (1/3 width) */}
+                {/* Right Card - Asset Hardware (1/3 width) */}
                 <Card className="border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col items-center justify-between print:hidden">
-                    
-                    <div className="my-4 bg-white p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                        <img
-                            src={qrCodeUrl}
-                            alt={`QR Code for ${assetCode}`}
-                            className="h-32 w-32 object-contain"
-                            onError={(e) => {
-                                e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>';
-                            }}
-                        />
+                    <div className="my-4 flex h-32 w-32 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                        <Monitor className="h-16 w-16 text-slate-400 dark:text-slate-500" aria-label="Hardware asset" />
                     </div>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 font-mono text-center mb-1">
                         {assetCode}

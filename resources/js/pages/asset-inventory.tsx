@@ -810,7 +810,7 @@ export default function AssetInventory({
                         <DialogHeader>
                             <DialogTitle>Request Asset Loan</DialogTitle>
                             <DialogDescription>
-                                Select available asset(s) to request a loan. Admin will review your request.
+                                Select available asset to request a loan. Admin will review your request.
                             </DialogDescription>
                         </DialogHeader>
 
@@ -875,7 +875,7 @@ export default function AssetInventory({
                                 <Textarea
                                     value={loanForm.purpose}
                                     onChange={(e) => setLoanForm(prev => ({ ...prev, purpose: e.target.value }))}
-                                    placeholder="Why do you need this asset?"
+                                    placeholder="State a reason / purpose"
                                     className="min-h-[60px]"
                                     required
                                 />
