@@ -14,7 +14,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 
@@ -42,6 +42,7 @@ export default function SparePartsDashboard({
     const [filterSite, setFilterSite] = useState('all');
     const [filterCategory, setFilterCategory] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [search, setSearch] = useState('');
 
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
@@ -131,6 +132,11 @@ export default function SparePartsDashboard({
         if (filterSite !== 'all' && String(p.site_id) !== filterSite) return false;
         if (filterCategory !== 'all' && p.category !== filterCategory) return false;
         if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+        if (search.trim()) {
+            const q = search.toLowerCase();
+            const match = (val: any) => String(val ?? '').toLowerCase().includes(q);
+            if (!match(p.name) && !match(p.part_number) && !match(p.category) && !match(p.location)) return false;
+        }
         return true;
     });
 
@@ -344,67 +350,59 @@ export default function SparePartsDashboard({
             </div>
 
             {/* ── All Spare Parts Table ── */}
-            <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b py-3 px-4">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                            <Package className="h-4 w-4 text-slate-600" />
-                            All Spare Parts
-                        </CardTitle>
-
-                    </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
-                        <div className="flex items-center gap-1.5">
-                            <Select value={filterSite} onValueChange={setFilterSite}>
-                                <SelectTrigger className="h-7 w-[120px] text-xs">
-                                    <SelectValue placeholder="Site" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map((s: any) => (
-                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={filterCategory} onValueChange={setFilterCategory}>
-                                <SelectTrigger className="h-7 w-[120px] text-xs">
-                                    <SelectValue placeholder="Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Categories</SelectItem>
-                                    {categories.map((c: string) => (
-                                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                <SelectTrigger className="h-7 w-[110px] text-xs">
-                                    <SelectValue placeholder="Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="available">Available</SelectItem>
-                                    <SelectItem value="in_used">In Use</SelectItem>
-                                    <SelectItem value="faulty">Faulty</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all') && (
-                                <Button variant="ghost" size="sm" className="h-7 text-xs px-2"
-                                    onClick={() => { setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); }}>
-                                    Clear
-                                </Button>
-                            )}
-                        </div>
-                        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{filteredParts.length} of {allParts.length}</span>
-                    </div>
-                    <DataTable
-                        columns={sparePartColumns}
-                        data={filteredParts}
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-[280px]">
+                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
                     />
-                </CardContent>
-            </Card>
+                </div>
+                <Select value={filterSite} onValueChange={setFilterSite}>
+                    <SelectTrigger className="h-8 w-[140px] text-sm">
+                        <SelectValue placeholder="All Sites" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Sites</SelectItem>
+                        {sites.map((s: any) => (
+                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                    <SelectTrigger className="h-8 w-[140px] text-sm">
+                        <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((c: string) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="h-8 w-[130px] text-sm">
+                        <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="in_used">In Use</SelectItem>
+                        <SelectItem value="faulty">Faulty</SelectItem>
+                    </SelectContent>
+                </Select>
+                {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
+                    <Button variant="ghost" size="sm" className="h-8 text-xs"
+                        onClick={() => { setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); }}>
+                        Clear
+                    </Button>
+                )}
+                <span className="text-xs text-muted-foreground tabular-nums ml-auto">{filteredParts.length} of {allParts.length} items</span>
+            </div>
+
+            <DataTable columns={sparePartColumns} data={filteredParts} hideToolbar />
 
             {/* Create Spare Part Dialog */}
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
