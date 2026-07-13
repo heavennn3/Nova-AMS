@@ -1,7 +1,9 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -18,8 +20,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 
 type AssetModelsProps = {
     data: any[];
@@ -34,6 +34,7 @@ export default function AssetModels({ data = [], manufacturers = [], categories 
 
     const handleOpenDialog = (item: any = null) => {
         setEditingItem(item);
+
         if (item) {
             setFormData({
                 ...item,
@@ -43,11 +44,15 @@ export default function AssetModels({ data = [], manufacturers = [], categories 
         } else {
             setFormData({});
         }
+
         setIsDialogOpen(true);
     };
 
     const handleDelete = (id: number) => {
-        if (!confirm('Are you sure you want to delete this asset model?')) return;
+        if (!confirm('Are you sure you want to delete this asset model?')) {
+return;
+}
+
         router.delete(`/settings/asset-models/${id}`, {
             preserveScroll: true,
         });

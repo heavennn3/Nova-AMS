@@ -1,10 +1,11 @@
 import { Head, router } from '@inertiajs/react';
+import { Plus, Edit, Trash2, MapPin, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { Plus, Edit, Trash2, MapPin, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -22,7 +23,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
 
 interface AdminSitesProps {
     sites: any[];
@@ -45,10 +45,13 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
     const [formData, setFormData] = useState<any>({});
     const [mounted, setMounted] = useState(false);
 
-    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => {
+ setMounted(true); 
+}, []);
 
     const handleOpenDialog = (site: Site | null = null) => {
         setEditingSite(site);
+
         if (site) {
             setFormData({
                 ...site,
@@ -60,6 +63,7 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
                 region: '',
             });
         }
+
         setIsDialogOpen(true);
     };
 
@@ -161,6 +165,7 @@ export default function AdminSites({ sites, users }: AdminSitesProps) {
             header: 'Actions',
             cell: ({ row }: any) => {
                 const site = row.original;
+
                 return (
                     <div className="flex items-center gap-2">
                         <Button

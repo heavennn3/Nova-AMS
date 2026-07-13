@@ -1,10 +1,10 @@
-import * as React from 'react';
+import type { Column } from '@tanstack/react-table';
 import { Check, PlusCircle, X } from 'lucide-react';
-import { Column } from '@tanstack/react-table';
-import { cn } from '@/lib/utils';
+import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 interface Option {
     label: string;
@@ -33,12 +33,16 @@ export function DataTableFacetedFilter<TData, TValue>({
         if (Array.isArray(filterValue)) {
             return new Set<string>(filterValue as string[]);
         }
+
         return new Set<string>();
     }, [filterValue]);
 
     // Close on outside click
     React.useEffect(() => {
-        if (!open) return;
+        if (!open) {
+return;
+}
+
         const handler = (e: MouseEvent) => {
             if (
                 containerRef.current &&
@@ -48,16 +52,19 @@ export function DataTableFacetedFilter<TData, TValue>({
             }
         };
         document.addEventListener('mousedown', handler);
+
         return () => document.removeEventListener('mousedown', handler);
     }, [open]);
 
     const toggleValue = (value: string) => {
         const next = new Set(selectedValues);
+
         if (next.has(value)) {
             next.delete(value);
         } else {
             next.add(value);
         }
+
         const arr = Array.from(next);
         column?.setFilterValue(arr.length ? arr : undefined);
     };
@@ -148,6 +155,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         )}
                         {filteredOptions.map((option) => {
                             const isSelected = selectedValues.has(option.value);
+
                             return (
                                 <button
                                     key={option.value}

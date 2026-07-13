@@ -1,11 +1,11 @@
-import { Download, FileText, Upload } from 'lucide-react';
-import * as React from 'react';
-import * as XLSX from 'xlsx';
+import { router } from '@inertiajs/react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Download, FileText, Upload } from 'lucide-react';
 import Papa from 'papaparse';
-import { router } from '@inertiajs/react';
+import * as React from 'react';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -44,9 +44,14 @@ function formatExportData(data: any[], columns: any[]) {
                 (typeof col.header === 'string' ? col.header : defaultHeader);
 
             let val = row[key];
-            if (val === null || val === undefined) val = '';
-            else if (typeof val === 'object') val = JSON.stringify(val);
-            else val = String(val);
+
+            if (val === null || val === undefined) {
+val = '';
+} else if (typeof val === 'object') {
+val = JSON.stringify(val);
+} else {
+val = String(val);
+}
 
             formattedRow[header] = val;
         });
@@ -64,17 +69,48 @@ export function DataTableActions({
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const getResourceTypeFromUrl = () => {
-        if (typeof window === 'undefined') return undefined;
+        if (typeof window === 'undefined') {
+return undefined;
+}
+
         const path = window.location.pathname;
-        if (path.includes('/settings/categories')) return 'categories';
-        if (path.includes('/settings/departments')) return 'departments';
-        if (path.includes('/settings/custom-fields')) return 'custom-fields';
-        if (path.includes('/settings/status-labels')) return 'status-labels';
-        if (path.includes('/settings/asset-models')) return 'asset-models';
-        if (path.includes('/settings/locations')) return 'locations';
-        if (path.includes('/settings/suppliers')) return 'suppliers';
-        if (path.includes('/settings/manufacturers')) return 'manufacturers';
-        if (path.includes('/users')) return 'users';
+
+        if (path.includes('/settings/categories')) {
+return 'categories';
+}
+
+        if (path.includes('/settings/departments')) {
+return 'departments';
+}
+
+        if (path.includes('/settings/custom-fields')) {
+return 'custom-fields';
+}
+
+        if (path.includes('/settings/status-labels')) {
+return 'status-labels';
+}
+
+        if (path.includes('/settings/asset-models')) {
+return 'asset-models';
+}
+
+        if (path.includes('/settings/locations')) {
+return 'locations';
+}
+
+        if (path.includes('/settings/suppliers')) {
+return 'suppliers';
+}
+
+        if (path.includes('/settings/manufacturers')) {
+return 'manufacturers';
+}
+
+        if (path.includes('/users')) {
+return 'users';
+}
+
         return undefined;
     };
 
@@ -82,10 +118,13 @@ export function DataTableActions({
 
     const handleExportExcel = () => {
         const formattedData = formatExportData(data, columns);
+
         if (formattedData.length === 0) {
             alert('No data to export');
+
             return;
         }
+
         const ws = XLSX.utils.json_to_sheet(formattedData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Data Export');
@@ -94,10 +133,13 @@ export function DataTableActions({
 
     const handleExportCSV = () => {
         const formattedData = formatExportData(data, columns);
+
         if (formattedData.length === 0) {
             alert('No data to export');
+
             return;
         }
+
         const ws = XLSX.utils.json_to_sheet(formattedData);
         const csv = XLSX.utils.sheet_to_csv(ws);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -112,8 +154,10 @@ export function DataTableActions({
 
     const handleExportPDF = () => {
         const formattedData = formatExportData(data, columns);
+
         if (formattedData.length === 0) {
             alert('No data to export');
+
             return;
         }
 
@@ -141,7 +185,10 @@ export function DataTableActions({
 
     const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
 
         Papa.parse(file, {
             header: false,
@@ -150,8 +197,10 @@ export function DataTableActions({
                 const rows = results.data as string[][];
 
                 let headerRowIndex = 0;
+
                 for (let i = 0; i < Math.min(rows.length, 20); i++) {
                     const row = rows[i];
+
                     if (
                         row.some(
                             (cell) =>
@@ -170,6 +219,7 @@ export function DataTableActions({
 
                 if (headerRowIndex >= rows.length) {
                     alert('Could not detect valid headers in CSV.');
+
                     return;
                 }
 
@@ -181,6 +231,7 @@ export function DataTableActions({
                     headers.forEach((header, index) => {
                         obj[header] = row[index];
                     });
+
                     return obj;
                 });
 
@@ -202,14 +253,17 @@ export function DataTableActions({
                         }).then(async (res) => {
                             if (!res.ok) {
                                 const err = await res.json();
+
                                 throw new Error(err.message || 'Failed to import records.');
                             }
+
                             return res.json();
                         }),
                         {
                             loading: `Importing ${parsedData.length} records into ${resourceType}...`,
                             success: (res) => {
                                 router.reload();
+
                                 return res.message || 'Import successful!';
                             },
                             error: (err) => err.message || 'Import failed.'
@@ -219,7 +273,9 @@ export function DataTableActions({
                     alert('Import functionality not configured for this table.');
                 }
 
-                if (fileInputRef.current) fileInputRef.current.value = '';
+                if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
             },
         });
     };

@@ -1,4 +1,3 @@
-import { useState, useMemo } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
     ShieldAlert,
@@ -13,15 +12,10 @@ import {
     X,
     Check,
 } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
 import {
     Dialog,
     DialogContent,
@@ -29,6 +23,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 
 export default function Logs({ logs = [] }: { logs: any[] }) {
     const [search, setSearch] = useState('');
@@ -67,6 +67,7 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                 l.event.toLowerCase().includes(q) ||
                 l.auditable_type.toLowerCase().includes(q) ||
                 (l.ip_address && l.ip_address.includes(q));
+
             return matchesEvent && matchesUser && matchesSite && matchesSearch;
         });
     }, [logs, search, selectedEvent, selectedUser, selectedSite]);
@@ -130,6 +131,7 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                 headerText: 'Action',
                 cell: ({ row }: any) => {
                     const event = row.getValue('event') as string;
+
                     return (
                         <Badge
                             variant="outline"
@@ -169,6 +171,7 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                 header: 'Changes',
                 cell: ({ row }: any) => {
                     const log = row.original;
+
                     return (
                         <Dialog>
                             <DialogTrigger asChild>

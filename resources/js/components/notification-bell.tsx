@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { usePage } from '@inertiajs/react';
 import {
     Bell,
     CheckCheck,
@@ -7,15 +7,15 @@ import {
     AlertTriangle,
     Info,
 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { usePage } from '@inertiajs/react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
 
 interface Notification {
     id: string;
@@ -105,6 +105,7 @@ export function NotificationBell() {
 
     const markAllAsRead = async () => {
         setLoading(true);
+
         try {
             await fetch('/api/notifications/read-all', {
                 method: 'POST',

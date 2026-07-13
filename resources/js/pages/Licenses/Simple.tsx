@@ -1,6 +1,4 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
-import { Badge } from '@/components/ui/badge';
 import {
     Plus,
     Check,
@@ -9,27 +7,10 @@ import {
     Eye,
     EyeOff,
 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
 import {
     Command,
     CommandEmpty,
@@ -38,7 +19,26 @@ import {
     CommandItem,
     CommandList,
 } from '@/components/ui/command';
-import { toast } from 'sonner';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 type SimpleLicensesProps = {
@@ -103,24 +103,36 @@ export default function SimpleLicensesIndex({
     const totalLicenses = licenses.length;
 
     const activeLicenses = licenses.filter((lic: any) => {
-        if (!lic.expiration_date) return true; // Never expires = active
+        if (!lic.expiration_date) {
+return true;
+} // Never expires = active
+
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
+
         return expiry.getTime() > now.getTime();
     });
 
     const expiringLicenses = licenses.filter((lic: any) => {
-        if (!lic.expiration_date) return false;
+        if (!lic.expiration_date) {
+return false;
+}
+
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
         const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
         return diffDays > 0 && diffDays <= 30;
     });
 
     const expiredLicenses = licenses.filter((lic: any) => {
-        if (!lic.expiration_date) return false;
+        if (!lic.expiration_date) {
+return false;
+}
+
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
+
         return expiry.getTime() <= now.getTime();
     });
 
@@ -318,7 +330,13 @@ export default function SimpleLicensesIndex({
             </div>
 
             {/* ── Create License Modal ── */}
-            <Dialog open={isCreateOpen} onOpenChange={(o) => { setIsCreateOpen(o); if (!o) { form.reset(); setCreateKeyVisible(false); } }}>
+            <Dialog open={isCreateOpen} onOpenChange={(o) => {
+ setIsCreateOpen(o);
+
+ if (!o) {
+ form.reset(); setCreateKeyVisible(false); 
+} 
+}}>
                 <DialogContent className="sm:max-w-lg">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
@@ -347,17 +365,27 @@ export default function SimpleLicensesIndex({
                                                     <button type="button" className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-primary hover:bg-accent"
                                                         onClick={async () => {
                                                             const name = vendorSearch.trim();
-                                                            if (!name) return;
+
+                                                            if (!name) {
+return;
+}
+
                                                             try {
                                                                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                                                                 const res = await fetch('/api/quick/vendors', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token }, body: JSON.stringify({ name }) });
-                                                                if (!res.ok) throw new Error();
+
+                                                                if (!res.ok) {
+throw new Error();
+}
+
                                                                 const vendor = await res.json();
                                                                 form.setData('vendor_id', String(vendor.id));
                                                                 setVendorOpen(false);
                                                                 setVendorSearch('');
                                                                 toast.success(`Vendor "${name}" created.`);
-                                                            } catch { toast.error('Failed to create vendor.'); }
+                                                            } catch {
+ toast.error('Failed to create vendor.'); 
+}
                                                         }}
                                                     >
                                                         <PlusCircle className="h-4 w-4" /> Create vendor "<span className="font-medium">{vendorSearch}</span>"
@@ -365,7 +393,9 @@ export default function SimpleLicensesIndex({
                                                 </CommandEmpty>
                                                 <CommandGroup>
                                                     {vendors.map((v: any) => (
-                                                        <CommandItem key={v.id} value={v.name} onSelect={() => { form.setData('vendor_id', String(v.id)); setVendorOpen(false); setVendorSearch(''); }}>
+                                                        <CommandItem key={v.id} value={v.name} onSelect={() => {
+ form.setData('vendor_id', String(v.id)); setVendorOpen(false); setVendorSearch(''); 
+}}>
                                                             <Check className={cn('mr-2 h-4 w-4', form.data.vendor_id === String(v.id) ? 'opacity-100' : 'opacity-0')} />
                                                             {v.name}
                                                         </CommandItem>
@@ -402,7 +432,9 @@ export default function SimpleLicensesIndex({
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" type="button" onClick={() => { setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false); }}>Cancel</Button>
+                            <Button variant="outline" type="button" onClick={() => {
+ setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false); 
+}}>Cancel</Button>
                             <Button type="submit" disabled={form.processing}>{form.processing ? 'Creating…' : 'Create License'}</Button>
                         </DialogFooter>
                     </form>

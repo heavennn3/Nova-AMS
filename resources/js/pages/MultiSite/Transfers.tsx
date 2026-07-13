@@ -1,14 +1,4 @@
-import { useState, useMemo } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
     ArrowRightLeft,
     Clock,
@@ -20,7 +10,17 @@ import {
     Search,
     User,
 } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Asset {
     id: number;
@@ -94,6 +94,7 @@ export default function Transfers({
                 (transfer.notes || '').toLowerCase().includes(q);
 
             const matchesStatus = filterStatus === 'ALL' || transfer.status === filterStatus;
+
             return matchesSearch && matchesStatus;
         });
     }, [transfers, searchQuery, filterStatus]);
@@ -111,6 +112,7 @@ export default function Transfers({
 
     const handleUpdateStatus = (id: number, status: 'approved' | 'rejected' | 'completed') => {
         const label = { approved: 'approve', rejected: 'reject', completed: 'complete' }[status];
+
         if (confirm(`Are you sure you want to ${label} this transfer?`)) {
             router.patch(`/multi-site/transfers/${id}/status`, { status }, {
                 preserveScroll: true,
@@ -128,6 +130,7 @@ export default function Transfers({
         };
         const b = badges[status] || badges.pending;
         const Icon = b.icon;
+
         return (
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${b.cls}`}>
                 <Icon className="h-3 w-3" /> {b.label}
@@ -200,6 +203,7 @@ export default function Transfers({
                                         <option value="">-- Choose Asset --</option>
                                         {filteredAssets.map(asset => {
                                             const site = sites.find(s => s.id === asset.site_id);
+
                                             return (
                                                 <option key={asset.id} value={asset.id}>
                                                     {asset.asset_id || `ID: ${asset.id}`} - {asset.product_name}

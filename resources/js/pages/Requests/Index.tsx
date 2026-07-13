@@ -1,15 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     Eye,
     Plus,
@@ -20,7 +9,18 @@ import {
     Package,
     RotateCcw,
 } from 'lucide-react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
     const [search, setSearch] = useState('');
@@ -36,6 +36,7 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
             selectedStatus === 'all' || r.status === selectedStatus;
         const matchesType =
             selectedType === 'all' || r.request_type === selectedType;
+
         return matchesSearch && matchesStatus && matchesType;
     });
 
@@ -48,6 +49,7 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
             Rejected: 'text-red-600 border-red-200 bg-red-50',
             Cancelled: 'text-slate-500 border-slate-200 bg-slate-50',
         };
+
         return <Badge variant="outline" className={styles[status] || ''}>{status}</Badge>;
     };
 
@@ -75,7 +77,10 @@ export default function RequestsIndex({ requests = [] }: { requests: any[] }) {
     };
 
     const handleCancel = (id: number) => {
-        if (!confirm('Are you sure you want to cancel this request?')) return;
+        if (!confirm('Are you sure you want to cancel this request?')) {
+return;
+}
+
         router.post(`/requests/${id}/cancel`, {}, { preserveScroll: true });
     };
 

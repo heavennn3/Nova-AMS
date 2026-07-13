@@ -1,13 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Upload, FileSpreadsheet, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { ArrowLeft, Upload, FileSpreadsheet, MapPin } from 'lucide-react';
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
 
 export default function AssetUpload({ sites = [] }: { sites?: any[] }) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -17,19 +17,30 @@ export default function AssetUpload({ sites = [] }: { sites?: any[] }) {
 
     const parseCsvText = (text: string) => {
         const lines = text.split('\n').filter(l => l.trim());
-        if (lines.length < 2) return { headers: [], rows: [] };
+
+        if (lines.length < 2) {
+return { headers: [], rows: [] };
+}
+
         const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
         const rows = lines.slice(1).map(line => {
             const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
             const row: Record<string, string> = {};
-            headers.forEach((h, i) => { if (h && values[i]) row[h] = values[i]; });
+            headers.forEach((h, i) => {
+ if (h && values[i]) {
+row[h] = values[i];
+} 
+});
+
             return row;
         }).filter(row => row[headers[0]]);
+
         return { headers, rows };
     };
 
     const handleFileSelect = (file: File) => {
         setSelectedFile(file);
+
         if (file.name.endsWith('.csv')) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -44,13 +55,18 @@ export default function AssetUpload({ sites = [] }: { sites?: any[] }) {
     const handleUpload = async () => {
         if (!selectedFile) {
             toast.error('Please select a file');
+
             return;
         }
+
         if (!selectedSiteId) {
             toast.error('Please select a site');
+
             return;
         }
+
         setIsProcessing(true);
+
         try {
             if (selectedFile.name.endsWith('.csv')) {
                 const reader = new FileReader();

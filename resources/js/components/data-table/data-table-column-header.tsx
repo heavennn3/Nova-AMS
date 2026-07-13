@@ -1,8 +1,8 @@
-import { Column } from '@tanstack/react-table';
+import type { Column } from '@tanstack/react-table';
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 
 import { cn } from '@/lib/utils';
 
@@ -30,11 +30,14 @@ export function DataTableColumnHeader<TData, TValue>({
 
     const handleSave = async () => {
         const newTitle = editValue.trim();
+
         if (!newTitle || newTitle === title || !configId) {
             setEditing(false);
             setEditValue(title);
+
             return;
         }
+
         try {
             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const res = await fetch(`/master-data/table-configurations/${configId}`, {
@@ -42,7 +45,11 @@ export function DataTableColumnHeader<TData, TValue>({
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, Accept: 'application/json' },
                 body: JSON.stringify({ column_title: newTitle }),
             });
-            if (!res.ok) throw new Error('Failed to rename');
+
+            if (!res.ok) {
+throw new Error('Failed to rename');
+}
+
             toast.success('Column renamed successfully');
             onTitleChange?.(configId, newTitle);
             setEditing(false);
@@ -60,14 +67,21 @@ export function DataTableColumnHeader<TData, TValue>({
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSave();
-                        if (e.key === 'Escape') { setEditValue(title); setEditing(false); }
+                        if (e.key === 'Enter') {
+handleSave();
+}
+
+                        if (e.key === 'Escape') {
+ setEditValue(title); setEditing(false); 
+}
                     }}
                     className="h-7 w-40 text-xs px-2"
                     autoFocus
                 />
                 <button onClick={handleSave} className="p-1 hover:text-green-600"><Check className="h-3.5 w-3.5" /></button>
-                <button onClick={() => { setEditValue(title); setEditing(false); }} className="p-1 hover:text-red-600"><X className="h-3.5 w-3.5" /></button>
+                <button onClick={() => {
+ setEditValue(title); setEditing(false); 
+}} className="p-1 hover:text-red-600"><X className="h-3.5 w-3.5" /></button>
             </div>
         );
     }

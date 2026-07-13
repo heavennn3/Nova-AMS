@@ -1,31 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableActions } from '@/components/data-table/data-table-actions';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { UserFormDialog } from '@/pages/Users/UserFormDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
     Plus,
     Edit,
@@ -42,6 +15,33 @@ import {
     MoreHorizontal,
     UserCheck,
 } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableActions } from '@/components/data-table/data-table-actions';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import { UserFormDialog } from '@/pages/Users/UserFormDialog';
 
 type UserType = {
     id: number;
@@ -62,7 +62,10 @@ type ConfirmAction = {
 };
 
 function userBelongsToSite(user: UserType, siteId: number): boolean {
-    if (!user.site_id) return true;
+    if (!user.site_id) {
+return true;
+}
+
     return user.site_id === siteId;
 }
 
@@ -90,13 +93,18 @@ export default function UsersIndex({
     );
 
     const siteScopedUsers = useMemo(() => {
-        if (selectedSiteId === 'all') return users;
+        if (selectedSiteId === 'all') {
+return users;
+}
+
         const siteId = parseInt(selectedSiteId, 10);
+
         return users.filter((u) => userBelongsToSite(u, siteId));
     }, [users, selectedSiteId]);
 
     const allRoles = useMemo(() => {
         const roleSet = new Set(siteScopedUsers.map((u) => u.role));
+
         return Array.from(roleSet).sort();
     }, [siteScopedUsers]);
 
@@ -115,6 +123,7 @@ export default function UsersIndex({
                 u.email.toLowerCase().includes(q) ||
                 (u.phone && u.phone.toLowerCase().includes(q)) ||
                 (u.ic_number && u.ic_number.toLowerCase().includes(q));
+
             return matchesRole && matchesStatus && matchesSearch;
         });
     }, [siteScopedUsers, selectedRole, selectedStatus, search]);
@@ -131,6 +140,7 @@ export default function UsersIndex({
         siteScopedUsers.forEach((u) => {
             map[u.role] = (map[u.role] || 0) + 1;
         });
+
         return map;
     }, [siteScopedUsers]);
 
@@ -168,7 +178,10 @@ export default function UsersIndex({
     ];
 
     const executeConfirmAction = () => {
-        if (!confirmAction) return;
+        if (!confirmAction) {
+return;
+}
+
         const { type, user } = confirmAction;
 
         if (type === 'toggle') {
@@ -198,6 +211,7 @@ export default function UsersIndex({
                     const user = row.original;
                     const gradient =
                         avatarGradients[user.id % avatarGradients.length];
+
                     return (
                         <div
                             className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border ${!user.profile_photo ? `bg-gradient-to-br ${gradient}` : 'bg-muted'} ${!user.is_active ? 'opacity-50 grayscale' : ''}`}
@@ -227,6 +241,7 @@ export default function UsersIndex({
                 ),
                 cell: ({ row }: any) => {
                     const user = row.original;
+
                     return (
                         <div
                             className={`min-w-[140px] ${!user.is_active ? 'opacity-60' : ''}`}
@@ -247,6 +262,7 @@ export default function UsersIndex({
                 ),
                 cell: ({ row }: any) => {
                     const phone = row.original.phone;
+
                     return phone ? (
                         <span className="text-sm">{phone}</span>
                     ) : (
@@ -264,6 +280,7 @@ export default function UsersIndex({
                 ),
                 cell: ({ row }: any) => {
                     const ic = row.original.ic_number;
+
                     return ic ? (
                         <span className="font-mono text-sm">{ic}</span>
                     ) : (
@@ -282,6 +299,7 @@ export default function UsersIndex({
                 cell: ({ row }: any) => {
                     const role = row.original.role;
                     const colorClass = roleColors[role] || roleColors['None'];
+
                     return (
                         <button
                             type="button"
@@ -302,6 +320,7 @@ export default function UsersIndex({
                 ),
                 cell: ({ row }: any) => {
                     const isActive = row.original.is_active;
+
                     return (
                         <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${isActive
@@ -332,6 +351,7 @@ export default function UsersIndex({
                 ),
                 cell: ({ row }: any) => {
                     const siteName = row.original.site_name;
+
                     return (
                         <span className="text-sm text-muted-foreground">
                             {siteName || (
@@ -364,6 +384,7 @@ export default function UsersIndex({
                 header: '',
                 cell: ({ row }: any) => {
                     const user = row.original;
+
                     return (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -466,6 +487,7 @@ export default function UsersIndex({
                     </button>
                     {sites.map((site) => {
                         const count = getSiteUserCount(site.id);
+
                         return (
                             <button
                                 key={site.id}
@@ -572,6 +594,7 @@ export default function UsersIndex({
                 </div>
                 {Object.entries(roleBreakdown).map(([role, count]) => {
                     const color = roleColors[role] || roleColors['None'];
+
                     return (
                         <div
                             key={role}

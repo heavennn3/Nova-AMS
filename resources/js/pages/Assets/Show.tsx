@@ -1,5 +1,3 @@
-import * as React from 'react';
-import { useState } from 'react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -25,9 +23,12 @@ import {
     RefreshCw,
     QrCode,
 } from 'lucide-react';
+import * as React from 'react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
     Dialog,
     DialogContent,
@@ -37,7 +38,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
     SelectContent,
@@ -45,7 +45,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 export default function Show({ asset, users = [] }: { asset: any; users?: any[] }) {
@@ -84,15 +84,22 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     const fields = asset;
 
     const formatCurrency = (val: any) => {
-        if (!val || val === '—') return '—';
+        if (!val || val === '—') {
+return '—';
+}
+
         const cleanVal = String(val).trim();
+
         if (cleanVal.startsWith('$') || cleanVal.startsWith('RM') || cleanVal.startsWith('Rp')) {
             return cleanVal;
         }
+
         const num = parseFloat(cleanVal.replace(/[^0-9.-]/g, ''));
+
         if (!isNaN(num)) {
             return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
         }
+
         return cleanVal;
     };
 
@@ -140,7 +147,11 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
 
     const handleCheckinSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!activeAssignment) return;
+
+        if (!activeAssignment) {
+return;
+}
+
         checkinForm.patch(`/asset-track/${activeAssignment.id}/checkin`, {
             onSuccess: () => {
                 setIsCheckinOpen(false);
@@ -175,29 +186,37 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     // Status styling helper
     const getStatusStyle = (status: string) => {
         const s = status.toLowerCase();
+
         if (s.includes('avail') || s.includes('sedia') || s.includes('good') || s.includes('elok')) {
             return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-green-600' };
         }
+
         if (s.includes('use') || s.includes('assign') || s.includes('guna') || s.includes('pinjam') || s.includes('aktif')) {
             return { bg: 'bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-blue-600' };
         }
+
         if (s.includes('maint') || s.includes('repair') || s.includes('selenggara') || s.includes('baiki')) {
             return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-amber-600' };
         }
+
         if (s.includes('fault') || s.includes('damage') || s.includes('broke') || s.includes('rosak')) {
             return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-red-600' };
         }
+
         return { bg: 'bg-slate-50 text-slate-650 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-slate-600' };
     };
 
     const getConditionStyle = (cond: string) => {
         const c = cond.toLowerCase();
+
         if (c.includes('good') || c.includes('elok') || c.includes('baik') || c.includes('new')) {
             return { bg: 'bg-green-50 text-green-600 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-green-600' };
         }
+
         if (c.includes('fair') || c.includes('sederhana')) {
             return { bg: 'bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-amber-600' };
         }
+
         return { bg: 'bg-red-50 text-red-600 border border-red-200 px-2.5 py-0.5 rounded-full text-xs font-semibold', text: 'text-red-600' };
     };
 
@@ -446,6 +465,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                         ].map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
+
                             return (
                                 <button
                                     key={tab.id}

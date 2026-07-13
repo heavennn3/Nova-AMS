@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import {
     FileKey,
@@ -15,10 +14,13 @@ import {
     Check,
     ChevronsUpDown,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import {
     Dialog,
     DialogContent,
@@ -26,6 +28,8 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Progress } from '@/components/ui/progress';
 import {
     Select,
     SelectContent,
@@ -34,10 +38,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { Progress } from '@/components/ui/progress';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
 export default function LicenseShow({ license, users = [], assets = [] }: any) {
@@ -50,11 +50,16 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
         const groups: Record<string, any[]> = {};
         users.forEach((u: any) => {
             const site = u.site || 'Global / Unassigned';
-            if (!groups[site]) groups[site] = [];
+
+            if (!groups[site]) {
+groups[site] = [];
+}
+
             groups[site].push(u);
         });
         
         const sortedKeys = Object.keys(groups).sort();
+
         return sortedKeys.map(key => ({
             site: key,
             users: groups[key].sort((a, b) => a.name.localeCompare(b.name))
@@ -73,11 +78,13 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
         
         if (checkoutForm.data.target_type === 'user' && !checkoutForm.data.user_id) {
             toast.error('Please select a user to assign the seat');
+
             return;
         }
 
         if (checkoutForm.data.target_type === 'asset' && !checkoutForm.data.asset_id) {
             toast.error('Please select an asset to assign the seat');
+
             return;
         }
 
@@ -133,6 +140,7 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                 cell: ({ row }: any) => {
                     const seat = row.original;
                     const isAssigned = seat.assigned_to_user_id || seat.assigned_to_asset_id;
+
                     return (
                         <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
@@ -152,6 +160,7 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                 header: 'Checked Out To',
                 cell: ({ row }: any) => {
                     const seat = row.original;
+
                     if (seat.assigned_to_user_id) {
                         return (
                             <div className="flex items-center gap-2 text-sm">
@@ -177,6 +186,7 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                             </div>
                         );
                     }
+
                     return <span className="text-xs text-muted-foreground italic">—</span>;
                 },
             },
@@ -203,6 +213,7 @@ export default function LicenseShow({ license, users = [], assets = [] }: any) {
                 cell: ({ row }: any) => {
                     const seat = row.original;
                     const isAssigned = seat.assigned_to_user_id || seat.assigned_to_asset_id;
+
                     return (
                         <div className="flex justify-end gap-2">
                             {isAssigned ? (

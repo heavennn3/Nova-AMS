@@ -1,9 +1,15 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search } from 'lucide-react';
+import Papa from 'papaparse';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -11,12 +17,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search } from 'lucide-react';
-import { toast } from 'sonner';
-import Papa from 'papaparse';
 
 export default function SparePartsDashboard({
     totalParts = 0,
@@ -47,8 +47,10 @@ export default function SparePartsDashboard({
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
             toast.error('CSV file is empty.');
+
             return;
         }
+
         router.post('/spare-parts/import-bulk',
             { spare_parts: importedData, site_id: importSiteId === 'all' ? null : importSiteId },
             {
@@ -71,7 +73,11 @@ export default function SparePartsDashboard({
         input.accept = '.csv';
         input.onchange = (e: any) => {
             const file = e.target?.files?.[0];
-            if (!file) return;
+
+            if (!file) {
+return;
+}
+
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
@@ -129,14 +135,27 @@ export default function SparePartsDashboard({
     const categories = [...new Set(allParts.map((p: any) => p.category).filter(Boolean))] as string[];
 
     const filteredParts = allParts.filter((p: any) => {
-        if (filterSite !== 'all' && String(p.site_id) !== filterSite) return false;
-        if (filterCategory !== 'all' && p.category !== filterCategory) return false;
-        if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+        if (filterSite !== 'all' && String(p.site_id) !== filterSite) {
+return false;
+}
+
+        if (filterCategory !== 'all' && p.category !== filterCategory) {
+return false;
+}
+
+        if (filterStatus !== 'all' && p.status !== filterStatus) {
+return false;
+}
+
         if (search.trim()) {
             const q = search.toLowerCase();
             const match = (val: any) => String(val ?? '').toLowerCase().includes(q);
-            if (!match(p.name) && !match(p.part_number) && !match(p.category) && !match(p.location)) return false;
+
+            if (!match(p.name) && !match(p.part_number) && !match(p.category) && !match(p.location)) {
+return false;
+}
         }
+
         return true;
     });
 
@@ -182,6 +201,7 @@ export default function SparePartsDashboard({
                     in_used: 'bg-blue-100 text-blue-700',
                     faulty: 'bg-red-100 text-red-700',
                 };
+
                 return (
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
                         {status?.replace('_', ' ')}
@@ -292,6 +312,7 @@ export default function SparePartsDashboard({
                                     const c = colors[i % colors.length];
                                     const maxCount = Math.max(...categoryData.map((x: any) => x.count), 1);
                                     const pct = (cat.count / maxCount) * 100;
+
                                     return (
                                         <div key={cat.category} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
                                             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${c.light}`}>
@@ -395,7 +416,9 @@ export default function SparePartsDashboard({
                 </Select>
                 {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
                     <Button variant="ghost" size="sm" className="h-8 text-xs"
-                        onClick={() => { setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); }}>
+                        onClick={() => {
+ setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); 
+}}>
                         Clear
                     </Button>
                 )}

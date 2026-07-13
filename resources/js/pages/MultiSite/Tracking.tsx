@@ -1,16 +1,16 @@
-import { useState, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { MapPin, Navigation, Search, Filter, X, Check } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { MapPin, Navigation, Search, Filter, X, Check } from 'lucide-react';
 
 export default function Tracking({
     sites,
@@ -79,6 +79,7 @@ export default function Tracking({
                 (a.product_name && a.product_name.toLowerCase().includes(q)) ||
                 (a.category && a.category.toLowerCase().includes(q)) ||
                 (a.site?.name && a.site.name.toLowerCase().includes(q));
+
             return matchesSite && matchesCategory && matchesSearch;
         });
     }, [assets, selectedSiteId, selectedCategory, search]);

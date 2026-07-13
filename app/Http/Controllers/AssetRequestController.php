@@ -209,8 +209,7 @@ class AssetRequestController extends Controller
             if ($loan->asset_id) {
                 $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
                 if ($asset) {
-                    $asset->setField('status', 'in_use');
-                    $asset->update(['status' => 'in_use']);
+                    $asset->updateStatus('in_use');
                 }
             }
 
@@ -260,8 +259,7 @@ class AssetRequestController extends Controller
                     'status' => 'active',
                     'remarks' => $assetRequest->reason . ($assetRequest->required_until ? ' | Expected return: ' . $assetRequest->required_until->format('Y-m-d') : ''),
                 ]);
-                $asset->setField('status', 'in_use');
-                $asset->update(['status' => 'in_use']);
+                $asset->updateStatus('in_use');
             }
         }
 
@@ -278,12 +276,11 @@ class AssetRequestController extends Controller
                     'condition_status' => $assetRequest->condition_status ?? 'good',
                     'purpose' => $assetRequest->purpose ?? $assetRequest->reason,
                     'notes' => $assetRequest->admin_notes,
-                    'status' => 'fulfilled',
+                    'status' => 'approved',
                     'approved_by' => $request->user()->id,
                     'approved_at' => now(),
                 ]);
-                $asset->setField('status', 'in_use');
-                $asset->update(['status' => 'in_use']);
+                $asset->updateStatus('in_use');
             }
         }
 
@@ -341,7 +338,7 @@ class AssetRequestController extends Controller
             if ($loan->asset_id) {
                 $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($loan->asset_id);
                 if ($asset) {
-                    $asset->setField('status', 'Available');
+                    $asset->updateStatus('available');
                 }
             }
 
@@ -377,7 +374,7 @@ class AssetRequestController extends Controller
             // Update asset status back to available
             $asset = \App\Models\Asset::withoutGlobalScope('site_access')->find($assetRequest->asset_id);
             if ($asset) {
-                $asset->setField('status', 'Available');
+                $asset->updateStatus('available');
             }
         } elseif (in_array($assetRequest->request_type, ['Borrow', 'Checkout']) && $assetRequest->asset_id) {
             // Handle Borrow/Checkout returns

@@ -1,4 +1,4 @@
-import { Table } from '@tanstack/react-table';
+import type { Table } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import * as React from 'react';
 
@@ -11,8 +11,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { DataTableFacetedFilter } from './data-table-faceted-filter';
 import { DataTableActions } from './data-table-actions';
+import { DataTableFacetedFilter } from './data-table-faceted-filter';
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
@@ -64,6 +64,7 @@ export function DataTableToolbar<TData>({
                             )
                             .map((c) => {
                                 const key = c.accessorKey || c.id;
+
                                 return (
                                     <SelectItem key={key} value={key}>
                                         {c.headerText || c.header}

@@ -1,7 +1,9 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -18,8 +20,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 
 type StatusLabelProps = {
     data: any[];
@@ -32,16 +32,21 @@ export default function StatusLabels({ data = [] }: StatusLabelProps) {
 
     const handleOpenDialog = (item: any = null) => {
         setEditingItem(item);
+
         if (item) {
             setFormData({ ...item });
         } else {
             setFormData({ type: 'deployable' });
         }
+
         setIsDialogOpen(true);
     };
 
     const handleDelete = (id: number) => {
-        if (!confirm('Are you sure you want to delete this status label?')) return;
+        if (!confirm('Are you sure you want to delete this status label?')) {
+return;
+}
+
         router.delete(`/settings/status-labels/${id}`, {
             preserveScroll: true,
         });
@@ -82,6 +87,7 @@ export default function StatusLabels({ data = [] }: StatusLabelProps) {
             cell: ({ row }: any) => {
                 const type = row.original.type;
                 const badgeColor = statusColors[type] || 'bg-secondary text-secondary-foreground';
+
                 return (
                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${badgeColor}`}>
                         {type}

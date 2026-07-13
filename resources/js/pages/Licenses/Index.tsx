@@ -1,14 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import {
     Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
     Package, CheckCircle2, AlertTriangle, Clock, Users, Layers,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState, useMemo, useEffect } from 'react';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -16,6 +16,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -23,8 +24,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 const statusConfig: Record<string, { bg: string; label: string }> = {
@@ -74,15 +74,26 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     // ── Filtered data ──
     const filteredLicenses = useMemo(() => {
         let filtered = licenses;
-        if (filterSite !== 'all') filtered = filtered.filter((l: any) => String(l.site_id) === filterSite);
-        if (filterCategory !== 'all') filtered = filtered.filter((l: any) => l.category === filterCategory);
-        if (filterStatus !== 'all') filtered = filtered.filter((l: any) => l.status === filterStatus);
+
+        if (filterSite !== 'all') {
+filtered = filtered.filter((l: any) => String(l.site_id) === filterSite);
+}
+
+        if (filterCategory !== 'all') {
+filtered = filtered.filter((l: any) => l.category === filterCategory);
+}
+
+        if (filterStatus !== 'all') {
+filtered = filtered.filter((l: any) => l.status === filterStatus);
+}
+
         if (search.trim()) {
             const q = search.toLowerCase();
             filtered = filtered.filter((l: any) =>
                 [l.name, l.category, l.type, l.license_key].some(v => String(v ?? '').toLowerCase().includes(q))
             );
         }
+
         return filtered;
     }, [licenses, filterSite, filterCategory, filterStatus, search]);
 
@@ -102,8 +113,14 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
         const data = { ...form.data };
-        if (data.total_seat) data.total_seat = Number(data.total_seat);
-        if (data.site_id) data.site_id = Number(data.site_id);
+
+        if (data.total_seat) {
+data.total_seat = Number(data.total_seat);
+}
+
+        if (data.site_id) {
+data.site_id = Number(data.site_id);
+}
 
         router.post('/licenses', data, {
             onSuccess: () => {
@@ -149,10 +166,20 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
     const handleEdit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedLicense) return;
+
+        if (!selectedLicense) {
+return;
+}
+
         const data = { ...editForm.data };
-        if (data.total_seat) data.total_seat = Number(data.total_seat);
-        if (data.site_id) data.site_id = Number(data.site_id);
+
+        if (data.total_seat) {
+data.total_seat = Number(data.total_seat);
+}
+
+        if (data.site_id) {
+data.site_id = Number(data.site_id);
+}
 
         router.put(`/licenses/${selectedLicense.id}`, data, {
             onSuccess: () => {
@@ -168,7 +195,10 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
     // ── Delete ──
     const handleDelete = () => {
-        if (!selectedLicense) return;
+        if (!selectedLicense) {
+return;
+}
+
         router.delete(`/licenses/${selectedLicense.id}`, {
             data: { delete_reason: deleteReason },
             onSuccess: () => {
@@ -182,21 +212,30 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     };
 
     const handleImport = () => {
-        if (!importFile) return;
+        if (!importFile) {
+return;
+}
+
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const text = e.target?.result as string;
                 const lines = text.split('\n').filter(l => l.trim());
+
                 if (lines.length < 2) {
                     toast.error('CSV must have a header row and at least one data row.');
+
                     return;
                 }
+
                 const headers = lines[0].split(',').map(h => h.trim());
                 const licenses = lines.slice(1).map(line => {
                     const vals = line.split(',').map(v => v.trim());
                     const row: Record<string, string> = {};
-                    headers.forEach((h, i) => { row[h] = vals[i] ?? ''; });
+                    headers.forEach((h, i) => {
+ row[h] = vals[i] ?? ''; 
+});
+
                     return row;
                 });
                 router.post('/licenses/import-bulk', { licenses, site_id: importSiteId || undefined }, {
@@ -232,7 +271,9 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             accessorKey: 'name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
             cell: ({ row }: any) => (
-                <button onClick={() => { setViewLicense(row.original); setIsViewOpen(true); }} className="font-semibold text-primary hover:underline text-left">
+                <button onClick={() => {
+ setViewLicense(row.original); setIsViewOpen(true); 
+}} className="font-semibold text-primary hover:underline text-left">
                     {row.getValue('name')}
                 </button>
             ),
@@ -267,6 +308,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 const key = row.getValue('license_key') as string;
                 const id = row.original.id;
                 const visible = visibleKeys[id];
+
                 return (
                     <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs truncate max-w-[100px]">
@@ -297,6 +339,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             cell: ({ row }: any) => {
                 const status = row.getValue('status') as string;
                 const cfg = statusConfig[status] || { bg: 'bg-gray-100 text-gray-700 border-gray-200', label: status };
+
                 return <Badge className={`text-xs px-2 py-0.5 ${cfg.bg}`}>{cfg.label}</Badge>;
             },
         },
@@ -309,7 +352,9 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
-                        onClick={() => { setSelectedLicense(row.original); setIsDeleteOpen(true); }}>
+                        onClick={() => {
+ setSelectedLicense(row.original); setIsDeleteOpen(true); 
+}}>
                         <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                 </div>
@@ -326,6 +371,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         const expired = filteredLicenses.filter((l: any) => l.status === 'expired').length;
         const expiring = filteredLicenses.filter((l: any) => l.status === 'expiring_soon').length;
         const full = filteredLicenses.filter((l: any) => l.status === 'full').length;
+
         return { total, totalSeats, used, available, expired, expiring, full };
     }, [filteredLicenses]);
 
@@ -451,7 +497,9 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 </Select>
                 {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
                     <Button variant="ghost" size="sm" className="h-8 text-xs"
-                        onClick={() => { setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); }}>
+                        onClick={() => {
+ setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); 
+}}>
                         Clear
                     </Button>
                 )}

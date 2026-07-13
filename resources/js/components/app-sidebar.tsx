@@ -165,7 +165,10 @@ export function AppSidebar() {
     const isEmployee = auth.user?.roles?.includes('Employee') || auth.user?.roles?.includes('Technician') || auth.user?.roles?.includes('Viewer') || false;
 
     const canAccess = (module?: string) => {
-        if (!module) return true; // No restriction (e.g. Dashboard)
+        if (!module) {
+return true;
+} // No restriction (e.g. Dashboard)
+
         return modulePermissions.includes(module);
     };
 

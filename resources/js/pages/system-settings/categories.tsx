@@ -1,7 +1,9 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -11,8 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 
 type CategoriesProps = {
     data: any[];
@@ -25,16 +25,21 @@ export default function Categories({ data = [] }: CategoriesProps) {
 
     const handleOpenDialog = (item: any = null) => {
         setEditingItem(item);
+
         if (item) {
             setFormData({ ...item });
         } else {
             setFormData({});
         }
+
         setIsDialogOpen(true);
     };
 
     const handleDelete = (id: number) => {
-        if (!confirm('Are you sure you want to delete this category?')) return;
+        if (!confirm('Are you sure you want to delete this category?')) {
+return;
+}
+
         router.delete(`/settings/categories/${id}`, {
             preserveScroll: true,
         });

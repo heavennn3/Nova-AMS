@@ -1,5 +1,4 @@
 import { Head, usePage, useForm, router } from '@inertiajs/react';
-import { useState, useEffect, useMemo } from 'react';
 import {
     Activity,
     Package,
@@ -24,19 +23,15 @@ import {
     Wrench,
     MoreHorizontal,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { DataTableActions } from '@/components/data-table/data-table-actions';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -46,9 +41,14 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface Assignment {
     id: number;
@@ -164,11 +164,13 @@ export default function LiveTrackingAdmin({
     const handleFilterChange = (siteId: string) => {
         setLocalSiteFilter(siteId);
         const params = new URLSearchParams(window.location.search);
+
         if (siteId !== 'all') {
             params.set('site_id', siteId);
         } else {
             params.delete('site_id');
         }
+
         window.location.href = `${window.location.pathname}?${params.toString()}`;
     };
 
@@ -188,7 +190,9 @@ export default function LiveTrackingAdmin({
 
     // Send single reminder
     const sendSingleReminder = (assignment: Assignment) => {
-        if (!confirm(`Send reminder to ${assignment.user_name} about ${assignment.product_name}?`)) return;
+        if (!confirm(`Send reminder to ${assignment.user_name} about ${assignment.product_name}?`)) {
+return;
+}
 
         router.post(`/asset-track/${assignment.id}/send-reminder`, {}, {
             onSuccess: () => {
@@ -204,6 +208,7 @@ export default function LiveTrackingAdmin({
     const sendBulkReminders = () => {
         if (selectedAssignments.length === 0) {
             toast.error('Please select at least one assignment');
+
             return;
         }
 
@@ -222,7 +227,9 @@ export default function LiveTrackingAdmin({
 
     // Check in asset
     const checkInAsset = (assignment: Assignment) => {
-        if (!confirm(`Check in ${assignment.product_name} from ${assignment.user_name}?`)) return;
+        if (!confirm(`Check in ${assignment.product_name} from ${assignment.user_name}?`)) {
+return;
+}
 
         router.patch(`/asset-track/${assignment.id}/checkin`, {}, {
             onSuccess: () => {
@@ -244,6 +251,7 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+
                 return (
                     <Button
                         variant="ghost"
@@ -264,6 +272,7 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+
                 return (
                     <div className="space-y-1">
                         <div className="font-semibold text-sm">{assignment.product_name}</div>
@@ -286,6 +295,7 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+
                 return (
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm">
@@ -307,6 +317,7 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+
                 return (
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm">
@@ -328,6 +339,7 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+
                 return (
                     <div className="text-sm">
                         {new Date(assignment.assigned_at).toLocaleDateString()}
@@ -372,6 +384,7 @@ export default function LiveTrackingAdmin({
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
+
                 return (
                     <div className="text-sm text-muted-foreground">
                         {assignment.duration}

@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import {
     Package,
     CheckCircle,
@@ -24,6 +22,7 @@ import {
     CalendarClock,
     ShieldAlert,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import {
     ResponsiveContainer,
     Tooltip as RechartsTooltip,
@@ -33,6 +32,7 @@ import {
     YAxis,
     CartesianGrid,
 } from 'recharts';
+import { Button } from '@/components/ui/button';
 import {
     Select,
     SelectContent,
@@ -81,6 +81,7 @@ export default function Dashboard({
         const matchesSite = selectedSiteFilter === 'all' || activity.site_id?.toString() === selectedSiteFilter;
 
         let matchesAction = true;
+
         if (selectedActionFilter !== 'all') {
             if (selectedActionFilter === 'create') {
                 matchesAction = activity.action === 'created';
@@ -98,6 +99,7 @@ export default function Dashboard({
         const timer = setInterval(() => {
             setCurrentDateTime(new Date());
         }, 1000);
+
         return () => clearInterval(timer);
     }, []);
 

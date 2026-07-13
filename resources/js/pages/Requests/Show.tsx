@@ -1,9 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import {
     ArrowLeft,
     CheckCircle,
@@ -20,7 +15,12 @@ import {
     Copy,
     Shield,
 } from 'lucide-react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function RequestShow({ assetRequest }: { assetRequest: any }) {
     const { auth } = usePage().props as any;
@@ -47,14 +47,17 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
             Rejected: 'text-red-600 border-red-200 bg-red-50',
             Cancelled: 'text-slate-500 border-slate-200 bg-slate-50',
         };
+
         return <Badge variant="outline" className={`${styles[status] || ''} text-sm px-3 py-1`}>{status}</Badge>;
     };
 
     const handleAction = (action: string) => {
         if (action === 'reject' && !adminNotes.trim()) {
             alert('Please provide a reason for rejection.');
+
             return;
         }
+
         router.post(`/requests/${r.id}/${action}`, { admin_notes: adminNotes }, { preserveScroll: true });
     };
 

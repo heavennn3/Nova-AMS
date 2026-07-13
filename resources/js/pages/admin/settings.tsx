@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
 import {
     Paintbrush,
     FileText,
@@ -25,9 +24,10 @@ import {
     X,
     MapPin,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -258,6 +258,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
         if (item.link) {
             return; // Managed by Inertia <Link>
         }
+
         setSelectedSetting(item.id);
         const defaults: any = {};
         item.fields?.forEach((f) => {
@@ -303,6 +304,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
                                 </Link>
                             );
                         }
+
                         return (
                             <div
                                 onClick={() => handleItemClick(item)}

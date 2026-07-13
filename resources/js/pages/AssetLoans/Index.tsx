@@ -1,6 +1,15 @@
+import { Head, Link } from '@inertiajs/react';
+import {
+    Plus,
+    Search,
+    Clock,
+    Calendar,
+    Package,
+    AlertTriangle,
+    Hourglass,
+} from 'lucide-react';
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,19 +19,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import {
-    Plus,
-    Search,
-    Clock,
-    Calendar,
-    Package,
-    AlertTriangle,
-    CheckCircle2,
-    XCircle,
-    RotateCcw,
-    Hourglass,
-} from 'lucide-react';
 
 const statusColors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -38,15 +34,39 @@ const conditionColors: Record<string, string> = {
     faulty: 'bg-red-100 text-red-800',
 };
 
+function parseDate(value: string): Date | null {
+    if (!value) {
+return null;
+}
+
+    const [year, month, day] = value.split('-').map(Number);
+
+    return year && month && day ? new Date(year, month - 1, day) : null;
+}
+
 function calcDaysRemaining(returnDate: string): { days: number; label: string; isOverdue: boolean } {
-    if (!returnDate) return { days: 0, label: '—', isOverdue: false };
+    if (!returnDate) {
+return { days: 0, label: '—', isOverdue: false };
+}
+
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    const ret = new Date(returnDate);
-    ret.setHours(0, 0, 0, 0);
+    const ret = parseDate(returnDate);
+
+    if (!ret) {
+return { days: 0, label: '—', isOverdue: false };
+}
+
     const diff = Math.round((ret.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    if (diff < 0) return { days: Math.abs(diff), label: `${Math.abs(diff)} day(s) overdue`, isOverdue: true };
-    if (diff === 0) return { days: 0, label: 'Due today', isOverdue: false };
+
+    if (diff < 0) {
+return { days: Math.abs(diff), label: `${Math.abs(diff)} day(s) overdue`, isOverdue: true };
+}
+
+    if (diff === 0) {
+return { days: 0, label: 'Due today', isOverdue: false };
+}
+
     return { days: diff, label: `${diff} day(s) remaining`, isOverdue: false };
 }
 
@@ -63,15 +83,20 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
             l.loan_id?.toLowerCase().includes(q) ||
             l.purpose?.toLowerCase().includes(q);
         const matchesStatus = statusFilter === 'all' || l.status === statusFilter;
+
         return matchesSearch && matchesStatus;
     });
 
-    const formatDate = (d: string) =>
-        d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    const formatDate = (d: string) => {
+        const date = parseDate(d);
+
+        return date ? date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+    };
 
     const stats = useMemo(() => {
         const active = loans.filter((l) => l.status === 'approved');
-        const overdue = active.filter((l) => l.expected_return_date && new Date(l.expected_return_date) < new Date());
+        const overdue = active.filter((l) => calcDaysRemaining(l.expected_return_date).isOverdue);
+
         return {
             pending: loans.filter((l) => l.status === 'pending').length,
             approved: loans.filter((l) => l.status === 'approved').length,
@@ -173,6 +198,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     filtered.map((loan) => {
                                         const duration = calcDaysRemaining(loan.expected_return_date);
                                         const isActiveApproved = loan.status === 'approved';
+
                                         return (
                                             <tr
                                                 key={loan.id}

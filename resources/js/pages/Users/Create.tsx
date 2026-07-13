@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,11 +29,14 @@ export default function UserCreate({
 
     const [mounted, setMounted] = useState(false);
 
-    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => {
+ setMounted(true); 
+}, []);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const siteId = params.get('site_id');
+
         if (siteId) {
             setData('site_id', siteId);
         }

@@ -1,25 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Head, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog';
 import {
     Eye,
     Search,
@@ -37,7 +16,28 @@ import {
     Filter,
     AlertTriangle,
 } from 'lucide-react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function AdminIndex({ requests = [], sites = [] }: { requests: any[]; sites: any[] }) {
     const [search, setSearch] = useState('');
@@ -63,12 +63,14 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         setSelectedRows(prev => {
             const next = new Set(prev);
             next.has(id) ? next.delete(id) : next.add(id);
+
             return next;
         });
     };
 
     const toggleAll = () => {
         const pendingIds = filteredRequests.filter(r => r.status === 'Pending').map(r => r.id);
+
         if (pendingIds.every(id => selectedRows.has(id))) {
             setSelectedRows(new Set());
         } else {
@@ -79,11 +81,16 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const pendingSelected = [...selectedRows].filter(id => requests.find(r => r.id === id && r.status === 'Pending'));
 
     const submitBatchAction = () => {
-        if (!batchAction || pendingSelected.length === 0) return;
+        if (!batchAction || pendingSelected.length === 0) {
+return;
+}
+
         const url = `/requests/batch-${batchAction}`;
         router.post(url, { ids: pendingSelected, admin_notes: batchNotes }, {
             preserveScroll: true,
-            onSuccess: () => { setBatchAction(null); setBatchNotes(''); setSelectedRows(new Set()); },
+            onSuccess: () => {
+ setBatchAction(null); setBatchNotes(''); setSelectedRows(new Set()); 
+},
         });
     };
 
@@ -104,6 +111,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             !dateFrom || new Date(r.created_at) >= new Date(dateFrom);
         const matchesDateTo =
             !dateTo || new Date(r.created_at) <= new Date(dateTo + 'T23:59:59');
+
         return matchesSearch && matchesStatus && matchesType && matchesSite && matchesDateFrom && matchesDateTo;
     });
 
@@ -116,12 +124,14 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             Rejected: { color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200', icon: XCircle },
             Cancelled: { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', icon: XCircle },
         };
+
         return config[status] || { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', icon: Clock };
     };
 
     const getStatusBadge = (status: string) => {
         const cfg = getStatusConfig(status);
         const Icon = cfg.icon;
+
         return (
             <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} gap-1`}>
                 <Icon className="h-3 w-3" />
@@ -156,7 +166,9 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     };
 
     const submitAction = () => {
-        if (!actionRequest || !actionType) return;
+        if (!actionRequest || !actionType) {
+return;
+}
 
         // Check if this is a loan request
         const isLoanRequest = actionRequest.type === 'loan' || actionRequest.original_model === 'AssetLoan';
@@ -166,7 +178,9 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             is_loan_request: isLoanRequest ? 'true' : 'false'
         }, {
             preserveScroll: true,
-            onSuccess: () => { setActionRequest(null); setActionType(null); setAdminNotes(''); },
+            onSuccess: () => {
+ setActionRequest(null); setActionType(null); setAdminNotes(''); 
+},
         });
     };
 
@@ -329,10 +343,14 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         <Checkbox checked={true} className="pointer-events-none" />
                         <span className="text-sm font-semibold">{pendingSelected.length} pending request(s) selected</span>
                         <div className="ml-auto flex gap-2">
-                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => { setBatchAction('approve'); setBatchNotes(''); }}>
+                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
+ setBatchAction('approve'); setBatchNotes(''); 
+}}>
                                 <CheckCircle className="h-3.5 w-3.5 mr-1" /> Batch Approve
                             </Button>
-                            <Button size="sm" variant="destructive" onClick={() => { setBatchAction('reject'); setBatchNotes(''); }}>
+                            <Button size="sm" variant="destructive" onClick={() => {
+ setBatchAction('reject'); setBatchNotes(''); 
+}}>
                                 <XCircle className="h-3.5 w-3.5 mr-1" /> Batch Reject
                             </Button>
                             <Button size="sm" variant="ghost" onClick={() => setSelectedRows(new Set())}>
@@ -375,6 +393,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     const isPending = r.status === 'Pending';
                                     const isUrgent = isPending && r.priority === 'Urgent';
                                     const isHigh = isPending && r.priority === 'High';
+
                                     return (
                                         <tr
                                             key={r.id}
@@ -486,7 +505,9 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             </div>
 
             {/* Action Dialog */}
-            <Dialog open={!!actionType} onOpenChange={() => { setActionType(null); setActionRequest(null); }}>
+            <Dialog open={!!actionType} onOpenChange={() => {
+ setActionType(null); setActionRequest(null); 
+}}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{actionType && actionConfig[actionType]?.title}</DialogTitle>
@@ -553,7 +574,9 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => { setActionType(null); setActionRequest(null); }}>
+                        <Button variant="outline" onClick={() => {
+ setActionType(null); setActionRequest(null); 
+}}>
                             Cancel
                         </Button>
                         <Button

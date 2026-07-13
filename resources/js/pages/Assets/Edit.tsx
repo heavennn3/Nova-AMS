@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { useForm, Link, Head } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft } from 'lucide-react';
 
 export default function AssetEdit({
     asset,

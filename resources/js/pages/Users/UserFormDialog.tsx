@@ -1,6 +1,15 @@
-import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
+import { Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -10,15 +19,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import { Loader2 } from 'lucide-react';
 
 type UserType = {
     id: number;
@@ -50,7 +50,9 @@ export function UserFormDialog({
     const isEditing = !!user;
     const [mounted, setMounted] = useState(false);
 
-    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => {
+ setMounted(true); 
+}, []);
 
     const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm({

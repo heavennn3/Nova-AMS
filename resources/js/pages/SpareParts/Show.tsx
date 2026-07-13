@@ -13,9 +13,9 @@ import {
     AlertTriangle,
     FileText,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 const statusConfig: Record<string, { bg: string; text: string; icon: any }> = {
     available: { bg: 'bg-green-100 text-green-700 border-green-200', text: 'text-green-600', icon: CheckCircle2 },
@@ -125,6 +125,7 @@ export default function Show({ part, sites = [] }: { part: any; sites?: any[] })
                         {['available', 'in_used', 'faulty'].map(s => {
                             const Icon = s === 'available' ? CheckCircle2 : s === 'in_used' ? Package : AlertTriangle;
                             const color = s === 'available' ? 'text-green-600' : s === 'in_used' ? 'text-blue-600' : 'text-red-600';
+
                             return (
                                 <Button
                                     key={s}

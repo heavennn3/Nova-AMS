@@ -1,48 +1,4 @@
-import { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import {
     ChevronRight,
     ChevronDown,
@@ -59,7 +15,51 @@ import {
     Globe,
     Layers,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface SiteData {
     id: number;
@@ -128,6 +128,7 @@ export default function Dashboards({
 
     useEffect(() => {
         setMounted(true);
+
         // expand first region by default
         if (initialRegions.length > 0) {
             setExpanded(new Set([initialRegions[0].id]));
@@ -147,8 +148,12 @@ export default function Dashboards({
     };
 
     const submitRegion = async () => {
-        if (!regionForm.name.trim()) return;
+        if (!regionForm.name.trim()) {
+return;
+}
+
         setProcessing(true);
+
         try {
             if (regionModal.mode === 'create') {
                 const res = await fetch('/api/regions', {
@@ -157,7 +162,11 @@ export default function Dashboards({
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify(regionForm),
                 });
-                if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
+
+                if (!res.ok) {
+throw new Error((await res.json()).message ?? 'Failed');
+}
+
                 toast.success('Region created');
             } else if (regionModal.mode === 'edit' && regionModal.region) {
                 const res = await fetch(`/api/regions/${regionModal.region.id}`, {
@@ -166,9 +175,14 @@ export default function Dashboards({
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify(regionForm),
                 });
-                if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
+
+                if (!res.ok) {
+throw new Error((await res.json()).message ?? 'Failed');
+}
+
                 toast.success('Region updated');
             }
+
             setRegionModal({ ...regionModal, open: false });
             refreshRegions();
         } catch (e: any) {
@@ -179,15 +193,23 @@ export default function Dashboards({
     };
 
     const confirmDeleteRegion = async () => {
-        if (!deleteRegion) return;
+        if (!deleteRegion) {
+return;
+}
+
         setProcessing(true);
+
         try {
             const res = await fetch(`/api/regions/${deleteRegion.id}`, {
                 method: 'DELETE',
                 credentials: 'same-origin',
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
             });
-            if (!res.ok) throw new Error((await res.json()).message ?? 'Cannot delete');
+
+            if (!res.ok) {
+throw new Error((await res.json()).message ?? 'Cannot delete');
+}
+
             toast.success('Region deleted');
             setDeleteRegion(null);
             refreshRegions();
@@ -215,8 +237,12 @@ export default function Dashboards({
     };
 
     const submitSite = async () => {
-        if (!siteForm.name.trim()) return;
+        if (!siteForm.name.trim()) {
+return;
+}
+
         setProcessing(true);
+
         try {
             if (siteModal.mode === 'create') {
                 const res = await fetch('/api/sites', {
@@ -225,7 +251,11 @@ export default function Dashboards({
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify({ ...siteForm, region_id: siteForm.region_id ? Number(siteForm.region_id) : null }),
                 });
-                if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
+
+                if (!res.ok) {
+throw new Error((await res.json()).message ?? 'Failed');
+}
+
                 toast.success('Site created');
             } else if (siteModal.mode === 'edit' && siteModal.site) {
                 const res = await fetch(`/api/sites/${siteModal.site.id}`, {
@@ -234,9 +264,14 @@ export default function Dashboards({
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
                     body: JSON.stringify({ ...siteForm, region_id: siteForm.region_id ? Number(siteForm.region_id) : null }),
                 });
-                if (!res.ok) throw new Error((await res.json()).message ?? 'Failed');
+
+                if (!res.ok) {
+throw new Error((await res.json()).message ?? 'Failed');
+}
+
                 toast.success('Site updated');
             }
+
             setSiteModal({ ...siteModal, open: false });
             refreshRegions();
         } catch (e: any) {
@@ -247,15 +282,23 @@ export default function Dashboards({
     };
 
     const confirmDeleteSite = async () => {
-        if (!deleteSite) return;
+        if (!deleteSite) {
+return;
+}
+
         setProcessing(true);
+
         try {
             const res = await fetch(`/api/sites/${deleteSite.id}`, {
                 method: 'DELETE',
                 credentials: 'same-origin',
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
             });
-            if (!res.ok) throw new Error((await res.json()).message ?? 'Cannot delete');
+
+            if (!res.ok) {
+throw new Error((await res.json()).message ?? 'Cannot delete');
+}
+
             toast.success('Site deleted');
             setDeleteSite(null);
             refreshRegions();
@@ -273,6 +316,7 @@ export default function Dashboards({
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
             body: JSON.stringify({ name: site.name, code: site.code, region_id: site.region_id, is_active: !site.is_active }),
         });
+
         if (res.ok) {
             toast.success(site.is_active ? 'Site disabled' : 'Site activated');
             refreshRegions();
@@ -284,6 +328,7 @@ export default function Dashboards({
     const refreshRegions = async () => {
         try {
             const res = await fetch('/api/regions', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+
             if (res.ok) {
                 const data = await res.json();
                 // data includes nested sites
@@ -309,11 +354,14 @@ export default function Dashboards({
         setExpanded((prev) => {
             const next = new Set(prev);
             next.has(id) ? next.delete(id) : next.add(id);
+
             return next;
         });
     };
 
-    if (!mounted) return null;
+    if (!mounted) {
+return null;
+}
 
     return (
         <div className="w-full space-y-6 p-8">

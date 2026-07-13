@@ -1,8 +1,4 @@
-import * as React from 'react';
-import { useState, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableActions } from '@/components/data-table/data-table-actions';
 import {
     Plus,
     Edit,
@@ -13,6 +9,12 @@ import {
     MapPin,
     AlertTriangle,
 } from 'lucide-react';
+import Papa from 'papaparse';
+import * as React from 'react';
+import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -22,8 +24,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
-import Papa from 'papaparse';
 
 export default function AssetIndex({
     assets = [],
@@ -50,6 +50,7 @@ export default function AssetIndex({
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
             toast.error('CSV file is empty.');
+
             return;
         }
 
@@ -76,7 +77,11 @@ export default function AssetIndex({
         input.accept = '.csv';
         input.onchange = (e: any) => {
             const file = e.target?.files?.[0];
-            if (!file) return;
+
+            if (!file) {
+return;
+}
+
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
@@ -142,6 +147,7 @@ export default function AssetIndex({
                 cell: ({ row }: any) => {
                     const val = row.getValue('status') ?? 'stored';
                     const bgColor = row.original.status_color || '#6B7280';
+
                     return (
                         <span
                             className="inline-block rounded-md px-2.5 py-1 text-xs font-semibold text-white"
@@ -157,6 +163,7 @@ export default function AssetIndex({
                 header: 'Actions',
                 cell: ({ row }: any) => {
                     const asset = row.original;
+
                     return (
                         <div className="flex items-center space-x-1 text-muted-foreground">
                             <Link
@@ -188,19 +195,24 @@ export default function AssetIndex({
 
     const filteredAssets = React.useMemo(() => {
         let result = assets || [];
+
         if (statusFilter !== 'all') {
             result = result.filter((a: any) => a.status === statusFilter);
         }
+
         const q = search.toLowerCase();
+
         if (q) {
             const searchKeys = ['asset_id', 'asset_name', 'category', 'type', 'location', 'oem', 'serial_number', 'part_number'];
             result = result.filter((a: any) =>
                 searchKeys.some((key: string) => {
                     const v = a[key];
+
                     return v && String(v).toLowerCase().includes(q);
                 }),
             );
         }
+
         return result;
     }, [assets, search, statusFilter]);
 

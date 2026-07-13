@@ -1,21 +1,14 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { DataTable } from '@/components/data-table/data-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
     Plus, Edit, Trash2, Search, Upload, Package, Building2, Layers, Clock, Loader2,
     HandCoins, Calendar, User, AlertTriangle,
 } from 'lucide-react';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import Papa from 'papaparse';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+import { DataTable } from '@/components/data-table/data-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -24,9 +17,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import Papa from 'papaparse';
-import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -47,8 +47,13 @@ export default function AssetInventory({
     const isAdmin = auth?.user?.is_admin ?? auth?.user?.roles?.includes('Admin') ?? false;
 
     useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.warning) toast.warning(flash.warning);
+        if (flash?.success) {
+toast.success(flash.success);
+}
+
+        if (flash?.warning) {
+toast.warning(flash.warning);
+}
     }, [flash]);
 
     const [search, setSearch] = useState('');
@@ -81,6 +86,7 @@ export default function AssetInventory({
         setShowCreate(true);
         setFormErrors({});
         setForm({ asset_id: '', asset_name: '', category_id: '', type_id: '', oem_id: '', location: '', purchase_year: '', serial_number: '', part_number: '', quantity: '' });
+
         if (!refs.categories.length || !refs.types.length || !refs.oems.length) {
             try {
                 const [catRes, typeRes, oemRes] = await Promise.all([
@@ -101,35 +107,48 @@ export default function AssetInventory({
 
     const handleFormChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
-        if (formErrors[key]) setFormErrors((prev) => ({ ...prev, [key]: '' }));
+
+        if (formErrors[key]) {
+setFormErrors((prev) => ({ ...prev, [key]: '' }));
+}
     };
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!form.asset_id.trim()) {
             setFormErrors({ asset_id: 'Asset ID is required' });
+
             return;
         }
+
         setCreating(true);
+
         try {
             const res = await fetch('/api/assets', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
                 body: JSON.stringify({ ...form, site_id: siteFilter === 'all' ? null : parseInt(siteFilter) }),
             });
+
             if (!res.ok) {
                 const err = await res.json();
+
                 if (err.errors) {
                     const fieldErrors: Record<string, string> = {};
+
                     for (const [k, msgs] of Object.entries(err.errors)) {
                         fieldErrors[k] = (msgs as string[])[0];
                     }
+
                     setFormErrors(fieldErrors);
                 } else {
                     toast.error(err.message || 'Failed to create asset');
                 }
+
                 return;
             }
+
             toast.success('Asset created!');
             setShowCreate(false);
             router.reload({ only: ['assets'] });
@@ -156,11 +175,27 @@ export default function AssetInventory({
 
     const submitLoan = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loanForm.asset_ids.length === 0) { toast.error('Pick at least one asset.'); return; }
-        if (!loanForm.expected_return_date) { toast.error('Expected return date required.'); return; }
-        if (!loanForm.purpose.trim()) { toast.error('Purpose required.'); return; }
+
+        if (loanForm.asset_ids.length === 0) {
+ toast.error('Pick at least one asset.');
+
+ return; 
+}
+
+        if (!loanForm.expected_return_date) {
+ toast.error('Expected return date required.');
+
+ return; 
+}
+
+        if (!loanForm.purpose.trim()) {
+ toast.error('Purpose required.');
+
+ return; 
+}
 
         setLoanSubmitting(true);
+
         try {
             const res = await fetch('/api/loans/quick', {
                 method: 'POST',
@@ -168,7 +203,13 @@ export default function AssetInventory({
                 body: JSON.stringify(loanForm),
             });
             const data = await res.json();
-            if (!res.ok) { toast.error(data.message || 'Failed to submit loan'); return; }
+
+            if (!res.ok) {
+ toast.error(data.message || 'Failed to submit loan');
+
+ return; 
+}
+
             toast.success(data.message || 'Loan request submitted!');
             setShowLoan(false);
             router.reload({ only: ['assets'] });
@@ -181,6 +222,7 @@ export default function AssetInventory({
 
     const handleSiteFilterChange = (value: string) => {
         setSiteFilter(value);
+
         if (value === 'all') {
             router.get('/asset-inventory', {}, { preserveState: true, replace: true });
         } else {
@@ -221,6 +263,7 @@ export default function AssetInventory({
                 cell: ({ row }: any) => {
                     const val = row.getValue('status') ?? 'stored';
                     const bgColor = row.original.status_color || '#6B7280';
+
                     return (
                         <span
                             className="inline-block rounded-md px-2.5 py-1 text-xs font-semibold text-white"
@@ -236,6 +279,7 @@ export default function AssetInventory({
                 header: 'Loan Status',
                 cell: ({ row }: any) => {
                     const ls = row.original.loan_status;
+
                     if (ls === 'on_loan') {
                         return (
                             <div className="flex items-center gap-1.5">
@@ -248,6 +292,7 @@ export default function AssetInventory({
                             </div>
                         );
                     }
+
                     if (ls === 'overdue') {
                         return (
                             <div className="flex items-center gap-1.5">
@@ -258,6 +303,7 @@ export default function AssetInventory({
                             </div>
                         );
                     }
+
                     return (
                         <span className="text-xs text-muted-foreground">Available</span>
                     );
@@ -297,16 +343,21 @@ export default function AssetInventory({
 
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
-            if (siteFilter === 'all') return true;
+            if (siteFilter === 'all') {
+return true;
+}
+
             return String(a.site_id) === siteFilter;
         });
 
         const q = search.toLowerCase();
+
         if (q) {
             const searchKeys = ['asset_id', 'asset_name', 'category', 'type', 'location', 'oem', 'serial_number', 'part_number'];
             result = result.filter((a: any) =>
                 searchKeys.some((key: string) => {
                     const v = a[key];
+
                     return v && String(v).toLowerCase().includes(q);
                 }),
             );
@@ -327,6 +378,7 @@ export default function AssetInventory({
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
             toast.error('CSV file is empty.');
+
             return;
         }
 
@@ -353,7 +405,11 @@ export default function AssetInventory({
         input.accept = '.csv';
         input.onchange = (e: any) => {
             const file = e.target?.files?.[0];
-            if (!file) return;
+
+            if (!file) {
+return;
+}
+
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,

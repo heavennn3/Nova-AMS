@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/bulk-delete', [\App\Http\Controllers\Api\RecycleBinApiController::class, 'bulkForceDelete']);
     });
 
-    // Quick loan from inventory page
+    // Loan-request API. `/quick` remains available for existing inventory clients.
+    Route::post('/loans', [\App\Http\Controllers\AssetLoanController::class, 'apiStore']);
     Route::post('/loans/quick', [\App\Http\Controllers\AssetLoanController::class, 'quickStore']);
 });

@@ -1,5 +1,4 @@
 import { Head, router } from '@inertiajs/react';
-import { useState, useEffect, useCallback } from 'react';
 import {
     Activity,
     User,
@@ -26,14 +25,10 @@ import {
     Filter,
     Check,
 } from 'lucide-react';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -42,6 +37,11 @@ import {
     DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import {
     Select,
     SelectContent,
@@ -144,15 +144,31 @@ interface Props {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function timeAgo(iso: string): string {
-    if (!iso) return '—';
+    if (!iso) {
+return '—';
+}
+
     try {
         const date = new Date(iso);
-        if (isNaN(date.getTime())) return '—';
+
+        if (isNaN(date.getTime())) {
+return '—';
+}
+
         const secs = Math.floor((Date.now() - date.getTime()) / 1000);
-        if (secs < 60) return `${secs}s ago`;
-        if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
-        if (secs < 86400)
-            return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
+
+        if (secs < 60) {
+return `${secs}s ago`;
+}
+
+        if (secs < 3600) {
+return `${Math.floor(secs / 60)}m ago`;
+}
+
+        if (secs < 86400) {
+return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
+}
+
         return `${Math.floor(secs / 86400)}d ago`;
     } catch {
         return '—';
@@ -160,10 +176,17 @@ function timeAgo(iso: string): string {
 }
 
 function formatDate(iso: string): string {
-    if (!iso) return '—';
+    if (!iso) {
+return '—';
+}
+
     try {
         const date = new Date(iso);
-        if (isNaN(date.getTime())) return '—';
+
+        if (isNaN(date.getTime())) {
+return '—';
+}
+
         return date.toLocaleString('en-GB', {
             day: '2-digit',
             month: 'short',
@@ -177,7 +200,10 @@ function formatDate(iso: string): string {
 }
 
 function initials(name: string): string {
-    if (!name) return '??';
+    if (!name) {
+return '??';
+}
+
     return name
         .split(' ')
         .filter(Boolean)
@@ -196,9 +222,16 @@ const AVATAR_COLORS = [
     'bg-cyan-500',
 ];
 function avatarColor(name: string): string {
-    if (!name) return 'bg-slate-400';
+    if (!name) {
+return 'bg-slate-400';
+}
+
     let hash = 0;
-    for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
+
+    for (const c of name) {
+hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
+}
+
     return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
@@ -287,16 +320,25 @@ export default function LiveTracking({
 
     const poll = useCallback(async () => {
         setPolling(true);
+
         try {
             const res = await fetch('/api/live-tracking/poll', {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
-            if (!res.ok) throw new Error('Network error');
+
+            if (!res.ok) {
+throw new Error('Network error');
+}
+
             const data = await res.json();
 
             setAssignments(data.liveAssignments || []);
             setStats((prev) => ({ ...prev, ...(data.stats || {}) }));
-            if (data.availableAssets) setAvailableAssets(data.availableAssets);
+
+            if (data.availableAssets) {
+setAvailableAssets(data.availableAssets);
+}
+
             setLastPoll(new Date());
             setOnline(true);
         } catch (err) {
@@ -309,6 +351,7 @@ export default function LiveTracking({
 
     useEffect(() => {
         const id = setInterval(poll, POLL_INTERVAL_MS);
+
         return () => clearInterval(id);
     }, [poll]);
 
@@ -323,6 +366,7 @@ export default function LiveTracking({
             userId = historyUserFilter,
         ) => {
             setLoadingHistory(true);
+
             try {
                 const params = new URLSearchParams({
                     page: String(page),
@@ -330,14 +374,22 @@ export default function LiveTracking({
                     start_date: start,
                     end_date: end,
                 });
-                if (userId !== 'all') params.set('user_id', userId);
+
+                if (userId !== 'all') {
+params.set('user_id', userId);
+}
+
                 const res = await fetch(
                     `/api/live-tracking/history?${params.toString()}`,
                     {
                         headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     },
                 );
-                if (!res.ok) throw new Error('History fetch failed');
+
+                if (!res.ok) {
+throw new Error('History fetch failed');
+}
+
                 const data = await res.json();
 
                 if (data && Array.isArray(data.data)) {
@@ -363,6 +415,7 @@ export default function LiveTracking({
     useEffect(() => {
         if (activeTab === 'history') {
             const timer = setTimeout(() => fetchHistory(1), 300);
+
             return () => clearTimeout(timer);
         }
     }, [
@@ -380,15 +433,21 @@ export default function LiveTracking({
             start_date: startDate,
             end_date: endDate,
         });
-        if (historyUserFilter !== 'all')
-            params.set('user_id', historyUserFilter);
+
+        if (historyUserFilter !== 'all') {
+params.set('user_id', historyUserFilter);
+}
+
         window.location.href = `/api/live-tracking/report?${params.toString()}`;
     };
 
     // ── Actions ────────────────────────────────────────────────────────────
 
     const handleCheckout = () => {
-        if (!checkoutAssetId || !checkoutUserId) return;
+        if (!checkoutAssetId || !checkoutUserId) {
+return;
+}
+
         setSubmitting(true);
         router.post(
             '/asset-track/checkout',
@@ -421,7 +480,10 @@ export default function LiveTracking({
                 onSuccess: () => {
                     setCheckinTarget(null);
                     poll();
-                    if (activeTab === 'history') fetchHistory(1);
+
+                    if (activeTab === 'history') {
+fetchHistory(1);
+}
                 },
             },
         );

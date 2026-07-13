@@ -1,13 +1,4 @@
-import { useState, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { DataTable } from '@/components/data-table/data-table';
-import { Input } from '@/components/ui/input';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 import {
     ShieldCheck,
     UserCog,
@@ -21,6 +12,15 @@ import {
     User,
     UserCheck,
 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { DataTable } from '@/components/data-table/data-table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface UserRecord {
     id: number;
@@ -131,12 +131,17 @@ export default function Access({
                 const role = row.original.role;
                 let colorClass = 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200 dark:bg-slate-900/40 dark:text-slate-300';
 
-                if (role === 'Admin')
-                    colorClass = 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-950/20 dark:text-rose-400';
-                if (role === 'Site Manager')
-                    colorClass = 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-950/20 dark:text-amber-400';
-                if (role === 'Technician')
-                    colorClass = 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-950/20 dark:text-blue-400';
+                if (role === 'Admin') {
+colorClass = 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-950/20 dark:text-rose-400';
+}
+
+                if (role === 'Site Manager') {
+colorClass = 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-950/20 dark:text-amber-400';
+}
+
+                if (role === 'Technician') {
+colorClass = 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-950/20 dark:text-blue-400';
+}
 
                 return (
                     <button

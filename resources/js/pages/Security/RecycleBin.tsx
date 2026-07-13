@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
+import { RefreshCcw, Trash2, Search, Users, Building2, Package, Wrench, FolderOpen, Columns3 } from 'lucide-react';
+import React, { useState } from 'react';
+import { toast } from 'sonner';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -7,13 +13,7 @@ import {
     CardTitle,
     CardDescription,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { RefreshCcw, Trash2, Search, Users, Building2, Package, Wrench, FolderOpen, Columns3 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface RecycleBinProps {
@@ -94,9 +94,15 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
     };
 
     const handleBatchRestore = (selectedRows: any[]) => {
-        if (!type) return;
+        if (!type) {
+return;
+}
+
         const ids = selectedRows.map((r) => r.id).filter(Boolean);
-        if (ids.length === 0) return;
+
+        if (ids.length === 0) {
+return;
+}
 
         toast.promise(
             fetch('/api/recycle-bin/bulk-restore', {
@@ -110,14 +116,17 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
             }).then(async (res) => {
                 if (!res.ok) {
                     const err = await res.json();
+
                     throw new Error(err.message || 'Failed to restore records.');
                 }
+
                 return res.json();
             }),
             {
                 loading: `Restoring ${ids.length} items...`,
                 success: (res) => {
                     router.reload();
+
                     return res.message || 'Items restored successfully!';
                 },
                 error: (err) => err.message || 'Restoration failed.',
@@ -126,9 +135,15 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
     };
 
     const handleBatchDelete = (selectedRows: any[]) => {
-        if (!type) return;
+        if (!type) {
+return;
+}
+
         const ids = selectedRows.map((r) => r.id).filter(Boolean);
-        if (ids.length === 0) return;
+
+        if (ids.length === 0) {
+return;
+}
 
         toast.promise(
             fetch('/api/recycle-bin/bulk-delete', {
@@ -142,14 +157,17 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
             }).then(async (res) => {
                 if (!res.ok) {
                     const err = await res.json();
+
                     throw new Error(err.message || 'Failed to delete records.');
                 }
+
                 return res.json();
             }),
             {
                 loading: `Deleting ${ids.length} items...`,
                 success: (res) => {
                     router.reload();
+
                     return res.message || 'Items deleted successfully!';
                 },
                 error: (err) => err.message || 'Deletion failed.',
@@ -210,6 +228,7 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
                 header: () => <div>Actions</div>,
                 cell: ({ row }: any) => {
                     const item = row.original;
+
                     return (
                         <div className="flex gap-2">
                             <Button
@@ -256,6 +275,7 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
                     const Icon = cfg.icon;
                     const isActive = type === key;
                     const count = stats?.[key] ?? 0;
+
                     return (
                         <button
                             key={key}

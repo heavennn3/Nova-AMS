@@ -1,10 +1,10 @@
-import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export default function LicenseTrash({ licenses = [] }: any) {
 
@@ -62,6 +62,7 @@ export default function LicenseTrash({ licenses = [] }: any) {
                 id: 'actions',
                 cell: ({ row }: any) => {
                     const license = row.original;
+
                     return (
                         <div className="flex justify-end gap-2">
                             <Button

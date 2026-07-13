@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,7 +32,9 @@ export default function UserEdit({
 
     const [mounted, setMounted] = useState(false);
 
-    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => {
+ setMounted(true); 
+}, []);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();

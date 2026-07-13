@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
+import { Moon, Sun, Search, Plus, ChevronDown, Users, Package, Settings2, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { NotificationBell } from '@/components/notification-bell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
-import { Link, router } from '@inertiajs/react';
 
 
 import {
@@ -14,11 +14,11 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useAppearance } from '@/hooks/use-appearance';
 import { useInitials } from '@/hooks/use-initials';
 // Included 'Settings' in the lucide-react imports
-import { Moon, Sun, Search, Plus, ChevronDown, Users, Package, Settings2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { settings } from '@/routes';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';

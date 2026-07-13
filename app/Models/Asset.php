@@ -68,6 +68,18 @@ class Asset extends Model implements Auditable
         return $this->hasOne(AssetLoan::class)->where('status', 'approved')->latestOfMany();
     }
 
+    /** Update the normalized asset status used by the loan workflow. */
+    public function updateStatus(string $status): void
+    {
+        $statusId = AssetStatus::where('name', strtolower($status))->value('id');
+
+        if ($statusId === null) {
+            throw new \InvalidArgumentException("Unknown asset status [{$status}].");
+        }
+
+        $this->update(['status_id' => $statusId]);
+    }
+
     // ─── EAV Helpers ───────────────────────────────────────────────
 
     public function fieldValues()

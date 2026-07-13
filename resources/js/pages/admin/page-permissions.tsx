@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import {
     Shield,
@@ -19,11 +18,10 @@ import {
     ChevronDown,
     ChevronUp,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -32,6 +30,8 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface Permission {
     can_create: boolean;
@@ -86,6 +86,7 @@ export default function PagePermissions({ pages, users, modules }: PagePermissio
 
     const filteredPages = pages.filter(page => {
         const matchesModule = selectedModule === 'all' || page.module === selectedModule;
+
         return matchesModule;
     });
 
@@ -123,7 +124,9 @@ export default function PagePermissions({ pages, users, modules }: PagePermissio
     };
 
     const handleSavePermissions = async () => {
-        if (!selectedUser) return;
+        if (!selectedUser) {
+return;
+}
 
         setLoading(true);
 
@@ -147,6 +150,7 @@ export default function PagePermissions({ pages, users, modules }: PagePermissio
     const handleCopyPermissions = async () => {
         if (!copyFromUser || !copyToUser) {
             toast.error('Please select both users');
+
             return;
         }
 
@@ -171,11 +175,13 @@ export default function PagePermissions({ pages, users, modules }: PagePermissio
     const toggleSection = (section: string) => {
         setExpandedSections(prev => {
             const newSet = new Set(prev);
+
             if (newSet.has(section)) {
                 newSet.delete(section);
             } else {
                 newSet.add(section);
             }
+
             return newSet;
         });
     };
@@ -326,7 +332,10 @@ export default function PagePermissions({ pages, users, modules }: PagePermissio
                             <div className="max-h-[600px] overflow-y-auto p-4">
                                 {modules.map(module => {
                                     const modulePages = getModulePages(module);
-                                    if (modulePages.length === 0) return null;
+
+                                    if (modulePages.length === 0) {
+return null;
+}
 
                                     const isExpanded = expandedSections.has(module);
                                     const moduleDisplayName = module.replace('module.', '').replace('-', ' ').toUpperCase();

@@ -1,16 +1,16 @@
-import { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
+import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Settings, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import {
-    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Settings, Eye, EyeOff } from 'lucide-react';
 
 const DATA_TYPES = ['string', 'number', 'date', 'boolean', 'enum', 'array'] as const;
 const ALIGNMENTS = ['left', 'center', 'right'] as const;
@@ -69,10 +69,19 @@ export default function SiteConfigSection({
     };
 
     const saveEdit = () => {
-        if (!editing) return;
+        if (!editing) {
+return;
+}
+
         const payload = {
             ...form,
-            options: form.options ? (() => { try { return JSON.parse(form.options); } catch { return {}; } })() : {},
+            options: form.options ? (() => {
+ try {
+ return JSON.parse(form.options); 
+} catch {
+ return {}; 
+} 
+})() : {},
             width: form.width ? Number(form.width) : null,
             sort_order: Number(form.sort_order),
         };
@@ -97,7 +106,13 @@ export default function SiteConfigSection({
             alignment: form.alignment,
             width: form.width ? Number(form.width) : null,
             format_pattern: form.format_pattern || null,
-            options: form.options ? (() => { try { return JSON.parse(form.options); } catch { return {}; } })() : null,
+            options: form.options ? (() => {
+ try {
+ return JSON.parse(form.options); 
+} catch {
+ return {}; 
+} 
+})() : null,
         };
         router.post('/master-data/table-configurations', payload, {
             preserveScroll: true,
@@ -120,8 +135,9 @@ export default function SiteConfigSection({
                         </Button>
                         <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                             onClick={() => {
-                                if (confirm(`Delete all columns for "${title}"? This cannot be undone.`))
-                                    router.post(`/master-data/table-configurations/delete-table/${tableName}`, { site_id: siteId }, { preserveScroll: true });
+                                if (confirm(`Delete all columns for "${title}"? This cannot be undone.`)) {
+router.post(`/master-data/table-configurations/delete-table/${tableName}`, { site_id: siteId }, { preserveScroll: true });
+}
                             }}>
                             <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -183,15 +199,27 @@ export default function SiteConfigSection({
                                         <div className="flex items-center justify-center gap-0.5">
                                             <span className="text-xs text-muted-foreground w-4 text-center">{config.sort_order}</span>
                                             <div className="flex flex-col gap-0">
-                                                <button onClick={() => { if (index > 0) router.post('/master-data/table-configurations/update-order', { columns: [{ id: config.id, sort_order: configs[index - 1].sort_order }, { id: configs[index - 1].id, sort_order: config.sort_order }] }, { preserveScroll: true }); }} disabled={index === 0} className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-20 leading-none"><ArrowUp className="h-2.5 w-2.5" /></button>
-                                                <button onClick={() => { if (index < configs.length - 1) router.post('/master-data/table-configurations/update-order', { columns: [{ id: config.id, sort_order: configs[index + 1].sort_order }, { id: configs[index + 1].id, sort_order: config.sort_order }] }, { preserveScroll: true }); }} disabled={index === configs.length - 1} className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-20 leading-none"><ArrowDown className="h-2.5 w-2.5" /></button>
+                                                <button onClick={() => {
+ if (index > 0) {
+router.post('/master-data/table-configurations/update-order', { columns: [{ id: config.id, sort_order: configs[index - 1].sort_order }, { id: configs[index - 1].id, sort_order: config.sort_order }] }, { preserveScroll: true });
+} 
+}} disabled={index === 0} className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-20 leading-none"><ArrowUp className="h-2.5 w-2.5" /></button>
+                                                <button onClick={() => {
+ if (index < configs.length - 1) {
+router.post('/master-data/table-configurations/update-order', { columns: [{ id: config.id, sort_order: configs[index + 1].sort_order }, { id: configs[index + 1].id, sort_order: config.sort_order }] }, { preserveScroll: true });
+} 
+}} disabled={index === configs.length - 1} className="p-0.5 hover:bg-gray-100 rounded disabled:opacity-20 leading-none"><ArrowDown className="h-2.5 w-2.5" /></button>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="p-2.5">
                                         <div className="flex items-center justify-center gap-1">
                                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openEdit(config)}><Edit className="h-3.5 w-3.5" /></Button>
-                                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600" onClick={() => { if (confirm('Delete this column?')) router.delete(`/master-data/table-configurations/${config.id}`, { preserveScroll: true }); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600" onClick={() => {
+ if (confirm('Delete this column?')) {
+router.delete(`/master-data/table-configurations/${config.id}`, { preserveScroll: true });
+} 
+}}><Trash2 className="h-3.5 w-3.5" /></Button>
                                         </div>
                                     </td>
                                 </tr>

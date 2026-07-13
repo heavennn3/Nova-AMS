@@ -1,20 +1,29 @@
-import {
+import { router, usePage } from '@inertiajs/react';
+import type {
     ColumnDef,
+    SortingState,
+    ColumnFiltersState,
+    VisibilityState} from '@tanstack/react-table';
+import {
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
     getFilteredRowModel,
-    useReactTable,
-    SortingState,
-    ColumnFiltersState,
-    VisibilityState,
+    useReactTable
 } from '@tanstack/react-table';
-import * as React from 'react';
-import { router, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
 import { RefreshCcw, Package, AlertTriangle, CheckCircle } from 'lucide-react';
+import * as React from 'react';
+import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Table,
     TableBody,
@@ -23,14 +32,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -74,24 +75,71 @@ export function DataTable<TData, TValue>({
     const [pageSize, setPageSize] = React.useState(10);
 
     const getResourceTypeFromUrl = () => {
-        if (typeof window === 'undefined') return undefined;
+        if (typeof window === 'undefined') {
+return undefined;
+}
+
         const path = window.location.pathname;
-        if (path.includes('/settings/categories')) return 'categories';
-        if (path.includes('/settings/departments')) return 'departments';
-        if (path.includes('/settings/custom-fields')) return 'custom-fields';
-        if (path.includes('/settings/status-labels')) return 'status-labels';
-        if (path.includes('/settings/asset-models')) return 'asset-models';
-        if (path.includes('/settings/locations')) return 'locations';
-        if (path.includes('/settings/suppliers')) return 'suppliers';
-        if (path.includes('/settings/manufacturers')) return 'manufacturers';
-        if (path.includes('/settings')) return 'settings';
-        if (path.includes('/users')) return 'users';
-        if (path.includes('/assets') || path.includes('/asset-inventory') || path.includes('/asset-track')) return 'assets';
-        if (path.includes('/work-orders')) return 'work-orders';
-        if (path.includes('/spare-parts') || path.includes('/maintenance/parts')) return 'spare-parts';
-        if (path.includes('/licenses')) return 'licenses';
+
+        if (path.includes('/settings/categories')) {
+return 'categories';
+}
+
+        if (path.includes('/settings/departments')) {
+return 'departments';
+}
+
+        if (path.includes('/settings/custom-fields')) {
+return 'custom-fields';
+}
+
+        if (path.includes('/settings/status-labels')) {
+return 'status-labels';
+}
+
+        if (path.includes('/settings/asset-models')) {
+return 'asset-models';
+}
+
+        if (path.includes('/settings/locations')) {
+return 'locations';
+}
+
+        if (path.includes('/settings/suppliers')) {
+return 'suppliers';
+}
+
+        if (path.includes('/settings/manufacturers')) {
+return 'manufacturers';
+}
+
+        if (path.includes('/settings')) {
+return 'settings';
+}
+
+        if (path.includes('/users')) {
+return 'users';
+}
+
+        if (path.includes('/assets') || path.includes('/asset-inventory') || path.includes('/asset-track')) {
+return 'assets';
+}
+
+        if (path.includes('/work-orders')) {
+return 'work-orders';
+}
+
+        if (path.includes('/spare-parts') || path.includes('/maintenance/parts')) {
+return 'spare-parts';
+}
+
+        if (path.includes('/licenses')) {
+return 'licenses';
+}
+
         // Generic fallback: use last meaningful path segment
         const segments = path.split('/').filter(s => s && !s.startsWith('master-data'));
+
         return segments.length > 0 ? segments[segments.length - 1] : undefined;
     };
 
@@ -166,12 +214,18 @@ export function DataTable<TData, TValue>({
 
     const handleBulkDelete = () => {
         const ids = selectedRows.map((r: any) => r.original.id);
+
         if (ids.length === 0) {
             toast.error('No records selected.');
+
             return;
         }
+
         const confirmMsg = `Are you sure you want to delete these ${selectedRows.length} items?`;
-        if (!confirm(confirmMsg)) return;
+
+        if (!confirm(confirmMsg)) {
+return;
+}
 
         const type = resourceType || window.location.pathname.split('/').filter(Boolean).pop() || 'unknown';
 
@@ -187,8 +241,10 @@ export function DataTable<TData, TValue>({
             }).then(async (res) => {
                 if (!res.ok) {
                     const err = await res.json();
+
                     throw new Error(err.message || 'Failed to delete records.');
                 }
+
                 return res.json();
             }),
             {
@@ -196,6 +252,7 @@ export function DataTable<TData, TValue>({
                 success: (res) => {
                     table.resetRowSelection();
                     router.reload();
+
                     return res.message || 'Items deleted successfully!';
                 },
                 error: (err) => err.message || 'Deletion failed.'
@@ -204,24 +261,38 @@ export function DataTable<TData, TValue>({
     };
 
     const handleBulkStatusUpdate = (statusVal: string | number) => {
-        if (!resourceType) return;
+        if (!resourceType) {
+return;
+}
+
         const ids = selectedRows.map((r: any) => r.original.id);
-        if (ids.length === 0) { toast.error('No records selected.'); return; }
+
+        if (ids.length === 0) {
+ toast.error('No records selected.');
+
+ return; 
+}
 
         if (resourceType === 'spare-parts') {
             router.post('/spare-parts/bulk-update-status', { ids, status: statusVal }, {
                 preserveScroll: true,
-                onSuccess: () => { table.resetRowSelection(); router.reload(); },
+                onSuccess: () => {
+ table.resetRowSelection(); router.reload(); 
+},
             });
         } else if (resourceType === 'licenses') {
             router.post('/licenses/bulk-update-status', { ids, status: statusVal }, {
                 preserveScroll: true,
-                onSuccess: () => { table.resetRowSelection(); router.reload(); },
+                onSuccess: () => {
+ table.resetRowSelection(); router.reload(); 
+},
             });
         } else {
             router.post('/assets/bulk-update-status', { ids, status_id: statusVal }, {
                 preserveScroll: true,
-                onSuccess: () => { table.resetRowSelection(); },
+                onSuccess: () => {
+ table.resetRowSelection(); 
+},
             });
         }
     };
@@ -254,8 +325,12 @@ export function DataTable<TData, TValue>({
                                 const rows = selectedRows.map((row) =>
                                     columns
                                         .map((col: any) => {
-                                            if (!col.accessorKey) return null;
+                                            if (!col.accessorKey) {
+return null;
+}
+
                                             const val = (row.original as any)[col.accessorKey];
+
                                             return typeof val === 'object' ? JSON.stringify(val) : val;
                                         })
                                         .filter((v) => v !== null)
@@ -361,6 +436,7 @@ export function DataTable<TData, TValue>({
                                 onClick={() => {
                                     const rows = selectedRows.map((r: any) => r.original);
                                     const msg = `Are you sure you want to delete these ${selectedRows.length} items?`;
+
                                     if (confirm(msg)) {
                                         onBatchDelete(rows);
                                         table.resetRowSelection();

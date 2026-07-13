@@ -1,5 +1,4 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState, useCallback } from 'react';
 import {
     Shield,
     Check,
@@ -11,6 +10,8 @@ import {
     Loader2,
     CheckCircle2,
 } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -26,7 +27,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 
 interface Role {
     id: number;
@@ -99,12 +99,15 @@ function buildMatrix(
     modules: string[],
 ): Record<string, Record<string, boolean>> {
     const matrix: Record<string, Record<string, boolean>> = {};
+
     for (const role of roles) {
         matrix[role.name] = {};
+
         for (const mod of modules) {
             matrix[role.name][mod] = role.moduleAccess[mod] ?? false;
         }
     }
+
     return matrix;
 }
 
@@ -240,6 +243,7 @@ export default function Roles({ roles, modules }: Props) {
                         const pct = Math.round(
                             (accessCount / modules.length) * 100,
                         );
+
                         return (
                             <Card
                                 key={role.id}
@@ -329,6 +333,7 @@ export default function Roles({ roles, modules }: Props) {
                                             const colors =
                                                 ROLE_COLORS[role.name] ??
                                                 DEFAULT_COLOR;
+
                                             return (
                                                 <TableHead
                                                     key={role.id}
@@ -356,6 +361,7 @@ export default function Roles({ roles, modules }: Props) {
                                 {modules.map((module) => {
                                     const accessCount =
                                         getModuleAccessCount(module);
+
                                     return (
                                         <TableRow
                                             key={module}
@@ -385,6 +391,7 @@ export default function Roles({ roles, modules }: Props) {
                                                         (savedMatrix[
                                                             role.name
                                                         ]?.[module] ?? false);
+
                                                     return (
                                                         <TableCell
                                                             key={`${module}-${role.id}`}
