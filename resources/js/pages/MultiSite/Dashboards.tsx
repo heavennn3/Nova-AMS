@@ -423,7 +423,7 @@ export default function Dashboards({
                         <div className="relative">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search sites..."
+                                placeholder="Search"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-64 pl-8"
@@ -452,8 +452,8 @@ export default function Dashboards({
                                 >
                                     <div
                                         className={`group flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${expanded.has(region.id)
-                                                ? 'bg-muted/50 shadow-sm'
-                                                : 'hover:bg-muted/30'
+                                            ? 'bg-muted/50 shadow-sm'
+                                            : 'hover:bg-muted/30'
                                             }`}
                                     >
                                         <CollapsibleTrigger asChild>

@@ -145,29 +145,29 @@ interface Props {
 
 function timeAgo(iso: string): string {
     if (!iso) {
-return '—';
-}
+        return '—';
+    }
 
     try {
         const date = new Date(iso);
 
         if (isNaN(date.getTime())) {
-return '—';
-}
+            return '—';
+        }
 
         const secs = Math.floor((Date.now() - date.getTime()) / 1000);
 
         if (secs < 60) {
-return `${secs}s ago`;
-}
+            return `${secs}s ago`;
+        }
 
         if (secs < 3600) {
-return `${Math.floor(secs / 60)}m ago`;
-}
+            return `${Math.floor(secs / 60)}m ago`;
+        }
 
         if (secs < 86400) {
-return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
-}
+            return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
+        }
 
         return `${Math.floor(secs / 86400)}d ago`;
     } catch {
@@ -177,15 +177,15 @@ return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ago`;
 
 function formatDate(iso: string): string {
     if (!iso) {
-return '—';
-}
+        return '—';
+    }
 
     try {
         const date = new Date(iso);
 
         if (isNaN(date.getTime())) {
-return '—';
-}
+            return '—';
+        }
 
         return date.toLocaleString('en-GB', {
             day: '2-digit',
@@ -201,8 +201,8 @@ return '—';
 
 function initials(name: string): string {
     if (!name) {
-return '??';
-}
+        return '??';
+    }
 
     return name
         .split(' ')
@@ -223,14 +223,14 @@ const AVATAR_COLORS = [
 ];
 function avatarColor(name: string): string {
     if (!name) {
-return 'bg-slate-400';
-}
+        return 'bg-slate-400';
+    }
 
     let hash = 0;
 
     for (const c of name) {
-hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
-}
+        hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
+    }
 
     return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
@@ -327,8 +327,8 @@ export default function LiveTracking({
             });
 
             if (!res.ok) {
-throw new Error('Network error');
-}
+                throw new Error('Network error');
+            }
 
             const data = await res.json();
 
@@ -336,8 +336,8 @@ throw new Error('Network error');
             setStats((prev) => ({ ...prev, ...(data.stats || {}) }));
 
             if (data.availableAssets) {
-setAvailableAssets(data.availableAssets);
-}
+                setAvailableAssets(data.availableAssets);
+            }
 
             setLastPoll(new Date());
             setOnline(true);
@@ -376,8 +376,8 @@ setAvailableAssets(data.availableAssets);
                 });
 
                 if (userId !== 'all') {
-params.set('user_id', userId);
-}
+                    params.set('user_id', userId);
+                }
 
                 const res = await fetch(
                     `/api/live-tracking/history?${params.toString()}`,
@@ -387,8 +387,8 @@ params.set('user_id', userId);
                 );
 
                 if (!res.ok) {
-throw new Error('History fetch failed');
-}
+                    throw new Error('History fetch failed');
+                }
 
                 const data = await res.json();
 
@@ -435,8 +435,8 @@ throw new Error('History fetch failed');
         });
 
         if (historyUserFilter !== 'all') {
-params.set('user_id', historyUserFilter);
-}
+            params.set('user_id', historyUserFilter);
+        }
 
         window.location.href = `/api/live-tracking/report?${params.toString()}`;
     };
@@ -445,8 +445,8 @@ params.set('user_id', historyUserFilter);
 
     const handleCheckout = () => {
         if (!checkoutAssetId || !checkoutUserId) {
-return;
-}
+            return;
+        }
 
         setSubmitting(true);
         router.post(
@@ -482,8 +482,8 @@ return;
                     poll();
 
                     if (activeTab === 'history') {
-fetchHistory(1);
-}
+                        fetchHistory(1);
+                    }
                 },
             },
         );
@@ -564,8 +564,8 @@ fetchHistory(1);
                 <button
                     onClick={() => setActiveTab('live')}
                     className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${activeTab === 'live'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
                         }`}
                 >
                     <Activity className="h-4 w-4" />
@@ -577,8 +577,8 @@ fetchHistory(1);
                 <button
                     onClick={() => setActiveTab('history')}
                     className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${activeTab === 'history'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
                         }`}
                 >
                     <HistoryIcon className="h-4 w-4" />
@@ -1277,7 +1277,7 @@ fetchHistory(1);
                                 }}
                             >
                                 <SelectTrigger className="h-11 w-full">
-                                    <SelectValue placeholder="All Sites" />
+                                    <SelectValue placeholder="Site" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">

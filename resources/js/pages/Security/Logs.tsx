@@ -245,7 +245,7 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                 <div className="relative w-[280px]">
                     <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Search user, site, action, resource..."
+                        placeholder="Search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="h-8 pl-8 text-sm"

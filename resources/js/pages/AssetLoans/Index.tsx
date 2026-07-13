@@ -140,12 +140,12 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                 <div className="flex items-center gap-2">
                     <div className="relative w-[280px]">
                         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                        <Input placeholder="Search loans..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 pl-8 text-sm" />
+                        <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 pl-8 text-sm" />
                     </div>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                         <SelectTrigger className="h-8 w-[150px] text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="all">Status</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="approved">Approved</SelectItem>
                             <SelectItem value="return_pending">Return Review</SelectItem>

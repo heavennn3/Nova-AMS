@@ -35,6 +35,9 @@ function csrfToken() {
 export default function AssetInventory({
     assets = [],
     sites = [],
+    categories = [],
+    types = [],
+    oems = [],
     currentSiteId = null,
     assetStatuses = [],
     totalSites = 0,
@@ -65,8 +68,8 @@ export default function AssetInventory({
     // ── Create Asset Modal ──
     const [showCreate, setShowCreate] = useState(false);
     const [creating, setCreating] = useState(false);
-    const [refs, setRefs] = useState<{ categories: any[]; types: any[]; oems: any[] }>({
-        categories: [], types: [], oems: [],
+    const [refs] = useState<{ categories: any[]; types: any[]; oems: any[] }>({
+        categories, types, oems,
     });
     const [form, setForm] = useState({
         asset_id: '', asset_name: '', category_id: '', type_id: '',
@@ -96,28 +99,11 @@ export default function AssetInventory({
         notes: '',
     });
 
-    const openCreateModal = useCallback(async () => {
+    const openCreateModal = useCallback(() => {
         setShowCreate(true);
         setFormErrors({});
         setForm({ asset_id: '', asset_name: '', category_id: '', type_id: '', oem_id: '', location: '', purchase_year: '', serial_number: '', part_number: '', quantity: '' });
-
-        if (!refs.categories.length || !refs.types.length || !refs.oems.length) {
-            try {
-                const [catRes, typeRes, oemRes] = await Promise.all([
-                    fetch('/api/references/categories'),
-                    fetch('/api/references/types'),
-                    fetch('/api/references/oems'),
-                ]);
-                setRefs({
-                    categories: await catRes.json(),
-                    types: await typeRes.json(),
-                    oems: await oemRes.json(),
-                });
-            } catch {
-                toast.error('Failed to load reference data');
-            }
-        }
-    }, [refs]);
+    }, []);
 
     const handleFormChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -173,7 +159,7 @@ export default function AssetInventory({
         }
     };
 
-    const openEditModal = useCallback(async (asset: any) => {
+    const openEditModal = useCallback((asset: any) => {
         setEditingAsset(asset);
         setEditFormErrors({});
         setEditForm({
@@ -189,24 +175,7 @@ export default function AssetInventory({
             quantity: asset.quantity?.toString() || '',
         });
         setShowEdit(true);
-
-        if (!refs.categories.length || !refs.types.length || !refs.oems.length) {
-            try {
-                const [catRes, typeRes, oemRes] = await Promise.all([
-                    fetch('/api/references/categories'),
-                    fetch('/api/references/types'),
-                    fetch('/api/references/oems'),
-                ]);
-                setRefs({
-                    categories: await catRes.json(),
-                    types: await typeRes.json(),
-                    oems: await oemRes.json(),
-                });
-            } catch {
-                toast.error('Failed to load reference data');
-            }
-        }
-    }, [refs]);
+    }, []);
 
     const handleEditFormChange = (key: string, value: string) => {
         setEditForm((prev) => ({ ...prev, [key]: value }));
@@ -216,7 +185,7 @@ export default function AssetInventory({
         }
     };
 
-    const handleUpdate = async (e: React.FormEvent) => {
+    const handleUpdate = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!editForm.asset_id.trim()) {
@@ -225,35 +194,15 @@ export default function AssetInventory({
         }
 
         setUpdating(true);
-        try {
-            const res = await fetch(`/api/assets/${editingAsset.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
-                body: JSON.stringify(editForm),
-            });
-            const data = await res.json();
-
-            if (!res.ok) {
-                if (data.errors) {
-                    const fieldErrors: Record<string, string> = {};
-                    for (const [key, messages] of Object.entries(data.errors)) {
-                        fieldErrors[key] = (messages as string[])[0];
-                    }
-                    setEditFormErrors(fieldErrors);
-                } else {
-                    toast.error(data.message || 'Failed to update asset');
-                }
-                return;
-            }
-
-            toast.success('Asset updated!');
-            setShowEdit(false);
-            router.reload({ only: ['assets'] });
-        } catch {
-            toast.error('Network error');
-        } finally {
-            setUpdating(false);
-        }
+        router.put(`/assets/${editingAsset.id}`, { ...editForm, return_to: 'asset-inventory' }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowEdit(false);
+                toast.success('Asset updated!');
+            },
+            onError: (errors) => setEditFormErrors(errors as Record<string, string>),
+            onFinish: () => setUpdating(false),
+        });
     };
 
     const openLoanModal = () => {

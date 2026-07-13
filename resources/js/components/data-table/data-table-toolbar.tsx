@@ -77,15 +77,15 @@ export function DataTableToolbar<TData>({
                 <Input
                     placeholder={
                         searchColumn === 'all'
-                            ? 'Search all data...'
+                            ? 'Search'
                             : `Search in ${searchColumn}...`
                     }
                     value={
                         searchColumn === 'all'
                             ? ((table.getState().globalFilter as string) ?? '')
                             : ((table
-                                  .getColumn(searchColumn)
-                                  ?.getFilterValue() as string) ?? '')
+                                .getColumn(searchColumn)
+                                ?.getFilterValue() as string) ?? '')
                     }
                     onChange={(event) => {
                         if (searchColumn === 'all') {

@@ -98,6 +98,9 @@ class AssetController extends Controller
         return Inertia::render('asset-inventory', [
             'assets' => $assets,
             'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
+            'categories' => \App\Models\AssetCategory::orderBy('name')->get(['id', 'name']),
+            'types' => \App\Models\AssetType::orderBy('name')->get(['id', 'name']),
+            'oems' => \App\Models\Oem::orderBy('name')->get(['id', 'name']),
             'totalSites' => \App\Models\Site::count(),
             'typeSummary' => \App\Models\AssetType::withCount('assets')->orderBy('name')->get(['id', 'name']),
             'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
@@ -179,6 +182,10 @@ class AssetController extends Controller
         ]);
 
         $asset->update($validated);
+
+        if ($request->input('return_to') === 'asset-inventory') {
+            return redirect()->route('asset-inventory')->with('success', 'Asset updated successfully.');
+        }
 
         return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
     }

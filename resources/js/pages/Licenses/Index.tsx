@@ -79,16 +79,16 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         let filtered = licenses;
 
         if (filterSite !== 'all') {
-filtered = filtered.filter((l: any) => String(l.site_id) === filterSite);
-}
+            filtered = filtered.filter((l: any) => String(l.site_id) === filterSite);
+        }
 
         if (filterCategory !== 'all') {
-filtered = filtered.filter((l: any) => l.category === filterCategory);
-}
+            filtered = filtered.filter((l: any) => l.category === filterCategory);
+        }
 
         if (filterStatus !== 'all') {
-filtered = filtered.filter((l: any) => l.status === filterStatus);
-}
+            filtered = filtered.filter((l: any) => l.status === filterStatus);
+        }
 
         if (search.trim()) {
             const q = search.toLowerCase();
@@ -118,12 +118,12 @@ filtered = filtered.filter((l: any) => l.status === filterStatus);
         const data = { ...form.data };
 
         if (data.total_seat) {
-data.total_seat = Number(data.total_seat);
-}
+            data.total_seat = Number(data.total_seat);
+        }
 
         if (data.site_id) {
-data.site_id = Number(data.site_id);
-}
+            data.site_id = Number(data.site_id);
+        }
 
         router.post('/licenses', data, {
             onSuccess: () => {
@@ -171,18 +171,18 @@ data.site_id = Number(data.site_id);
         e.preventDefault();
 
         if (!selectedLicense) {
-return;
-}
+            return;
+        }
 
         const data = { ...editForm.data };
 
         if (data.total_seat) {
-data.total_seat = Number(data.total_seat);
-}
+            data.total_seat = Number(data.total_seat);
+        }
 
         if (data.site_id) {
-data.site_id = Number(data.site_id);
-}
+            data.site_id = Number(data.site_id);
+        }
 
         router.put(`/licenses/${selectedLicense.id}`, data, {
             onSuccess: () => {
@@ -199,8 +199,8 @@ data.site_id = Number(data.site_id);
     // ── Delete ──
     const handleDelete = () => {
         if (!selectedLicense) {
-return;
-}
+            return;
+        }
 
         router.delete(`/licenses/${selectedLicense.id}`, {
             data: { delete_reason: deleteReason },
@@ -216,8 +216,8 @@ return;
 
     const handleImport = () => {
         if (!importFile) {
-return;
-}
+            return;
+        }
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -236,8 +236,8 @@ return;
                     const vals = line.split(',').map(v => v.trim());
                     const row: Record<string, string> = {};
                     headers.forEach((h, i) => {
- row[h] = vals[i] ?? ''; 
-});
+                        row[h] = vals[i] ?? '';
+                    });
 
                     return row;
                 });
@@ -275,8 +275,8 @@ return;
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
             cell: ({ row }: any) => (
                 <button onClick={() => {
- setViewLicense(row.original); setIsViewOpen(true); 
-}} className="font-semibold text-primary hover:underline text-left">
+                    setViewLicense(row.original); setIsViewOpen(true);
+                }} className="font-semibold text-primary hover:underline text-left">
                     {row.getValue('name')}
                 </button>
             ),
@@ -356,8 +356,8 @@ return;
                     </Button>
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
                         onClick={() => {
- setSelectedLicense(row.original); setIsDeleteOpen(true); 
-}}>
+                            setSelectedLicense(row.original); setIsDeleteOpen(true);
+                        }}>
                         <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                 </div>
@@ -467,13 +467,13 @@ return;
             <div className="flex flex-wrap items-center gap-2">
                 <div className="relative w-[240px]">
                     <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
+                    <Input placeholder="Search" value={search} onChange={e => setSearch(e.target.value)}
                         className="h-8 pl-8 text-sm" />
                 </div>
                 <Select value={filterSite} onValueChange={setFilterSite}>
                     <SelectTrigger className="h-8 w-[130px] text-sm"><SelectValue placeholder="Site" /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Sites</SelectItem>
+                        <SelectItem value="all">Site</SelectItem>
                         {sites.map((s: any) => (
                             <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                         ))}
@@ -482,7 +482,7 @@ return;
                 <Select value={filterCategory} onValueChange={setFilterCategory}>
                     <SelectTrigger className="h-8 w-[130px] text-sm"><SelectValue placeholder="Category" /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">Category</SelectItem>
                         {categories.map((c: string) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
                         ))}
@@ -491,7 +491,7 @@ return;
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
                     <SelectTrigger className="h-8 w-[130px] text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="all">Status</SelectItem>
                         <SelectItem value="available">Available</SelectItem>
                         <SelectItem value="full">Full</SelectItem>
                         <SelectItem value="expiring_soon">Expiring Soon</SelectItem>
@@ -501,12 +501,12 @@ return;
                 {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
                     <Button variant="ghost" size="sm" className="h-8 text-xs"
                         onClick={() => {
- setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); 
-}}>
+                            setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch('');
+                        }}>
                         Clear
                     </Button>
                 )}
-                <span className="text-xs text-muted-foreground ml-auto tabular-nums">{filteredLicenses.length} of {licenses.length}</span>
+
             </div>
 
             {/* Table */}

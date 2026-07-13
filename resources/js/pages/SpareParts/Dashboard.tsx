@@ -75,8 +75,8 @@ export default function SparePartsDashboard({
             const file = e.target?.files?.[0];
 
             if (!file) {
-return;
-}
+                return;
+            }
 
             Papa.parse(file, {
                 header: true,
@@ -136,24 +136,24 @@ return;
 
     const filteredParts = allParts.filter((p: any) => {
         if (filterSite !== 'all' && String(p.site_id) !== filterSite) {
-return false;
-}
+            return false;
+        }
 
         if (filterCategory !== 'all' && p.category !== filterCategory) {
-return false;
-}
+            return false;
+        }
 
         if (filterStatus !== 'all' && p.status !== filterStatus) {
-return false;
-}
+            return false;
+        }
 
         if (search.trim()) {
             const q = search.toLowerCase();
             const match = (val: any) => String(val ?? '').toLowerCase().includes(q);
 
             if (!match(p.name) && !match(p.part_number) && !match(p.category) && !match(p.location)) {
-return false;
-}
+                return false;
+            }
         }
 
         return true;
@@ -347,7 +347,7 @@ return false;
                             <div className="flex flex-col items-center justify-center py-10 text-center">
                                 <CheckCircle className="h-10 w-10 text-green-400 mb-3" />
                                 <p className="text-sm font-medium text-muted-foreground">All items in good stock</p>
-                                <p className="text-xs text-muted-foreground/60 mt-1">No low stock alerts at this time</p>
+                                <p className="text-xs text-muted-foreground/60 mt-1">No low stock </p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -375,7 +375,7 @@ return false;
                 <div className="relative w-[280px]">
                     <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Search..."
+                        placeholder="Search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="h-8 pl-8 text-sm"
@@ -386,7 +386,7 @@ return false;
                         <SelectValue placeholder="All Sites" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Sites</SelectItem>
+                        <SelectItem value="all">Sites</SelectItem>
                         {sites.map((s: any) => (
                             <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                         ))}
@@ -397,7 +397,7 @@ return false;
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">Categories</SelectItem>
                         {categories.map((c: string) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
                         ))}
@@ -408,7 +408,7 @@ return false;
                         <SelectValue placeholder="All Status" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="all">Status</SelectItem>
                         <SelectItem value="available">Available</SelectItem>
                         <SelectItem value="in_used">In Use</SelectItem>
                         <SelectItem value="faulty">Faulty</SelectItem>
@@ -417,8 +417,8 @@ return false;
                 {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
                     <Button variant="ghost" size="sm" className="h-8 text-xs"
                         onClick={() => {
- setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch(''); 
-}}>
+                            setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); setSearch('');
+                        }}>
                         Clear
                     </Button>
                 )}
