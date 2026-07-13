@@ -641,7 +641,7 @@ export default function AssetInventory({
                 <div className="relative w-[280px]">
                     <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Search..."
+                        placeholder="Search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="h-8 pl-8 text-sm"
@@ -653,7 +653,7 @@ export default function AssetInventory({
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">Categories</SelectItem>
                         {[...(new Set((assets || []).map((a: any) => String(a.category_name ?? a.category ?? '').trim()).filter(Boolean)))].map((category) => (
                             <SelectItem key={category} value={category.toLowerCase()}>
                                 {category}
@@ -667,7 +667,7 @@ export default function AssetInventory({
                         <SelectValue placeholder="All Types" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="all">Types</SelectItem>
                         {[...(new Set((assets || []).map((a: any) => String(a.type_name ?? a.type ?? '').trim()).filter(Boolean)))].map((type) => (
                             <SelectItem key={type} value={type.toLowerCase()}>
                                 {type}
