@@ -503,10 +503,12 @@ class LicenseController extends Controller
     {
         $request->validate([
             'licenses' => 'required|array',
+            'site_id' => 'nullable|integer|exists:sites,id',
         ]);
 
         $errors = [];
         $imported = 0;
+        $requestSiteId = $request->site_id;
 
         foreach ($request->licenses as $idx => $row) {
             $line = $idx + 2;
@@ -525,7 +527,7 @@ class LicenseController extends Controller
                     'used_seat' => (int)($normalized['used_seat'] ?? 0),
                     'active_date' => $normalized['active_date'] ?? null,
                     'end_date' => $normalized['end_date'] ?? null,
-                    'site_id' => !empty($normalized['site_id']) ? (int)$normalized['site_id'] : null,
+                    'site_id' => !empty($normalized['site_id']) ? (int)$normalized['site_id'] : $requestSiteId,
                     'status' => $normalized['status'] ?? 'available',
                 ];
 

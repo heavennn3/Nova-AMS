@@ -49,6 +49,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     const [filterStatus, setFilterStatus] = useState('all');
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
+    const [importSiteId, setImportSiteId] = useState<string>(currentSiteId ? String(currentSiteId) : '');
 
     useEffect(() => {
         try {
@@ -196,10 +197,11 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                     headers.forEach((h, i) => { row[h] = vals[i] ?? ''; });
                     return row;
                 });
-                router.post('/licenses/import-bulk', { licenses }, {
+                router.post('/licenses/import-bulk', { licenses, site_id: importSiteId || undefined }, {
                     onSuccess: () => {
                         setIsImportOpen(false);
                         setImportFile(null);
+                        setImportSiteId('');
                         toast.success('Import completed successfully');
                     },
                     onError: (err) => {
@@ -340,23 +342,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4">
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold tracking-tight">Software Licenses</h1>
-                    {sites.length > 0 && (
-                        <Select
-                            value={currentSiteId ? String(currentSiteId) : ''}
-                            onValueChange={(v) => router.get('/licenses', { site_id: v })}
-                        >
-                            <SelectTrigger className="h-9 w-[200px] text-sm">
-                                <SelectValue
-                                    placeholder={sites.find((s: any) => String(s.id) === String(currentSiteId))?.name || 'Select site'}
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {sites.map((site: any) => (
-                                    <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
+
                 </div>
                 <div className="flex items-center gap-2">
                     <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
@@ -482,6 +468,17 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             Upload a CSV file with columns: name, category, type, total_seat, site_id, license_key, active_date, end_date, status
                         </p>
                         <Input type="file" accept=".csv" onChange={e => setImportFile(e.target.files?.[0] ?? null)} className="h-9" />
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium">Target Site</label>
+                            <Select value={importSiteId} onValueChange={setImportSiteId}>
+                                <SelectTrigger className="h-9"><SelectValue placeholder="Select site (from CSV if empty)" /></SelectTrigger>
+                                <SelectContent>
+                                    {sites.map((s: any) => (
+                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsImportOpen(false)}>Cancel</Button>
