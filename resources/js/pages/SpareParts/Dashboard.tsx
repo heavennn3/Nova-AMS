@@ -39,6 +39,9 @@ export default function SparePartsDashboard({
 }) {
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [importSiteId, setImportSiteId] = useState('all');
+    const [filterSite, setFilterSite] = useState('all');
+    const [filterCategory, setFilterCategory] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
 
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
@@ -121,6 +124,16 @@ export default function SparePartsDashboard({
         });
     };
 
+    // ── Filtering ──
+    const categories = [...new Set(allParts.map((p: any) => p.category).filter(Boolean))] as string[];
+
+    const filteredParts = allParts.filter((p: any) => {
+        if (filterSite !== 'all' && String(p.site_id) !== filterSite) return false;
+        if (filterCategory !== 'all' && p.category !== filterCategory) return false;
+        if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+        return true;
+    });
+
     const sparePartColumns = [
         {
             accessorKey: 'id',
@@ -193,9 +206,7 @@ export default function SparePartsDashboard({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={downloadCsvTemplate}>
-                        <Download className="mr-2 h-4 w-4" /> CSV Template
-                    </Button>
+
                     <div className="flex items-center gap-2">
                         {sites.length > 0 && (
                             <Select value={importSiteId} onValueChange={setImportSiteId}>
@@ -340,15 +351,57 @@ export default function SparePartsDashboard({
                             <Package className="h-4 w-4 text-slate-600" />
                             All Spare Parts
                         </CardTitle>
-                        <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-full border">
-                            {allParts.length} items
-                        </span>
+
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
+                    <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
+                        <div className="flex items-center gap-1.5">
+                            <Select value={filterSite} onValueChange={setFilterSite}>
+                                <SelectTrigger className="h-7 w-[120px] text-xs">
+                                    <SelectValue placeholder="Site" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {sites.map((s: any) => (
+                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select value={filterCategory} onValueChange={setFilterCategory}>
+                                <SelectTrigger className="h-7 w-[120px] text-xs">
+                                    <SelectValue placeholder="Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Categories</SelectItem>
+                                    {categories.map((c: string) => (
+                                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select value={filterStatus} onValueChange={setFilterStatus}>
+                                <SelectTrigger className="h-7 w-[110px] text-xs">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="available">Available</SelectItem>
+                                    <SelectItem value="in_used">In Use</SelectItem>
+                                    <SelectItem value="faulty">Faulty</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all') && (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs px-2"
+                                    onClick={() => { setFilterSite('all'); setFilterCategory('all'); setFilterStatus('all'); }}>
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{filteredParts.length} of {allParts.length}</span>
+                    </div>
                     <DataTable
                         columns={sparePartColumns}
-                        data={allParts}
+                        data={filteredParts}
                     />
                 </CardContent>
             </Card>

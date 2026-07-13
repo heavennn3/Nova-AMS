@@ -405,9 +405,7 @@ export default function AssetInventory({
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={downloadCsvTemplate}>
-                        <Upload className="mr-2 h-4 w-4" /> CSV Template
-                    </Button>
+
                     <Button variant="outline" size="sm" onClick={openFilePicker}>
                         <Upload className="mr-2 h-4 w-4" /> Import CSV
                     </Button>
@@ -629,9 +627,8 @@ export default function AssetInventory({
                                         availableForLoan.map((asset: any) => (
                                             <label
                                                 key={asset.id}
-                                                className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors hover:bg-muted/30 ${
-                                                    loanForm.asset_ids.includes(asset.id) ? 'bg-primary/5' : ''
-                                                }`}
+                                                className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors hover:bg-muted/30 ${loanForm.asset_ids.includes(asset.id) ? 'bg-primary/5' : ''
+                                                    }`}
                                             >
                                                 <input
                                                     type="checkbox"

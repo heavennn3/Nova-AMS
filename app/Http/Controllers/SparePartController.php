@@ -44,6 +44,7 @@ class SparePartController extends Controller
                     'category' => $part->category,
                     'location' => $part->location,
                     'site_name' => $part->site?->name ?? 'N/A',
+                    'site_id' => $part->site_id,
                     'status' => $part->status,
                     'used_by' => $part->used_by,
                     'used_by_name' => $part->user?->name ?? '—',
