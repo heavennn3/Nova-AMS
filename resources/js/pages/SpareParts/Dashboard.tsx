@@ -130,7 +130,11 @@ export default function SparePartsDashboard({
         {
             accessorKey: 'name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
-            cell: ({ row }: any) => <span className="font-semibold">{row.getValue('name')}</span>,
+            cell: ({ row }: any) => (
+                <Link href={`/spare-parts/${row.original.id}`} className="font-semibold text-primary hover:underline transition-colors">
+                    {row.getValue('name')}
+                </Link>
+            ),
         },
         {
             accessorKey: 'part_number',
@@ -169,28 +173,11 @@ export default function SparePartsDashboard({
         {
             id: 'actions',
             header: 'Actions',
-            cell: ({ row }: any) => {
-                const part = row.original;
-                const nextStatus = part.status === 'available' ? 'faulty' : 'available';
-                return (
-                    <Button
-                        variant="outline" size="sm"
-                        onClick={() => {
-                            if (confirm(`Set "${part.name}" to ${nextStatus}?`)) {
-                                router.put(`/spare-parts/${part.id}`, {
-                                    name: part.name,
-                                    part_number: part.part_number,
-                                    category: part.category,
-                                    location: part.location,
-                                    status: nextStatus,
-                                });
-                            }
-                        }}
-                    >
-                        Set {nextStatus.replace('_', ' ')}
-                    </Button>
-                );
-            },
+            cell: ({ row }: any) => (
+                <Link href={`/spare-parts/${row.original.id}`} className="text-sm text-primary hover:underline">
+                    View
+                </Link>
+            ),
         },
     ];
 
@@ -237,119 +224,104 @@ export default function SparePartsDashboard({
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Package className="h-6 w-6 text-blue-600" />
+            {/* ── Stats Cards ── */}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {[
+                    { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10', text: 'text-blue-600' },
+                    { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-green-500/10', text: 'text-green-600' },
+                    { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: 'bg-red-500/10', text: 'text-red-600' },
+                    { label: 'Recently Added', value: recentlyAdded, icon: Package, bg: 'bg-purple-500/10', text: 'text-purple-600' },
+                ].map(s => (
+                    <div key={s.label} className="flex items-center gap-4 rounded-xl border bg-card p-5 shadow-sm min-h-[90px]">
+                        <div className={`rounded-full ${s.bg} p-3 shrink-0`}>
+                            <s.icon className={`h-6 w-6 ${s.text}`} />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-sm text-muted-foreground truncate">{s.label}</p>
+                            <p className="text-2xl font-bold tabular-nums">{s.value}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Items</p>
-                        <p className="text-2xl font-bold">{totalParts}</p>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-green-500/10 p-3">
-                        <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Available</p>
-                        <p className="text-2xl font-bold">{availableParts}</p>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-red-500/10 p-3">
-                        <AlertTriangle className="h-6 w-6 text-red-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Faulty</p>
-                        <p className="text-2xl font-bold">{outOfStockParts}</p>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-purple-500/10 p-3">
-                        <Package className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Recently Added</p>
-                        <p className="text-2xl font-bold">{recentlyAdded}</p>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Category Breakdown */}
-                <Card className="overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b py-2 px-3">
+            {/* ── Category Breakdown + Low Stock ── */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <Card className="lg:col-span-2 overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b py-3 px-4">
                         <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold">
-                                <Package className="h-3.5 w-3.5 text-emerald-600" />
+                            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                                <Package className="h-4 w-4 text-emerald-600" />
                                 Inventory by Category
                             </CardTitle>
-                            <span className="text-[10px] text-muted-foreground bg-white px-1.5 py-0.5 rounded-full border">
-                                {categoryData.length} groups
+                            <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-full border">
+                                {categoryData.length} categories
                             </span>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-2">
-                        <div className="space-y-1">
-                            {categoryData.map((cat: any, i: number) => {
-                                const colors = [
-                                    { bg: 'bg-emerald-500', dot: 'bg-emerald-500', light: 'bg-emerald-50', text: 'text-emerald-700' },
-                                    { bg: 'bg-blue-500', dot: 'bg-blue-500', light: 'bg-blue-50', text: 'text-blue-700' },
-                                    { bg: 'bg-purple-500', dot: 'bg-purple-500', light: 'bg-purple-50', text: 'text-purple-700' },
-                                    { bg: 'bg-amber-500', dot: 'bg-amber-500', light: 'bg-amber-50', text: 'text-amber-700' },
-                                    { bg: 'bg-rose-500', dot: 'bg-rose-500', light: 'bg-rose-50', text: 'text-rose-700' },
-                                    { bg: 'bg-cyan-500', dot: 'bg-cyan-500', light: 'bg-cyan-50', text: 'text-cyan-700' },
-                                ];
-                                const c = colors[i % colors.length];
-                                const maxCount = Math.max(...categoryData.map((x: any) => x.count), 1);
-                                const pct = maxCount > 0 ? (cat.count / maxCount) * 100 : 0;
-                                return (
-                                    <div key={cat.category} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted/40 transition-colors">
-                                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${c.light}`}>
-                                            <span className={`text-[10px] font-bold ${c.text}`}>{cat.category[0]}</span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <p className="text-xs font-medium truncate">{cat.category}</p>
-                                                <span className={`text-[10px] font-semibold tabular-nums ${c.text}`}>{cat.count}</span>
+                    <CardContent className="p-4">
+                        {categoryData.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-8">No category data</p>
+                        ) : (
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                {categoryData.map((cat: any, i: number) => {
+                                    const colors = [
+                                        { bar: 'bg-emerald-500', light: 'bg-emerald-50', label: 'text-emerald-700' },
+                                        { bar: 'bg-blue-500', light: 'bg-blue-50', label: 'text-blue-700' },
+                                        { bar: 'bg-purple-500', light: 'bg-purple-50', label: 'text-purple-700' },
+                                        { bar: 'bg-amber-500', light: 'bg-amber-50', label: 'text-amber-700' },
+                                        { bar: 'bg-rose-500', light: 'bg-rose-50', label: 'text-rose-700' },
+                                        { bar: 'bg-cyan-500', light: 'bg-cyan-50', label: 'text-cyan-700' },
+                                    ];
+                                    const c = colors[i % colors.length];
+                                    const maxCount = Math.max(...categoryData.map((x: any) => x.count), 1);
+                                    const pct = (cat.count / maxCount) * 100;
+                                    return (
+                                        <div key={cat.category} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
+                                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${c.light}`}>
+                                                <span className={`text-xs font-bold ${c.label}`}>{cat.category[0]}</span>
                                             </div>
-                                            <div className="h-1 w-full rounded-full bg-muted overflow-hidden mt-0.5">
-                                                <div className={`h-full rounded-full transition-all ${c.bg}`} style={{ width: `${pct}%` }} />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2 mb-1">
+                                                    <p className="text-sm font-medium truncate">{cat.category}</p>
+                                                    <span className={`text-xs font-semibold tabular-nums ${c.label}`}>{cat.count}</span>
+                                                </div>
+                                                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                                                    <div className={`h-full rounded-full ${c.bar}`} style={{ width: `${pct}%` }} />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
-                {/* Low Stock Alerts */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <Card className="overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b py-3 px-4">
+                        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                            <AlertTriangle className="h-4 w-4 text-yellow-600" />
                             Low Stock Alerts
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4">
                         {lowStockAlerts.length === 0 ? (
-                            <p className="text-sm text-muted-foreground text-center py-4">
-                                No low stock alerts
-                            </p>
+                            <div className="flex flex-col items-center justify-center py-10 text-center">
+                                <CheckCircle className="h-10 w-10 text-green-400 mb-3" />
+                                <p className="text-sm font-medium text-muted-foreground">All items in good stock</p>
+                                <p className="text-xs text-muted-foreground/60 mt-1">No low stock alerts at this time</p>
+                            </div>
                         ) : (
                             <div className="space-y-3">
                                 {lowStockAlerts.map((alert: any, index: number) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                                        <div>
-                                            <p className="font-medium text-sm">{alert.name}</p>
-                                            <p className="text-xs text-muted-foreground">{alert.location}</p>
+                                    <div key={index} className="flex items-center justify-between p-3 bg-amber-50/50 rounded-lg border border-amber-200">
+                                        <div className="min-w-0">
+                                            <p className="font-medium text-sm truncate">{alert.name}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{alert.location}</p>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-semibold text-yellow-700">
-                                                {alert.stock_level} / {alert.minimum_level}
+                                        <div className="text-right shrink-0 ml-3">
+                                            <p className="text-sm font-semibold text-amber-700 tabular-nums">
+                                                {alert.stock_level ?? '?'} / {alert.minimum_level ?? '?'}
                                             </p>
                                         </div>
                                     </div>
@@ -360,15 +332,17 @@ export default function SparePartsDashboard({
                 </Card>
             </div>
 
-            {/* All Spare Parts Table */}
+            {/* ── All Spare Parts Table ── */}
             <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b py-3">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b py-3 px-4">
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-sm font-semibold flex items-center gap-2">
                             <Package className="h-4 w-4 text-slate-600" />
                             All Spare Parts
                         </CardTitle>
-
+                        <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-full border">
+                            {allParts.length} items
+                        </span>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">

@@ -96,6 +96,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/checkouts/{checkout}/return', [\App\Http\Controllers\SparePartController::class, 'returnCheckout'])->name('spare-parts.return');
         Route::get('/export', [\App\Http\Controllers\SparePartController::class, 'exportCsv'])->name('spare-parts.export');
         Route::post('/import-bulk', [\App\Http\Controllers\SparePartController::class, 'importBulk'])->name('spare-parts.import-bulk');
+        Route::get('/{sparePart}', [\App\Http\Controllers\SparePartController::class, 'show'])->name('spare-parts.show');
+        Route::post('/bulk-update-status', [\App\Http\Controllers\SparePartController::class, 'bulkUpdateStatus'])->name('spare-parts.bulk-update-status');
     });
 
 

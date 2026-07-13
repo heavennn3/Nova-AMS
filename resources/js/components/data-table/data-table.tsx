@@ -13,7 +13,7 @@ import {
 import * as React from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, Package, AlertTriangle, CheckCircle } from 'lucide-react';
 
 import {
     Table,
@@ -207,10 +207,18 @@ export function DataTable<TData, TValue>({
         if (!resourceType) return;
         const ids = selectedRows.map((r: any) => r.original.id);
         if (ids.length === 0) { toast.error('No records selected.'); return; }
-        router.post('/assets/bulk-update-status', { ids, status_id: statusVal }, {
-            preserveScroll: true,
-            onSuccess: () => { table.resetRowSelection(); },
-        });
+
+        if (resourceType === 'spare-parts') {
+            router.post('/spare-parts/bulk-update-status', { ids, status: statusVal }, {
+                preserveScroll: true,
+                onSuccess: () => { table.resetRowSelection(); router.reload(); },
+            });
+        } else {
+            router.post('/assets/bulk-update-status', { ids, status_id: statusVal }, {
+                preserveScroll: true,
+                onSuccess: () => { table.resetRowSelection(); },
+            });
+        }
     };
 
     return (
@@ -261,7 +269,7 @@ export function DataTable<TData, TValue>({
                         >
                             Export Selected
                         </Button>
-                        {canUpdateStatus && ['assets', 'work-orders', 'users'].includes(resourceType || '') && (
+                        {canUpdateStatus && ['assets', 'work-orders', 'users', 'spare-parts'].includes(resourceType || '') && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">
@@ -289,6 +297,22 @@ export function DataTable<TData, TValue>({
                                         <>
                                             <DropdownMenuItem onClick={() => handleBulkStatusUpdate('active')}>Activate</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleBulkStatusUpdate('deactivated')}>Deactivate</DropdownMenuItem>
+                                        </>
+                                    )}
+                                    {resourceType === 'spare-parts' && (
+                                        <>
+                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('available')}>
+                                                <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                                                Available
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('in_used')}>
+                                                <Package className="mr-2 h-4 w-4 text-blue-600" />
+                                                In Use
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleBulkStatusUpdate('faulty')}>
+                                                <AlertTriangle className="mr-2 h-4 w-4 text-red-600" />
+                                                Faulty
+                                            </DropdownMenuItem>
                                         </>
                                     )}
                                 </DropdownMenuContent>
