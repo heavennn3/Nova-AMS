@@ -203,11 +203,11 @@ export function DataTable<TData, TValue>({
         );
     };
 
-    const handleBulkStatusUpdate = (statusVal: string) => {
+    const handleBulkStatusUpdate = (statusVal: string | number) => {
         if (!resourceType) return;
         const ids = selectedRows.map((r: any) => r.original.id);
         if (ids.length === 0) { toast.error('No records selected.'); return; }
-        router.post('/assets/bulk-update-status', { ids, status: statusVal }, {
+        router.post('/assets/bulk-update-status', { ids, status_id: statusVal }, {
             preserveScroll: true,
             onSuccess: () => { table.resetRowSelection(); },
         });
@@ -271,7 +271,7 @@ export function DataTable<TData, TValue>({
                                 <DropdownMenuContent align="end" className="w-[160px]">
                                     {resourceType === 'assets' && (
                                         <>{(assetStatuses || []).map(s => (
-                                            <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.name)}>
+                                            <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.id)}>
                                                 <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
                                                 {s.name}
                                             </DropdownMenuItem>

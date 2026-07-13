@@ -310,16 +310,16 @@ class AssetController extends Controller
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:assets,id',
-            'status' => 'required|string|max:255',
+            'status_id' => 'required|integer|exists:asset_statuses,id',
         ]);
 
         $count = 0;
         foreach (Asset::withoutGlobalScope('site_access')->whereIn('id', $validated['ids'])->cursor() as $asset) {
-            $asset->update(['status' => $validated['status']]);
+            $asset->update(['status_id' => $validated['status_id']]);
             $count++;
         }
 
-        return redirect()->back()->with('success', "Successfully updated status of $count assets!");
+        return redirect()->back()->with('success', "Updated {$count} assets.");
     }
 
     // ─── CSV Export ────────────────────────────────────────────────
