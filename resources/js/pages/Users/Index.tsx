@@ -86,6 +86,9 @@ export default function UsersIndex({
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(
         null,
     );
+    const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set());
+    const [bulkAction, setBulkAction] = useState<string | null>(null);
+    const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
     const selectedSite = useMemo(
         () => sites.find((s) => s.id.toString() === selectedSiteId),
@@ -202,8 +205,73 @@ export default function UsersIndex({
             ? `/users/create?site_id=${selectedSiteId}`
             : '/users/create';
 
+    const toggleUserSelection = (userId: number) => {
+        setSelectedUsers(prev => {
+            const next = new Set(prev);
+            next.has(userId) ? next.delete(userId) : next.add(userId);
+            return next;
+        });
+    };
+
+    const toggleAllUsers = () => {
+        const filteredIds = filteredUsers.map(u => u.id);
+        if (filteredIds.every(id => selectedUsers.has(id))) {
+            setSelectedUsers(new Set());
+        } else {
+            setSelectedUsers(new Set(filteredIds));
+        }
+    };
+
+    const executeBulkAction = () => {
+        if (!bulkAction || selectedUsers.size === 0) return;
+
+        const payload: any = {
+            user_ids: Array.from(selectedUsers),
+            action: bulkAction,
+        };
+
+        if (bulkAction === 'role') {
+            payload.role_id = '2'; // Default to Manager
+        } else if (bulkAction === 'site') {
+            payload.site_id = selectedSiteId !== 'all' ? parseInt(selectedSiteId) : null;
+        }
+
+        router.post('/users/bulk-update', payload, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSelectedUsers(new Set());
+                setBulkAction(null);
+                setBulkDialogOpen(false);
+            },
+        });
+    };
+
     const columns = useMemo((): any[] => {
         const baseColumns = [
+            {
+                id: 'select',
+                header: ({ table }: any) => (
+                    <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300"
+                        checked={filteredUsers.length > 0 && filteredUsers.every(u => selectedUsers.has(u.id))}
+                        onChange={toggleAllUsers}
+                    />
+                ),
+                cell: ({ row }: any) => {
+                    const user = row.original;
+                    return (
+                        <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300"
+                            checked={selectedUsers.has(user.id)}
+                            onChange={() => toggleUserSelection(user.id)}
+                        />
+                    );
+                },
+                enableSorting: false,
+                size: 50,
+            },
             {
                 id: 'avatar',
                 header: '',
@@ -410,7 +478,7 @@ export default function UsersIndex({
         );
 
         return baseColumns;
-    }, [selectedSiteId, sites]);
+    }, [selectedSiteId, sites, selectedUsers, filteredUsers, toggleUserSelection]);
 
     return (
         <div className="w-full space-y-6 p-8">
@@ -588,6 +656,54 @@ export default function UsersIndex({
                     );
                 })}
             </div>
+
+            {/* Bulk actions bar */}
+            {selectedUsers.size > 0 && (
+                <div className="flex items-center gap-3 rounded-lg border bg-blue-50 px-4 py-3 dark:bg-blue-950/20">
+                    <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300"
+                        checked={true}
+                        readOnly
+                    />
+                    <span className="text-sm font-semibold">
+                        {selectedUsers.size} user(s) selected
+                    </span>
+                    <div className="ml-auto flex gap-2">
+                        <Button
+                            size="sm"
+                            className="h-8 bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => { setBulkAction('activate'); setBulkDialogOpen(true); }}
+                        >
+                            <UserCheck className="mr-2 h-4 w-4" /> Activate
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-8"
+                            onClick={() => { setBulkAction('deactivate'); setBulkDialogOpen(true); }}
+                        >
+                            <UserX className="mr-2 h-4 w-4" /> Deactivate
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8"
+                            onClick={() => { setBulkAction('role'); setBulkDialogOpen(true); }}
+                        >
+                            <ShieldCheck className="mr-2 h-4 w-4" /> Set Role
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8"
+                            onClick={() => setSelectedUsers(new Set())}
+                        >
+                            Clear
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Search + Filter row */}
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -855,6 +971,46 @@ export default function UsersIndex({
                                 : confirmAction?.user.is_active
                                     ? 'Deactivate'
                                     : 'Activate'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Bulk Action Dialog */}
+            <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {bulkAction === 'activate' && 'Activate Users'}
+                            {bulkAction === 'deactivate' && 'Deactivate Users'}
+                            {bulkAction === 'role' && 'Update User Role'}
+                            {bulkAction === 'delete' && 'Delete Users'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {bulkAction === 'activate' && `Activate ${selectedUsers.size} selected user(s). They will regain access to the system.`}
+                            {bulkAction === 'deactivate' && `Deactivate ${selectedUsers.size} selected user(s). They will lose access to the system.`}
+                            {bulkAction === 'role' && `Set role for ${selectedUsers.size} selected user(s) to Manager.`}
+                            {bulkAction === 'delete' && `Delete ${selectedUsers.size} selected user(s). This action cannot be undone.`}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setBulkDialogOpen(false);
+                                setBulkAction(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant={bulkAction === 'delete' ? 'destructive' : 'default'}
+                            onClick={executeBulkAction}
+                        >
+                            {bulkAction === 'activate' && 'Activate'}
+                            {bulkAction === 'deactivate' && 'Deactivate'}
+                            {bulkAction === 'role' && 'Update Role'}
+                            {bulkAction === 'delete' && 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

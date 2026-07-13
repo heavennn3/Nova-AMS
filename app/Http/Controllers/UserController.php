@@ -17,11 +17,19 @@ class UserController extends Controller
             ->map(function ($user) {
                 $roleName = $user->roles->pluck('name')->first() ?? 'None';
 
+                // Map role name to ID for frontend compatibility
+                $roleMap = [
+                    'Admin' => '1',
+                    'Manager' => '2',
+                    'Employee' => '3',
+                ];
+                $roleId = $roleMap[$roleName] ?? '3';
+
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role_id' => $user->role_id,
+                    'role_id' => $roleId,
                     'role' => $roleName,
                     'site_id' => $user->site_id,
                     'site_name' => $user->site?->name,
@@ -35,7 +43,7 @@ class UserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => $users,
             'sites' => $sites,
-            'roles' => ['Employee', 'Manager'],
+            'roles' => ['Admin', 'Manager', 'Employee'],
         ]);
     }
 
@@ -81,13 +89,21 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $roleName = $user->roles->pluck('name')->first() ?? 'Employee';
+        $roleMap = [
+            'Admin' => '1',
+            'Manager' => '2',
+            'Employee' => '3',
+        ];
+        $roleId = $roleMap[$roleName] ?? '3';
+
         return Inertia::render('Users/Edit', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role_id' => $user->role_id,
-                'role' => $user->roles->pluck('name')->first() ?? '',
+                'role_id' => $roleId,
+                'role' => $roleName,
                 'site_id' => $user->site_id,
             ],
             'roles' => ['Admin', 'Manager', 'Employee'],
@@ -114,6 +130,7 @@ class UserController extends Controller
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->site_id = $validated['site_id'] ?? null;
+        $user->role_id = $validated['role_id'];
 
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
@@ -125,7 +142,7 @@ class UserController extends Controller
         $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         $user->syncRoles([$role]);
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return back()->with('success', 'User updated successfully.');
     }
 
     public function destroy(User $user)
@@ -148,5 +165,73 @@ class UserController extends Controller
 
         $status = $user->is_active ? 'activated' : 'deactivated';
         return redirect()->route('users.index')->with('success', "User {$status} successfully.");
+    }
+
+    public function bulkUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'integer|exists:users,id',
+            'action' => 'required|in:activate,deactivate,delete,role,site',
+            'role_id' => 'nullable|in:1,2,3',
+            'site_id' => 'nullable|exists:sites,id',
+        ]);
+
+        $users = User::whereIn('id', $validated['user_ids'])->get();
+        $action = $validated['action'];
+        $count = 0;
+
+        $roleMap = [
+            '1' => 'Admin',
+            '2' => 'Manager',
+            '3' => 'Employee',
+        ];
+
+        foreach ($users as $user) {
+            // Skip admin users for bulk operations
+            if ($user->hasRole('Admin')) {
+                continue;
+            }
+
+            switch ($action) {
+                case 'activate':
+                    $user->is_active = true;
+                    $user->save();
+                    $count++;
+                    break;
+                case 'deactivate':
+                    $user->is_active = false;
+                    $user->save();
+                    $count++;
+                    break;
+                case 'delete':
+                    $user->delete();
+                    $count++;
+                    break;
+                case 'role':
+                    if (isset($validated['role_id'])) {
+                        $roleName = $roleMap[$validated['role_id']];
+                        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+                        $user->syncRoles([$role]);
+                        $count++;
+                    }
+                    break;
+                case 'site':
+                    $user->site_id = $validated['site_id'] ?? null;
+                    $user->save();
+                    $count++;
+                    break;
+            }
+        }
+
+        $message = match($action) {
+            'activate' => "{$count} user(s) activated successfully.",
+            'deactivate' => "{$count} user(s) deactivated successfully.",
+            'delete' => "{$count} user(s) deleted successfully.",
+            'role' => "{$count} user(s) role updated successfully.",
+            'site' => "{$count} user(s) site updated successfully.",
+        };
+
+        return redirect()->route('users.index')->with('success', $message);
     }
 }

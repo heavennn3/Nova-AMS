@@ -277,41 +277,7 @@ export default function AssetInventory({
                     );
                 },
             },
-            {
-                id: 'loan_status',
-                header: 'Loan Status',
-                cell: ({ row }: any) => {
-                    const ls = row.original.loan_status;
 
-                    if (ls === 'on_loan') {
-                        return (
-                            <div className="flex items-center gap-1.5">
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1">
-                                    <User className="h-3 w-3" /> On Loan
-                                </Badge>
-                                {row.original.loan_return_date && (
-                                    <span className="text-[11px] text-muted-foreground">due {row.original.loan_return_date}</span>
-                                )}
-                            </div>
-                        );
-                    }
-
-                    if (ls === 'overdue') {
-                        return (
-                            <div className="flex items-center gap-1.5">
-                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1 animate-pulse">
-                                    <AlertTriangle className="h-3 w-3" /> Overdue!
-                                </Badge>
-                                <span className="text-[11px] text-red-500">{row.original.loan_user_name}</span>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <span className="text-xs text-muted-foreground">Available</span>
-                    );
-                },
-            },
             {
                 id: 'actions',
                 header: 'Actions',

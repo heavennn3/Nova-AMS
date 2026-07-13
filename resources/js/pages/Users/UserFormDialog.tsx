@@ -55,6 +55,17 @@ export function UserFormDialog({
  setMounted(true); 
 }, []);
 
+    // Get role ID from role name for editing
+    const getRoleIdFromName = (roleName: string | undefined): string => {
+        if (!roleName || roleName === 'None') return '';
+        const roleMap: Record<string, string> = {
+            'Admin': '1',
+            'Manager': '2',
+            'Employee': '3',
+        };
+        return roleMap[roleName] || '';
+    };
+
     const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm({
             _method: isEditing ? 'PUT' : undefined,
@@ -62,7 +73,7 @@ export function UserFormDialog({
             email: user?.email || '',
             password: '',
             password_confirmation: '',
-            role_id: user?.role_id?.toString() || '',
+            role_id: getRoleIdFromName(user?.role),
             site_id: user?.site_id?.toString() || '',
         });
 
@@ -76,7 +87,7 @@ export function UserFormDialog({
                 email: user?.email || '',
                 password: '',
                 password_confirmation: '',
-                role_id: user?.role_id?.toString() || '',
+                role_id: getRoleIdFromName(user?.role),
                 site_id: user?.site_id?.toString() || '',
             } as any);
         }
