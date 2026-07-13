@@ -113,7 +113,7 @@ export default function AssetInventory({
         }
     };
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!form.asset_id.trim()) {
@@ -123,40 +123,19 @@ export default function AssetInventory({
         }
 
         setCreating(true);
-
-        try {
-            const res = await fetch('/api/assets', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
-                body: JSON.stringify({ ...form, site_id: siteFilter === 'all' ? null : parseInt(siteFilter) }),
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-
-                if (err.errors) {
-                    const fieldErrors: Record<string, string> = {};
-
-                    for (const [k, msgs] of Object.entries(err.errors)) {
-                        fieldErrors[k] = (msgs as string[])[0];
-                    }
-
-                    setFormErrors(fieldErrors);
-                } else {
-                    toast.error(err.message || 'Failed to create asset');
-                }
-
-                return;
-            }
-
-            toast.success('Asset created!');
-            setShowCreate(false);
-            router.reload({ only: ['assets'] });
-        } catch {
-            toast.error('Network error');
-        } finally {
-            setCreating(false);
-        }
+        router.post('/assets', {
+            ...form,
+            site_id: siteFilter === 'all' ? null : Number(siteFilter),
+            return_to: 'asset-inventory',
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowCreate(false);
+                toast.success('Asset created!');
+            },
+            onError: (errors) => setFormErrors(errors as Record<string, string>),
+            onFinish: () => setCreating(false),
+        });
     };
 
     const openEditModal = useCallback((asset: any) => {
