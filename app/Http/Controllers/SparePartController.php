@@ -219,6 +219,7 @@ class SparePartController extends Controller
     {
         $request->validate([
             'spare_parts' => 'required|array',
+            'site_id' => 'nullable|exists:sites,id',
         ]);
 
         $rows = $request->spare_parts;
@@ -258,6 +259,11 @@ class SparePartController extends Controller
             }
 
             if (empty($data)) continue;
+
+            // Apply site_id from request if row doesn't have one
+            if ($request->site_id && empty($data['site_id'])) {
+                $data['site_id'] = $request->site_id;
+            }
 
             $data['status'] ??= 'available';
             $data['quantity'] = (int)($data['quantity'] ?? 0);
@@ -308,6 +314,9 @@ class SparePartController extends Controller
             'location' => 'location',
             'category' => 'category',
             'status' => 'status',
+            'site' => 'site_id',
+            'site_name' => 'site_id',
+            'site_id' => 'site_id',
         ];
         return $map[$normalizedKey] ?? null;
     }

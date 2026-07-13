@@ -72,7 +72,7 @@ class AssetLoanController extends Controller
             ->filter(function ($asset) {
                 $fields = $asset->getFields();
                 $status = $fields['status'] ?? '';
-                return strtolower($status) === 'available';
+                return strtolower($status) === 'stored';
             })
             ->values()
             ->map(function ($asset) {
@@ -131,5 +131,47 @@ class AssetLoanController extends Controller
 
         return redirect()->route('asset-loans.index')
             ->with('success', count($validated['asset_ids']) . ' asset loan request(s) submitted and pending approval.');
+    }
+
+    /**
+     * Quick JSON API for creating loans from the inventory page.
+     */
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'asset_ids' => 'required|array|min:1',
+            'asset_ids.*' => 'exists:assets,id',
+            'expected_return_date' => 'required|date|after_or_equal:today',
+            'purpose' => 'required|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+        $siteId = $user->site_id;
+
+        if (!$siteId) {
+            return response()->json(['message' => 'No site assigned to your account.'], 400);
+        }
+
+        $created = 0;
+        foreach ($validated['asset_ids'] as $assetId) {
+            AssetLoan::create([
+                'asset_id' => $assetId,
+                'user_id' => $user->id,
+                'site_id' => $siteId,
+                'loan_date' => now()->format('Y-m-d'),
+                'expected_return_date' => $validated['expected_return_date'],
+                'condition_status' => 'good',
+                'purpose' => $validated['purpose'],
+                'notes' => $validated['notes'] ?? '',
+                'status' => 'pending',
+            ]);
+            $created++;
+        }
+
+        return response()->json([
+            'message' => $created . ' loan request(s) submitted and pending admin approval.',
+            'count' => $created,
+        ]);
     }
 }

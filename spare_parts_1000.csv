@@ -1,0 +1,1001 @@
+Name,Part Number,Stock Level,Minimum Stock Level,Unit Cost,Site ID,Category,Location,Status,Used By,Created By
+Pro HDD,SP-49722,42,10,485.67,3,HDD,Cabinet 2 - Bottom,available,,5
+Premium CPU,SP-96072,16,6,475.91,9,CPU,Cabinet 2 - Top,in_used,15,9
+Premium DDR5 RAM,SP-65507,21,4,198.7,8,DDR5 RAM,Server Room - Rack 02,available,,1
+Wired MOUSE,SP-39112,23,3,365.73,5,MOUSE,Rack B - Shelf 2,in_used,7,6
+Premium M.2 SSD,SP-67669,5,2,395.66,6,M.2 SSD,Warehouse - Row 2,faulty,,2
+Standard CABLE TRACER,SP-16080,9,2,352.07,10,CABLE TRACER,Drawer #2,faulty,,6
+Premium DDR4 RAM,SP-87587,11,6,399.63,3,DDR4 RAM,Rack A - Shelf 1,available,,5
+Standard DDR4 RAM,SP-15594,19,9,85.35,9,DDR4 RAM,Rack C - Shelf 2,in_used,8,4
+2TB HDD STORAGE,SP-42173,31,5,277.39,4,STORAGE,Workshop Bench,in_used,16,4
+Premium SATA CABLE,SP-95975,44,7,138.44,6,SATA CABLE,Drawer #1,faulty,,5
+Premium CABLE TRACER,SP-35181,36,10,380.47,7,CABLE TRACER,Drawer #3,available,,7
+Pro NETWORK CARD,SP-65834,5,4,453.89,10,NETWORK CARD,Cabinet 2 - Bottom,faulty,,3
+2TB HDD STORAGE,SP-78818,37,4,425.51,9,STORAGE,Server Room - Rack 01,available,,6
+Pro NETWORK CARD,SP-52747,47,4,335.06,2,NETWORK CARD,Cabinet 1 - Right,available,,8
+Pro HDD,SP-29713,22,5,370.61,1,HDD,Cabinet 1 - Right,faulty,,4
+Industrial SATA CABLE,SP-31576,48,7,104.77,2,SATA CABLE,Warehouse - Row 2,in_used,18,6
+DDR5 16GB RAM,SP-63451,28,6,484.14,4,RAM,Workshop Bench,faulty,,7
+Standard HDMI CABLE,SP-35138,3,9,170.62,8,HDMI CABLE,Rack A - Shelf 1,available,,7
+Pro USB HUB,SP-17004,36,9,362.28,5,USB HUB,Drawer #1,faulty,,3
+650W PSU,SP-72527,17,1,292.65,1,PSU,Rack B - Shelf 2,in_used,2,2
+Standard USB HUB,SP-41886,23,4,431.1,7,USB HUB,Rack A - Shelf 3,in_used,4,9
+Premium HEATSINK,SP-87764,46,7,268.78,4,HEATSINK,Cabinet 1 - Left,in_used,9,3
+4TB HDD STORAGE,SP-93648,6,2,241.93,7,STORAGE,Warehouse - Row 2,available,,2
+Unshielded RJ45,SP-47262,18,8,30.72,5,RJ45,Rack A - Shelf 1,faulty,,5
+Premium DDR4 RAM,SP-89004,28,2,373.92,8,DDR4 RAM,Rack B - Shelf 2,in_used,5,5
+Pro USB HUB,SP-86374,39,10,341.5,1,USB HUB,Rack B - Shelf 2,available,,1
+Standard HDD,SP-16656,42,2,225.95,4,HDD,Rack C - Shelf 1,in_used,21,6
+Industrial SSD,SP-73051,19,7,490.88,8,SSD,Cabinet 1 - Left,faulty,,3
+Premium HDMI CABLE,SP-88320,0,8,2.67,7,HDMI CABLE,Drawer #1,faulty,,1
+Standard CPU,SP-54039,40,6,106.82,2,CPU,Warehouse - Row 2,available,,1
+Premium CPU,SP-29396,13,2,32.44,6,CPU,Rack A - Shelf 1,available,,10
+DDR4 32GB RAM,SP-34277,31,7,396.12,7,RAM,Workshop Bench,faulty,,7
+Cat6 3m CABLE,SP-78260,5,10,21.53,3,CABLE,Cabinet 2 - Bottom,faulty,,3
+Pro M.2 SSD,SP-41960,45,1,168.72,4,M.2 SSD,Rack B - Shelf 2,available,,3
+Mechanical KEYBOARD,SP-85429,24,3,332.08,8,KEYBOARD,Cabinet 2 - Top,available,,3
+Industrial CABLE TRACER,SP-57318,18,6,334.59,1,CABLE TRACER,Rack B - Shelf 2,in_used,5,10
+10g THERMAL PASTE,SP-22610,48,7,64.15,10,THERMAL PASTE,Warehouse - Row 2,faulty,,6
+Pro HDMI CABLE,SP-39326,30,6,175.21,6,HDMI CABLE,Rack B - Shelf 1,in_used,5,5
+24-inch MONITOR,SP-19723,42,2,349.09,2,MONITOR,Warehouse - Row 2,faulty,,4
+Cat6 5m CABLE,SP-24249,42,9,255.51,10,CABLE,Server Room - Rack 01,available,,2
+Premium HEATSINK,SP-61359,38,7,262.17,1,HEATSINK,Workshop Bench,available,,4
+Standard SSD,SP-74911,14,6,485.91,5,SSD,Drawer #1,available,,9
+Unshielded RJ45,SP-26466,38,2,262.7,3,RJ45,Drawer #3,available,,10
+80mm FAN,SP-45788,4,4,31.18,7,FAN,Rack A - Shelf 2,in_used,6,4
+650W PSU,SP-42447,25,8,19.51,1,PSU,Cabinet 1 - Left,available,,8
+4TB HDD STORAGE,SP-71298,35,5,20.37,7,STORAGE,Server Room - Rack 02,available,,10
+Industrial M.2 SSD,SP-30113,28,10,305.05,2,M.2 SSD,Workshop Bench,available,,6
+Industrial CPU,SP-50207,27,7,90.39,9,CPU,Workshop Bench,in_used,6,10
+Pass-through RJ45,SP-33050,10,8,147.03,2,RJ45,Server Room - Rack 02,available,,9
+80mm FAN,SP-40233,14,4,340.9,9,FAN,Drawer #2,available,,9
+Pro DDR4 RAM,SP-16328,44,4,114.31,8,DDR4 RAM,Warehouse - Row 1,faulty,,9
+Standard DDR4 RAM,SP-39298,31,6,232.14,3,DDR4 RAM,Rack A - Shelf 1,available,,6
+Pro CPU,SP-97966,48,5,259.51,10,CPU,Warehouse - Row 2,faulty,,2
+Premium POWER CABLE,SP-64959,26,7,204.72,10,POWER CABLE,Warehouse - Row 1,available,,4
+Standard NETWORK CARD,SP-17425,38,7,70.22,5,NETWORK CARD,Storage Closet A,faulty,,3
+Wireless MOUSE,SP-73768,0,2,187.01,5,MOUSE,Cabinet 2 - Top,available,,1
+Pro HDMI CABLE,SP-32269,38,10,66.44,5,HDMI CABLE,Cabinet 2 - Bottom,in_used,15,8
+Standard GPU,SP-56730,23,7,68.05,5,GPU,Drawer #1,faulty,,5
+Mechanical KEYBOARD,SP-75126,14,6,196.11,2,KEYBOARD,Rack A - Shelf 2,in_used,12,2
+Premium POWER CABLE,SP-67014,13,6,179.97,9,POWER CABLE,Cabinet 2 - Top,available,,2
+750W PSU,SP-21843,36,7,115.63,1,PSU,Workshop Bench,available,,2
+Premium NETWORK CARD,SP-76382,35,2,451.65,3,NETWORK CARD,Storage Closet A,available,,3
+Industrial POWER CABLE,SP-13275,44,1,369.76,4,POWER CABLE,Warehouse - Row 2,available,,9
+512GB SSD STORAGE,SP-98017,35,10,155.19,10,STORAGE,Storage Closet A,in_used,17,10
+Premium SSD,SP-18205,46,5,482.9,3,SSD,Cabinet 2 - Bottom,available,,3
+750W PSU,SP-15619,48,7,199.18,9,PSU,Cabinet 1 - Right,available,,3
+Premium DDR5 RAM,SP-44227,42,2,445.95,8,DDR5 RAM,Cabinet 2 - Bottom,available,,5
+Premium HDMI CABLE,SP-46247,49,8,4.28,10,HDMI CABLE,Drawer #2,in_used,6,5
+Industrial CABLE TRACER,SP-73868,31,2,309.36,2,CABLE TRACER,Drawer #1,available,,5
+Pass-through RJ45,SP-22591,32,6,92.51,8,RJ45,Rack C - Shelf 2,available,,4
+4TB HDD STORAGE,SP-29909,16,5,440.92,5,STORAGE,Drawer #1,faulty,,3
+Pro M.2 SSD,SP-77317,31,1,426.57,9,M.2 SSD,Cabinet 1 - Right,faulty,,5
+Cat6 5m CABLE,SP-83075,27,5,221.9,6,CABLE,Rack C - Shelf 1,faulty,,3
+Pro CABLE TRACER,SP-53252,37,6,396.04,6,CABLE TRACER,Rack C - Shelf 1,faulty,,8
+Cat6 3m CABLE,SP-23789,2,9,255.49,1,CABLE,Rack B - Shelf 2,available,,2
+Pro SATA CABLE,SP-44745,20,9,201.89,1,SATA CABLE,Warehouse - Row 2,available,,1
+Wireless MOUSE,SP-48303,39,1,408.8,6,MOUSE,Cabinet 1 - Right,faulty,,7
+Standard CPU,SP-20151,0,5,143.64,10,CPU,Rack C - Shelf 2,in_used,3,7
+Pro CPU,SP-53797,11,1,226.54,7,CPU,Drawer #3,available,,5
+Standard USB HUB,SP-71414,46,8,20.63,4,USB HUB,Cabinet 1 - Left,available,,9
+Industrial SATA CABLE,SP-80897,13,9,58.58,8,SATA CABLE,Rack A - Shelf 2,available,,1
+Industrial CABLE TRACER,SP-11585,43,5,150.39,1,CABLE TRACER,Drawer #3,available,,3
+22-inch MONITOR,SP-30654,4,8,469.48,6,MONITOR,Rack B - Shelf 1,faulty,,1
+10g THERMAL PASTE,SP-40450,12,4,222.9,6,THERMAL PASTE,Rack C - Shelf 1,available,,6
+Industrial USB HUB,SP-82195,4,5,210.1,6,USB HUB,Rack B - Shelf 2,faulty,,1
+Premium CPU,SP-57320,21,7,177.08,2,CPU,Rack B - Shelf 2,available,,6
+Standard HDMI CABLE,SP-15687,14,9,128.2,3,HDMI CABLE,Rack A - Shelf 2,available,,10
+Industrial HDD,SP-66283,15,2,224.37,10,HDD,Rack B - Shelf 2,available,,1
+Premium HEATSINK,SP-39757,2,6,366.67,5,HEATSINK,Rack A - Shelf 2,faulty,,2
+Pro CABLE TRACER,SP-26863,25,3,376.39,8,CABLE TRACER,Rack C - Shelf 1,available,,1
+Pass-through RJ45,SP-47538,31,7,463.56,6,RJ45,Server Room - Rack 01,available,,10
+Pass-through RJ45,SP-20320,20,8,442.37,3,RJ45,Rack C - Shelf 1,available,,2
+Wired MOUSE,SP-76289,9,2,215.52,10,MOUSE,Cabinet 2 - Bottom,in_used,19,3
+Pro HDMI CABLE,SP-85884,50,9,35.2,4,HDMI CABLE,Drawer #3,faulty,,1
+2TB HDD STORAGE,SP-24181,11,6,177.32,10,STORAGE,Cabinet 1 - Left,faulty,,6
+Premium SATA CABLE,SP-26586,48,6,181.02,5,SATA CABLE,Rack B - Shelf 2,available,,3
+Cat6 3m CABLE,SP-18979,8,10,302.38,4,CABLE,Rack B - Shelf 2,available,,7
+DDR4 16GB RAM,SP-95638,44,9,404.05,1,RAM,Server Room - Rack 02,available,,3
+Standard CPU,SP-67003,16,5,485.87,5,CPU,Rack A - Shelf 2,in_used,7,10
+DDR5 16GB RAM,SP-74382,20,8,331.56,4,RAM,Warehouse - Row 2,available,,9
+Industrial DDR5 RAM,SP-36302,11,8,183.82,1,DDR5 RAM,Rack C - Shelf 1,available,,5
+5g THERMAL PASTE,SP-75992,12,9,132.17,10,THERMAL PASTE,Warehouse - Row 1,faulty,,4
+Membrane KEYBOARD,SP-38119,20,7,358.37,5,KEYBOARD,Rack C - Shelf 2,available,,5
+27-inch MONITOR,SP-85382,1,3,484.78,5,MONITOR,Rack A - Shelf 2,available,,1
+Standard SSD,SP-41491,7,9,58.06,9,SSD,Warehouse - Row 1,faulty,,8
+24-inch MONITOR,SP-46429,13,3,339.37,4,MONITOR,Rack A - Shelf 2,available,,9
+Industrial SATA CABLE,SP-17331,28,2,453.63,10,SATA CABLE,Workshop Bench,available,,1
+Premium M.2 SSD,SP-77287,9,2,227.54,6,M.2 SSD,Cabinet 1 - Right,faulty,,8
+Mechanical KEYBOARD,SP-96441,3,1,330.21,3,KEYBOARD,Rack B - Shelf 1,available,,8
+Industrial DDR5 RAM,SP-25765,16,3,160.84,8,DDR5 RAM,Drawer #1,in_used,8,3
+Pro POWER CABLE,SP-38155,34,7,332.64,5,POWER CABLE,Cabinet 2 - Top,faulty,,1
+Premium SSD,SP-24761,22,7,426.92,6,SSD,Cabinet 2 - Bottom,available,,10
+3g THERMAL PASTE,SP-20546,42,8,473.3,4,THERMAL PASTE,Rack C - Shelf 2,available,,1
+120mm FAN,SP-85343,27,2,202.15,4,FAN,Drawer #1,available,,10
+Pro MOTHERBOARD,SP-56595,49,5,361.83,10,MOTHERBOARD,Storage Closet A,available,,3
+Unshielded RJ45,SP-37741,6,5,228.88,7,RJ45,Drawer #2,available,,4
+Standard NETWORK CARD,SP-97727,29,9,437.17,6,NETWORK CARD,Server Room - Rack 02,available,,5
+Pro CPU,SP-56144,42,3,99.07,1,CPU,Drawer #1,in_used,17,3
+Cat5e 2m CABLE,SP-77280,13,10,453.77,6,CABLE,Drawer #3,available,,10
+Industrial CABLE TRACER,SP-58805,5,3,417.95,1,CABLE TRACER,Cabinet 1 - Right,available,,10
+Premium HEATSINK,SP-66342,8,8,141.92,9,HEATSINK,Rack B - Shelf 2,faulty,,4
+Unshielded RJ45,SP-95731,15,2,263.62,3,RJ45,Rack C - Shelf 1,available,,1
+650W PSU,SP-86754,8,3,247.68,8,PSU,Rack A - Shelf 1,available,,7
+Unshielded RJ45,SP-88699,13,5,123.51,10,RJ45,Drawer #2,in_used,13,4
+3g THERMAL PASTE,SP-68509,19,5,299.42,3,THERMAL PASTE,Rack B - Shelf 2,available,,2
+Standard HEATSINK,SP-86236,40,1,366.14,9,HEATSINK,Server Room - Rack 01,available,,7
+24-inch MONITOR,SP-97205,42,1,397.11,2,MONITOR,Cabinet 2 - Bottom,available,,5
+Premium MOTHERBOARD,SP-30658,24,10,164.51,1,MOTHERBOARD,Rack A - Shelf 2,faulty,,1
+Gaming MOUSE,SP-86791,24,6,306.28,7,MOUSE,Server Room - Rack 01,in_used,3,5
+Industrial SSD,SP-73302,27,5,446.18,2,SSD,Warehouse - Row 1,available,,9
+120mm FAN,SP-70569,50,5,484.25,3,FAN,Drawer #2,available,,8
+3g THERMAL PASTE,SP-91622,46,9,45.63,4,THERMAL PASTE,Server Room - Rack 01,available,,7
+500W PSU,SP-19548,39,9,479.13,1,PSU,Rack A - Shelf 1,in_used,3,5
+DDR4 8GB RAM,SP-31129,37,7,368.16,3,RAM,Rack B - Shelf 1,available,,8
+Industrial GPU,SP-22433,41,1,89.53,3,GPU,Rack B - Shelf 2,available,,2
+24-inch MONITOR,SP-42608,25,9,233.59,7,MONITOR,Server Room - Rack 01,available,,4
+27-inch MONITOR,SP-56764,28,3,44.22,3,MONITOR,Server Room - Rack 02,available,,9
+Industrial SSD,SP-38690,3,7,112.96,9,SSD,Drawer #1,available,,9
+Pro CPU,SP-54461,48,7,323.29,4,CPU,Cabinet 1 - Right,available,,6
+22-inch MONITOR,SP-42039,5,8,245.76,4,MONITOR,Server Room - Rack 01,available,,1
+Industrial DDR5 RAM,SP-70936,36,2,499.27,4,DDR5 RAM,Drawer #3,in_used,12,4
+Standard DDR4 RAM,SP-88592,32,1,234.75,9,DDR4 RAM,Server Room - Rack 01,available,,6
+Membrane KEYBOARD,SP-29241,5,1,47.26,5,KEYBOARD,Rack C - Shelf 2,faulty,,8
+22-inch MONITOR,SP-44888,21,9,372.27,1,MONITOR,Cabinet 2 - Top,in_used,9,2
+2TB HDD STORAGE,SP-37431,22,3,229.33,8,STORAGE,Cabinet 1 - Right,available,,2
+Cat6 5m CABLE,SP-97913,20,8,105.85,2,CABLE,Server Room - Rack 01,available,,4
+Fiber 5m CABLE,SP-98571,0,3,341.36,2,CABLE,Drawer #1,in_used,12,10
+Industrial SSD,SP-29200,25,7,14.45,3,SSD,Drawer #1,faulty,,8
+Premium POWER CABLE,SP-86618,42,4,114.34,7,POWER CABLE,Drawer #2,available,,4
+850W PSU,SP-72476,14,10,385.23,1,PSU,Cabinet 2 - Bottom,available,,3
+Standard DDR5 RAM,SP-16478,35,7,331.11,9,DDR5 RAM,Rack A - Shelf 2,available,,10
+3g THERMAL PASTE,SP-63640,40,6,234.21,1,THERMAL PASTE,Cabinet 2 - Top,in_used,18,8
+Premium SSD,SP-44771,0,8,236.04,8,SSD,Cabinet 2 - Top,in_used,13,2
+Industrial GPU,SP-89371,10,5,87.45,4,GPU,Drawer #2,available,,10
+Pro USB HUB,SP-62086,30,6,340.13,3,USB HUB,Drawer #2,in_used,9,2
+DDR4 16GB RAM,SP-48746,38,5,305.63,7,RAM,Rack A - Shelf 1,faulty,,10
+Pro HEATSINK,SP-18607,19,7,439.79,10,HEATSINK,Warehouse - Row 1,in_used,18,10
+Shielded RJ45,SP-18009,7,6,473.74,10,RJ45,Warehouse - Row 2,in_used,6,9
+Standard NETWORK CARD,SP-22944,24,9,408.49,8,NETWORK CARD,Cabinet 2 - Bottom,in_used,15,2
+Industrial CABLE TRACER,SP-19688,1,2,424.91,3,CABLE TRACER,Rack C - Shelf 2,available,,3
+Pro SSD,SP-60754,10,4,294.99,2,SSD,Drawer #2,in_used,17,10
+512GB SSD STORAGE,SP-78097,2,1,98.17,7,STORAGE,Warehouse - Row 2,in_used,7,3
+Standard NETWORK CARD,SP-96964,15,5,108.06,3,NETWORK CARD,Cabinet 1 - Right,available,,3
+80mm FAN,SP-87219,2,1,292.23,7,FAN,Rack A - Shelf 2,in_used,6,8
+DDR4 32GB RAM,SP-40413,50,8,67.95,3,RAM,Storage Closet A,faulty,,9
+Premium CPU,SP-61163,4,3,171.35,10,CPU,Warehouse - Row 1,available,,2
+Industrial POWER CABLE,SP-44062,14,5,334.92,1,POWER CABLE,Rack A - Shelf 3,available,,8
+27-inch MONITOR,SP-67989,4,6,357.07,5,MONITOR,Rack C - Shelf 1,available,,3
+DDR4 16GB RAM,SP-87402,30,5,189.71,7,RAM,Server Room - Rack 02,in_used,14,6
+Cat5e 2m CABLE,SP-13516,26,6,447.31,4,CABLE,Drawer #3,faulty,,2
+Standard CPU,SP-66031,16,9,12.0,3,CPU,Rack C - Shelf 2,available,,4
+Pro CABLE TRACER,SP-48032,14,7,68.08,3,CABLE TRACER,Storage Closet A,available,,8
+500W PSU,SP-38224,37,8,492.61,6,PSU,Rack C - Shelf 1,available,,10
+DDR5 16GB RAM,SP-98634,44,3,347.73,5,RAM,Rack C - Shelf 2,available,,8
+Pro GPU,SP-22940,1,10,57.08,1,GPU,Drawer #3,available,,9
+Pro GPU,SP-90295,19,6,164.63,4,GPU,Rack C - Shelf 2,available,,3
+Membrane KEYBOARD,SP-58339,4,6,37.09,8,KEYBOARD,Cabinet 1 - Right,in_used,18,7
+Standard M.2 SSD,SP-75267,35,4,495.64,9,M.2 SSD,Rack A - Shelf 3,available,,1
+Standard USB HUB,SP-43810,21,1,60.53,7,USB HUB,Drawer #2,available,,5
+Pro SATA CABLE,SP-71740,6,3,134.8,2,SATA CABLE,Storage Closet A,available,,10
+Pro CABLE TRACER,SP-80630,3,7,37.31,5,CABLE TRACER,Drawer #1,available,,9
+Premium HDD,SP-29319,36,8,224.58,2,HDD,Server Room - Rack 01,available,,9
+Pro GPU,SP-72959,27,8,167.8,3,GPU,Rack B - Shelf 2,in_used,2,7
+Pro GPU,SP-91502,45,3,346.81,3,GPU,Cabinet 2 - Top,available,,7
+Industrial MOTHERBOARD,SP-12087,4,3,122.17,2,MOTHERBOARD,Drawer #3,available,,8
+Standard USB HUB,SP-53221,35,8,96.21,9,USB HUB,Rack A - Shelf 2,faulty,,5
+24-inch MONITOR,SP-18891,18,9,199.2,10,MONITOR,Drawer #1,available,,10
+5g THERMAL PASTE,SP-67663,12,9,351.85,4,THERMAL PASTE,Rack A - Shelf 3,in_used,11,3
+Premium DDR5 RAM,SP-94821,31,2,80.16,10,DDR5 RAM,Workshop Bench,available,,3
+Standard SSD,SP-18834,47,2,99.46,3,SSD,Drawer #1,faulty,,7
+Mechanical KEYBOARD,SP-54745,36,6,315.44,1,KEYBOARD,Cabinet 2 - Top,available,,2
+Standard HDMI CABLE,SP-79730,4,2,470.01,1,HDMI CABLE,Rack C - Shelf 1,available,,5
+Pro HEATSINK,SP-93520,14,7,206.92,3,HEATSINK,Rack B - Shelf 1,faulty,,10
+Pro SSD,SP-81273,16,4,401.98,10,SSD,Storage Closet A,in_used,17,4
+140mm FAN,SP-70023,47,8,435.32,6,FAN,Rack B - Shelf 2,available,,8
+Industrial HEATSINK,SP-26351,15,8,122.14,5,HEATSINK,Rack B - Shelf 1,available,,7
+Standard NETWORK CARD,SP-71338,11,10,205.6,7,NETWORK CARD,Drawer #2,faulty,,9
+Standard CABLE TRACER,SP-18671,31,8,148.43,8,CABLE TRACER,Server Room - Rack 02,available,,2
+Pro USB HUB,SP-92306,23,5,247.96,8,USB HUB,Drawer #1,in_used,12,7
+Premium M.2 SSD,SP-85916,43,4,70.22,8,M.2 SSD,Warehouse - Row 2,available,,8
+22-inch MONITOR,SP-72032,41,2,481.88,8,MONITOR,Rack B - Shelf 2,available,,2
+Membrane KEYBOARD,SP-20723,23,5,114.17,3,KEYBOARD,Workshop Bench,available,,7
+Premium DDR5 RAM,SP-97434,34,4,404.29,6,DDR5 RAM,Warehouse - Row 1,faulty,,10
+Premium SATA CABLE,SP-60913,50,8,414.74,7,SATA CABLE,Warehouse - Row 2,faulty,,10
+Pro SATA CABLE,SP-72126,25,7,326.8,4,SATA CABLE,Server Room - Rack 01,available,,9
+Pro MOTHERBOARD,SP-32868,25,2,496.56,7,MOTHERBOARD,Server Room - Rack 02,in_used,7,1
+Pro CABLE TRACER,SP-46639,35,10,16.51,10,CABLE TRACER,Drawer #2,in_used,10,9
+Wireless KEYBOARD,SP-84476,21,6,297.51,9,KEYBOARD,Cabinet 2 - Top,in_used,12,3
+850W PSU,SP-48513,10,4,150.18,5,PSU,Cabinet 2 - Bottom,in_used,10,10
+27-inch MONITOR,SP-56996,44,9,221.02,9,MONITOR,Rack C - Shelf 1,available,,10
+Industrial HDD,SP-53931,28,8,82.45,1,HDD,Cabinet 1 - Left,available,,5
+Standard GPU,SP-59931,1,10,176.94,7,GPU,Server Room - Rack 01,available,,2
+140mm FAN,SP-10476,33,4,414.14,1,FAN,Server Room - Rack 01,available,,4
+Unshielded RJ45,SP-45626,33,1,485.81,4,RJ45,Cabinet 2 - Top,in_used,13,7
+Pro HDD,SP-61703,43,2,94.78,5,HDD,Workshop Bench,faulty,,3
+Premium DDR5 RAM,SP-58580,31,10,11.57,9,DDR5 RAM,Rack B - Shelf 2,available,,5
+Premium CABLE TRACER,SP-72439,15,5,347.29,1,CABLE TRACER,Server Room - Rack 01,available,,3
+120mm FAN,SP-68079,48,2,78.55,7,FAN,Storage Closet A,available,,2
+Premium HEATSINK,SP-93327,12,4,436.03,8,HEATSINK,Workshop Bench,in_used,17,10
+Pro CPU,SP-25304,44,5,343.86,5,CPU,Warehouse - Row 1,faulty,,1
+Premium HDMI CABLE,SP-38956,31,6,472.6,7,HDMI CABLE,Workshop Bench,in_used,14,5
+10g THERMAL PASTE,SP-62659,29,6,328.56,3,THERMAL PASTE,Rack A - Shelf 3,in_used,16,10
+Shielded RJ45,SP-81832,27,9,302.75,9,RJ45,Rack A - Shelf 2,in_used,9,3
+120mm FAN,SP-48986,4,8,105.03,9,FAN,Warehouse - Row 1,available,,3
+Pro SSD,SP-87668,0,8,130.24,6,SSD,Warehouse - Row 2,available,,8
+Premium GPU,SP-60685,36,1,499.13,9,GPU,Drawer #2,available,,8
+22-inch MONITOR,SP-62060,29,1,441.06,8,MONITOR,Rack B - Shelf 1,available,,8
+Premium M.2 SSD,SP-78398,8,7,256.49,7,M.2 SSD,Drawer #3,faulty,,5
+Pro CABLE TRACER,SP-97053,36,1,428.26,10,CABLE TRACER,Server Room - Rack 02,available,,6
+Premium MOTHERBOARD,SP-73886,25,4,459.17,2,MOTHERBOARD,Workshop Bench,available,,10
+Standard POWER CABLE,SP-49510,14,3,353.34,5,POWER CABLE,Cabinet 2 - Top,available,,8
+140mm FAN,SP-59242,3,6,145.84,4,FAN,Drawer #1,in_used,19,9
+Membrane KEYBOARD,SP-60176,32,7,129.33,8,KEYBOARD,Server Room - Rack 01,faulty,,9
+140mm FAN,SP-22354,14,8,479.09,9,FAN,Rack B - Shelf 2,available,,10
+27-inch MONITOR,SP-70431,18,2,421.06,9,MONITOR,Rack A - Shelf 1,available,,10
+27-inch MONITOR,SP-65371,43,2,277.06,4,MONITOR,Cabinet 1 - Right,faulty,,2
+Standard DDR5 RAM,SP-30481,15,4,481.28,7,DDR5 RAM,Warehouse - Row 2,in_used,20,3
+Industrial USB HUB,SP-69023,45,1,406.47,10,USB HUB,Warehouse - Row 2,faulty,,6
+Pro HDD,SP-44149,37,7,188.13,4,HDD,Workshop Bench,available,,4
+Standard GPU,SP-50151,36,6,285.2,6,GPU,Storage Closet A,available,,6
+5g THERMAL PASTE,SP-43424,19,10,405.15,10,THERMAL PASTE,Cabinet 2 - Bottom,in_used,4,5
+Unshielded RJ45,SP-95586,20,7,237.41,6,RJ45,Cabinet 2 - Bottom,available,,4
+Premium SSD,SP-67739,7,4,110.08,8,SSD,Drawer #3,available,,10
+22-inch MONITOR,SP-73833,42,4,64.67,3,MONITOR,Rack A - Shelf 1,available,,2
+Industrial NETWORK CARD,SP-98184,1,3,305.62,10,NETWORK CARD,Storage Closet A,available,,4
+120mm FAN,SP-50928,46,10,263.64,1,FAN,Rack C - Shelf 2,available,,2
+Industrial SATA CABLE,SP-51809,49,4,380.58,10,SATA CABLE,Storage Closet A,available,,4
+Industrial HEATSINK,SP-64034,15,8,411.44,1,HEATSINK,Rack A - Shelf 2,in_used,20,10
+512GB SSD STORAGE,SP-40099,14,4,247.41,5,STORAGE,Workshop Bench,available,,4
+27-inch MONITOR,SP-52963,33,9,97.11,4,MONITOR,Rack A - Shelf 2,in_used,16,10
+Pass-through RJ45,SP-61611,33,6,133.54,5,RJ45,Drawer #3,available,,4
+Pro CPU,SP-50651,29,4,479.03,2,CPU,Cabinet 1 - Left,available,,6
+Industrial GPU,SP-12211,13,3,300.32,10,GPU,Server Room - Rack 02,in_used,5,4
+Pro SATA CABLE,SP-51671,14,5,236.49,3,SATA CABLE,Rack A - Shelf 1,available,,1
+850W PSU,SP-90609,33,7,417.69,3,PSU,Rack A - Shelf 1,available,,6
+Standard DDR5 RAM,SP-38467,48,7,271.78,6,DDR5 RAM,Rack C - Shelf 1,available,,8
+Wired MOUSE,SP-14838,33,7,310.63,7,MOUSE,Drawer #1,available,,6
+Industrial NETWORK CARD,SP-17930,48,2,466.81,3,NETWORK CARD,Cabinet 1 - Right,available,,2
+27-inch MONITOR,SP-19630,45,3,52.54,2,MONITOR,Warehouse - Row 2,available,,3
+Wireless MOUSE,SP-87717,8,9,236.69,2,MOUSE,Rack C - Shelf 2,faulty,,4
+Pro SSD,SP-68865,32,5,356.18,9,SSD,Rack B - Shelf 2,faulty,,7
+Industrial HDD,SP-73039,12,9,31.38,8,HDD,Cabinet 2 - Top,available,,4
+Industrial SATA CABLE,SP-11476,29,10,283.81,6,SATA CABLE,Cabinet 2 - Top,in_used,4,7
+Pro HEATSINK,SP-98752,49,7,98.47,10,HEATSINK,Rack A - Shelf 3,available,,5
+Cat6 5m CABLE,SP-23294,12,10,337.61,9,CABLE,Cabinet 1 - Right,available,,4
+Premium CABLE TRACER,SP-12931,10,6,92.08,1,CABLE TRACER,Storage Closet A,in_used,4,9
+Standard HEATSINK,SP-51764,11,9,378.03,4,HEATSINK,Drawer #3,available,,2
+Standard POWER CABLE,SP-42658,0,7,273.08,1,POWER CABLE,Rack A - Shelf 3,available,,10
+120mm FAN,SP-87023,5,8,496.59,5,FAN,Rack C - Shelf 1,available,,6
+Pro CPU,SP-46613,11,1,192.77,6,CPU,Rack B - Shelf 1,available,,7
+650W PSU,SP-52344,26,3,13.28,3,PSU,Server Room - Rack 02,available,,2
+24-inch MONITOR,SP-27690,10,5,157.83,10,MONITOR,Server Room - Rack 01,in_used,2,3
+Pass-through RJ45,SP-50258,36,1,310.92,7,RJ45,Rack B - Shelf 1,available,,2
+DDR4 8GB RAM,SP-51726,40,9,125.15,8,RAM,Rack B - Shelf 2,in_used,2,5
+Standard HDD,SP-71567,35,3,395.24,8,HDD,Rack B - Shelf 1,available,,3
+Premium SSD,SP-45451,3,10,293.32,3,SSD,Rack B - Shelf 1,faulty,,3
+Shielded RJ45,SP-98736,14,6,277.63,6,RJ45,Drawer #3,available,,4
+Fiber 5m CABLE,SP-26814,18,1,247.25,9,CABLE,Rack B - Shelf 1,available,,1
+Standard CPU,SP-53513,24,7,22.16,1,CPU,Storage Closet A,in_used,14,2
+Pro CABLE TRACER,SP-32604,1,5,353.37,7,CABLE TRACER,Server Room - Rack 01,available,,8
+22-inch MONITOR,SP-88002,37,7,388.99,10,MONITOR,Rack C - Shelf 1,available,,1
+DDR4 8GB RAM,SP-37479,22,4,51.78,6,RAM,Cabinet 2 - Bottom,faulty,,2
+Premium GPU,SP-18757,2,6,297.44,7,GPU,Rack C - Shelf 1,available,,1
+Shielded RJ45,SP-23425,22,2,452.83,3,RJ45,Warehouse - Row 1,available,,1
+Gaming MOUSE,SP-39325,28,9,187.23,7,MOUSE,Cabinet 2 - Bottom,available,,3
+Wired MOUSE,SP-31289,48,6,232.48,1,MOUSE,Workshop Bench,available,,9
+Cat6 3m CABLE,SP-91856,13,2,317.99,3,CABLE,Rack C - Shelf 1,in_used,4,3
+10g THERMAL PASTE,SP-30556,37,2,22.44,10,THERMAL PASTE,Workshop Bench,available,,7
+Unshielded RJ45,SP-35098,47,8,357.23,1,RJ45,Rack B - Shelf 1,faulty,,2
+Industrial CABLE TRACER,SP-49392,0,5,468.68,4,CABLE TRACER,Warehouse - Row 2,in_used,19,3
+Standard HDMI CABLE,SP-13408,10,10,70.53,10,HDMI CABLE,Warehouse - Row 1,in_used,16,8
+Industrial MOTHERBOARD,SP-10341,13,6,159.95,6,MOTHERBOARD,Cabinet 1 - Left,in_used,5,9
+Premium USB HUB,SP-98376,29,4,139.36,4,USB HUB,Cabinet 2 - Bottom,available,,7
+Wireless MOUSE,SP-78420,16,10,27.67,3,MOUSE,Rack A - Shelf 3,faulty,,1
+Membrane KEYBOARD,SP-56391,11,7,358.33,10,KEYBOARD,Workshop Bench,available,,6
+Pro HEATSINK,SP-13548,44,2,367.88,2,HEATSINK,Rack C - Shelf 1,faulty,,10
+1TB SSD STORAGE,SP-30393,43,10,67.49,6,STORAGE,Rack B - Shelf 1,available,,5
+750W PSU,SP-12205,18,1,129.65,2,PSU,Rack C - Shelf 1,available,,8
+Pro CPU,SP-57846,18,1,93.07,9,CPU,Server Room - Rack 02,available,,4
+80mm FAN,SP-19481,35,7,8.73,4,FAN,Rack B - Shelf 2,available,,3
+Pro CPU,SP-94771,4,6,403.46,9,CPU,Warehouse - Row 1,available,,2
+Premium GPU,SP-25945,0,4,496.26,7,GPU,Rack B - Shelf 1,available,,1
+DDR5 16GB RAM,SP-59384,4,5,347.55,9,RAM,Rack C - Shelf 1,faulty,,6
+Cat5e 2m CABLE,SP-71224,17,8,194.63,7,CABLE,Cabinet 1 - Left,in_used,6,3
+Industrial CPU,SP-81486,9,1,311.21,10,CPU,Rack B - Shelf 1,available,,1
+Industrial CPU,SP-87237,16,2,52.63,5,CPU,Rack B - Shelf 1,in_used,21,5
+Premium NETWORK CARD,SP-28787,41,6,400.88,10,NETWORK CARD,Cabinet 1 - Left,in_used,20,8
+Fiber 5m CABLE,SP-58605,20,8,412.7,5,CABLE,Cabinet 2 - Bottom,in_used,13,10
+Premium CABLE TRACER,SP-68190,0,1,226.29,3,CABLE TRACER,Rack A - Shelf 3,faulty,,3
+Industrial GPU,SP-18013,29,2,218.29,5,GPU,Storage Closet A,available,,3
+Industrial M.2 SSD,SP-50028,30,6,305.77,10,M.2 SSD,Warehouse - Row 2,available,,6
+Wireless MOUSE,SP-30540,44,1,36.72,3,MOUSE,Rack C - Shelf 1,in_used,17,1
+Mechanical KEYBOARD,SP-69308,38,3,155.57,1,KEYBOARD,Drawer #3,available,,4
+5g THERMAL PASTE,SP-98911,50,8,403.66,9,THERMAL PASTE,Cabinet 2 - Bottom,faulty,,1
+Standard MOTHERBOARD,SP-59090,41,6,370.73,7,MOTHERBOARD,Rack A - Shelf 2,in_used,9,10
+Standard M.2 SSD,SP-47173,27,2,309.64,10,M.2 SSD,Cabinet 1 - Right,available,,4
+Industrial M.2 SSD,SP-35122,27,4,390.66,8,M.2 SSD,Warehouse - Row 1,available,,4
+Premium HEATSINK,SP-88488,49,5,25.43,2,HEATSINK,Rack B - Shelf 1,in_used,15,4
+Standard HEATSINK,SP-18258,49,1,30.57,1,HEATSINK,Drawer #3,available,,4
+Standard SATA CABLE,SP-94097,7,3,418.16,2,SATA CABLE,Cabinet 2 - Top,in_used,13,4
+Wireless MOUSE,SP-56718,22,6,185.1,3,MOUSE,Rack A - Shelf 1,available,,5
+512GB SSD STORAGE,SP-11537,21,7,364.14,8,STORAGE,Drawer #2,in_used,19,7
+22-inch MONITOR,SP-17990,25,3,348.3,7,MONITOR,Drawer #2,faulty,,6
+Premium NETWORK CARD,SP-16886,4,8,231.23,3,NETWORK CARD,Server Room - Rack 01,faulty,,9
+Premium MOTHERBOARD,SP-18587,32,2,91.31,4,MOTHERBOARD,Cabinet 1 - Left,available,,4
+4TB HDD STORAGE,SP-12678,27,5,73.09,10,STORAGE,Rack A - Shelf 2,faulty,,9
+Fiber 5m CABLE,SP-35308,4,7,230.62,2,CABLE,Server Room - Rack 02,available,,8
+Pass-through RJ45,SP-73116,39,4,206.18,2,RJ45,Rack C - Shelf 2,available,,9
+Premium M.2 SSD,SP-14973,21,10,174.14,6,M.2 SSD,Drawer #3,faulty,,1
+Wired MOUSE,SP-66940,12,6,471.15,1,MOUSE,Rack B - Shelf 2,in_used,16,3
+Pro M.2 SSD,SP-64441,45,1,294.89,2,M.2 SSD,Cabinet 1 - Right,in_used,8,3
+Unshielded RJ45,SP-94080,50,1,130.19,1,RJ45,Cabinet 2 - Bottom,faulty,,7
+Wireless MOUSE,SP-24924,33,7,25.47,10,MOUSE,Cabinet 1 - Right,in_used,16,10
+Fiber 5m CABLE,SP-29066,29,1,483.18,8,CABLE,Server Room - Rack 01,in_used,12,5
+Industrial NETWORK CARD,SP-49067,26,2,70.43,3,NETWORK CARD,Drawer #1,faulty,,1
+Industrial HEATSINK,SP-57670,11,2,496.34,6,HEATSINK,Cabinet 2 - Top,faulty,,10
+120mm FAN,SP-53052,6,2,391.65,4,FAN,Rack A - Shelf 1,available,,7
+Industrial DDR4 RAM,SP-42902,4,7,315.12,10,DDR4 RAM,Rack B - Shelf 2,available,,1
+Premium GPU,SP-90427,47,7,461.22,8,GPU,Rack A - Shelf 2,faulty,,10
+650W PSU,SP-74486,8,6,294.24,10,PSU,Cabinet 1 - Left,faulty,,2
+Cat6 3m CABLE,SP-36151,39,7,140.24,6,CABLE,Workshop Bench,in_used,6,6
+Standard MOTHERBOARD,SP-37796,17,1,260.68,4,MOTHERBOARD,Rack A - Shelf 3,faulty,,2
+Industrial CABLE TRACER,SP-46823,27,6,225.75,8,CABLE TRACER,Rack B - Shelf 2,available,,4
+Shielded RJ45,SP-90408,36,10,459.59,8,RJ45,Rack B - Shelf 1,available,,7
+2TB HDD STORAGE,SP-16634,17,3,489.18,8,STORAGE,Rack A - Shelf 1,faulty,,2
+Pro USB HUB,SP-80504,45,6,24.2,4,USB HUB,Drawer #2,available,,9
+140mm FAN,SP-65005,16,3,317.17,10,FAN,Cabinet 1 - Left,available,,3
+Industrial SATA CABLE,SP-29560,33,8,145.02,5,SATA CABLE,Server Room - Rack 02,in_used,2,5
+Pro MOTHERBOARD,SP-58167,8,5,8.3,1,MOTHERBOARD,Rack A - Shelf 1,in_used,4,10
+Standard HDD,SP-34355,28,10,228.71,3,HDD,Storage Closet A,available,,9
+Premium HEATSINK,SP-34642,10,5,404.11,2,HEATSINK,Rack B - Shelf 1,faulty,,4
+Standard USB HUB,SP-24758,44,4,297.52,9,USB HUB,Rack B - Shelf 1,in_used,6,8
+Mechanical KEYBOARD,SP-68012,35,4,494.07,3,KEYBOARD,Drawer #2,in_used,12,3
+Wireless MOUSE,SP-59379,47,5,55.5,5,MOUSE,Rack A - Shelf 3,faulty,,2
+Industrial CABLE TRACER,SP-30882,42,5,383.74,1,CABLE TRACER,Rack B - Shelf 2,available,,6
+Pro POWER CABLE,SP-28354,47,1,290.98,3,POWER CABLE,Cabinet 1 - Left,faulty,,7
+Shielded RJ45,SP-70203,9,1,390.11,4,RJ45,Storage Closet A,in_used,10,5
+Pro M.2 SSD,SP-15848,19,4,213.67,4,M.2 SSD,Rack A - Shelf 3,faulty,,8
+512GB SSD STORAGE,SP-26569,19,9,67.71,7,STORAGE,Warehouse - Row 1,faulty,,4
+Industrial POWER CABLE,SP-82787,24,4,290.32,4,POWER CABLE,Workshop Bench,in_used,2,10
+Standard CPU,SP-74607,18,6,319.8,8,CPU,Cabinet 2 - Top,available,,9
+Premium SSD,SP-27161,37,1,333.15,2,SSD,Warehouse - Row 2,faulty,,9
+Pro DDR4 RAM,SP-20902,26,4,480.18,9,DDR4 RAM,Rack B - Shelf 1,in_used,17,5
+Pro HDMI CABLE,SP-95388,20,4,278.65,7,HDMI CABLE,Server Room - Rack 02,available,,8
+Wireless KEYBOARD,SP-20345,9,5,319.88,4,KEYBOARD,Rack C - Shelf 2,available,,9
+Premium CPU,SP-45390,48,2,95.58,10,CPU,Rack A - Shelf 2,available,,9
+Premium HEATSINK,SP-90921,42,3,141.1,5,HEATSINK,Drawer #1,available,,10
+Industrial SATA CABLE,SP-51326,7,2,289.45,4,SATA CABLE,Drawer #2,available,,5
+Mechanical KEYBOARD,SP-92458,32,9,26.05,8,KEYBOARD,Storage Closet A,available,,5
+Premium USB HUB,SP-78676,32,10,413.23,5,USB HUB,Server Room - Rack 02,in_used,21,4
+Standard SATA CABLE,SP-43978,30,7,222.76,10,SATA CABLE,Rack C - Shelf 2,in_used,2,3
+Standard NETWORK CARD,SP-93741,20,7,424.86,6,NETWORK CARD,Server Room - Rack 02,available,,8
+750W PSU,SP-51644,36,9,326.69,6,PSU,Cabinet 1 - Left,available,,10
+Gaming MOUSE,SP-72135,2,2,379.78,1,MOUSE,Drawer #2,available,,10
+Wireless MOUSE,SP-97945,11,8,311.2,2,MOUSE,Warehouse - Row 2,available,,7
+Standard GPU,SP-52620,29,4,423.4,3,GPU,Rack A - Shelf 1,available,,6
+Pro GPU,SP-84119,31,9,317.37,1,GPU,Warehouse - Row 2,available,,3
+Pro HDD,SP-92328,24,8,57.16,6,HDD,Server Room - Rack 02,faulty,,5
+Pro HDD,SP-70521,37,6,163.99,1,HDD,Warehouse - Row 1,faulty,,10
+Industrial MOTHERBOARD,SP-68734,22,1,157.64,10,MOTHERBOARD,Cabinet 1 - Left,faulty,,10
+Premium CPU,SP-68775,49,2,252.25,2,CPU,Cabinet 1 - Right,faulty,,10
+Standard HDD,SP-72815,50,1,433.75,8,HDD,Cabinet 2 - Bottom,in_used,16,6
+Pro USB HUB,SP-25206,15,3,188.78,5,USB HUB,Rack C - Shelf 1,faulty,,4
+140mm FAN,SP-83384,30,3,382.98,3,FAN,Server Room - Rack 01,available,,3
+Standard SSD,SP-31030,17,1,162.9,9,SSD,Storage Closet A,available,,9
+Gaming MOUSE,SP-15832,36,10,382.18,8,MOUSE,Rack B - Shelf 1,available,,4
+750W PSU,SP-48280,48,4,150.91,2,PSU,Server Room - Rack 02,available,,1
+Pro DDR5 RAM,SP-44974,40,6,148.51,6,DDR5 RAM,Warehouse - Row 1,faulty,,5
+Pro GPU,SP-71451,34,5,305.16,6,GPU,Rack B - Shelf 1,available,,1
+Standard USB HUB,SP-30449,18,8,163.5,9,USB HUB,Cabinet 2 - Bottom,in_used,20,7
+Premium DDR4 RAM,SP-50989,2,10,124.63,6,DDR4 RAM,Rack B - Shelf 1,available,,3
+Pass-through RJ45,SP-60082,31,1,116.27,7,RJ45,Server Room - Rack 02,in_used,15,2
+Standard CPU,SP-30186,0,8,440.39,9,CPU,Storage Closet A,available,,7
+Premium SATA CABLE,SP-70156,45,8,407.06,2,SATA CABLE,Cabinet 2 - Bottom,faulty,,4
+Standard HDD,SP-77116,25,2,58.43,7,HDD,Cabinet 2 - Bottom,available,,3
+10g THERMAL PASTE,SP-58551,27,7,246.96,7,THERMAL PASTE,Drawer #2,in_used,20,4
+Premium HDMI CABLE,SP-84086,47,6,231.72,4,HDMI CABLE,Rack A - Shelf 1,available,,1
+Premium DDR5 RAM,SP-28909,33,4,144.14,8,DDR5 RAM,Rack B - Shelf 1,available,,6
+Cat6 5m CABLE,SP-65027,50,9,58.08,7,CABLE,Rack B - Shelf 2,in_used,19,3
+Industrial HEATSINK,SP-13631,48,9,163.11,10,HEATSINK,Drawer #1,available,,2
+Premium GPU,SP-59321,11,3,275.27,4,GPU,Rack A - Shelf 2,available,,10
+Standard USB HUB,SP-23163,0,6,375.75,10,USB HUB,Drawer #2,available,,6
+Premium MOTHERBOARD,SP-99557,29,4,84.69,5,MOTHERBOARD,Rack B - Shelf 1,available,,4
+650W PSU,SP-30419,50,6,464.03,3,PSU,Warehouse - Row 1,available,,9
+Industrial SATA CABLE,SP-77774,48,5,263.94,6,SATA CABLE,Rack A - Shelf 3,in_used,15,4
+4TB HDD STORAGE,SP-13215,34,5,56.01,3,STORAGE,Drawer #3,faulty,,10
+Industrial USB HUB,SP-66461,28,10,273.33,6,USB HUB,Drawer #3,faulty,,10
+Standard NETWORK CARD,SP-43715,17,6,265.21,4,NETWORK CARD,Storage Closet A,available,,5
+Pro DDR5 RAM,SP-75453,42,10,41.63,5,DDR5 RAM,Drawer #2,available,,1
+Standard DDR5 RAM,SP-75492,26,1,398.61,3,DDR5 RAM,Storage Closet A,available,,1
+Industrial M.2 SSD,SP-41632,13,2,384.09,1,M.2 SSD,Drawer #3,available,,9
+10g THERMAL PASTE,SP-88142,0,2,246.73,10,THERMAL PASTE,Drawer #2,in_used,5,5
+140mm FAN,SP-94074,21,6,459.21,5,FAN,Storage Closet A,available,,1
+140mm FAN,SP-50189,22,2,351.61,10,FAN,Server Room - Rack 01,available,,9
+Pro NETWORK CARD,SP-14484,15,8,25.23,3,NETWORK CARD,Rack C - Shelf 1,available,,7
+Standard NETWORK CARD,SP-97503,43,7,325.79,10,NETWORK CARD,Server Room - Rack 01,available,,6
+Industrial HDD,SP-25853,9,5,401.82,4,HDD,Rack A - Shelf 1,available,,8
+80mm FAN,SP-41728,11,10,232.25,9,FAN,Drawer #1,available,,5
+Premium SATA CABLE,SP-96165,30,7,293.42,5,SATA CABLE,Drawer #3,available,,6
+Wireless KEYBOARD,SP-85129,49,3,42.87,2,KEYBOARD,Server Room - Rack 02,available,,9
+140mm FAN,SP-52917,43,9,125.12,9,FAN,Server Room - Rack 01,available,,1
+Gaming MOUSE,SP-78406,9,6,477.01,5,MOUSE,Server Room - Rack 02,faulty,,10
+Industrial SSD,SP-74364,8,2,198.62,10,SSD,Server Room - Rack 02,in_used,14,8
+Wired MOUSE,SP-86888,37,3,472.35,9,MOUSE,Cabinet 1 - Left,available,,1
+Standard SATA CABLE,SP-34485,49,7,299.87,9,SATA CABLE,Workshop Bench,faulty,,6
+Standard MOTHERBOARD,SP-32426,17,10,462.42,2,MOTHERBOARD,Rack A - Shelf 3,available,,9
+750W PSU,SP-20665,34,7,453.99,9,PSU,Cabinet 1 - Left,faulty,,1
+512GB SSD STORAGE,SP-95718,6,2,459.47,10,STORAGE,Storage Closet A,faulty,,3
+Wired MOUSE,SP-26610,24,9,411.54,8,MOUSE,Warehouse - Row 2,faulty,,6
+Industrial POWER CABLE,SP-10322,42,7,75.27,1,POWER CABLE,Rack A - Shelf 3,faulty,,8
+Industrial CABLE TRACER,SP-40863,3,6,372.9,6,CABLE TRACER,Drawer #2,available,,3
+Pro SSD,SP-10379,25,9,165.08,9,SSD,Drawer #1,faulty,,3
+Premium CPU,SP-78485,16,3,281.02,9,CPU,Drawer #1,available,,9
+Premium HDD,SP-91650,19,8,400.59,8,HDD,Drawer #3,faulty,,4
+Standard CABLE TRACER,SP-99230,23,5,353.09,1,CABLE TRACER,Warehouse - Row 1,available,,8
+Premium SSD,SP-28710,16,10,308.31,8,SSD,Warehouse - Row 2,available,,6
+140mm FAN,SP-10833,32,5,428.13,5,FAN,Rack C - Shelf 1,available,,7
+Premium NETWORK CARD,SP-54207,40,4,496.83,8,NETWORK CARD,Rack B - Shelf 1,available,,3
+10g THERMAL PASTE,SP-98393,42,3,468.22,5,THERMAL PASTE,Drawer #3,available,,1
+Premium DDR4 RAM,SP-28807,13,4,433.86,4,DDR4 RAM,Server Room - Rack 01,in_used,4,5
+3g THERMAL PASTE,SP-45697,2,6,127.6,1,THERMAL PASTE,Rack A - Shelf 2,in_used,8,1
+3g THERMAL PASTE,SP-15774,2,6,394.35,7,THERMAL PASTE,Drawer #1,in_used,13,1
+Pro HEATSINK,SP-41465,42,7,68.04,8,HEATSINK,Rack A - Shelf 1,available,,9
+5g THERMAL PASTE,SP-38532,45,7,342.89,2,THERMAL PASTE,Rack B - Shelf 2,in_used,17,8
+Pro DDR5 RAM,SP-42563,25,2,203.77,2,DDR5 RAM,Workshop Bench,available,,9
+Industrial M.2 SSD,SP-32633,44,4,477.78,4,M.2 SSD,Rack A - Shelf 2,available,,5
+Standard SSD,SP-90783,36,1,384.48,9,SSD,Cabinet 1 - Left,available,,3
+Standard HDMI CABLE,SP-63457,10,5,382.21,9,HDMI CABLE,Drawer #3,available,,5
+Standard HDMI CABLE,SP-19827,5,7,150.84,1,HDMI CABLE,Workshop Bench,in_used,4,10
+Pro NETWORK CARD,SP-77159,26,2,98.61,3,NETWORK CARD,Rack B - Shelf 2,available,,4
+2TB HDD STORAGE,SP-60383,13,6,24.02,5,STORAGE,Storage Closet A,in_used,14,6
+Membrane KEYBOARD,SP-36274,0,8,333.54,10,KEYBOARD,Cabinet 2 - Top,faulty,,9
+Standard SATA CABLE,SP-63329,31,9,335.0,8,SATA CABLE,Rack C - Shelf 2,faulty,,5
+Premium M.2 SSD,SP-42122,33,1,213.59,9,M.2 SSD,Server Room - Rack 01,in_used,10,5
+512GB SSD STORAGE,SP-34442,44,3,392.8,6,STORAGE,Rack B - Shelf 2,available,,9
+Wireless KEYBOARD,SP-63083,24,3,40.85,4,KEYBOARD,Rack B - Shelf 1,available,,5
+Industrial HEATSINK,SP-99891,24,1,89.38,2,HEATSINK,Rack C - Shelf 1,available,,5
+80mm FAN,SP-67643,26,10,437.87,4,FAN,Rack C - Shelf 1,in_used,4,3
+DDR4 32GB RAM,SP-70967,33,4,398.1,9,RAM,Rack A - Shelf 1,in_used,4,6
+Premium DDR5 RAM,SP-98346,46,2,16.06,6,DDR5 RAM,Rack A - Shelf 3,faulty,,7
+Pro HEATSINK,SP-18712,7,5,216.11,8,HEATSINK,Storage Closet A,available,,4
+80mm FAN,SP-75791,16,2,467.64,5,FAN,Rack A - Shelf 2,faulty,,3
+140mm FAN,SP-35586,47,10,10.65,5,FAN,Drawer #1,available,,7
+Standard DDR4 RAM,SP-73560,41,1,448.31,3,DDR4 RAM,Rack B - Shelf 1,available,,2
+Premium M.2 SSD,SP-83288,49,10,456.76,9,M.2 SSD,Drawer #2,available,,4
+1TB SSD STORAGE,SP-48627,28,6,155.43,7,STORAGE,Warehouse - Row 1,available,,6
+Pro SSD,SP-36877,49,5,480.51,1,SSD,Rack A - Shelf 1,available,,9
+750W PSU,SP-25086,37,8,333.93,8,PSU,Rack A - Shelf 3,available,,4
+Premium POWER CABLE,SP-19791,11,4,286.47,8,POWER CABLE,Warehouse - Row 2,available,,8
+850W PSU,SP-72902,14,8,251.29,1,PSU,Rack B - Shelf 2,in_used,11,2
+Pro HEATSINK,SP-26531,0,8,484.34,9,HEATSINK,Rack C - Shelf 2,in_used,17,4
+Pro DDR5 RAM,SP-31188,21,9,261.85,7,DDR5 RAM,Workshop Bench,in_used,16,4
+Pro USB HUB,SP-90699,9,2,429.48,7,USB HUB,Workshop Bench,in_used,21,4
+1TB SSD STORAGE,SP-38394,44,7,259.81,7,STORAGE,Rack A - Shelf 3,available,,1
+Pro CPU,SP-51899,45,3,190.62,1,CPU,Drawer #1,available,,3
+Membrane KEYBOARD,SP-69934,3,10,312.09,2,KEYBOARD,Rack A - Shelf 1,available,,6
+Pro NETWORK CARD,SP-28190,42,4,391.49,10,NETWORK CARD,Rack A - Shelf 2,faulty,,6
+Wireless KEYBOARD,SP-63257,29,2,371.64,7,KEYBOARD,Rack B - Shelf 2,available,,7
+Premium CABLE TRACER,SP-37229,49,2,120.54,9,CABLE TRACER,Cabinet 1 - Right,in_used,4,6
+Premium SATA CABLE,SP-39675,20,10,274.98,9,SATA CABLE,Cabinet 2 - Bottom,available,,3
+Industrial DDR4 RAM,SP-99748,2,1,210.83,7,DDR4 RAM,Cabinet 1 - Left,faulty,,5
+Premium POWER CABLE,SP-21606,49,7,297.46,4,POWER CABLE,Drawer #1,faulty,,5
+Cat6 3m CABLE,SP-86409,17,6,50.47,6,CABLE,Server Room - Rack 01,available,,7
+Pro POWER CABLE,SP-28793,2,6,5.9,8,POWER CABLE,Warehouse - Row 1,available,,9
+Premium NETWORK CARD,SP-53977,20,9,153.35,2,NETWORK CARD,Rack A - Shelf 1,available,,10
+3g THERMAL PASTE,SP-73588,32,5,243.92,7,THERMAL PASTE,Rack A - Shelf 2,available,,2
+Wireless KEYBOARD,SP-82595,27,4,103.51,10,KEYBOARD,Cabinet 2 - Top,available,,10
+Industrial HDD,SP-18741,5,9,8.75,5,HDD,Cabinet 2 - Bottom,available,,10
+Pro HDMI CABLE,SP-16699,3,7,92.05,3,HDMI CABLE,Cabinet 2 - Bottom,available,,9
+Standard NETWORK CARD,SP-49213,3,7,125.04,1,NETWORK CARD,Rack A - Shelf 3,in_used,6,7
+Pro DDR4 RAM,SP-27538,33,4,221.29,3,DDR4 RAM,Warehouse - Row 1,available,,9
+120mm FAN,SP-65709,50,3,284.16,10,FAN,Server Room - Rack 01,available,,4
+Standard GPU,SP-55723,13,3,475.17,4,GPU,Rack C - Shelf 1,available,,3
+Industrial HDMI CABLE,SP-83707,2,4,27.0,8,HDMI CABLE,Server Room - Rack 02,available,,2
+Mechanical KEYBOARD,SP-17435,36,7,343.77,6,KEYBOARD,Cabinet 2 - Top,in_used,17,6
+Wireless MOUSE,SP-15407,12,4,228.92,8,MOUSE,Warehouse - Row 1,available,,10
+Shielded RJ45,SP-77489,2,3,470.25,2,RJ45,Cabinet 2 - Top,available,,4
+Premium POWER CABLE,SP-24178,33,3,226.5,8,POWER CABLE,Server Room - Rack 01,available,,3
+Premium M.2 SSD,SP-76709,9,5,84.13,2,M.2 SSD,Rack B - Shelf 2,faulty,,10
+Premium NETWORK CARD,SP-70897,29,4,494.19,7,NETWORK CARD,Drawer #1,available,,4
+Standard USB HUB,SP-92082,31,2,276.76,7,USB HUB,Drawer #1,available,,3
+Cat6 3m CABLE,SP-23572,6,9,90.5,6,CABLE,Rack A - Shelf 3,in_used,12,10
+Industrial HEATSINK,SP-94555,18,5,332.17,7,HEATSINK,Rack B - Shelf 2,available,,7
+Standard HEATSINK,SP-68228,29,3,274.74,2,HEATSINK,Server Room - Rack 01,in_used,2,7
+Premium GPU,SP-87630,8,2,368.49,6,GPU,Rack A - Shelf 1,in_used,5,8
+850W PSU,SP-11282,6,2,322.3,2,PSU,Cabinet 1 - Right,faulty,,1
+22-inch MONITOR,SP-77285,30,8,70.17,7,MONITOR,Rack B - Shelf 2,available,,1
+Pro HDMI CABLE,SP-25560,21,7,9.06,8,HDMI CABLE,Cabinet 1 - Right,in_used,11,8
+Industrial CABLE TRACER,SP-75826,9,2,287.53,10,CABLE TRACER,Rack C - Shelf 1,available,,10
+Fiber 5m CABLE,SP-87345,18,5,314.17,7,CABLE,Rack C - Shelf 1,available,,9
+Industrial HEATSINK,SP-33866,44,6,265.63,6,HEATSINK,Cabinet 1 - Right,faulty,,4
+Wireless MOUSE,SP-27622,23,1,170.12,8,MOUSE,Rack C - Shelf 2,in_used,20,6
+Standard M.2 SSD,SP-21093,2,10,339.17,5,M.2 SSD,Rack C - Shelf 2,faulty,,4
+24-inch MONITOR,SP-87038,39,6,340.93,10,MONITOR,Cabinet 1 - Left,faulty,,10
+DDR4 16GB RAM,SP-31076,17,5,334.62,9,RAM,Rack A - Shelf 3,in_used,21,6
+Industrial HDD,SP-30335,1,3,115.23,10,HDD,Rack C - Shelf 1,in_used,12,5
+27-inch MONITOR,SP-10846,32,5,199.9,3,MONITOR,Cabinet 1 - Right,in_used,5,9
+Gaming MOUSE,SP-86650,33,8,147.42,4,MOUSE,Storage Closet A,in_used,15,9
+Standard MOTHERBOARD,SP-27869,28,9,144.53,10,MOTHERBOARD,Cabinet 1 - Left,in_used,13,1
+Pro NETWORK CARD,SP-71215,16,5,197.92,9,NETWORK CARD,Workshop Bench,faulty,,4
+Standard SSD,SP-96428,22,10,457.97,7,SSD,Drawer #1,in_used,9,5
+DDR4 8GB RAM,SP-33132,14,4,45.86,8,RAM,Cabinet 1 - Left,available,,6
+Standard NETWORK CARD,SP-17683,16,7,61.72,4,NETWORK CARD,Server Room - Rack 01,faulty,,8
+Mechanical KEYBOARD,SP-91208,6,1,401.82,1,KEYBOARD,Warehouse - Row 2,faulty,,3
+Pro CPU,SP-63799,46,2,92.73,5,CPU,Cabinet 2 - Bottom,faulty,,6
+Industrial DDR5 RAM,SP-76746,41,3,391.11,5,DDR5 RAM,Rack A - Shelf 2,available,,4
+Premium USB HUB,SP-19793,7,2,464.42,2,USB HUB,Rack C - Shelf 1,in_used,18,3
+Industrial CPU,SP-21722,19,1,327.14,9,CPU,Rack B - Shelf 2,available,,6
+120mm FAN,SP-65398,29,6,300.15,2,FAN,Rack A - Shelf 1,faulty,,5
+512GB SSD STORAGE,SP-61971,5,3,35.94,8,STORAGE,Cabinet 1 - Right,available,,5
+22-inch MONITOR,SP-30950,17,6,132.92,1,MONITOR,Rack C - Shelf 2,available,,8
+DDR4 32GB RAM,SP-98031,46,10,230.32,1,RAM,Rack B - Shelf 1,available,,4
+Premium HDD,SP-84714,5,7,203.93,10,HDD,Rack C - Shelf 1,in_used,19,6
+Pro HDMI CABLE,SP-34295,36,9,267.78,8,HDMI CABLE,Server Room - Rack 01,in_used,9,5
+Standard MOTHERBOARD,SP-95702,15,8,374.63,9,MOTHERBOARD,Drawer #3,faulty,,1
+1TB SSD STORAGE,SP-49059,5,5,34.43,10,STORAGE,Cabinet 2 - Bottom,available,,2
+Pro GPU,SP-52007,48,7,107.26,1,GPU,Cabinet 2 - Bottom,in_used,17,5
+650W PSU,SP-77318,27,5,47.73,4,PSU,Workshop Bench,available,,4
+Premium GPU,SP-53859,47,2,160.53,4,GPU,Server Room - Rack 02,available,,3
+Standard CPU,SP-88989,25,9,395.7,5,CPU,Storage Closet A,available,,3
+Cat6 5m CABLE,SP-39255,9,2,337.09,2,CABLE,Rack A - Shelf 2,faulty,,5
+Pro POWER CABLE,SP-32809,42,3,257.13,8,POWER CABLE,Drawer #3,available,,6
+Industrial HDD,SP-82825,22,8,342.39,8,HDD,Cabinet 2 - Bottom,in_used,12,5
+Premium MOTHERBOARD,SP-97236,17,5,105.87,1,MOTHERBOARD,Rack C - Shelf 1,available,,10
+Pro M.2 SSD,SP-29341,20,10,258.25,2,M.2 SSD,Rack A - Shelf 2,in_used,17,9
+Wired MOUSE,SP-93436,45,4,380.64,10,MOUSE,Rack C - Shelf 2,available,,5
+Industrial DDR5 RAM,SP-96984,7,4,30.6,8,DDR5 RAM,Cabinet 1 - Left,faulty,,1
+Industrial HDMI CABLE,SP-50335,12,1,120.63,6,HDMI CABLE,Storage Closet A,faulty,,10
+512GB SSD STORAGE,SP-79084,48,4,235.43,4,STORAGE,Cabinet 1 - Left,available,,3
+Industrial USB HUB,SP-38177,10,8,241.12,6,USB HUB,Rack C - Shelf 2,available,,5
+Standard USB HUB,SP-63384,23,4,371.71,5,USB HUB,Cabinet 2 - Top,available,,4
+Cat6 5m CABLE,SP-55321,37,3,92.2,5,CABLE,Server Room - Rack 02,available,,8
+Premium HDMI CABLE,SP-57298,8,6,343.71,7,HDMI CABLE,Rack C - Shelf 2,available,,8
+Industrial SSD,SP-51760,16,9,339.07,3,SSD,Rack A - Shelf 3,available,,1
+Premium POWER CABLE,SP-98993,19,4,329.57,3,POWER CABLE,Rack A - Shelf 3,faulty,,6
+Pro SATA CABLE,SP-15264,35,4,56.47,8,SATA CABLE,Workshop Bench,available,,5
+Pro CABLE TRACER,SP-84497,22,1,296.47,2,CABLE TRACER,Server Room - Rack 02,available,,3
+Industrial CABLE TRACER,SP-75220,22,8,273.06,4,CABLE TRACER,Warehouse - Row 2,available,,6
+Wireless KEYBOARD,SP-40317,39,10,293.44,5,KEYBOARD,Cabinet 2 - Top,available,,10
+Fiber 5m CABLE,SP-78507,5,3,273.23,2,CABLE,Cabinet 1 - Left,available,,7
+140mm FAN,SP-60628,47,10,493.59,3,FAN,Server Room - Rack 02,available,,5
+Industrial CPU,SP-65903,9,5,286.28,2,CPU,Warehouse - Row 1,available,,9
+Standard HDMI CABLE,SP-86779,28,6,199.84,1,HDMI CABLE,Cabinet 2 - Bottom,available,,4
+Industrial HDMI CABLE,SP-29118,45,9,320.99,9,HDMI CABLE,Warehouse - Row 2,faulty,,4
+Premium NETWORK CARD,SP-19327,46,3,79.56,9,NETWORK CARD,Drawer #2,faulty,,10
+Pro CABLE TRACER,SP-33865,38,7,209.85,5,CABLE TRACER,Warehouse - Row 2,available,,2
+Pro USB HUB,SP-23944,36,10,136.38,9,USB HUB,Drawer #1,available,,10
+Fiber 5m CABLE,SP-53333,33,3,332.4,9,CABLE,Cabinet 2 - Top,faulty,,2
+DDR5 16GB RAM,SP-27896,12,5,33.64,2,RAM,Drawer #2,in_used,18,7
+Pro MOTHERBOARD,SP-66507,8,4,465.96,10,MOTHERBOARD,Workshop Bench,in_used,7,1
+Fiber 5m CABLE,SP-63828,49,10,60.91,6,CABLE,Storage Closet A,available,,9
+Pro NETWORK CARD,SP-55477,9,2,340.6,1,NETWORK CARD,Cabinet 2 - Top,in_used,21,3
+Standard CABLE TRACER,SP-86037,1,1,452.74,8,CABLE TRACER,Rack C - Shelf 2,available,,10
+750W PSU,SP-59145,38,4,441.97,3,PSU,Server Room - Rack 02,available,,6
+Pro GPU,SP-14773,48,7,248.23,10,GPU,Rack B - Shelf 1,faulty,,6
+10g THERMAL PASTE,SP-49628,17,10,93.57,4,THERMAL PASTE,Warehouse - Row 1,available,,3
+Pro HDD,SP-62941,23,1,320.74,6,HDD,Rack C - Shelf 1,available,,9
+3g THERMAL PASTE,SP-26372,24,4,474.94,8,THERMAL PASTE,Drawer #3,available,,1
+Industrial DDR4 RAM,SP-13716,32,6,98.22,2,DDR4 RAM,Rack A - Shelf 3,in_used,10,3
+10g THERMAL PASTE,SP-22773,35,4,282.94,4,THERMAL PASTE,Cabinet 2 - Top,available,,2
+22-inch MONITOR,SP-56152,1,4,421.75,10,MONITOR,Server Room - Rack 02,available,,4
+Industrial SATA CABLE,SP-48266,35,8,203.47,6,SATA CABLE,Rack C - Shelf 2,available,,3
+Pro CABLE TRACER,SP-85308,50,10,490.16,1,CABLE TRACER,Rack B - Shelf 2,in_used,13,3
+Premium GPU,SP-39045,48,7,105.07,5,GPU,Cabinet 2 - Top,available,,8
+750W PSU,SP-47391,24,2,191.94,1,PSU,Workshop Bench,available,,9
+Membrane KEYBOARD,SP-32223,21,2,135.86,7,KEYBOARD,Cabinet 1 - Right,faulty,,6
+Premium M.2 SSD,SP-16726,40,2,240.95,1,M.2 SSD,Cabinet 2 - Top,in_used,3,2
+120mm FAN,SP-78770,3,7,147.76,8,FAN,Rack B - Shelf 1,faulty,,3
+750W PSU,SP-89734,49,4,372.05,3,PSU,Cabinet 1 - Right,available,,4
+Standard M.2 SSD,SP-56241,40,8,304.98,4,M.2 SSD,Drawer #2,available,,4
+Pro HDD,SP-87457,47,7,408.72,7,HDD,Cabinet 1 - Left,faulty,,10
+Cat6 3m CABLE,SP-12432,45,5,102.14,2,CABLE,Drawer #1,in_used,5,5
+4TB HDD STORAGE,SP-94902,21,2,233.91,6,STORAGE,Rack B - Shelf 1,available,,10
+DDR4 16GB RAM,SP-32384,21,3,301.64,2,RAM,Server Room - Rack 01,in_used,17,8
+Standard USB HUB,SP-43682,18,4,26.88,7,USB HUB,Rack A - Shelf 2,faulty,,7
+Pro MOTHERBOARD,SP-83548,33,10,325.5,10,MOTHERBOARD,Rack C - Shelf 1,available,,7
+Standard DDR4 RAM,SP-48180,2,1,303.74,2,DDR4 RAM,Workshop Bench,available,,6
+80mm FAN,SP-67575,4,3,379.18,1,FAN,Cabinet 2 - Bottom,available,,10
+Premium SATA CABLE,SP-47807,35,9,193.49,6,SATA CABLE,Cabinet 1 - Left,faulty,,7
+80mm FAN,SP-23862,43,5,348.37,2,FAN,Drawer #3,available,,5
+DDR5 16GB RAM,SP-19443,20,8,262.35,2,RAM,Storage Closet A,available,,5
+Standard HEATSINK,SP-92313,18,8,113.72,3,HEATSINK,Rack C - Shelf 2,available,,3
+Industrial SATA CABLE,SP-28097,33,5,300.16,9,SATA CABLE,Drawer #2,faulty,,5
+Standard CPU,SP-86531,36,6,2.36,7,CPU,Server Room - Rack 01,available,,10
+500W PSU,SP-24245,33,2,113.4,6,PSU,Drawer #3,available,,1
+Membrane KEYBOARD,SP-26886,35,6,113.24,10,KEYBOARD,Rack B - Shelf 1,in_used,4,4
+Pass-through RJ45,SP-48373,30,2,264.55,7,RJ45,Drawer #2,available,,9
+Pro USB HUB,SP-42513,19,10,262.85,8,USB HUB,Rack A - Shelf 2,in_used,6,8
+Membrane KEYBOARD,SP-59373,2,1,387.64,7,KEYBOARD,Rack A - Shelf 2,faulty,,2
+Pro HDMI CABLE,SP-58063,2,4,456.0,1,HDMI CABLE,Cabinet 2 - Bottom,faulty,,6
+Standard MOTHERBOARD,SP-31695,36,5,401.37,9,MOTHERBOARD,Warehouse - Row 2,available,,3
+850W PSU,SP-62993,17,2,104.97,1,PSU,Rack A - Shelf 2,in_used,16,6
+Standard GPU,SP-50115,22,8,418.99,3,GPU,Warehouse - Row 2,available,,5
+Premium HDMI CABLE,SP-64052,18,7,293.25,5,HDMI CABLE,Cabinet 2 - Top,available,,7
+Industrial HDMI CABLE,SP-29667,37,6,118.37,5,HDMI CABLE,Cabinet 1 - Left,available,,5
+Premium CABLE TRACER,SP-30942,18,5,385.91,4,CABLE TRACER,Rack A - Shelf 3,available,,7
+Standard NETWORK CARD,SP-34207,25,4,113.28,5,NETWORK CARD,Workshop Bench,available,,6
+Industrial SSD,SP-45367,35,1,463.43,10,SSD,Rack B - Shelf 1,in_used,3,10
+750W PSU,SP-16877,47,8,177.62,1,PSU,Storage Closet A,faulty,,4
+512GB SSD STORAGE,SP-24716,9,7,219.25,8,STORAGE,Rack A - Shelf 1,available,,3
+Premium USB HUB,SP-71995,8,7,70.14,2,USB HUB,Storage Closet A,available,,2
+Standard USB HUB,SP-95274,35,5,9.39,2,USB HUB,Rack C - Shelf 2,available,,10
+Pro CPU,SP-74511,19,9,147.44,4,CPU,Rack C - Shelf 2,available,,10
+Pro POWER CABLE,SP-46736,26,7,121.82,1,POWER CABLE,Cabinet 1 - Right,available,,6
+120mm FAN,SP-79485,14,10,227.04,4,FAN,Drawer #1,available,,5
+27-inch MONITOR,SP-55290,3,6,91.09,3,MONITOR,Rack A - Shelf 2,faulty,,8
+Pro DDR5 RAM,SP-19461,9,7,387.38,3,DDR5 RAM,Warehouse - Row 2,in_used,10,5
+Standard USB HUB,SP-41954,47,7,220.06,9,USB HUB,Rack C - Shelf 2,faulty,,1
+Industrial SSD,SP-28858,45,8,288.76,4,SSD,Storage Closet A,faulty,,6
+Unshielded RJ45,SP-78820,31,9,463.21,1,RJ45,Cabinet 1 - Left,available,,7
+DDR4 32GB RAM,SP-95712,14,10,260.2,6,RAM,Drawer #2,faulty,,1
+Membrane KEYBOARD,SP-49366,43,8,58.45,3,KEYBOARD,Cabinet 2 - Top,faulty,,10
+Standard MOTHERBOARD,SP-90984,31,9,352.14,2,MOTHERBOARD,Warehouse - Row 1,available,,7
+Pro M.2 SSD,SP-45350,24,8,349.77,1,M.2 SSD,Storage Closet A,available,,3
+Premium MOTHERBOARD,SP-56847,10,5,457.35,5,MOTHERBOARD,Rack A - Shelf 2,faulty,,1
+500W PSU,SP-72115,17,7,346.89,1,PSU,Warehouse - Row 2,available,,9
+Industrial GPU,SP-89661,43,3,38.62,9,GPU,Workshop Bench,available,,7
+Industrial CPU,SP-86489,47,7,157.62,4,CPU,Rack A - Shelf 2,faulty,,7
+Standard SATA CABLE,SP-34998,21,3,419.68,5,SATA CABLE,Rack B - Shelf 2,available,,3
+Shielded RJ45,SP-58955,21,6,342.51,8,RJ45,Cabinet 1 - Left,available,,8
+27-inch MONITOR,SP-50841,24,9,369.72,1,MONITOR,Rack B - Shelf 2,faulty,,5
+32-inch MONITOR,SP-22046,41,4,173.26,2,MONITOR,Server Room - Rack 01,available,,2
+Premium POWER CABLE,SP-24141,35,5,386.87,8,POWER CABLE,Cabinet 1 - Left,available,,1
+Pro USB HUB,SP-85967,16,10,196.94,8,USB HUB,Storage Closet A,available,,3
+Pro DDR4 RAM,SP-78187,1,3,345.76,3,DDR4 RAM,Cabinet 2 - Top,in_used,8,1
+Wireless MOUSE,SP-83634,36,3,251.94,10,MOUSE,Rack C - Shelf 2,available,,1
+Pro HEATSINK,SP-32968,27,6,341.37,6,HEATSINK,Drawer #3,available,,2
+Wireless KEYBOARD,SP-69491,16,3,385.33,9,KEYBOARD,Drawer #2,available,,5
+Mechanical KEYBOARD,SP-51824,19,8,39.03,4,KEYBOARD,Rack C - Shelf 1,faulty,,6
+Wireless MOUSE,SP-49805,10,8,93.11,1,MOUSE,Cabinet 2 - Top,faulty,,4
+Industrial SATA CABLE,SP-97988,10,1,173.34,1,SATA CABLE,Drawer #2,available,,7
+Unshielded RJ45,SP-50292,5,8,404.6,8,RJ45,Cabinet 2 - Top,faulty,,2
+Industrial HEATSINK,SP-50185,26,5,57.79,9,HEATSINK,Rack A - Shelf 2,faulty,,6
+Industrial HDD,SP-65062,15,9,184.34,4,HDD,Rack A - Shelf 3,faulty,,3
+Pro NETWORK CARD,SP-76073,40,8,32.44,6,NETWORK CARD,Rack A - Shelf 1,available,,3
+Industrial POWER CABLE,SP-94378,11,6,238.63,9,POWER CABLE,Rack A - Shelf 3,in_used,9,8
+Wireless MOUSE,SP-94249,13,8,459.4,7,MOUSE,Rack A - Shelf 3,faulty,,10
+Cat6 5m CABLE,SP-71343,9,5,167.57,2,CABLE,Cabinet 2 - Bottom,faulty,,1
+Wireless KEYBOARD,SP-23067,28,3,340.7,5,KEYBOARD,Rack A - Shelf 2,available,,9
+4TB HDD STORAGE,SP-66179,35,9,494.74,8,STORAGE,Storage Closet A,in_used,12,1
+1TB SSD STORAGE,SP-62643,19,1,471.19,4,STORAGE,Drawer #3,available,,4
+Premium HEATSINK,SP-63689,8,10,404.87,10,HEATSINK,Workshop Bench,available,,10
+Industrial NETWORK CARD,SP-92644,21,10,151.22,10,NETWORK CARD,Rack C - Shelf 1,available,,4
+2TB HDD STORAGE,SP-16157,0,5,226.33,5,STORAGE,Drawer #1,available,,3
+4TB HDD STORAGE,SP-85397,4,3,170.54,1,STORAGE,Cabinet 2 - Top,faulty,,4
+80mm FAN,SP-33027,3,6,357.23,7,FAN,Storage Closet A,faulty,,10
+32-inch MONITOR,SP-56791,29,8,261.91,7,MONITOR,Warehouse - Row 2,faulty,,10
+Pass-through RJ45,SP-21708,25,8,251.33,4,RJ45,Drawer #1,faulty,,1
+Pro POWER CABLE,SP-16653,5,4,15.36,8,POWER CABLE,Cabinet 2 - Bottom,available,,1
+Premium HDMI CABLE,SP-17810,19,7,480.65,4,HDMI CABLE,Server Room - Rack 01,faulty,,5
+Standard DDR4 RAM,SP-81022,20,6,299.9,8,DDR4 RAM,Rack A - Shelf 3,available,,3
+32-inch MONITOR,SP-78764,28,10,11.7,7,MONITOR,Drawer #3,available,,4
+Pro SATA CABLE,SP-99266,15,10,224.21,8,SATA CABLE,Rack C - Shelf 2,available,,5
+Gaming MOUSE,SP-12062,29,10,138.28,1,MOUSE,Workshop Bench,in_used,13,10
+Pro CABLE TRACER,SP-73839,14,1,171.85,1,CABLE TRACER,Drawer #3,in_used,5,2
+Standard SATA CABLE,SP-49939,3,6,200.43,4,SATA CABLE,Rack A - Shelf 3,available,,10
+Membrane KEYBOARD,SP-64585,35,10,347.0,4,KEYBOARD,Server Room - Rack 01,available,,4
+Industrial SATA CABLE,SP-19546,28,1,415.2,9,SATA CABLE,Server Room - Rack 01,available,,4
+Unshielded RJ45,SP-44807,4,1,205.51,2,RJ45,Cabinet 2 - Top,available,,8
+4TB HDD STORAGE,SP-77772,12,2,239.25,8,STORAGE,Warehouse - Row 1,available,,8
+Industrial MOTHERBOARD,SP-42008,1,8,205.68,9,MOTHERBOARD,Warehouse - Row 2,in_used,6,7
+Industrial HEATSINK,SP-45577,2,2,218.79,9,HEATSINK,Warehouse - Row 1,in_used,7,5
+Pro HDMI CABLE,SP-11225,13,8,484.87,3,HDMI CABLE,Rack B - Shelf 1,available,,8
+Standard SATA CABLE,SP-69658,46,10,480.74,4,SATA CABLE,Storage Closet A,in_used,15,4
+5g THERMAL PASTE,SP-62046,8,4,290.84,4,THERMAL PASTE,Rack B - Shelf 2,available,,5
+Standard HDMI CABLE,SP-57456,9,10,375.89,10,HDMI CABLE,Cabinet 2 - Bottom,in_used,4,6
+Pro CABLE TRACER,SP-33299,32,10,349.55,2,CABLE TRACER,Rack A - Shelf 2,available,,9
+3g THERMAL PASTE,SP-68762,24,5,100.66,7,THERMAL PASTE,Rack A - Shelf 3,available,,9
+Pro DDR5 RAM,SP-33142,20,5,188.74,3,DDR5 RAM,Rack A - Shelf 1,available,,6
+Fiber 5m CABLE,SP-72984,40,9,267.26,8,CABLE,Cabinet 1 - Right,in_used,5,8
+Industrial DDR5 RAM,SP-86433,46,10,54.88,2,DDR5 RAM,Storage Closet A,available,,2
+Cat6 3m CABLE,SP-54654,39,1,371.99,1,CABLE,Cabinet 2 - Bottom,available,,5
+Standard M.2 SSD,SP-82621,31,10,447.97,8,M.2 SSD,Drawer #3,available,,9
+Premium CABLE TRACER,SP-88918,49,1,420.78,6,CABLE TRACER,Workshop Bench,in_used,4,5
+Industrial HDD,SP-34093,18,1,201.19,3,HDD,Rack B - Shelf 1,available,,7
+Pro HDMI CABLE,SP-10244,31,9,409.51,5,HDMI CABLE,Rack A - Shelf 3,available,,3
+Membrane KEYBOARD,SP-36939,7,10,473.05,7,KEYBOARD,Drawer #2,available,,1
+32-inch MONITOR,SP-15306,24,1,410.52,6,MONITOR,Workshop Bench,faulty,,6
+DDR4 8GB RAM,SP-74334,4,7,439.52,1,RAM,Drawer #1,available,,8
+Industrial DDR5 RAM,SP-46505,42,6,459.16,5,DDR5 RAM,Warehouse - Row 2,faulty,,5
+Pro SSD,SP-22830,37,1,129.62,4,SSD,Drawer #1,available,,5
+Premium NETWORK CARD,SP-37341,6,6,44.76,1,NETWORK CARD,Workshop Bench,available,,4
+Premium HEATSINK,SP-32887,22,3,208.91,6,HEATSINK,Rack B - Shelf 2,available,,7
+Unshielded RJ45,SP-16041,47,10,229.42,6,RJ45,Drawer #3,available,,1
+Membrane KEYBOARD,SP-48958,21,9,285.28,9,KEYBOARD,Server Room - Rack 01,available,,2
+Premium CPU,SP-24222,25,5,404.12,7,CPU,Workshop Bench,available,,6
+Industrial M.2 SSD,SP-39487,7,1,431.62,3,M.2 SSD,Drawer #3,available,,4
+Wireless MOUSE,SP-37512,3,1,490.28,10,MOUSE,Server Room - Rack 01,available,,8
+Industrial M.2 SSD,SP-96169,33,6,156.61,4,M.2 SSD,Rack A - Shelf 1,faulty,,1
+22-inch MONITOR,SP-61771,21,3,151.34,1,MONITOR,Server Room - Rack 01,available,,2
+Standard M.2 SSD,SP-56047,37,7,234.66,4,M.2 SSD,Workshop Bench,faulty,,8
+Standard DDR5 RAM,SP-38868,27,8,179.45,4,DDR5 RAM,Rack A - Shelf 3,available,,6
+32-inch MONITOR,SP-21723,22,6,204.8,10,MONITOR,Drawer #1,in_used,4,8
+Premium CABLE TRACER,SP-91260,23,9,177.39,4,CABLE TRACER,Server Room - Rack 01,available,,4
+Premium M.2 SSD,SP-58525,26,1,188.44,1,M.2 SSD,Storage Closet A,available,,3
+Industrial NETWORK CARD,SP-25643,23,10,207.07,6,NETWORK CARD,Rack B - Shelf 1,available,,9
+Industrial NETWORK CARD,SP-17664,44,3,309.57,7,NETWORK CARD,Server Room - Rack 02,available,,8
+Premium NETWORK CARD,SP-52970,6,8,272.93,3,NETWORK CARD,Storage Closet A,available,,5
+3g THERMAL PASTE,SP-43233,38,9,239.81,6,THERMAL PASTE,Cabinet 2 - Bottom,available,,6
+DDR4 8GB RAM,SP-17321,23,8,286.73,5,RAM,Warehouse - Row 2,available,,6
+750W PSU,SP-95417,39,6,58.44,5,PSU,Drawer #2,available,,6
+Pro USB HUB,SP-81995,9,10,294.0,3,USB HUB,Cabinet 1 - Right,available,,5
+Standard HDD,SP-81139,35,10,372.39,10,HDD,Cabinet 2 - Bottom,faulty,,2
+Industrial SSD,SP-98239,43,4,361.4,9,SSD,Storage Closet A,available,,4
+Standard HDMI CABLE,SP-89353,30,8,129.93,8,HDMI CABLE,Workshop Bench,available,,2
+Industrial HDD,SP-10972,27,4,370.28,4,HDD,Rack C - Shelf 1,faulty,,10
+24-inch MONITOR,SP-96824,46,6,117.31,2,MONITOR,Server Room - Rack 02,available,,7
+Pro M.2 SSD,SP-67097,24,7,166.08,6,M.2 SSD,Workshop Bench,faulty,,7
+Unshielded RJ45,SP-14124,50,3,64.51,6,RJ45,Drawer #3,available,,10
+4TB HDD STORAGE,SP-71638,11,8,493.56,9,STORAGE,Rack A - Shelf 2,in_used,9,4
+Standard CPU,SP-13877,1,9,171.78,2,CPU,Cabinet 1 - Left,available,,4
+Standard NETWORK CARD,SP-98803,0,3,117.21,4,NETWORK CARD,Rack A - Shelf 1,in_used,19,5
+5g THERMAL PASTE,SP-98807,28,6,124.88,1,THERMAL PASTE,Cabinet 2 - Bottom,faulty,,5
+Premium CABLE TRACER,SP-88098,30,6,486.42,3,CABLE TRACER,Drawer #1,available,,8
+Industrial CPU,SP-90444,9,8,218.56,1,CPU,Server Room - Rack 02,faulty,,5
+Pro HDMI CABLE,SP-10219,32,6,171.88,1,HDMI CABLE,Server Room - Rack 01,faulty,,9
+140mm FAN,SP-88226,42,6,339.97,2,FAN,Rack B - Shelf 1,available,,9
+Premium MOTHERBOARD,SP-37251,0,8,141.51,1,MOTHERBOARD,Rack A - Shelf 2,available,,8
+Wireless KEYBOARD,SP-35941,45,5,176.56,4,KEYBOARD,Rack A - Shelf 1,in_used,12,6
+Wireless KEYBOARD,SP-87719,34,7,75.34,3,KEYBOARD,Warehouse - Row 1,available,,10
+Standard NETWORK CARD,SP-52025,36,2,492.91,3,NETWORK CARD,Cabinet 1 - Right,available,,1
+Premium M.2 SSD,SP-12977,8,6,92.71,1,M.2 SSD,Server Room - Rack 02,faulty,,10
+Pro USB HUB,SP-41373,8,2,248.63,2,USB HUB,Rack B - Shelf 2,in_used,4,3
+Pro NETWORK CARD,SP-15972,2,1,377.44,6,NETWORK CARD,Server Room - Rack 01,available,,2
+32-inch MONITOR,SP-40271,45,9,240.14,1,MONITOR,Drawer #3,available,,2
+Standard NETWORK CARD,SP-12589,6,5,408.26,7,NETWORK CARD,Rack C - Shelf 1,available,,3
+120mm FAN,SP-71592,9,7,282.82,5,FAN,Rack C - Shelf 2,in_used,2,8
+Standard CPU,SP-65508,4,6,39.05,3,CPU,Rack A - Shelf 2,faulty,,3
+Industrial NETWORK CARD,SP-52949,34,9,388.41,3,NETWORK CARD,Rack C - Shelf 2,available,,1
+Wireless KEYBOARD,SP-34843,43,1,134.39,4,KEYBOARD,Warehouse - Row 1,available,,2
+Industrial HDMI CABLE,SP-91226,7,4,18.94,6,HDMI CABLE,Rack A - Shelf 3,available,,3
+Industrial SATA CABLE,SP-50929,14,4,213.53,5,SATA CABLE,Server Room - Rack 01,faulty,,4
+Mechanical KEYBOARD,SP-82368,11,1,473.5,5,KEYBOARD,Warehouse - Row 2,available,,5
+Industrial HDD,SP-57158,0,2,442.05,8,HDD,Drawer #2,available,,1
+DDR4 16GB RAM,SP-35938,12,8,37.1,6,RAM,Cabinet 1 - Left,in_used,14,4
+Industrial CPU,SP-40135,30,8,135.71,9,CPU,Drawer #2,in_used,9,6
+Pro DDR5 RAM,SP-69780,40,2,303.08,9,DDR5 RAM,Cabinet 2 - Top,in_used,20,5
+Fiber 5m CABLE,SP-17286,45,1,345.41,3,CABLE,Rack C - Shelf 2,available,,8
+Standard CABLE TRACER,SP-66773,41,3,266.42,8,CABLE TRACER,Warehouse - Row 2,in_used,9,3
+Standard DDR5 RAM,SP-55287,7,8,317.52,2,DDR5 RAM,Server Room - Rack 01,available,,10
+5g THERMAL PASTE,SP-69895,47,4,13.78,6,THERMAL PASTE,Drawer #1,faulty,,4
+Pro GPU,SP-47490,5,5,89.61,5,GPU,Rack A - Shelf 3,available,,2
+DDR4 8GB RAM,SP-63855,50,9,275.0,4,RAM,Workshop Bench,in_used,4,5
+Pro MOTHERBOARD,SP-77163,23,6,398.09,6,MOTHERBOARD,Rack B - Shelf 1,in_used,16,1
+Pro HDD,SP-64801,33,10,162.4,5,HDD,Drawer #2,available,,7
+Pro SSD,SP-36661,22,5,306.64,9,SSD,Cabinet 1 - Left,in_used,19,3
+Standard NETWORK CARD,SP-82798,45,10,9.66,8,NETWORK CARD,Server Room - Rack 02,faulty,,10
+5g THERMAL PASTE,SP-54187,28,1,395.21,10,THERMAL PASTE,Drawer #2,available,,5
+Premium CPU,SP-78687,1,8,316.76,3,CPU,Drawer #3,available,,9
+Industrial M.2 SSD,SP-51756,11,9,465.35,1,M.2 SSD,Warehouse - Row 2,faulty,,9
+Fiber 5m CABLE,SP-30567,46,3,273.67,4,CABLE,Warehouse - Row 1,available,,5
+Standard SSD,SP-23229,22,3,482.61,7,SSD,Cabinet 2 - Top,available,,3
+Gaming MOUSE,SP-49592,43,3,400.74,1,MOUSE,Warehouse - Row 2,available,,9
+Pro HEATSINK,SP-59628,3,6,483.59,10,HEATSINK,Rack B - Shelf 2,available,,4
+27-inch MONITOR,SP-15489,0,5,124.76,7,MONITOR,Rack B - Shelf 1,available,,8
+Unshielded RJ45,SP-53603,41,6,489.73,8,RJ45,Storage Closet A,in_used,17,5
+10g THERMAL PASTE,SP-19031,39,6,499.6,3,THERMAL PASTE,Rack B - Shelf 2,faulty,,3
+Premium HDMI CABLE,SP-69953,6,8,469.3,2,HDMI CABLE,Cabinet 2 - Bottom,available,,3
+750W PSU,SP-86317,8,1,242.4,4,PSU,Warehouse - Row 1,faulty,,10
+Industrial HDD,SP-48940,31,8,85.69,1,HDD,Cabinet 2 - Top,available,,1
+Pro HDD,SP-30009,16,6,146.25,5,HDD,Rack A - Shelf 1,faulty,,8
+1TB SSD STORAGE,SP-17663,16,5,245.73,7,STORAGE,Rack C - Shelf 1,available,,2
+Premium USB HUB,SP-64115,15,9,90.93,5,USB HUB,Drawer #1,in_used,18,3
+3g THERMAL PASTE,SP-18452,21,9,154.2,8,THERMAL PASTE,Cabinet 1 - Left,in_used,18,4
+Industrial POWER CABLE,SP-74855,25,4,87.05,7,POWER CABLE,Rack B - Shelf 1,available,,10
+Premium NETWORK CARD,SP-29177,15,8,165.01,1,NETWORK CARD,Rack A - Shelf 3,available,,2
+Premium MOTHERBOARD,SP-11564,8,7,113.78,6,MOTHERBOARD,Rack A - Shelf 2,available,,8
+Industrial HDMI CABLE,SP-53959,14,7,180.48,4,HDMI CABLE,Cabinet 1 - Left,faulty,,4
+Cat5e 2m CABLE,SP-34736,45,5,91.41,2,CABLE,Server Room - Rack 01,available,,3
+Premium POWER CABLE,SP-22013,33,6,138.84,3,POWER CABLE,Cabinet 1 - Right,faulty,,7
+DDR5 16GB RAM,SP-24855,24,5,324.52,4,RAM,Drawer #3,available,,7
+Standard DDR5 RAM,SP-27353,15,5,476.05,7,DDR5 RAM,Warehouse - Row 1,available,,3
+10g THERMAL PASTE,SP-22145,6,6,319.05,3,THERMAL PASTE,Rack C - Shelf 2,faulty,,5
+Standard DDR5 RAM,SP-19788,14,8,340.34,10,DDR5 RAM,Cabinet 1 - Right,available,,1
+Industrial M.2 SSD,SP-29138,45,6,328.34,4,M.2 SSD,Cabinet 1 - Left,available,,8
+1TB SSD STORAGE,SP-21389,43,10,97.95,2,STORAGE,Rack C - Shelf 1,available,,1
+Standard SSD,SP-61372,2,10,239.97,5,SSD,Rack B - Shelf 2,faulty,,8
+10g THERMAL PASTE,SP-47240,7,5,142.17,7,THERMAL PASTE,Warehouse - Row 1,available,,10
+Premium USB HUB,SP-12096,18,9,295.52,2,USB HUB,Rack C - Shelf 2,available,,8
+Standard NETWORK CARD,SP-88344,30,5,3.16,6,NETWORK CARD,Rack A - Shelf 3,available,,3
+32-inch MONITOR,SP-27231,50,2,13.05,8,MONITOR,Rack A - Shelf 3,faulty,,9
+Industrial M.2 SSD,SP-11138,27,7,488.89,9,M.2 SSD,Drawer #2,available,,2
+Unshielded RJ45,SP-83892,49,5,322.55,10,RJ45,Rack C - Shelf 2,faulty,,1
+Premium HEATSINK,SP-73225,21,3,295.88,7,HEATSINK,Cabinet 1 - Right,available,,2
+Premium M.2 SSD,SP-35656,33,10,314.67,1,M.2 SSD,Rack A - Shelf 3,in_used,19,6
+Pro M.2 SSD,SP-56171,16,8,408.52,5,M.2 SSD,Rack A - Shelf 3,available,,8
+Standard SSD,SP-72486,49,5,21.29,1,SSD,Rack A - Shelf 3,available,,1
+Premium DDR5 RAM,SP-76633,31,3,398.89,3,DDR5 RAM,Server Room - Rack 01,available,,8
+Wireless MOUSE,SP-65054,29,1,187.27,10,MOUSE,Drawer #2,available,,9
+4TB HDD STORAGE,SP-54856,32,8,63.26,5,STORAGE,Cabinet 2 - Top,faulty,,10
+Industrial SATA CABLE,SP-96188,5,7,308.07,9,SATA CABLE,Cabinet 2 - Bottom,in_used,6,5
+Pass-through RJ45,SP-79505,38,1,28.57,9,RJ45,Cabinet 2 - Top,available,,6
+Industrial HEATSINK,SP-44812,9,4,91.87,7,HEATSINK,Server Room - Rack 02,available,,6
+Gaming MOUSE,SP-87225,49,1,181.26,8,MOUSE,Cabinet 2 - Bottom,faulty,,10
+Unshielded RJ45,SP-77972,1,2,27.36,3,RJ45,Cabinet 2 - Bottom,available,,4
+Industrial USB HUB,SP-45690,5,5,316.04,3,USB HUB,Rack C - Shelf 2,available,,8
+DDR4 32GB RAM,SP-11675,3,4,345.61,9,RAM,Drawer #2,in_used,17,6
+Standard SATA CABLE,SP-93479,29,7,166.07,2,SATA CABLE,Cabinet 1 - Right,available,,9
+Wired MOUSE,SP-32329,43,9,129.28,2,MOUSE,Server Room - Rack 02,in_used,21,5
+Premium GPU,SP-68536,5,4,144.24,4,GPU,Drawer #2,available,,1
+Industrial SATA CABLE,SP-33815,47,2,192.82,10,SATA CABLE,Drawer #1,available,,1
+Cat6 3m CABLE,SP-39314,42,10,4.57,9,CABLE,Cabinet 2 - Top,available,,4
+Industrial CABLE TRACER,SP-18117,30,9,413.2,9,CABLE TRACER,Rack C - Shelf 1,available,,10
+Pro MOTHERBOARD,SP-27712,5,8,334.94,6,MOTHERBOARD,Workshop Bench,faulty,,9
+850W PSU,SP-77505,29,8,472.68,6,PSU,Drawer #3,available,,9
+Membrane KEYBOARD,SP-61086,31,8,254.08,3,KEYBOARD,Rack A - Shelf 3,available,,7
+Cat6 3m CABLE,SP-67801,43,4,412.28,3,CABLE,Cabinet 1 - Left,in_used,12,9
+32-inch MONITOR,SP-23651,29,10,118.03,8,MONITOR,Rack C - Shelf 1,in_used,14,7
+Industrial USB HUB,SP-36901,14,7,406.85,1,USB HUB,Rack A - Shelf 3,available,,2
+Premium SATA CABLE,SP-49395,28,9,133.22,10,SATA CABLE,Drawer #3,available,,6
+750W PSU,SP-61936,32,5,213.59,9,PSU,Rack C - Shelf 1,faulty,,2
+Pro SSD,SP-49429,27,3,483.72,5,SSD,Server Room - Rack 02,available,,3
+3g THERMAL PASTE,SP-28208,7,1,370.4,6,THERMAL PASTE,Rack C - Shelf 2,available,,3
+Premium DDR4 RAM,SP-35741,27,1,149.12,1,DDR4 RAM,Cabinet 1 - Left,available,,4
+Industrial DDR5 RAM,SP-50708,36,1,315.93,7,DDR5 RAM,Cabinet 2 - Top,in_used,12,2
+Premium SATA CABLE,SP-13235,23,2,156.35,5,SATA CABLE,Server Room - Rack 02,available,,9
+Standard NETWORK CARD,SP-54740,46,9,469.78,10,NETWORK CARD,Drawer #3,in_used,17,9
+Industrial SSD,SP-36668,49,1,272.19,4,SSD,Cabinet 1 - Right,in_used,13,2
+5g THERMAL PASTE,SP-91372,29,7,64.06,4,THERMAL PASTE,Storage Closet A,available,,1
+Pro DDR4 RAM,SP-98825,10,10,313.86,5,DDR4 RAM,Warehouse - Row 2,available,,10
+120mm FAN,SP-36097,14,6,428.45,3,FAN,Storage Closet A,faulty,,4
+Cat6 3m CABLE,SP-78325,15,3,313.3,10,CABLE,Rack B - Shelf 2,faulty,,5
+Cat6 5m CABLE,SP-87496,31,3,22.78,1,CABLE,Rack B - Shelf 1,available,,10
+Pro USB HUB,SP-77747,31,10,304.01,6,USB HUB,Warehouse - Row 2,in_used,16,6
+Pro M.2 SSD,SP-96297,20,5,89.38,2,M.2 SSD,Workshop Bench,in_used,10,2
+512GB SSD STORAGE,SP-11679,24,4,159.34,6,STORAGE,Drawer #2,available,,3
+Industrial MOTHERBOARD,SP-75339,41,9,461.08,4,MOTHERBOARD,Cabinet 2 - Top,faulty,,1
+Premium POWER CABLE,SP-17208,29,5,449.21,2,POWER CABLE,Rack B - Shelf 1,in_used,13,9
+DDR4 16GB RAM,SP-59987,40,7,308.61,4,RAM,Server Room - Rack 01,available,,4
+140mm FAN,SP-74327,42,5,475.81,6,FAN,Rack C - Shelf 1,available,,3
+Standard NETWORK CARD,SP-45593,49,6,369.58,8,NETWORK CARD,Drawer #2,available,,6
+Pro CABLE TRACER,SP-31958,0,7,481.25,1,CABLE TRACER,Rack A - Shelf 2,available,,6
+500W PSU,SP-70264,32,4,444.37,6,PSU,Warehouse - Row 1,in_used,16,7
+Shielded RJ45,SP-44876,7,7,4.31,8,RJ45,Rack A - Shelf 1,in_used,20,1
+140mm FAN,SP-25421,39,5,15.15,1,FAN,Rack B - Shelf 1,available,,4
+Premium HEATSINK,SP-41307,30,10,275.64,1,HEATSINK,Warehouse - Row 1,in_used,12,7
+Shielded RJ45,SP-51008,9,8,450.29,2,RJ45,Drawer #3,in_used,15,10
+Pro CPU,SP-73972,11,9,356.26,1,CPU,Drawer #2,available,,7
+Industrial MOTHERBOARD,SP-10131,41,10,342.33,5,MOTHERBOARD,Rack C - Shelf 2,faulty,,5
+Standard DDR5 RAM,SP-60730,36,8,66.39,2,DDR5 RAM,Rack A - Shelf 2,available,,10
+Premium SATA CABLE,SP-74659,30,8,182.01,8,SATA CABLE,Rack A - Shelf 2,faulty,,3
+Industrial CPU,SP-64583,14,4,97.65,2,CPU,Warehouse - Row 1,faulty,,7
+Industrial HEATSINK,SP-45806,13,6,441.76,1,HEATSINK,Storage Closet A,available,,5
+Pro CPU,SP-74114,30,2,417.94,6,CPU,Drawer #3,in_used,18,8
+Pro SATA CABLE,SP-75409,7,2,346.76,4,SATA CABLE,Rack A - Shelf 1,in_used,5,2
+Premium POWER CABLE,SP-28838,7,10,470.82,5,POWER CABLE,Rack A - Shelf 1,available,,7
+Membrane KEYBOARD,SP-68218,27,4,215.03,4,KEYBOARD,Drawer #3,faulty,,6
+750W PSU,SP-48555,42,8,307.6,2,PSU,Drawer #3,faulty,,7
+Standard POWER CABLE,SP-44711,41,10,343.12,3,POWER CABLE,Rack B - Shelf 2,in_used,15,8
+Premium DDR4 RAM,SP-34697,9,3,424.59,2,DDR4 RAM,Storage Closet A,in_used,17,4
+Pro MOTHERBOARD,SP-12806,28,4,52.76,6,MOTHERBOARD,Cabinet 2 - Top,available,,9
+DDR4 8GB RAM,SP-60533,20,8,373.52,10,RAM,Rack A - Shelf 3,available,,7
+Pro HEATSINK,SP-54156,44,7,299.53,6,HEATSINK,Drawer #2,available,,1
+Premium M.2 SSD,SP-89722,47,3,388.73,7,M.2 SSD,Rack C - Shelf 2,available,,7
+Industrial USB HUB,SP-69604,33,10,41.03,8,USB HUB,Server Room - Rack 02,in_used,19,9
+Premium DDR4 RAM,SP-98156,50,7,121.97,6,DDR4 RAM,Cabinet 2 - Bottom,in_used,21,2
+Pro HEATSINK,SP-45582,10,8,92.75,9,HEATSINK,Server Room - Rack 01,available,,7
+22-inch MONITOR,SP-18732,46,9,272.97,4,MONITOR,Warehouse - Row 2,available,,1
+Standard M.2 SSD,SP-84394,49,8,453.42,8,M.2 SSD,Workshop Bench,available,,3
+Membrane KEYBOARD,SP-17961,3,3,82.1,1,KEYBOARD,Cabinet 2 - Top,in_used,9,9
+Premium HDD,SP-48602,13,1,115.5,1,HDD,Rack C - Shelf 2,available,,2
+5g THERMAL PASTE,SP-65976,49,7,236.43,2,THERMAL PASTE,Rack A - Shelf 1,available,,10
+Pro SSD,SP-33764,46,8,169.14,5,SSD,Cabinet 1 - Right,available,,5
+Pro MOTHERBOARD,SP-70639,26,6,486.47,9,MOTHERBOARD,Rack A - Shelf 2,faulty,,4
+Standard USB HUB,SP-91934,15,3,422.47,8,USB HUB,Rack B - Shelf 2,available,,4
+Pro SATA CABLE,SP-39018,3,1,127.5,5,SATA CABLE,Cabinet 2 - Bottom,available,,7
+Pass-through RJ45,SP-49038,4,3,77.47,5,RJ45,Cabinet 1 - Right,available,,6
+Wired MOUSE,SP-12563,50,7,343.38,5,MOUSE,Rack A - Shelf 3,available,,1
+Pro CPU,SP-85425,47,1,167.75,10,CPU,Cabinet 2 - Bottom,available,,2
+Pro M.2 SSD,SP-91427,11,6,132.05,4,M.2 SSD,Rack A - Shelf 1,available,,3
+DDR4 32GB RAM,SP-76290,37,8,479.21,10,RAM,Server Room - Rack 01,faulty,,4
+Industrial CABLE TRACER,SP-68295,33,4,376.74,8,CABLE TRACER,Cabinet 1 - Right,available,,6
+Pro MOTHERBOARD,SP-71336,29,4,98.02,2,MOTHERBOARD,Warehouse - Row 2,available,,3
+Industrial M.2 SSD,SP-64472,31,1,367.84,9,M.2 SSD,Cabinet 1 - Right,available,,5
+Pro USB HUB,SP-33376,26,9,337.81,3,USB HUB,Server Room - Rack 02,available,,1
+Industrial HDD,SP-89782,20,4,320.47,10,HDD,Cabinet 1 - Right,available,,2
+Mechanical KEYBOARD,SP-51473,15,10,491.72,9,KEYBOARD,Rack B - Shelf 1,faulty,,1
+120mm FAN,SP-76570,0,10,344.19,7,FAN,Cabinet 2 - Bottom,available,,8
+Premium MOTHERBOARD,SP-30208,17,9,174.98,4,MOTHERBOARD,Storage Closet A,available,,4
+Pro GPU,SP-88477,30,2,236.01,5,GPU,Rack B - Shelf 2,available,,5
+Premium CPU,SP-18229,32,2,29.74,4,CPU,Rack C - Shelf 2,available,,7
+Pass-through RJ45,SP-77158,48,1,476.1,1,RJ45,Cabinet 2 - Bottom,faulty,,8
+Industrial POWER CABLE,SP-50567,39,6,176.26,8,POWER CABLE,Warehouse - Row 1,available,,1
+Pro NETWORK CARD,SP-57954,11,6,217.49,9,NETWORK CARD,Rack A - Shelf 2,available,,4
+24-inch MONITOR,SP-18720,38,8,331.73,5,MONITOR,Rack B - Shelf 2,available,,7
+140mm FAN,SP-84774,46,1,453.44,2,FAN,Rack A - Shelf 3,in_used,13,3
+512GB SSD STORAGE,SP-86634,37,6,277.7,6,STORAGE,Cabinet 2 - Bottom,available,,2
+Premium HDMI CABLE,SP-72699,27,3,394.88,8,HDMI CABLE,Workshop Bench,available,,8
+Pro DDR5 RAM,SP-29514,5,5,33.66,6,DDR5 RAM,Rack C - Shelf 2,available,,1
+DDR4 32GB RAM,SP-24997,25,5,140.46,5,RAM,Warehouse - Row 1,available,,2
+Industrial HDMI CABLE,SP-58115,19,6,394.24,5,HDMI CABLE,Cabinet 1 - Right,faulty,,8
+Industrial POWER CABLE,SP-10592,28,9,416.93,8,POWER CABLE,Drawer #3,available,,2
+2TB HDD STORAGE,SP-27678,27,3,422.77,4,STORAGE,Server Room - Rack 02,faulty,,3
+500W PSU,SP-60097,36,6,309.77,10,PSU,Warehouse - Row 1,in_used,18,5
+3g THERMAL PASTE,SP-60127,24,5,210.29,2,THERMAL PASTE,Warehouse - Row 2,available,,5
+Premium HDMI CABLE,SP-87855,32,8,96.87,4,HDMI CABLE,Rack B - Shelf 1,faulty,,6
+Standard POWER CABLE,SP-71702,22,1,383.63,5,POWER CABLE,Server Room - Rack 01,available,,7
+4TB HDD STORAGE,SP-63760,17,6,26.02,1,STORAGE,Workshop Bench,available,,5
+Standard HEATSINK,SP-50584,26,4,440.42,9,HEATSINK,Cabinet 2 - Bottom,in_used,15,3
+Standard NETWORK CARD,SP-47940,37,3,286.56,1,NETWORK CARD,Cabinet 2 - Top,available,,7
+Pro SATA CABLE,SP-61763,33,8,220.06,3,SATA CABLE,Cabinet 1 - Left,available,,9
+500W PSU,SP-89009,49,5,393.61,8,PSU,Drawer #3,available,,7
+Industrial GPU,SP-94185,18,4,152.1,4,GPU,Rack B - Shelf 1,available,,9
+Pro SATA CABLE,SP-85719,43,9,282.73,4,SATA CABLE,Rack C - Shelf 2,faulty,,9
+DDR4 8GB RAM,SP-14480,44,3,196.87,8,RAM,Rack B - Shelf 2,available,,2
+Standard NETWORK CARD,SP-18170,29,2,394.45,7,NETWORK CARD,Cabinet 1 - Right,available,,4
+1TB SSD STORAGE,SP-21399,23,2,265.52,3,STORAGE,Rack B - Shelf 1,available,,6
+24-inch MONITOR,SP-39154,22,8,417.66,3,MONITOR,Warehouse - Row 1,faulty,,1
+Pro MOTHERBOARD,SP-82219,42,5,112.12,7,MOTHERBOARD,Drawer #3,available,,3
+Industrial CABLE TRACER,SP-32177,4,2,151.22,9,CABLE TRACER,Cabinet 2 - Top,available,,7
+Standard NETWORK CARD,SP-60199,43,7,131.34,4,NETWORK CARD,Drawer #3,faulty,,5
+Industrial SATA CABLE,SP-99830,48,2,364.48,10,SATA CABLE,Drawer #2,available,,6
+Standard HEATSINK,SP-88263,39,9,446.81,5,HEATSINK,Rack C - Shelf 2,in_used,20,5
+Premium POWER CABLE,SP-85617,44,1,270.2,2,POWER CABLE,Rack C - Shelf 2,available,,6
+Wired MOUSE,SP-20653,42,4,268.01,6,MOUSE,Warehouse - Row 2,in_used,21,4
+Premium DDR5 RAM,SP-64912,27,4,38.79,3,DDR5 RAM,Rack A - Shelf 1,available,,10
+5g THERMAL PASTE,SP-50257,35,6,295.52,10,THERMAL PASTE,Warehouse - Row 2,available,,1
+512GB SSD STORAGE,SP-92068,34,3,455.03,10,STORAGE,Cabinet 1 - Left,available,,9
+Standard NETWORK CARD,SP-74027,13,6,458.97,3,NETWORK CARD,Rack B - Shelf 2,available,,4
+Standard M.2 SSD,SP-83583,3,2,242.66,9,M.2 SSD,Rack A - Shelf 2,in_used,19,6
+Premium M.2 SSD,SP-29311,29,8,458.51,10,M.2 SSD,Server Room - Rack 02,faulty,,10
+Pro CABLE TRACER,SP-91114,5,9,151.25,9,CABLE TRACER,Drawer #1,faulty,,4
+Industrial M.2 SSD,SP-33609,44,9,275.8,3,M.2 SSD,Drawer #2,faulty,,7
+Industrial MOTHERBOARD,SP-59899,41,9,480.34,2,MOTHERBOARD,Cabinet 1 - Left,in_used,18,6
+Standard HDMI CABLE,SP-12086,6,4,70.3,4,HDMI CABLE,Cabinet 1 - Left,faulty,,4
+Premium MOTHERBOARD,SP-23636,1,9,365.39,1,MOTHERBOARD,Cabinet 1 - Right,available,,6
+Premium USB HUB,SP-87942,35,9,180.39,1,USB HUB,Drawer #1,faulty,,2
+Wireless KEYBOARD,SP-17423,28,7,17.6,2,KEYBOARD,Rack A - Shelf 1,available,,4
+1TB SSD STORAGE,SP-11208,25,10,97.33,10,STORAGE,Rack A - Shelf 1,available,,7
+Premium POWER CABLE,SP-33863,27,6,320.43,4,POWER CABLE,Server Room - Rack 02,available,,10
+Premium CPU,SP-15580,23,9,494.53,1,CPU,Cabinet 1 - Left,available,,10
+Standard POWER CABLE,SP-93086,42,3,387.95,3,POWER CABLE,Rack B - Shelf 1,in_used,18,4
+Premium SATA CABLE,SP-27890,27,7,65.98,4,SATA CABLE,Drawer #2,available,,2
+Industrial SSD,SP-83804,41,9,81.42,4,SSD,Server Room - Rack 02,available,,8
+Premium CPU,SP-97003,10,7,217.33,4,CPU,Rack B - Shelf 2,available,,10
+Standard SSD,SP-74514,46,4,115.4,5,SSD,Rack C - Shelf 1,in_used,7,6
+Premium GPU,SP-44086,28,8,157.53,5,GPU,Workshop Bench,available,,10
+Cat6 3m CABLE,SP-65937,24,2,360.86,6,CABLE,Workshop Bench,in_used,11,10
+Premium HEATSINK,SP-73470,41,3,213.67,9,HEATSINK,Rack C - Shelf 2,available,,7
+Standard M.2 SSD,SP-78070,29,7,367.17,7,M.2 SSD,Rack C - Shelf 1,faulty,,3
+2TB HDD STORAGE,SP-54217,3,9,194.67,2,STORAGE,Cabinet 1 - Left,available,,5
+Mechanical KEYBOARD,SP-38378,36,4,441.62,3,KEYBOARD,Rack B - Shelf 2,in_used,13,7
+Premium GPU,SP-33829,45,2,427.66,5,GPU,Drawer #3,available,,4
+Premium NETWORK CARD,SP-63567,22,7,276.3,10,NETWORK CARD,Rack B - Shelf 1,faulty,,9
+Standard USB HUB,SP-12425,9,6,432.6,5,USB HUB,Drawer #3,in_used,4,7
+Standard SATA CABLE,SP-97566,17,4,127.52,3,SATA CABLE,Cabinet 2 - Bottom,faulty,,6
+Standard USB HUB,SP-61498,33,10,309.36,7,USB HUB,Rack B - Shelf 2,faulty,,9
+Premium CABLE TRACER,SP-80000,5,7,368.3,4,CABLE TRACER,Rack B - Shelf 1,in_used,16,1
+Standard POWER CABLE,SP-14780,20,9,81.66,3,POWER CABLE,Storage Closet A,available,,8
+Pro MOTHERBOARD,SP-95151,17,1,235.79,2,MOTHERBOARD,Storage Closet A,in_used,3,7
+5g THERMAL PASTE,SP-65254,19,2,465.84,9,THERMAL PASTE,Cabinet 1 - Left,in_used,4,10
+Premium NETWORK CARD,SP-92491,29,6,219.88,1,NETWORK CARD,Rack B - Shelf 1,available,,1
+Shielded RJ45,SP-18459,42,6,45.54,5,RJ45,Rack A - Shelf 2,available,,1
+500W PSU,SP-66143,37,8,195.66,4,PSU,Server Room - Rack 01,available,,3
+Premium USB HUB,SP-11368,15,1,76.19,5,USB HUB,Rack C - Shelf 2,available,,4
+Industrial SSD,SP-57654,9,9,178.4,6,SSD,Rack A - Shelf 1,in_used,18,4
+Pro GPU,SP-81217,6,8,349.63,6,GPU,Workshop Bench,faulty,,3
+Premium SSD,SP-50417,21,5,210.81,7,SSD,Storage Closet A,faulty,,6
+Wireless MOUSE,SP-45225,1,1,325.23,6,MOUSE,Cabinet 2 - Bottom,available,,9
+Pro GPU,SP-58385,8,2,178.43,1,GPU,Rack A - Shelf 1,faulty,,9
+Standard USB HUB,SP-49009,23,1,315.08,8,USB HUB,Server Room - Rack 02,in_used,6,3
+Premium SATA CABLE,SP-15633,17,1,324.82,9,SATA CABLE,Warehouse - Row 2,available,,3
+Pro SATA CABLE,SP-29188,50,2,324.0,1,SATA CABLE,Drawer #2,available,,7
+Premium POWER CABLE,SP-81189,42,2,489.6,7,POWER CABLE,Rack C - Shelf 1,available,,5
+Pro CPU,SP-85759,30,9,260.35,4,CPU,Cabinet 1 - Right,in_used,3,2
+Cat6 3m CABLE,SP-11128,23,3,183.59,2,CABLE,Storage Closet A,available,,3
+1TB SSD STORAGE,SP-83949,35,5,299.61,6,STORAGE,Rack C - Shelf 2,in_used,4,7
+Wired MOUSE,SP-49180,43,10,303.91,5,MOUSE,Cabinet 1 - Left,available,,7
+Standard USB HUB,SP-98473,29,1,158.3,6,USB HUB,Warehouse - Row 1,faulty,,5
+Standard HDMI CABLE,SP-72819,12,4,404.19,3,HDMI CABLE,Drawer #2,available,,6
+DDR5 16GB RAM,SP-42100,7,5,112.93,4,RAM,Rack C - Shelf 1,available,,3
+Premium HDMI CABLE,SP-95590,19,1,115.53,3,HDMI CABLE,Storage Closet A,faulty,,3
+Wireless KEYBOARD,SP-45122,13,2,241.66,8,KEYBOARD,Cabinet 2 - Bottom,faulty,,2
+Industrial SSD,SP-60702,45,9,203.8,9,SSD,Drawer #1,available,,3
+Wired MOUSE,SP-11347,50,7,61.24,7,MOUSE,Cabinet 1 - Left,faulty,,2
+Premium M.2 SSD,SP-42637,30,9,179.62,1,M.2 SSD,Rack A - Shelf 3,in_used,4,9
+500W PSU,SP-39247,45,2,263.17,10,PSU,Warehouse - Row 1,available,,5
+Mechanical KEYBOARD,SP-76908,36,10,322.01,1,KEYBOARD,Drawer #1,faulty,,2
+Premium DDR4 RAM,SP-61938,16,6,440.07,8,DDR4 RAM,Rack B - Shelf 1,available,,6
+Pro SATA CABLE,SP-85664,22,4,398.35,8,SATA CABLE,Server Room - Rack 01,in_used,20,7

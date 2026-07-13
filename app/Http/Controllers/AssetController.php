@@ -59,13 +59,15 @@ class AssetController extends Controller
     {
         $siteId = $request->query('site_id');
 
-        $assetsQuery = Asset::with('category', 'type', 'oem', 'site')->latest();
+        $assetsQuery = Asset::with('category', 'type', 'oem', 'site', 'activeLoan.user')->latest();
 
         if ($siteId) {
             $assetsQuery->where('site_id', $siteId);
         }
 
         $assets = $assetsQuery->get()->map(function ($asset) {
+            $loan = $asset->activeLoan;
+            $overdue = $loan && $loan->expected_return_date && $loan->expected_return_date->isPast();
             return [
                 'id' => $asset->id,
                 'site_id' => $asset->site_id,
@@ -83,6 +85,10 @@ class AssetController extends Controller
                 'status_color' => $asset->status?->color,
                 'status_id' => $asset->status_id,
                 'site' => $asset->site?->name,
+                'loan_status' => $loan ? ($overdue ? 'overdue' : 'on_loan') : null,
+                'loan_user_name' => $loan?->user?->name,
+                'loan_return_date' => $loan?->expected_return_date?->format('Y-m-d'),
+                'loan_id' => $loan?->id,
             ];
         });
 
@@ -94,6 +100,12 @@ class AssetController extends Controller
             'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
             'currentSiteId' => $siteId ? (int)$siteId : null,
             'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color']),
+            'loanStats' => [
+                'active' => \App\Models\AssetLoan::where('status', 'approved')->count(),
+                'overdue' => \App\Models\AssetLoan::where('status', 'approved')
+                    ->where('expected_return_date', '<', now())->count(),
+                'pending' => \App\Models\AssetLoan::where('status', 'pending')->count(),
+            ],
         ]);
     }
 
@@ -128,7 +140,7 @@ class AssetController extends Controller
 
     public function show(Asset $asset)
     {
-        $asset->load('category', 'type', 'oem', 'site', 'assignments.user', 'assignments.location', 'audits.user');
+        $asset->load('category', 'type', 'oem', 'site', 'assignments.user', 'assignments.location', 'audits.user', 'activeLoan.user');
 
         $users = \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get();
 

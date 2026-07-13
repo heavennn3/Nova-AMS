@@ -62,6 +62,12 @@ class Asset extends Model implements Auditable
         return $this->belongsTo(AssetStatus::class, 'status_id');
     }
 
+    /** The currently active approved loan, if any. */
+    public function activeLoan()
+    {
+        return $this->hasOne(AssetLoan::class)->where('status', 'approved')->latestOfMany();
+    }
+
     // ─── EAV Helpers ───────────────────────────────────────────────
 
     public function fieldValues()

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,11 @@ import {
     Clock,
     Calendar,
     Package,
+    AlertTriangle,
+    CheckCircle2,
+    XCircle,
+    RotateCcw,
+    Hourglass,
 } from 'lucide-react';
 
 const statusColors: Record<string, string> = {
@@ -32,6 +37,18 @@ const conditionColors: Record<string, string> = {
     semi_faulty: 'bg-yellow-100 text-yellow-800',
     faulty: 'bg-red-100 text-red-800',
 };
+
+function calcDaysRemaining(returnDate: string): { days: number; label: string; isOverdue: boolean } {
+    if (!returnDate) return { days: 0, label: '—', isOverdue: false };
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const ret = new Date(returnDate);
+    ret.setHours(0, 0, 0, 0);
+    const diff = Math.round((ret.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return { days: Math.abs(diff), label: `${Math.abs(diff)} day(s) overdue`, isOverdue: true };
+    if (diff === 0) return { days: 0, label: 'Due today', isOverdue: false };
+    return { days: diff, label: `${diff} day(s) remaining`, isOverdue: false };
+}
 
 export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const [search, setSearch] = useState('');
@@ -52,6 +69,17 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const formatDate = (d: string) =>
         d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
+    const stats = useMemo(() => {
+        const active = loans.filter((l) => l.status === 'approved');
+        const overdue = active.filter((l) => l.expected_return_date && new Date(l.expected_return_date) < new Date());
+        return {
+            pending: loans.filter((l) => l.status === 'pending').length,
+            approved: loans.filter((l) => l.status === 'approved').length,
+            overdue: overdue.length,
+            returned: loans.filter((l) => l.status === 'returned').length,
+        };
+    }, [loans]);
+
     return (
         <>
             <Head title="Asset Loans" />
@@ -69,19 +97,27 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     </Link>
                 </div>
 
-                {/* Stats */}
+                {/* Stats with overdue count */}
                 <div className="grid grid-cols-4 gap-4">
-                    {[
-                        { label: 'Pending', value: loans.filter((l) => l.status === 'pending').length, color: 'text-yellow-600' },
-                        { label: 'Approved', value: loans.filter((l) => l.status === 'approved').length, color: 'text-blue-600' },
-                        { label: 'Active Loans', value: loans.filter((l) => l.status === 'approved').length, color: 'text-blue-600' },
-                        { label: 'Returned', value: loans.filter((l) => l.status === 'returned').length, color: 'text-green-600' },
-                    ].map((s) => (
-                        <div key={s.label} className="rounded-xl border bg-card p-4">
-                            <p className="text-sm text-muted-foreground">{s.label}</p>
-                            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-                        </div>
-                    ))}
+                    <div className="rounded-xl border bg-card p-4">
+                        <p className="text-sm text-muted-foreground">Pending</p>
+                        <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                    </div>
+                    <div className="rounded-xl border bg-card p-4">
+                        <p className="text-sm text-muted-foreground">Active Loans</p>
+                        <p className="text-2xl font-bold text-blue-600">{stats.approved}</p>
+                    </div>
+                    <div className="rounded-xl border bg-card p-4">
+                        <p className="text-sm text-muted-foreground">Overdue</p>
+                        <p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                            {stats.overdue}
+                            {stats.overdue > 0 && <AlertTriangle className="inline h-5 w-5 ml-1 animate-pulse text-red-500" />}
+                        </p>
+                    </div>
+                    <div className="rounded-xl border bg-card p-4">
+                        <p className="text-sm text-muted-foreground">Returned</p>
+                        <p className="text-2xl font-bold text-green-600">{stats.returned}</p>
+                    </div>
                 </div>
 
                 {/* Filters */}
@@ -109,7 +145,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     </Select>
                 </div>
 
-                {/* Table */}
+                {/* Table with duration tracking */}
                 <div className="rounded-xl border bg-card">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -120,6 +156,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     <th className="p-3 text-left font-medium">Asset ID</th>
                                     <th className="p-3 text-left font-medium">Loan Date</th>
                                     <th className="p-3 text-left font-medium">Expected Return</th>
+                                    <th className="p-3 text-left font-medium">Duration</th>
                                     <th className="p-3 text-left font-medium">Condition</th>
                                     <th className="p-3 text-left font-medium">Status</th>
                                 </tr>
@@ -127,49 +164,74 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                             <tbody>
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="p-12 text-center text-muted-foreground">
+                                        <td colSpan={8} className="p-12 text-center text-muted-foreground">
                                             <Package className="mx-auto h-12 w-12 mb-3 opacity-30" />
                                             <p>No loan requests found</p>
                                         </td>
                                     </tr>
                                 ) : (
-                                    filtered.map((loan) => (
-                                        <tr key={loan.id} className="border-b last:border-0 hover:bg-muted/30">
-                                            <td className="p-3">
-                                                <Link href={`/requests/${loan.id}?is_loan=true`} className="text-primary hover:underline font-mono text-sm font-medium">
-                                                    {loan.loan_id}
-                                                </Link>
-                                            </td>
-                                            <td className="p-3">
-                                                <p className="font-medium">{loan.asset_name || '—'}</p>
-                                            </td>
-                                            <td className="p-3">
-                                                <p className="text-xs text-muted-foreground font-mono">{loan.asset_id || '—'}</p>
-                                            </td>
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-1.5 text-sm">
-                                                    <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    {formatDate(loan.loan_date)}
-                                                </div>
-                                            </td>
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-1.5 text-sm">
-                                                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    {formatDate(loan.expected_return_date)}
-                                                </div>
-                                            </td>
-                                            <td className="p-3">
-                                                <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionColors[loan.condition_status] || 'bg-gray-100 text-gray-800'}`}>
-                                                    {loan.condition_status?.replace('_', ' ') || '—'}
-                                                </span>
-                                            </td>
-                                            <td className="p-3">
-                                                <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'bg-gray-100 text-gray-800'}`}>
-                                                    {loan.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))
+                                    filtered.map((loan) => {
+                                        const duration = calcDaysRemaining(loan.expected_return_date);
+                                        const isActiveApproved = loan.status === 'approved';
+                                        return (
+                                            <tr
+                                                key={loan.id}
+                                                className={`border-b last:border-0 hover:bg-muted/30 transition-colors ${
+                                                    duration.isOverdue && isActiveApproved ? 'bg-red-50/50' : ''
+                                                }`}
+                                            >
+                                                <td className="p-3">
+                                                    <Link href={`/requests/${loan.id}?is_loan=true`} className="text-primary hover:underline font-mono text-sm font-medium">
+                                                        {loan.loan_id}
+                                                    </Link>
+                                                </td>
+                                                <td className="p-3">
+                                                    <p className="font-medium">{loan.asset_name || '—'}</p>
+                                                </td>
+                                                <td className="p-3">
+                                                    <p className="text-xs text-muted-foreground font-mono">{loan.asset_id || '—'}</p>
+                                                </td>
+                                                <td className="p-3">
+                                                    <div className="flex items-center gap-1.5 text-sm">
+                                                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                                        {formatDate(loan.loan_date)}
+                                                    </div>
+                                                </td>
+                                                <td className="p-3">
+                                                    <div className="flex items-center gap-1.5 text-sm">
+                                                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                                        {formatDate(loan.expected_return_date)}
+                                                    </div>
+                                                </td>
+                                                <td className="p-3">
+                                                    {isActiveApproved ? (
+                                                        <span className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                                                            duration.isOverdue ? 'text-red-600' : 'text-emerald-600'
+                                                        }`}>
+                                                            {duration.isOverdue ? (
+                                                                <AlertTriangle className="h-3.5 w-3.5" />
+                                                            ) : (
+                                                                <Hourglass className="h-3.5 w-3.5" />
+                                                            )}
+                                                            {duration.label}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="p-3">
+                                                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionColors[loan.condition_status] || 'bg-gray-100 text-gray-800'}`}>
+                                                        {loan.condition_status?.replace('_', ' ') || '—'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-3">
+                                                    <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'bg-gray-100 text-gray-800'}`}>
+                                                        {loan.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>

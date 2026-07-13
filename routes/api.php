@@ -84,4 +84,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/bulk-restore', [\App\Http\Controllers\Api\RecycleBinApiController::class, 'bulkRestore']);
         Route::post('/bulk-delete', [\App\Http\Controllers\Api\RecycleBinApiController::class, 'bulkForceDelete']);
     });
+
+    // Quick loan from inventory page
+    Route::post('/loans/quick', [\App\Http\Controllers\AssetLoanController::class, 'quickStore']);
 });

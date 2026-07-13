@@ -29,6 +29,17 @@ class AssetLoan extends Model
         'returned_at' => 'datetime',
     ];
 
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('status', 'approved')
+            ->where('expected_return_date', '<', now());
+    }
+
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);

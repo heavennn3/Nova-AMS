@@ -4,8 +4,10 @@ import { DataTable } from '@/components/data-table/data-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Plus, Edit, Trash2, Search, Upload, Package, Building2, Layers, Clock, Loader2,
+    HandCoins, Calendar, User, AlertTriangle,
 } from 'lucide-react';
 import {
     Select,
@@ -22,6 +24,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import Papa from 'papaparse';
 import { toast } from 'sonner';
 
@@ -37,9 +40,11 @@ export default function AssetInventory({
     totalSites = 0,
     typeSummary = [],
     totalRecentAdded = 0,
+    loanStats = { active: 0, overdue: 0, pending: 0 },
 }: any) {
     const { props } = usePage();
-    const { flash } = props as any;
+    const { flash, auth } = props as any;
+    const isAdmin = auth?.user?.is_admin ?? auth?.user?.roles?.includes('Admin') ?? false;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -49,7 +54,7 @@ export default function AssetInventory({
     const [search, setSearch] = useState('');
     const [siteFilter, setSiteFilter] = useState(currentSiteId || 'all');
 
-    // ── Create Modal ──
+    // ── Create Asset Modal ──
     const [showCreate, setShowCreate] = useState(false);
     const [creating, setCreating] = useState(false);
     const [refs, setRefs] = useState<{ categories: any[]; types: any[]; oems: any[] }>({
@@ -61,6 +66,16 @@ export default function AssetInventory({
         part_number: '', quantity: '',
     });
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+    // ── Loan Request Modal ──
+    const [showLoan, setShowLoan] = useState(false);
+    const [loanSubmitting, setLoanSubmitting] = useState(false);
+    const [loanForm, setLoanForm] = useState({
+        asset_ids: [] as number[],
+        expected_return_date: '',
+        purpose: '',
+        notes: '',
+    });
 
     const openCreateModal = useCallback(async () => {
         setShowCreate(true);
@@ -125,6 +140,45 @@ export default function AssetInventory({
         }
     };
 
+    const openLoanModal = () => {
+        setLoanForm({ asset_ids: [], expected_return_date: '', purpose: '', notes: '' });
+        setShowLoan(true);
+    };
+
+    const toggleLoanAsset = (id: number) => {
+        setLoanForm(prev => ({
+            ...prev,
+            asset_ids: prev.asset_ids.includes(id)
+                ? prev.asset_ids.filter(a => a !== id)
+                : [...prev.asset_ids, id],
+        }));
+    };
+
+    const submitLoan = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (loanForm.asset_ids.length === 0) { toast.error('Pick at least one asset.'); return; }
+        if (!loanForm.expected_return_date) { toast.error('Expected return date required.'); return; }
+        if (!loanForm.purpose.trim()) { toast.error('Purpose required.'); return; }
+
+        setLoanSubmitting(true);
+        try {
+            const res = await fetch('/api/loans/quick', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+                body: JSON.stringify(loanForm),
+            });
+            const data = await res.json();
+            if (!res.ok) { toast.error(data.message || 'Failed to submit loan'); return; }
+            toast.success(data.message || 'Loan request submitted!');
+            setShowLoan(false);
+            router.reload({ only: ['assets'] });
+        } catch {
+            toast.error('Network error');
+        } finally {
+            setLoanSubmitting(false);
+        }
+    };
+
     const handleSiteFilterChange = (value: string) => {
         setSiteFilter(value);
         if (value === 'all') {
@@ -174,6 +228,38 @@ export default function AssetInventory({
                         >
                             {val}
                         </span>
+                    );
+                },
+            },
+            {
+                id: 'loan_status',
+                header: 'Loan Status',
+                cell: ({ row }: any) => {
+                    const ls = row.original.loan_status;
+                    if (ls === 'on_loan') {
+                        return (
+                            <div className="flex items-center gap-1.5">
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1">
+                                    <User className="h-3 w-3" /> On Loan
+                                </Badge>
+                                {row.original.loan_return_date && (
+                                    <span className="text-[11px] text-muted-foreground">due {row.original.loan_return_date}</span>
+                                )}
+                            </div>
+                        );
+                    }
+                    if (ls === 'overdue') {
+                        return (
+                            <div className="flex items-center gap-1.5">
+                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1 animate-pulse">
+                                    <AlertTriangle className="h-3 w-3" /> Overdue!
+                                </Badge>
+                                <span className="text-[11px] text-red-500">{row.original.loan_user_name}</span>
+                            </div>
+                        );
+                    }
+                    return (
+                        <span className="text-xs text-muted-foreground">Available</span>
                     );
                 },
             },
@@ -228,6 +314,13 @@ export default function AssetInventory({
 
         return result;
     }, [assets, search, siteFilter]);
+
+    // ── Available-for-loan subset ──
+    const availableForLoan = useMemo(() => {
+        return filteredAssets.filter((a: any) =>
+            !a.loan_status && String(a.status ?? '').toLowerCase() === 'stored'
+        );
+    }, [filteredAssets]);
 
     // ── CSV Import ──
 
@@ -318,14 +411,17 @@ export default function AssetInventory({
                     <Button variant="outline" size="sm" onClick={openFilePicker}>
                         <Upload className="mr-2 h-4 w-4" /> Import CSV
                     </Button>
+                    <Button size="sm" onClick={openLoanModal}>
+                        <HandCoins className="mr-2 h-4 w-4" /> Request Loan
+                    </Button>
                     <Button size="sm" onClick={openCreateModal}>
                         <Plus className="mr-2 h-4 w-4" /> New Asset
                     </Button>
                 </div>
             </div>
 
-            {/* Metrics cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Metrics cards with loan stats */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-blue-500/10 p-3">
                         <Package className="h-6 w-6 text-blue-600" />
@@ -366,13 +462,27 @@ export default function AssetInventory({
                 </div>
 
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-amber-500/10 p-3">
-                        <Clock className="h-6 w-6 text-amber-600" />
+                    <div className="rounded-full bg-emerald-500/10 p-3">
+                        <HandCoins className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Recently Added</p>
-                        <p className="text-2xl font-bold">{totalRecentAdded}</p>
-                        <p className="text-xs text-muted-foreground">last 30 days</p>
+                        <p className="text-sm text-muted-foreground">Active Loans</p>
+                        <p className="text-2xl font-bold">{loanStats.active}</p>
+                        {loanStats.pending > 0 && (
+                            <p className="text-xs text-amber-600 mt-0.5">{loanStats.pending} pending</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                    <div className={`rounded-full p-3 ${loanStats.overdue > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
+                        <AlertTriangle className={`h-6 w-6 ${loanStats.overdue > 0 ? 'text-red-600' : 'text-amber-600'}`} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">Overdue</p>
+                        <p className={`text-2xl font-bold ${loanStats.overdue > 0 ? 'text-red-600' : ''}`}>
+                            {loanStats.overdue}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -491,6 +601,109 @@ export default function AssetInventory({
                             <Button type="submit" disabled={creating}>
                                 {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {creating ? 'Creating...' : 'Create Asset'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* ── Loan Request Modal ── */}
+            <Dialog open={showLoan} onOpenChange={setShowLoan}>
+                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <form onSubmit={submitLoan}>
+                        <DialogHeader>
+                            <DialogTitle>Request Asset Loan</DialogTitle>
+                            <DialogDescription>
+                                Select available asset(s) to request a loan. Admin will review your request.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-4 py-4">
+                            {/* Asset picker */}
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Select Assets <span className="text-red-500">*</span></Label>
+                                <div className="border rounded-lg max-h-48 overflow-y-auto divide-y">
+                                    {availableForLoan.length === 0 ? (
+                                        <p className="p-4 text-sm text-muted-foreground text-center">No available assets.</p>
+                                    ) : (
+                                        availableForLoan.map((asset: any) => (
+                                            <label
+                                                key={asset.id}
+                                                className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors hover:bg-muted/30 ${
+                                                    loanForm.asset_ids.includes(asset.id) ? 'bg-primary/5' : ''
+                                                }`}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded"
+                                                    checked={loanForm.asset_ids.includes(asset.id)}
+                                                    onChange={() => toggleLoanAsset(asset.id)}
+                                                />
+                                                <span className="font-mono text-xs font-semibold">{asset.asset_id}</span>
+                                                <span className="text-sm text-muted-foreground">{asset.asset_name || asset.type}</span>
+                                            </label>
+                                        ))
+                                    )}
+                                </div>
+                                {loanForm.asset_ids.length > 0 && (
+                                    <p className="text-xs text-muted-foreground">{loanForm.asset_ids.length} asset(s) selected</p>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold">Loan Date</Label>
+                                    <Input
+                                        type="date"
+                                        value={new Date().toISOString().split('T')[0]}
+                                        disabled
+                                        className="bg-muted/30"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Starts today</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold">
+                                        Expected Return Date <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        type="date"
+                                        value={loanForm.expected_return_date}
+                                        onChange={(e) => setLoanForm(prev => ({ ...prev, expected_return_date: e.target.value }))}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Purpose <span className="text-red-500">*</span></Label>
+                                <Textarea
+                                    value={loanForm.purpose}
+                                    onChange={(e) => setLoanForm(prev => ({ ...prev, purpose: e.target.value }))}
+                                    placeholder="Why do you need this asset?"
+                                    className="min-h-[60px]"
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Notes</Label>
+                                <Textarea
+                                    value={loanForm.notes}
+                                    onChange={(e) => setLoanForm(prev => ({ ...prev, notes: e.target.value }))}
+                                    placeholder="Additional info (optional)"
+                                    className="min-h-[60px]"
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setShowLoan(false)} disabled={loanSubmitting}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={loanSubmitting || loanForm.asset_ids.length === 0}>
+                                {loanSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {loanSubmitting ? 'Submitting...' : `Submit Loan (${loanForm.asset_ids.length})`}
                             </Button>
                         </DialogFooter>
                     </form>

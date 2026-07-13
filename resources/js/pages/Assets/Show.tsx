@@ -74,6 +74,13 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
         (a: any) => a.status === 'active'
     );
 
+    // Find active loan (approved)
+    const activeLoan = asset.activeLoan || null;
+    const isOnLoan = !!activeLoan;
+    const loanUser = activeLoan?.user?.name || null;
+    const loanReturnDate = activeLoan?.expected_return_date || null;
+    const isOverdue = loanReturnDate && new Date(loanReturnDate) < new Date();
+
     const fields = asset;
 
     const formatCurrency = (val: any) => {
@@ -109,7 +116,9 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     // Department
     const departmentValue = asset.department || (activeAssignment?.user?.department?.name) || '—';
     // Assigned to
-    const assignedToValue = activeAssignment ? (activeAssignment.user?.name || '—') : '—';
+    const assignedToValue = isOnLoan
+        ? `On loan to ${loanUser}`
+        : (activeAssignment ? (activeAssignment.user?.name || '—') : '—');
     // Location
     const locationValue = asset.location || asset.site?.name || '—';
     // Serial Number

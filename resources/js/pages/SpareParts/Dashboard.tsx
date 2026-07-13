@@ -14,8 +14,9 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, CheckCircle, Plus } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import Papa from 'papaparse';
 
 export default function SparePartsDashboard({
     totalParts = 0,
@@ -37,6 +38,59 @@ export default function SparePartsDashboard({
     sites?: any[];
 }) {
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [importSiteId, setImportSiteId] = useState('all');
+
+    const confirmImport = (importedData: any[]) => {
+        if (!importedData || importedData.length === 0) {
+            toast.error('CSV file is empty.');
+            return;
+        }
+        router.post('/spare-parts/import-bulk',
+            { spare_parts: importedData, site_id: importSiteId === 'all' ? null : importSiteId },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(`Imported ${importedData.length} spare parts!`);
+                    router.reload({ only: ['allParts', 'totalParts', 'categoryData'] });
+                },
+                onError: (err: any) => {
+                    console.error(err);
+                    toast.error(typeof err === 'string' ? err : 'Import failed.');
+                },
+            },
+        );
+    };
+
+    const openFilePicker = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        input.onchange = (e: any) => {
+            const file = e.target?.files?.[0];
+            if (!file) return;
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => confirmImport(results.data),
+            });
+        };
+        input.click();
+    };
+
+    const downloadCsvTemplate = () => {
+        const headers = ['name', 'part_number', 'category', 'site_id', 'location', 'status', 'used_by', 'created_by'];
+        const csvContent = [
+            headers.join(','),
+            'DDR4 16GB RAM,SP-50001,RAM,7,Rack A - Shelf 3,available,,'
+        ].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'spare_parts_template.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const form = useForm({
         name: '',
@@ -69,13 +123,18 @@ export default function SparePartsDashboard({
 
     const sparePartColumns = [
         {
+            accessorKey: 'id',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="ID" />,
+            cell: ({ row }: any) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('id')}</span>,
+        },
+        {
             accessorKey: 'name',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Spare Part Name" />,
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
             cell: ({ row }: any) => <span className="font-semibold">{row.getValue('name')}</span>,
         },
         {
             accessorKey: 'part_number',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Serial Number" />,
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Part Number" />,
             cell: ({ row }: any) => <span className="font-mono">{row.getValue('part_number')}</span>,
         },
         {
@@ -83,12 +142,12 @@ export default function SparePartsDashboard({
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
         },
         {
-            accessorKey: 'location',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Place" />,
-        },
-        {
             accessorKey: 'site_name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Site" />,
+        },
+        {
+            accessorKey: 'location',
+            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Location" />,
         },
         {
             accessorKey: 'status',
@@ -106,16 +165,6 @@ export default function SparePartsDashboard({
                     </span>
                 );
             },
-        },
-        {
-            accessorKey: 'used_by_name',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Used By" />,
-            cell: ({ row }: any) => <span>{row.getValue('used_by_name') ?? '—'}</span>,
-        },
-        {
-            accessorKey: 'created_by_name',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Added By" />,
-            cell: ({ row }: any) => <span>{row.getValue('created_by_name') ?? 'N/A'}</span>,
         },
         {
             id: 'actions',
@@ -156,13 +205,36 @@ export default function SparePartsDashboard({
                     </h1>
                 </div>
 
-                <Button onClick={() => {
-                    form.reset();
-                    setCreateDialogOpen(true);
-                }}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Spare Part
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={downloadCsvTemplate}>
+                        <Download className="mr-2 h-4 w-4" /> CSV Template
+                    </Button>
+                    <div className="flex items-center gap-2">
+                        {sites.length > 0 && (
+                            <Select value={importSiteId} onValueChange={setImportSiteId}>
+                                <SelectTrigger className="h-9 w-[160px] text-sm">
+                                    <SelectValue placeholder="Select site" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {sites.map((s: any) => (
+                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                        <Button variant="outline" size="sm" onClick={openFilePicker}>
+                            <Upload className="mr-2 h-4 w-4" /> Import CSV
+                        </Button>
+                    </div>
+                    <Button onClick={() => {
+                        form.reset();
+                        setCreateDialogOpen(true);
+                    }}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Spare Part
+                    </Button>
+                </div>
             </div>
 
             {/* Stats Cards */}
