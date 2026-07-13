@@ -27,10 +27,12 @@ class AssetLoanController extends Controller
                 
                 if ($loan->asset) {
                     $fields = $loan->asset->getFields();
-                    $assetName = $fields['jenis_aset']
+                    $assetName = $fields['asset_name']
+                        ?? $fields['jenis_aset']
                         ?? $fields['aset_id']
                         ?? 'Unknown';
                     $assetId = $fields['aset_id']
+                        ?? $fields['asset_id']
                         ?? $fields['serial_number']
                         ?? 'N/A';
                 }
@@ -86,6 +88,15 @@ class AssetLoanController extends Controller
                     'id' => $asset->id,
                     'site_id' => $asset->site_id,
                     'fields' => $fields,
+                    'asset_name' => $fields['asset_name'] ?? null,
+                    'asset_id' => $fields['asset_id'] ?? $fields['aset_id'] ?? null,
+                    'serial_number' => $fields['serial_number'] ?? null,
+                    'part_number' => $fields['part_number'] ?? null,
+                    'location' => $fields['location'] ?? null,
+                    'category_name' => $asset->category?->name,
+                    'type_name' => $asset->type?->name,
+                    'oem_name' => $asset->oem?->name,
+                    'site_name' => $asset->site?->name,
                 ];
             });
 
