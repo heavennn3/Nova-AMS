@@ -21,15 +21,9 @@ class LicenseController extends Controller
 
             $siteId = $request->query('site_id');
 
-            if (!$siteId) {
-                $firstSite = \App\Models\Site::orderBy('name')->first();
-                if ($firstSite) {
-                    return redirect()->to('/licenses?site_id=' . $firstSite->id);
-                }
-            }
-
-            $licenses = License::with(['site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset'])
-                ->when($siteId, fn($q) => $q->where('site_id', $siteId))
+            $licenses = License::withoutGlobalScope('site_access')
+                ->with(['site', 'licenseSeats.assignedUser', 'licenseSeats.assignedAsset'])
+                ->when($siteId && $siteId !== 'all', fn($q) => $q->where('site_id', $siteId))
                 ->get()
                 ->map(function ($license) {
                     try {

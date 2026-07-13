@@ -155,10 +155,12 @@ export default function UsersIndex({
 
     const roleColors: Record<string, string> = {
         Admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+        Manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+        Employee: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
         'Site Manager':
-            'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+            'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
         Technician:
-            'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+            'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
         Viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300',
         None: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     };

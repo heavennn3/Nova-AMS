@@ -149,8 +149,8 @@ export default function Dashboards({
 
     const submitRegion = async () => {
         if (!regionForm.name.trim()) {
-return;
-}
+            return;
+        }
 
         setProcessing(true);
 
@@ -164,8 +164,8 @@ return;
                 });
 
                 if (!res.ok) {
-throw new Error((await res.json()).message ?? 'Failed');
-}
+                    throw new Error((await res.json()).message ?? 'Failed');
+                }
 
                 toast.success('Region created');
             } else if (regionModal.mode === 'edit' && regionModal.region) {
@@ -177,8 +177,8 @@ throw new Error((await res.json()).message ?? 'Failed');
                 });
 
                 if (!res.ok) {
-throw new Error((await res.json()).message ?? 'Failed');
-}
+                    throw new Error((await res.json()).message ?? 'Failed');
+                }
 
                 toast.success('Region updated');
             }
@@ -194,8 +194,8 @@ throw new Error((await res.json()).message ?? 'Failed');
 
     const confirmDeleteRegion = async () => {
         if (!deleteRegion) {
-return;
-}
+            return;
+        }
 
         setProcessing(true);
 
@@ -207,8 +207,8 @@ return;
             });
 
             if (!res.ok) {
-throw new Error((await res.json()).message ?? 'Cannot delete');
-}
+                throw new Error((await res.json()).message ?? 'Cannot delete');
+            }
 
             toast.success('Region deleted');
             setDeleteRegion(null);
@@ -238,8 +238,8 @@ throw new Error((await res.json()).message ?? 'Cannot delete');
 
     const submitSite = async () => {
         if (!siteForm.name.trim()) {
-return;
-}
+            return;
+        }
 
         setProcessing(true);
 
@@ -253,8 +253,8 @@ return;
                 });
 
                 if (!res.ok) {
-throw new Error((await res.json()).message ?? 'Failed');
-}
+                    throw new Error((await res.json()).message ?? 'Failed');
+                }
 
                 toast.success('Site created');
             } else if (siteModal.mode === 'edit' && siteModal.site) {
@@ -266,8 +266,8 @@ throw new Error((await res.json()).message ?? 'Failed');
                 });
 
                 if (!res.ok) {
-throw new Error((await res.json()).message ?? 'Failed');
-}
+                    throw new Error((await res.json()).message ?? 'Failed');
+                }
 
                 toast.success('Site updated');
             }
@@ -283,8 +283,8 @@ throw new Error((await res.json()).message ?? 'Failed');
 
     const confirmDeleteSite = async () => {
         if (!deleteSite) {
-return;
-}
+            return;
+        }
 
         setProcessing(true);
 
@@ -296,8 +296,8 @@ return;
             });
 
             if (!res.ok) {
-throw new Error((await res.json()).message ?? 'Cannot delete');
-}
+                throw new Error((await res.json()).message ?? 'Cannot delete');
+            }
 
             toast.success('Site deleted');
             setDeleteSite(null);
@@ -360,8 +360,8 @@ throw new Error((await res.json()).message ?? 'Cannot delete');
     };
 
     if (!mounted) {
-return null;
-}
+        return null;
+    }
 
     return (
         <div className="w-full space-y-6 p-8">
@@ -451,11 +451,10 @@ return null;
                                     onOpenChange={() => toggleExpand(region.id)}
                                 >
                                     <div
-                                        className={`group flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
-                                            expanded.has(region.id)
+                                        className={`group flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${expanded.has(region.id)
                                                 ? 'bg-muted/50 shadow-sm'
                                                 : 'hover:bg-muted/30'
-                                        }`}
+                                            }`}
                                     >
                                         <CollapsibleTrigger asChild>
                                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
@@ -481,6 +480,7 @@ return null;
                                             <div className="flex items-center gap-4 text-xs text-muted-foreground mt-0.5">
                                                 <span>{region.users_count} users</span>
                                                 <span>{region.assets_count} assets</span>
+
                                             </div>
                                         </div>
 
@@ -654,8 +654,8 @@ return null;
                             {processing
                                 ? 'Saving...'
                                 : regionModal.mode === 'create'
-                                  ? 'Create'
-                                  : 'Update'}
+                                    ? 'Create'
+                                    : 'Update'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -756,8 +756,8 @@ return null;
                             {processing
                                 ? 'Saving...'
                                 : siteModal.mode === 'create'
-                                  ? 'Create Site'
-                                  : 'Update Site'}
+                                    ? 'Create Site'
+                                    : 'Update Site'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

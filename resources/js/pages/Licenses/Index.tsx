@@ -55,12 +55,15 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
     useEffect(() => {
         try {
+            console.log('Licenses data received:', licenses);
             if (!Array.isArray(licenses)) {
                 setError('Invalid data format received from server');
             } else {
+                console.log('Total licenses:', licenses.length);
                 setError(null);
             }
         } catch (e) {
+            console.error('Error processing license data:', e);
             setError('Error processing license data');
         }
     }, [licenses]);
