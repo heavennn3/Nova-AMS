@@ -69,8 +69,10 @@ class AssetTrackingController extends Controller
             }
         }
 
-        $availableAssets = Asset::with(['category', 'site'])
-            ->where('status', 'available')
+        $availableAssets = Asset::with(['category', 'site', 'status'])
+            ->whereHas('status', function ($status) {
+                $status->whereRaw('LOWER(TRIM(name)) = ?', ['available']);
+            })
             ->get()
             ->map(fn($asset) => [
                 'id'           => $asset->id,
@@ -79,7 +81,7 @@ class AssetTrackingController extends Controller
                 'category'     => $asset->category?->name,
                 'site_id'      => $asset->site_id,
                 'site_name'    => $asset->site?->name,
-                'status'       => $asset->status,
+                'status'       => $asset->status?->name,
             ]);
 
         $users = User::with('sites')->select('id', 'name', 'email')->orderBy('name')->get()->map(fn($u) => [
@@ -153,8 +155,10 @@ class AssetTrackingController extends Controller
             ->get()
             ->map(fn($a) => $this->formatAssignment($a));
 
-        $availableAssets = Asset::with(['category', 'site'])
-            ->where('status', 'available')
+        $availableAssets = Asset::with(['category', 'site', 'status'])
+            ->whereHas('status', function ($status) {
+                $status->whereRaw('LOWER(TRIM(name)) = ?', ['available']);
+            })
             ->get()
             ->map(fn($asset) => [
                 'id'           => $asset->id,
@@ -163,13 +167,15 @@ class AssetTrackingController extends Controller
                 'category'     => $asset->category?->name,
                 'site_id'      => $asset->site_id,
                 'site_name'    => $asset->site?->name,
-                'status'       => $asset->status,
+                'status'       => $asset->status?->name,
             ]);
 
         $stats = [
             'total_assets'   => Asset::count(),
             'in_use'         => AssetAssignment::active()->count(),
-            'available'      => Asset::where('status', 'available')->count(),
+            'available'      => Asset::whereHas('status', function ($status) {
+                $status->whereRaw('LOWER(TRIM(name)) = ?', ['available']);
+            })->count(),
             'returned_today' => AssetAssignment::whereDate('returned_at', today())
                                     ->where('status', 'returned')->count(),
             'total_history'  => AssetAssignment::where('status', 'returned')->count(),

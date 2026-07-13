@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -14,11 +15,14 @@ class UserController extends Controller
         $users = User::with('roles')->get()
             ->filter(fn($user) => !$user->hasRole('Admin'))
             ->map(function ($user) {
+                $roleName = $user->roles->pluck('name')->first() ?? 'None';
+
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->roles->pluck('name')->first() ?? 'None',
+                    'role_id' => $user->role_id,
+                    'role' => $roleName,
                     'site_id' => $user->site_id,
                     'site_name' => $user->site?->name,
                     'is_active' => (bool) $user->is_active,
@@ -38,18 +42,24 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('Users/Create', [
-            'roles' => ['Employee', 'Manager'],
+            'roles' => ['Admin', 'Manager', 'Employee'],
             'sites' => \DB::table('sites')->select('id', 'name')->get(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $roleMap = [
+            '1' => 'Admin',
+            '2' => 'Manager',
+            '3' => 'Employee',
+        ];
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:Employee,Manager',
+            'role_id' => 'required|in:1,2,3',
             'site_id' => 'nullable|exists:sites,id',
         ]);
 
@@ -62,9 +72,9 @@ class UserController extends Controller
 
         $user = User::create($userData);
 
-        if (!empty($validated['role'])) {
-            $user->assignRole($validated['role']);
-        }
+        $roleName = $roleMap[$validated['role_id']];
+        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+        $user->assignRole($role);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -76,21 +86,28 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role_id' => $user->role_id,
                 'role' => $user->roles->pluck('name')->first() ?? '',
                 'site_id' => $user->site_id,
             ],
-            'roles' => ['Employee', 'Manager'],
+            'roles' => ['Admin', 'Manager', 'Employee'],
             'sites' => \DB::table('sites')->select('id', 'name')->get(),
         ]);
     }
 
     public function update(Request $request, User $user)
     {
+        $roleMap = [
+            '1' => 'Admin',
+            '2' => 'Manager',
+            '3' => 'Employee',
+        ];
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|string|in:Employee,Manager',
+            'role_id' => 'required|in:1,2,3',
             'site_id' => 'nullable|exists:sites,id',
         ]);
 
@@ -104,9 +121,9 @@ class UserController extends Controller
 
         $user->save();
 
-        if (!empty($validated['role'])) {
-            $user->syncRoles([$validated['role']]);
-        }
+        $roleName = $roleMap[$validated['role_id']];
+        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+        $user->syncRoles([$role]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }

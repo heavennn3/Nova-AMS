@@ -63,8 +63,8 @@ type ConfirmAction = {
 
 function userBelongsToSite(user: UserType, siteId: number): boolean {
     if (!user.site_id) {
-return true;
-}
+        return true;
+    }
 
     return user.site_id === siteId;
 }
@@ -94,8 +94,8 @@ export default function UsersIndex({
 
     const siteScopedUsers = useMemo(() => {
         if (selectedSiteId === 'all') {
-return users;
-}
+            return users;
+        }
 
         const siteId = parseInt(selectedSiteId, 10);
 
@@ -179,8 +179,8 @@ return users;
 
     const executeConfirmAction = () => {
         if (!confirmAction) {
-return;
-}
+            return;
+        }
 
         const { type, user } = confirmAction;
 
@@ -254,42 +254,8 @@ return;
                     );
                 },
             },
-            {
-                accessorKey: 'phone',
-                headerText: 'Phone',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Phone" />
-                ),
-                cell: ({ row }: any) => {
-                    const phone = row.original.phone;
 
-                    return phone ? (
-                        <span className="text-sm">{phone}</span>
-                    ) : (
-                        <span className="text-xs text-muted-foreground italic">
-                            —
-                        </span>
-                    );
-                },
-            },
-            {
-                accessorKey: 'ic_number',
-                headerText: 'IC Number',
-                header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="IC Number" />
-                ),
-                cell: ({ row }: any) => {
-                    const ic = row.original.ic_number;
 
-                    return ic ? (
-                        <span className="font-mono text-sm">{ic}</span>
-                    ) : (
-                        <span className="text-xs text-muted-foreground italic">
-                            —
-                        </span>
-                    );
-                },
-            },
             {
                 accessorKey: 'role',
                 headerText: 'Role',

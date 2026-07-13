@@ -24,6 +24,7 @@ type UserType = {
     id: number;
     name: string;
     email: string;
+    role_id: number | null;
     role: string;
     site_id: number | null;
     is_active: boolean;
@@ -61,7 +62,7 @@ export function UserFormDialog({
             email: user?.email || '',
             password: '',
             password_confirmation: '',
-            role: user?.role === 'None' ? '' : user?.role || '',
+            role_id: user?.role_id?.toString() || '',
             site_id: user?.site_id?.toString() || '',
         });
 
@@ -75,7 +76,7 @@ export function UserFormDialog({
                 email: user?.email || '',
                 password: '',
                 password_confirmation: '',
-                role: user?.role === 'None' ? '' : user?.role || '',
+                role_id: user?.role_id?.toString() || '',
                 site_id: user?.site_id?.toString() || '',
             } as any);
         }
@@ -184,24 +185,24 @@ export function UserFormDialog({
                             <Label>Role *</Label>
                             {mounted && (
                                 <Select
-                                    value={data.role}
-                                    onValueChange={(val) => setData('role', val)}
+                                    value={data.role_id}
+                                    onValueChange={(val) => setData('role_id', val)}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select role" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {['Employee', 'Manager'].map((role) => (
-                                            <SelectItem key={role} value={role}>
+                                        {roles.map((role, index) => (
+                                            <SelectItem key={role} value={String(index + 1)}>
                                                 {role}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             )}
-                            {errors.role && (
+                            {errors.role_id && (
                                 <p className="text-xs text-red-500">
-                                    {errors.role}
+                                    {errors.role_id}
                                 </p>
                             )}
                         </div>

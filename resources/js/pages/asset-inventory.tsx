@@ -48,16 +48,19 @@ export default function AssetInventory({
 
     useEffect(() => {
         if (flash?.success) {
-toast.success(flash.success);
-}
+            toast.success(flash.success);
+        }
 
         if (flash?.warning) {
-toast.warning(flash.warning);
-}
+            toast.warning(flash.warning);
+        }
     }, [flash]);
 
     const [search, setSearch] = useState('');
     const [siteFilter, setSiteFilter] = useState(currentSiteId || 'all');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     // ── Create Asset Modal ──
     const [showCreate, setShowCreate] = useState(false);
@@ -109,8 +112,8 @@ toast.warning(flash.warning);
         setForm((prev) => ({ ...prev, [key]: value }));
 
         if (formErrors[key]) {
-setFormErrors((prev) => ({ ...prev, [key]: '' }));
-}
+            setFormErrors((prev) => ({ ...prev, [key]: '' }));
+        }
     };
 
     const handleCreate = async (e: React.FormEvent) => {
@@ -177,22 +180,22 @@ setFormErrors((prev) => ({ ...prev, [key]: '' }));
         e.preventDefault();
 
         if (loanForm.asset_ids.length === 0) {
- toast.error('Pick at least one asset.');
+            toast.error('Pick at least one asset.');
 
- return; 
-}
+            return;
+        }
 
         if (!loanForm.expected_return_date) {
- toast.error('Expected return date required.');
+            toast.error('Expected return date required.');
 
- return; 
-}
+            return;
+        }
 
         if (!loanForm.purpose.trim()) {
- toast.error('Purpose required.');
+            toast.error('Purpose required.');
 
- return; 
-}
+            return;
+        }
 
         setLoanSubmitting(true);
 
@@ -205,10 +208,10 @@ setFormErrors((prev) => ({ ...prev, [key]: '' }));
             const data = await res.json();
 
             if (!res.ok) {
- toast.error(data.message || 'Failed to submit loan');
+                toast.error(data.message || 'Failed to submit loan');
 
- return; 
-}
+                return;
+            }
 
             toast.success(data.message || 'Loan request submitted!');
             setShowLoan(false);
@@ -234,7 +237,7 @@ setFormErrors((prev) => ({ ...prev, [key]: '' }));
         const cols: any[] = [
             {
                 id: 'no',
-                header: '#',
+                header: 'No',
                 cell: ({ row }: any) => <span className="text-muted-foreground text-sm">{row.index + 1}</span>,
                 enableSorting: false,
             },
@@ -344,11 +347,23 @@ setFormErrors((prev) => ({ ...prev, [key]: '' }));
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
             if (siteFilter === 'all') {
-return true;
-}
+                return true;
+            }
 
             return String(a.site_id) === siteFilter;
         });
+
+        if (categoryFilter !== 'all') {
+            result = result.filter((a: any) => String(a.category_name ?? a.category ?? '').toLowerCase() === categoryFilter);
+        }
+
+        if (typeFilter !== 'all') {
+            result = result.filter((a: any) => String(a.type_name ?? a.type ?? '').toLowerCase() === typeFilter);
+        }
+
+        if (statusFilter !== 'all') {
+            result = result.filter((a: any) => String(a.status ?? a.asset_status ?? '').toLowerCase() === statusFilter);
+        }
 
         const q = search.toLowerCase();
 
@@ -364,7 +379,7 @@ return true;
         }
 
         return result;
-    }, [assets, search, siteFilter]);
+    }, [assets, search, siteFilter, categoryFilter, typeFilter, statusFilter]);
 
     // ── Available-for-loan subset ──
     const availableForLoan = useMemo(() => {
@@ -407,8 +422,8 @@ return true;
             const file = e.target?.files?.[0];
 
             if (!file) {
-return;
-}
+                return;
+            }
 
             Papa.parse(file, {
                 header: true,
@@ -551,6 +566,48 @@ return;
                         className="h-8 pl-8 text-sm"
                     />
                 </div>
+
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-8 w-[180px] text-sm">
+                        <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {[...(new Set((assets || []).map((a: any) => String(a.category_name ?? a.category ?? '').trim()).filter(Boolean)))].map((category) => (
+                            <SelectItem key={category} value={category.toLowerCase()}>
+                                {category}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="h-8 w-[180px] text-sm">
+                        <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        {[...(new Set((assets || []).map((a: any) => String(a.type_name ?? a.type ?? '').trim()).filter(Boolean)))].map((type) => (
+                            <SelectItem key={type} value={type.toLowerCase()}>
+                                {type}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 w-[180px] text-sm">
+                        <SelectValue placeholder="All Statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        {[...(new Set((assets || []).map((a: any) => String(a.status ?? a.asset_status ?? '').trim()).filter(Boolean)))].map((status) => (
+                            <SelectItem key={status} value={status.toLowerCase()}>
+                                {status}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
                 {sites.length > 0 && (
                     <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
