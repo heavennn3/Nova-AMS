@@ -27,6 +27,8 @@ interface Asset {
     asset_id: string;
     product_name: string;
     site_id: number;
+    category: string;
+    status: string;
 }
 
 interface Site {
@@ -61,20 +63,32 @@ export default function Transfers({
 }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
+    const [fromSiteId, setFromSiteId] = useState('all');
+    const [assetCategory, setAssetCategory] = useState('all');
+    const [assetStatus, setAssetStatus] = useState('available');
+    const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
 
     const { data, setData, post, processing, reset, errors } = useForm({
-        asset_id: '',
+        asset_ids: [] as number[],
         to_site_id: '',
         notes: '',
     });
 
     const [assetSearch, setAssetSearch] = useState('');
+    const assetCategories = useMemo(() => [...new Set(assets.map(asset => asset.category).filter(Boolean))], [assets]);
     const filteredAssets = useMemo(() => {
-        return assets.filter(asset =>
-            (asset.product_name || '').toLowerCase().includes(assetSearch.toLowerCase()) ||
-            (asset.asset_id || '').toLowerCase().includes(assetSearch.toLowerCase())
-        );
-    }, [assets, assetSearch]);
+        return assets.filter(asset => {
+            const q = assetSearch.toLowerCase();
+            const matchesSearch = !q ||
+                (asset.product_name || '').toLowerCase().includes(q) ||
+                (asset.asset_id || '').toLowerCase().includes(q);
+            const matchesSite = fromSiteId === 'all' || String(asset.site_id) === fromSiteId;
+            const matchesCategory = assetCategory === 'all' || asset.category === assetCategory;
+            const matchesStatus = assetStatus === 'all' || asset.status === assetStatus;
+
+            return matchesSearch && matchesSite && matchesCategory && matchesStatus;
+        });
+    }, [assets, assetSearch, fromSiteId, assetCategory, assetStatus]);
 
     const counts = useMemo(() => ({
         pending: transfers.filter(t => t.status === 'pending').length,
@@ -101,9 +115,15 @@ export default function Transfers({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/multi-site/transfers', {
+        router.post('/multi-site/transfers', {
+            asset_ids: selectedAssetIds,
+            to_site_id: data.to_site_id,
+            notes: data.notes,
+        }, {
+            preserveScroll: true,
             onSuccess: () => {
                 reset();
+                setSelectedAssetIds([]);
                 setAssetSearch('');
                 toast.success('Transfer requested');
             },
@@ -183,7 +203,51 @@ export default function Transfers({
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold">Select Asset</label>
+                                <label className="text-xs font-semibold">Source Site</label>
+                                <select
+                                    className="w-full text-xs rounded-md border border-input bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-ring"
+                                    value={fromSiteId}
+                                    onChange={(e) => {
+                                        setFromSiteId(e.target.value);
+                                        setSelectedAssetIds([]);
+                                    }}
+                                >
+                                    <option value="all">All Sites</option>
+                                    {sites.map(site => (
+                                        <option key={site.id} value={site.id}>{site.name} ({site.code})</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold">Category</label>
+                                    <select
+                                        className="w-full text-xs rounded-md border border-input bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-ring"
+                                        value={assetCategory}
+                                        onChange={(e) => setAssetCategory(e.target.value)}
+                                    >
+                                        <option value="all">All Categories</option>
+                                        {assetCategories.map(category => (
+                                            <option key={category} value={category}>{category}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold">Status</label>
+                                    <select
+                                        className="w-full text-xs rounded-md border border-input bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-ring"
+                                        value={assetStatus}
+                                        onChange={(e) => setAssetStatus(e.target.value)}
+                                    >
+                                        <option value="available">Available</option>
+                                        <option value="all">All Status</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold">Select Asset ({selectedAssetIds.length})</label>
                                 <div className="space-y-2">
                                     <div className="relative">
                                         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -194,26 +258,36 @@ export default function Transfers({
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssetSearch(e.target.value)}
                                         />
                                     </div>
-                                    <select
-                                        className="w-full text-xs rounded-md border border-input bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-ring"
-                                        value={data.asset_id}
-                                        onChange={(e) => setData('asset_id', e.target.value)}
-                                        required
-                                    >
-                                        <option value="">-- Choose Asset --</option>
-                                        {filteredAssets.map(asset => {
+                                    <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border p-2">
+                                        {filteredAssets.length === 0 ? (
+                                            <p className="py-6 text-center text-xs text-muted-foreground">No available assets found</p>
+                                        ) : filteredAssets.map(asset => {
                                             const site = sites.find(s => s.id === asset.site_id);
+                                            const checked = selectedAssetIds.includes(asset.id);
 
                                             return (
-                                                <option key={asset.id} value={asset.id}>
-                                                    {asset.asset_id || `ID: ${asset.id}`} - {asset.product_name}
-                                                    {site ? ` [${site.name}]` : ''}
-                                                </option>
+                                                <label key={asset.id} className="flex cursor-pointer items-start gap-2 rounded p-2 text-xs hover:bg-muted/50">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="mt-0.5"
+                                                        checked={checked}
+                                                        onChange={(e) => {
+                                                            setSelectedAssetIds(e.target.checked
+                                                                ? [...selectedAssetIds, asset.id]
+                                                                : selectedAssetIds.filter(id => id !== asset.id)
+                                                            );
+                                                        }}
+                                                    />
+                                                    <span className="min-w-0">
+                                                        <span className="block font-semibold">{asset.asset_id || `ID: ${asset.id}`} - {asset.product_name}</span>
+                                                        <span className="block text-muted-foreground">{site?.name || 'No site'} • {asset.category} • {asset.status}</span>
+                                                    </span>
+                                                </label>
                                             );
                                         })}
-                                    </select>
+                                    </div>
                                 </div>
-                                {errors.asset_id && <p className="text-[10px] text-destructive">{errors.asset_id}</p>}
+                                {errors.asset_ids && <p className="text-[10px] text-destructive">{errors.asset_ids}</p>}
                             </div>
 
                             <div className="space-y-2">
@@ -248,7 +322,7 @@ export default function Transfers({
                             <Button
                                 type="submit"
                                 className="w-full text-xs h-9"
-                                disabled={processing || !data.asset_id || !data.to_site_id}
+                                disabled={processing || selectedAssetIds.length === 0 || !data.to_site_id}
                             >
                                 <ArrowRightLeft className="mr-2 h-3.5 w-3.5" />
                                 {processing ? 'Submitting...' : 'Submit Transfer'}

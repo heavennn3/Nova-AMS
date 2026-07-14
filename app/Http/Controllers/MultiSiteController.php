@@ -87,7 +87,17 @@ class MultiSiteController extends Controller
 
         return Inertia::render('MultiSite/Transfers', [
             'sites' => Site::all(),
-            'assets' => Asset::all(),
+            'assets' => Asset::with(['site', 'category', 'status'])
+                ->whereHas('status', fn($status) => $status->whereRaw('LOWER(TRIM(name)) = ?', ['available']))
+                ->get()
+                ->map(fn($asset) => [
+                    'id' => $asset->id,
+                    'asset_id' => $asset->asset_id,
+                    'product_name' => $asset->product_name,
+                    'site_id' => $asset->site_id,
+                    'category' => $asset->category?->name ?? 'Uncategorized',
+                    'status' => strtolower($asset->status?->name ?? 'available'),
+                ]),
             'transfers' => $transfers
         ]);
     }
@@ -95,21 +105,32 @@ class MultiSiteController extends Controller
     public function storeTransfer(Request $request)
     {
         $request->validate([
-            'asset_id' => 'required|exists:assets,id',
+            'asset_ids' => 'required|array|min:1',
+            'asset_ids.*' => 'exists:assets,id',
             'to_site_id' => 'required|exists:sites,id',
             'notes' => 'nullable|string',
         ]);
 
-        $asset = Asset::findOrFail($request->asset_id);
+        foreach ($request->asset_ids as $assetId) {
+            $asset = Asset::with('status')->findOrFail($assetId);
 
-        \App\Models\AssetTransfer::create([
-            'asset_id' => $request->asset_id,
-            'from_site_id' => $asset->site_id,
-            'to_site_id' => $request->to_site_id,
-            'requested_by' => auth()->id(),
-            'status' => 'pending',
-            'notes' => $request->notes,
-        ]);
+            if (strtolower($asset->status?->name ?? '') !== 'available') {
+                continue;
+            }
+
+            if ((int) $asset->site_id === (int) $request->to_site_id) {
+                continue;
+            }
+
+            \App\Models\AssetTransfer::create([
+                'asset_id' => $asset->id,
+                'from_site_id' => $asset->site_id,
+                'to_site_id' => $request->to_site_id,
+                'requested_by' => auth()->id(),
+                'status' => 'pending',
+                'notes' => $request->notes,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Asset transfer workflow initiated successfully.');
     }
@@ -123,14 +144,16 @@ class MultiSiteController extends Controller
         $transfer = \App\Models\AssetTransfer::findOrFail($id);
         $transfer->status = $request->status;
 
-        if ($request->status === 'approved' || $request->status === 'completed') {
+        if ($request->status === 'approved') {
             $transfer->approved_by = auth()->id();
             $transfer->transfer_date = now();
 
-            // Actually execute the asset move inside the database!
             $asset = Asset::findOrFail($transfer->asset_id);
             $asset->site_id = $transfer->to_site_id;
             $asset->save();
+            $transfer->status = 'completed';
+        } elseif ($request->status === 'completed') {
+            $transfer->transfer_date = now();
         }
 
         $transfer->save();
