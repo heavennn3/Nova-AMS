@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AssetController extends Controller
@@ -159,6 +160,22 @@ class AssetController extends Controller
             'asset' => $asset,
             'users' => $users,
         ]);
+    }
+
+    public function updateImage(Request $request, Asset $asset)
+    {
+        $validated = $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png|max:4096',
+        ]);
+
+        if ($asset->image_path) {
+            Storage::disk('public')->delete($asset->image_path);
+        }
+
+        $path = $validated['image']->store('assets', 'public');
+        $asset->update(['image_path' => $path]);
+
+        return redirect()->back()->with('success', 'Asset image updated.');
     }
 
     public function edit(Asset $asset)

@@ -22,6 +22,7 @@ import {
     LineChart,
     RefreshCw,
     Monitor,
+    Upload,
 } from 'lucide-react';
 import * as React from 'react';
 import { useState } from 'react';
@@ -56,6 +57,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('information');
+    const imageInputRef = React.useRef<HTMLInputElement | null>(null);
 
     // Form setup for Checkout
     const checkoutForm = useForm({
@@ -104,6 +106,22 @@ return '—';
     };
 
     const assetCode = asset.asset_id || `AS-${asset.id}`;
+    const assetImageUrl = asset.image_path ? `/storage/${asset.image_path}` : null;
+
+    const uploadAssetImage = (file?: File) => {
+        if (!file) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+        router.post(`/assets/${asset.id}/image`, formData, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => toast.success('Asset image updated'),
+            onError: () => toast.error('Please upload a JPG or PNG image.'),
+        });
+    };
 
     // Asset Name/Title
     const assetTitle = asset.asset_name || assetCode;
@@ -359,8 +377,12 @@ return;
                 <Card className="lg:col-span-2 border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col justify-between print:col-span-3">
                     <div className="flex flex-col md:flex-row md:items-start gap-6">
                         {/* Rounded Square Asset Icon Container */}
-                        <div className="h-20 w-20 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750 flex items-center justify-center shrink-0">
-                            <Monitor className="h-9 w-9 text-slate-400 dark:text-slate-500" />
+                        <div className="h-20 w-20 overflow-hidden rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750 flex items-center justify-center shrink-0">
+                            {assetImageUrl ? (
+                                <img src={assetImageUrl} alt={assetTitle} className="h-full w-full object-cover" />
+                            ) : (
+                                <Monitor className="h-9 w-9 text-slate-400 dark:text-slate-500" />
+                            )}
                         </div>
 
                         {/* Title, Subtitle, Badges */}
@@ -427,9 +449,29 @@ return;
 
                 {/* Right Card - Asset Hardware (1/3 width) */}
                 <Card className="border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col items-center justify-between print:hidden">
-                    <div className="my-4 flex h-32 w-32 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
-                        <Monitor className="h-16 w-16 text-slate-400 dark:text-slate-500" aria-label="Hardware asset" />
+                    <div className="my-4 flex h-32 w-32 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                        {assetImageUrl ? (
+                            <img src={assetImageUrl} alt={assetTitle} className="h-full w-full object-cover" />
+                        ) : (
+                            <Monitor className="h-16 w-16 text-slate-400 dark:text-slate-500" aria-label="Hardware asset" />
+                        )}
                     </div>
+                    <input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        className="hidden"
+                        onChange={(event) => uploadAssetImage(event.target.files?.[0])}
+                    />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mb-3 h-8 rounded-lg text-xs"
+                        onClick={() => imageInputRef.current?.click()}
+                    >
+                        <Upload className="mr-1.5 h-3.5 w-3.5" /> Upload JPG/PNG
+                    </Button>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 font-mono text-center mb-1">
                         {assetCode}
                     </span>

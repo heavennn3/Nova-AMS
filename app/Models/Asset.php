@@ -13,7 +13,7 @@ class Asset extends Model implements Auditable
     protected $fillable = [
         'asset_id', 'site_id', 'region_id', 'status_id', 'added_by',
         'category_id', 'type_id', 'oem_id', 'location', 'quantity',
-        'asset_name', 'purchase_year', 'serial_number', 'part_number',
+        'asset_name', 'purchase_year', 'serial_number', 'part_number', 'image_path',
     ];
 
     protected function casts(): array
