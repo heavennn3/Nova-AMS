@@ -38,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('assets', \App\Http\Controllers\AssetController::class);
         Route::get('asset-statuses', [\App\Http\Controllers\AssetController::class, 'statuses'])->name('asset-statuses');
         Route::post('assets/bulk-update-status', [\App\Http\Controllers\AssetController::class, 'bulkUpdateStatus'])->name('assets.bulk-status');
+        Route::post('/quick/bulk-delete', [\App\Http\Controllers\Api\QuickApiController::class, 'bulkDelete'])->name('quick.bulk-delete');
 
         // Asset Registration Workflows
         Route::get('/assets/scan', function () {

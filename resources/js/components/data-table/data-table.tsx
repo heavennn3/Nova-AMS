@@ -230,7 +230,7 @@ return;
         const type = resourceType || window.location.pathname.split('/').filter(Boolean).pop() || 'unknown';
 
         toast.promise(
-            fetch('/api/quick/bulk-delete', {
+            fetch('/quick/bulk-delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
