@@ -258,6 +258,14 @@ export default function AssetInventory({
         }
     };
 
+    const updateAssetStatus = (assetId: number, statusId: string) => {
+        router.patch(`/assets/${assetId}/status`, { status_id: Number(statusId) }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Asset status updated'),
+            onError: () => toast.error('Failed to update asset status'),
+        });
+    };
+
     const columns = useMemo(() => {
         const cols: any[] = [
             {
@@ -293,12 +301,31 @@ export default function AssetInventory({
                     const bgColor = row.original.status_color || '#6B7280';
 
                     return (
-                        <span
-                            className="inline-block rounded-md px-2.5 py-1 text-xs font-semibold text-white"
-                            style={{ backgroundColor: bgColor }}
-                        >
-                            {val}
-                        </span>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="inline-block rounded-md px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-80"
+                                    style={{ backgroundColor: bgColor }}
+                                >
+                                    {val}
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-40">
+                                {assetStatuses.map((status: any) => (
+                                    <DropdownMenuItem
+                                        key={status.id}
+                                        onClick={() => updateAssetStatus(row.original.id, String(status.id))}
+                                    >
+                                        <span
+                                            className="mr-2 h-2.5 w-2.5 rounded-full"
+                                            style={{ backgroundColor: status.color || '#6B7280' }}
+                                        />
+                                        {status.name}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     );
                 },
             },
@@ -336,7 +363,7 @@ export default function AssetInventory({
         ];
 
         return cols;
-    }, [openEditModal]);
+    }, [assetStatuses, openEditModal]);
 
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
