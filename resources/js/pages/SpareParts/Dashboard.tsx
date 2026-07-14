@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2 } from 'lucide-react';
 import Papa from 'papaparse';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -45,6 +45,15 @@ export default function SparePartsDashboard({
     const [search, setSearch] = useState('');
     const [categoryPage, setCategoryPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [editPart, setEditPart] = useState<any | null>(null);
+    const [editData, setEditData] = useState({
+        name: '',
+        part_number: '',
+        category: '',
+        location: '',
+        site_id: 'all',
+        status: 'available',
+    });
 
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
@@ -130,6 +139,49 @@ export default function SparePartsDashboard({
             onError: () => {
                 toast.error('Failed to add spare part');
             }
+        });
+    };
+
+    const openEditDialog = (part: any) => {
+        setEditPart(part);
+        setEditData({
+            name: part.name || '',
+            part_number: part.part_number || '',
+            category: part.category || '',
+            location: part.location || '',
+            site_id: part.site_id ? String(part.site_id) : 'all',
+            status: part.status || 'available',
+        });
+    };
+
+    const handleEdit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editPart) {
+            return;
+        }
+
+        router.put(`/spare-parts/${editPart.id}`, {
+            ...editData,
+            site_id: editData.site_id === 'all' ? null : editData.site_id,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditPart(null);
+                toast.success('Spare part updated successfully');
+            },
+            onError: () => toast.error('Failed to update spare part'),
+        });
+    };
+
+    const handleDelete = (part: any) => {
+        if (!confirm(`Delete spare part "${part.name}"?`)) {
+            return;
+        }
+
+        router.delete(`/spare-parts/${part.id}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Spare part deleted successfully'),
+            onError: () => toast.error('Failed to delete spare part'),
         });
     };
 
@@ -225,9 +277,14 @@ export default function SparePartsDashboard({
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <Link href={`/spare-parts/${row.original.id}`} className="text-sm text-primary hover:underline">
-                    View
-                </Link>
+                <div className="flex items-center gap-2">
+                    <Button type="button" size="sm" variant="outline" onClick={() => openEditDialog(row.original)}>
+                        <Edit className="mr-1 h-3.5 w-3.5" /> Edit
+                    </Button>
+                    <Button type="button" size="sm" variant="destructive" onClick={() => handleDelete(row.original)}>
+                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                    </Button>
+                </div>
             ),
         },
     ];
@@ -540,6 +597,68 @@ export default function SparePartsDashboard({
                             <Button type="submit" disabled={form.processing}>
                                 {form.processing ? 'Saving...' : 'Save Part'}
                             </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!editPart} onOpenChange={(open) => !open && setEditPart(null)}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Edit Spare Part</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleEdit} className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Name *</Label>
+                                <Input required value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Part Number *</Label>
+                                <Input required value={editData.part_number} onChange={(e) => setEditData({ ...editData, part_number: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Category *</Label>
+                                <Select value={editData.category} onValueChange={(v) => setEditData({ ...editData, category: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                                    <SelectContent>
+                                        {['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((cat) => (
+                                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Status *</Label>
+                                <Select value={editData.status} onValueChange={(v) => setEditData({ ...editData, status: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="available">Available</SelectItem>
+                                        <SelectItem value="in_used">In Used</SelectItem>
+                                        <SelectItem value="faulty">Faulty</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Site</Label>
+                                <Select value={editData.site_id} onValueChange={(v) => setEditData({ ...editData, site_id: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select site" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Global (All Sites)</SelectItem>
+                                        {sites.map((site: any) => (
+                                            <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Place (Where Kept) *</Label>
+                                <Input required value={editData.location} onChange={(e) => setEditData({ ...editData, location: e.target.value })} />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setEditPart(null)}>Cancel</Button>
+                            <Button type="submit">Save Changes</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
