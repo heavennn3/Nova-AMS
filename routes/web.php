@@ -30,8 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Asset Inventory Module
+    Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
+
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
-        Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
         Route::patch('assets/{asset}/status', [\App\Http\Controllers\AssetController::class, 'updateStatus'])->name('assets.status');

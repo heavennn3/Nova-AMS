@@ -53,7 +53,8 @@ export default function AssetInventory({
 }: any) {
     const { props } = usePage();
     const { flash, auth } = props as any;
-    const isAdmin = auth?.user?.is_admin ?? auth?.user?.roles?.includes('Admin') ?? false;
+    const roles = auth?.user?.roles ?? [];
+    const canManageAssets = roles.includes('Admin') || roles.includes('Manager');
 
     useEffect(() => {
         if (flash?.success) {
@@ -331,7 +332,7 @@ export default function AssetInventory({
                 },
             },
 
-            {
+            ...(canManageAssets ? [{
                 id: 'actions',
                 header: 'Actions',
                 cell: ({ row }: any) => (
@@ -360,11 +361,11 @@ export default function AssetInventory({
                         </Button>
                     </div>
                 ),
-            },
+            }] : []),
         ];
 
         return cols;
-    }, [assetStatuses, openEditModal]);
+    }, [assetStatuses, openEditModal, canManageAssets]);
 
     const filteredAssets = useMemo(() => {
         let result = (assets || []).filter((a: any) => {
@@ -599,16 +600,18 @@ export default function AssetInventory({
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
                 </div>
-                <div className="flex gap-2">
+                {canManageAssets && (
+                    <div className="flex gap-2">
 
-                    <Button variant="outline" size="sm" onClick={openFilePicker}>
-                        <Upload className="mr-2 h-4 w-4" /> Import CSV
-                    </Button>
+                        <Button variant="outline" size="sm" onClick={openFilePicker}>
+                            <Upload className="mr-2 h-4 w-4" /> Import CSV
+                        </Button>
 
-                    <Button size="sm" onClick={openCreateModal}>
-                        <Plus className="mr-2 h-4 w-4" /> New Asset
-                    </Button>
-                </div>
+                        <Button size="sm" onClick={openCreateModal}>
+                            <Plus className="mr-2 h-4 w-4" /> New Asset
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Metrics cards with loan stats */}
@@ -763,7 +766,7 @@ export default function AssetInventory({
                 </div>
             </div>
 
-            <DataTable columns={columns} data={filteredAssets} hideToolbar assetStatuses={assetStatuses} />
+            <DataTable columns={columns} data={filteredAssets} hideToolbar={!canManageAssets} assetStatuses={canManageAssets ? assetStatuses : []} />
 
             {/* ── Create Asset Modal ── */}
             <Dialog open={showCreate} onOpenChange={setShowCreate}>

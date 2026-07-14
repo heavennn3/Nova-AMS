@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2 } from 'lucide-react';
 import Papa from 'papaparse';
 import { useState } from 'react';
@@ -37,6 +37,8 @@ export default function SparePartsDashboard({
     allParts: any[];
     sites?: any[];
 }) {
+    const roles = usePage<any>().props.auth?.user?.roles ?? [];
+    const canManageSpareParts = roles.includes('Admin') || roles.includes('Manager');
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [importSiteId, setImportSiteId] = useState('all');
     const [filterSite, setFilterSite] = useState('all');
@@ -273,7 +275,7 @@ export default function SparePartsDashboard({
                 );
             },
         },
-        {
+        ...(canManageSpareParts ? [{
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
@@ -286,7 +288,7 @@ export default function SparePartsDashboard({
                     </Button>
                 </div>
             ),
-        },
+        }] : []),
     ];
 
     return (
@@ -300,22 +302,24 @@ export default function SparePartsDashboard({
                     </h1>
                 </div>
 
-                <div className="flex items-center gap-2">
-
+                {canManageSpareParts && (
                     <div className="flex items-center gap-2">
 
-                        <Button variant="outline" size="sm" onClick={openFilePicker}>
-                            <Upload className="mr-2 h-4 w-4" /> Import CSV
+                        <div className="flex items-center gap-2">
+
+                            <Button variant="outline" size="sm" onClick={openFilePicker}>
+                                <Upload className="mr-2 h-4 w-4" /> Import CSV
+                            </Button>
+                        </div>
+                        <Button onClick={() => {
+                            form.reset();
+                            setCreateDialogOpen(true);
+                        }}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Spare Part
                         </Button>
                     </div>
-                    <Button onClick={() => {
-                        form.reset();
-                        setCreateDialogOpen(true);
-                    }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Spare Part
-                    </Button>
-                </div>
+                )}
             </div>
 
             {/* ── Stats Cards ── */}
@@ -517,7 +521,7 @@ export default function SparePartsDashboard({
                 <span className="text-xs text-muted-foreground tabular-nums ml-auto">{filteredParts.length} of {allParts.length} items</span>
             </div>
 
-            <DataTable columns={sparePartColumns} data={filteredParts} hideToolbar />
+            <DataTable columns={sparePartColumns} data={filteredParts} hideToolbar={!canManageSpareParts} />
 
             {/* Create Spare Part Dialog */}
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
