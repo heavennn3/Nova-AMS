@@ -149,6 +149,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         active_date: '',
         end_date: '',
         notes: '',
+        status: 'available',
     });
 
     const openEdit = (license: any) => {
@@ -163,6 +164,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             active_date: license.active_date || '',
             end_date: license.end_date || '',
             notes: license.notes || '',
+            status: license.status || 'available',
         });
         setIsEditOpen(true);
     };
@@ -774,6 +776,18 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Duration (months)</label>
                                 <Input type="number" min={1} value={editForm.data.duration_months} onChange={e => editForm.setData('duration_months', e.target.value)} className="h-9" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium">Status</label>
+                                <Select value={editForm.data.status} onValueChange={v => editForm.setData('status', v)}>
+                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="available">Available</SelectItem>
+                                        <SelectItem value="full">Full</SelectItem>
+                                        <SelectItem value="expiring_soon">Expiring Soon</SelectItem>
+                                        <SelectItem value="expired">Expired</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="space-y-1.5 col-span-2">
                                 <label className="text-sm font-medium">Notes</label>

@@ -104,8 +104,8 @@ export default function SimpleLicensesIndex({
 
     const activeLicenses = licenses.filter((lic: any) => {
         if (!lic.expiration_date) {
-return true;
-} // Never expires = active
+            return true;
+        } // Never expires = active
 
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
@@ -115,8 +115,8 @@ return true;
 
     const expiringLicenses = licenses.filter((lic: any) => {
         if (!lic.expiration_date) {
-return false;
-}
+            return false;
+        }
 
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
@@ -127,8 +127,8 @@ return false;
 
     const expiredLicenses = licenses.filter((lic: any) => {
         if (!lic.expiration_date) {
-return false;
-}
+            return false;
+        }
 
         const expiry = new Date(lic.expiration_date);
         const now = new Date();
@@ -331,12 +331,12 @@ return false;
 
             {/* ── Create License Modal ── */}
             <Dialog open={isCreateOpen} onOpenChange={(o) => {
- setIsCreateOpen(o);
+                setIsCreateOpen(o);
 
- if (!o) {
- form.reset(); setCreateKeyVisible(false); 
-} 
-}}>
+                if (!o) {
+                    form.reset(); setCreateKeyVisible(false);
+                }
+            }}>
                 <DialogContent className="sm:max-w-lg">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
@@ -367,16 +367,16 @@ return false;
                                                             const name = vendorSearch.trim();
 
                                                             if (!name) {
-return;
-}
+                                                                return;
+                                                            }
 
                                                             try {
                                                                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                                                                 const res = await fetch('/api/quick/vendors', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token }, body: JSON.stringify({ name }) });
 
                                                                 if (!res.ok) {
-throw new Error();
-}
+                                                                    throw new Error();
+                                                                }
 
                                                                 const vendor = await res.json();
                                                                 form.setData('vendor_id', String(vendor.id));
@@ -384,8 +384,8 @@ throw new Error();
                                                                 setVendorSearch('');
                                                                 toast.success(`Vendor "${name}" created.`);
                                                             } catch {
- toast.error('Failed to create vendor.'); 
-}
+                                                                toast.error('Failed to create vendor.');
+                                                            }
                                                         }}
                                                     >
                                                         <PlusCircle className="h-4 w-4" /> Create vendor "<span className="font-medium">{vendorSearch}</span>"
@@ -394,8 +394,8 @@ throw new Error();
                                                 <CommandGroup>
                                                     {vendors.map((v: any) => (
                                                         <CommandItem key={v.id} value={v.name} onSelect={() => {
- form.setData('vendor_id', String(v.id)); setVendorOpen(false); setVendorSearch(''); 
-}}>
+                                                            form.setData('vendor_id', String(v.id)); setVendorOpen(false); setVendorSearch('');
+                                                        }}>
                                                             <Check className={cn('mr-2 h-4 w-4', form.data.vendor_id === String(v.id) ? 'opacity-100' : 'opacity-0')} />
                                                             {v.name}
                                                         </CommandItem>
@@ -433,8 +433,8 @@ throw new Error();
                         </div>
                         <DialogFooter>
                             <Button variant="outline" type="button" onClick={() => {
- setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false); 
-}}>Cancel</Button>
+                                setIsCreateOpen(false); form.reset(); setCreateKeyVisible(false);
+                            }}>Cancel</Button>
                             <Button type="submit" disabled={form.processing}>{form.processing ? 'Creating…' : 'Create License'}</Button>
                         </DialogFooter>
                     </form>

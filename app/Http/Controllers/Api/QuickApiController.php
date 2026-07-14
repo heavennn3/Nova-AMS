@@ -9,6 +9,7 @@ use App\Models\AssetModel;
 use App\Models\AssetType;
 use App\Models\CustomField;
 use App\Models\Department;
+use App\Models\License;
 use App\Models\Location;
 use App\Models\Manufacturer;
 use App\Models\Site;
@@ -132,7 +133,7 @@ class QuickApiController extends Controller
             'assets' => Asset::class, 'categories' => AssetCategory::class, 'departments' => Department::class,
             'suppliers' => Supplier::class, 'locations' => Location::class, 'manufacturers' => Manufacturer::class,
             'status-labels' => StatusLabel::class, 'users' => User::class, 'custom-fields' => CustomField::class,
-            'spare-parts' => SparePart::class,
+            'spare-parts' => SparePart::class, 'licenses' => License::class,
         ];
 
         $class = $map[$type] ?? null;
@@ -159,6 +160,9 @@ class QuickApiController extends Controller
                 break;
             case 'spare-parts':
                 $count = SparePart::whereIn('id', $ids)->update(['status' => $status]);
+                break;
+            case 'licenses':
+                $count = License::whereIn('id', $ids)->update(['status' => $status]);
                 break;
             default:
                 return response()->json(['message' => "Unsupported type: $type"], 400);

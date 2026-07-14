@@ -223,6 +223,7 @@ class LicenseController extends Controller
             'active_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'notes' => 'nullable|string',
+            'status' => 'nullable|string|in:available,full,expired,expiring_soon',
         ]);
 
         $error = DB::transaction(function () use ($license, $validated) {
