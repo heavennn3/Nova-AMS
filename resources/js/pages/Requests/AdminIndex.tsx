@@ -378,13 +378,9 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                             <thead className="bg-muted/30 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
                                 <tr>
                                     <th className="px-3 py-3 w-10">
-                                        <Checkbox
-                                            checked={filteredRequests.filter(r => r.status === 'Pending').length > 0 && filteredRequests.filter(r => r.status === 'Pending').every(r => selectedRows.has(r.id))}
-                                            onCheckedChange={toggleAll}
-                                        />
                                     </th>
-                                    <th className="px-4 py-3 text-left">Request #</th>
-                                    <th className="px-4 py-3 text-left">Requester</th>
+                                    <th className="px-4 py-3 text-left">Request ID</th>
+                                    <th className="px-4 py-3 text-left">Name</th>
                                     <th className="px-4 py-3 text-left">Site</th>
                                     <th className="px-4 py-3 text-left">Type</th>
                                     <th className="px-4 py-3 text-left">Asset / License</th>

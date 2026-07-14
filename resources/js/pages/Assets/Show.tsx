@@ -568,65 +568,137 @@ return;
 
                     {activeTab === 'history' && (
                         <div className="space-y-6">
-                            <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2">
-                                Checkout / Assignment History
-                            </h3>
-                            {asset.assignments && asset.assignments.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">
-                                                <th className="pb-3">User</th>
-                                                <th className="pb-3">Site / Location</th>
-                                                <th className="pb-3">Status</th>
-                                                <th className="pb-3">Assigned At</th>
-                                                <th className="pb-3">Returned At</th>
-                                                <th className="pb-3">Remarks</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="text-sm text-slate-700 dark:text-slate-350">
-                                            {asset.assignments.map((assignment: any) => (
-                                                <tr key={assignment.id} className="border-b border-slate-50 dark:border-slate-800/30 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                                                    <td className="py-4 font-medium text-slate-900 dark:text-slate-100">
-                                                        {assignment.user?.name || '—'}
-                                                        <span className="text-xs text-slate-400 block font-normal mt-0.5">{assignment.user?.email}</span>
-                                                    </td>
-                                                    <td className="py-4">
-                                                        {assignment.site?.name || '—'}
-                                                        {assignment.location?.name && (
-                                                            <span className="text-xs text-slate-400 block mt-0.5">{assignment.location.name}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="py-4">
-                                                        <span className={cn(
-                                                            "px-2 py-0.5 rounded-full text-xs font-semibold border",
-                                                            assignment.status === 'active'
-                                                                ? "bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-950/20 dark:border-blue-800/40 dark:text-blue-400"
-                                                                : "bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-850/20 dark:border-slate-800/40 dark:text-slate-400"
-                                                        )}>
-                                                            {assignment.status === 'active' ? 'Active' : 'Returned'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4">
-                                                        {assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString() : '—'}
-                                                    </td>
-                                                    <td className="py-4">
-                                                        {assignment.returned_at ? new Date(assignment.returned_at).toLocaleDateString() : '—'}
-                                                    </td>
-                                                    <td className="py-4 text-xs italic text-slate-500 max-w-xs truncate">
-                                                        {assignment.remarks || '—'}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 text-slate-400">
-                                    <Clock className="mx-auto h-12 w-12 text-slate-200 mb-3" />
-                                    <p className="text-sm">No assignment history found for this asset.</p>
+                            {/* Current User Section */}
+                            {(activeAssignment || isOnLoan) && (
+                                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-lg p-5">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                            <User className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-blue-900 dark:text-blue-100">Currently Used By</h4>
+                                            <p className="text-xs text-blue-600 dark:text-blue-400">Active assignment in progress</p>
+                                        </div>
+                                    </div>
+
+                                    {isOnLoan ? (
+                                        <div className="space-y-2">
+                                            <div className="flex items-baseline justify-between">
+                                                <span className="text-sm text-blue-700 dark:text-blue-300">User:</span>
+                                                <span className="font-semibold text-blue-900 dark:text-blue-100">{loanUser}</span>
+                                            </div>
+                                            <div className="flex items-baseline justify-between">
+                                                <span className="text-sm text-blue-700 dark:text-blue-300">Expected Return:</span>
+                                                <span className={`font-semibold ${isOverdue ? 'text-red-600' : 'text-blue-900 dark:text-blue-100'}`}>
+                                                    {loanReturnDate ? new Date(loanReturnDate).toLocaleDateString() : 'Not set'}
+                                                    {isOverdue && ' (Overdue)'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <div className="flex items-baseline justify-between">
+                                                <span className="text-sm text-blue-700 dark:text-blue-300">User:</span>
+                                                <span className="font-semibold text-blue-900 dark:text-blue-100">{activeAssignment?.user?.name || '—'}</span>
+                                            </div>
+                                            {activeAssignment?.user?.email && (
+                                                <div className="flex items-baseline justify-between">
+                                                    <span className="text-sm text-blue-700 dark:text-blue-300">Email:</span>
+                                                    <span className="text-sm text-blue-900 dark:text-blue-100">{activeAssignment.user.email}</span>
+                                                </div>
+                                            )}
+                                            {activeAssignment?.assigned_at && (
+                                                <div className="flex items-baseline justify-between">
+                                                    <span className="text-sm text-blue-700 dark:text-blue-300">Since:</span>
+                                                    <span className="text-sm text-blue-900 dark:text-blue-100">{new Date(activeAssignment.assigned_at).toLocaleDateString()}</span>
+                                                </div>
+                                            )}
+                                            {activeAssignment?.remarks && (
+                                                <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                                                    <span className="text-sm text-blue-700 dark:text-blue-300">Reason: </span>
+                                                    <span className="text-sm text-blue-900 dark:text-blue-100 italic">{activeAssignment.remarks}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
+
+                            {/* No Current User */}
+                            {!activeAssignment && !isOnLoan && (
+                                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-full bg-slate-400 flex items-center justify-center">
+                                            <CheckCircle2 className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-slate-900 dark:text-slate-100">Not Currently Assigned</h4>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400">Asset is available for checkout</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Previous Users Section */}
+                            <div>
+                                <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2 mb-4">
+                                    Previous Users
+                                </h3>
+                                {asset.assignments && asset.assignments.filter((a: any) => a.status !== 'active').length > 0 ? (
+                                    <div className="space-y-3">
+                                        {asset.assignments
+                                            .filter((assignment: any) => assignment.status !== 'active')
+                                            .map((assignment: any) => (
+                                                <div key={assignment.id} className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                                                    <div className="flex items-start justify-between gap-4">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <User className="h-4 w-4 text-slate-500" />
+                                                                <span className="font-semibold text-slate-900 dark:text-slate-100">{assignment.user?.name || 'Unknown User'}</span>
+                                                            </div>
+                                                            {assignment.user?.email && (
+                                                                <div className="text-xs text-slate-600 dark:text-slate-400 mb-3 ml-6">{assignment.user.email}</div>
+                                                            )}
+
+                                                            <div className="grid grid-cols-2 gap-4 text-xs ml-6">
+                                                                <div>
+                                                                    <span className="text-slate-500 dark:text-slate-500 block">Assigned Date:</span>
+                                                                    <span className="text-slate-900 dark:text-slate-100 font-medium">
+                                                                        {assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString() : '—'}
+                                                                    </span>
+                                                                </div>
+                                                                <div>
+                                                                    <span className="text-slate-500 dark:text-slate-500 block">Returned Date:</span>
+                                                                    <span className="text-slate-900 dark:text-slate-100 font-medium">
+                                                                        {assignment.returned_at ? new Date(assignment.returned_at).toLocaleDateString() : '—'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            {assignment.remarks && (
+                                                                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 ml-6">
+                                                                    <span className="text-slate-500 dark:text-slate-500 text-xs block">Reason:</span>
+                                                                    <span className="text-slate-900 dark:text-slate-100 text-xs italic">{assignment.remarks}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="shrink-0">
+                                                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+                                                                Returned
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 text-slate-400">
+                                        <Clock className="mx-auto h-12 w-12 text-slate-200 mb-3" />
+                                        <p className="text-sm">No previous assignment history found.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 
