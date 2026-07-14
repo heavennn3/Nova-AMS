@@ -14,9 +14,12 @@ import {
     Key,
     Copy,
     Shield,
+    Image as ImageIcon,
+    ZoomIn,
 } from 'lucide-react';
 import * as React from 'react';
 import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -27,6 +30,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
     const isAdmin = auth?.user?.roles?.includes('Admin') || false;
     const [adminNotes, setAdminNotes] = useState('');
     const [copied, setCopied] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const copyKey = () => {
         if (r.license?.product_key) {
@@ -66,7 +70,21 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
         { label: 'Submitted', date: r.created_at, icon: FileText, color: 'text-slate-500', done: true },
         { label: 'Approved', date: r.approved_at, icon: CheckCircle2, color: 'text-emerald-500', done: !!r.approved_at && r.status !== 'Rejected' },
         { label: r.status === 'Rejected' ? 'Rejected' : 'Fulfilled', date: r.status === 'Rejected' ? r.approved_at : r.fulfilled_at, icon: r.status === 'Rejected' ? XCircle : Package, color: r.status === 'Rejected' ? 'text-red-500' : 'text-blue-500', done: r.status === 'Rejected' || !!r.fulfilled_at },
-        ...(['Borrow', 'Checkout'].includes(r.request_type) ? [{ label: 'Returned', date: r.returned_at, icon: RotateCcw, color: 'text-violet-500', done: !!r.returned_at }] : []),
+        ...(['Borrow', 'Checkout'].includes(r.request_type) || r.type === 'loan' ? [{
+            label: 'Return Requested',
+            date: r.return_requested_at,
+            icon: Clock,
+            color: 'text-orange-500',
+            done: !!r.return_requested_at
+        }] : []),
+        ...(['Borrow', 'Checkout'].includes(r.request_type) || r.type === 'loan' ? [{
+            label: 'Returned',
+            date: r.returned_at,
+            icon: RotateCcw,
+            color: 'text-violet-500',
+            done: !!r.returned_at,
+            hasProof: !!(r.proof_photo_path || r.return_proof_photo)
+        }] : []),
     ];
 
     return (
@@ -198,6 +216,48 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                         <p className="mt-1 text-sm leading-relaxed bg-blue-50/50 rounded-lg p-3 border border-blue-100">
                                             {r.admin_notes}
                                         </p>
+                                    </div>
+                                )}
+
+                                {(r.return_notes || r.proof_photo_path || r.return_proof_photo) && (
+                                    <div className="pt-4 border-t">
+                                        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                                            <RotateCcw className="h-4 w-4 text-violet-600" />
+                                            Return Information
+                                        </h3>
+                                        {r.return_notes && (
+                                            <div className="mb-3">
+                                                <span className="text-sm text-muted-foreground">Return Notes:</span>
+                                                <p className="mt-1 text-sm leading-relaxed bg-violet-50/50 rounded-lg p-3 border border-violet-100">
+                                                    {r.return_notes}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {(r.proof_photo_path || r.return_proof_photo) && (
+                                            <div>
+                                                <span className="text-sm text-muted-foreground flex items-center gap-1 mb-2">
+                                                    <ImageIcon className="h-3.5 w-3.5" />
+                                                    Proof Photo:
+                                                </span>
+                                                <div className="rounded-lg border border-slate-200 overflow-hidden inline-block">
+                                                    <img
+                                                        src={`/storage/${r.proof_photo_path || r.return_proof_photo}`}
+                                                        alt="Return proof"
+                                                        className="max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                        onClick={() => setImagePreview(`/storage/${r.proof_photo_path || r.return_proof_photo}`)}
+                                                    />
+                                                </div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="mt-2 text-xs"
+                                                    onClick={() => setImagePreview(`/storage/${r.proof_photo_path || r.return_proof_photo}`)}
+                                                >
+                                                    <ZoomIn className="h-3 w-3 mr-1" />
+                                                    View Full Size
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -351,6 +411,12 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                     {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
+                                            {(event.hasProof || (event.label === 'Returned' && (r.proof_photo_path || r.return_proof_photo))) && (
+                                                <div className="mt-1 flex items-center gap-1 text-xs text-violet-600">
+                                                    <ImageIcon className="h-3 w-3" />
+                                                    <span>Proof photo attached</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -359,6 +425,22 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                     </div>
                 </div>
             </div>
+
+            {/* Image Preview Dialog */}
+            <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview(null)}>
+                <DialogContent className="max-w-4xl border-0 bg-black/95 p-3 shadow-2xl">
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>Proof Photo Preview</DialogTitle>
+                    </DialogHeader>
+                    {imagePreview && (
+                        <img
+                            src={imagePreview}
+                            alt="Return proof preview"
+                            className="max-h-[85vh] w-full rounded-lg object-contain"
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

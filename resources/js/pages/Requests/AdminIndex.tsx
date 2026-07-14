@@ -15,6 +15,7 @@ import {
     CalendarDays,
     Filter,
     AlertTriangle,
+    Image as ImageIcon,
 } from 'lucide-react';
 import * as React from 'react';
 import { useState } from 'react';
@@ -54,6 +55,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const [actionRequest, setActionRequest] = useState<any>(null);
     const [actionType, setActionType] = useState<'approve' | 'reject' | 'return' | null>(null);
     const [adminNotes, setAdminNotes] = useState('');
+    const [proofImagePreview, setProofImagePreview] = useState<string | null>(null);
 
     // Batch dialogs
     const [batchAction, setBatchAction] = useState<'approve' | 'reject' | null>(null);
@@ -164,6 +166,22 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         setActionRequest(request);
         setActionType(type);
         setAdminNotes('');
+
+        // Set proof image preview if available for returns or return approvals
+        if (type === 'return' || request.status === 'Return_pending') {
+            if (request.proof_photo_path) {
+                setProofImagePreview(`/storage/${request.proof_photo_path}`);
+            } else if (request.return_proof_photo) {
+                setProofImagePreview(`/storage/${request.return_proof_photo}`);
+            } else if (request.return_notes && !request.proof_photo_path && !request.return_proof_photo) {
+                // Show dialog even without proof photo
+                setProofImagePreview(null);
+            } else {
+                setProofImagePreview(null);
+            }
+        } else {
+            setProofImagePreview(null);
+        }
     };
 
     const submitAction = () => {
@@ -469,7 +487,18 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                             </td>
                                             <td className="px-4 py-3.5 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.get(`/requests/${r.id}`)}>
+                                                    {(r.proof_photo_path || r.return_proof_photo) && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+                                                            onClick={() => setProofImagePreview(`/storage/${r.proof_photo_path || r.return_proof_photo}`)}
+                                                            title="View proof photo"
+                                                        >
+                                                            <ImageIcon className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    )}
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.get(`/requests/${r.id}${r.type === 'loan' || r.original_model === 'AssetLoan' ? '?is_loan=true' : ''}`)}>
                                                         <Eye className="h-3.5 w-3.5" />
                                                     </Button>
                                                     {r.status === 'Pending' && (
@@ -548,10 +577,39 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     <span>{actionRequest.priority}</span>
                                 </div>
                                 {actionRequest.reason && (
-                                    <div className="pt-2 border-t mt-2">
-                                        <span className="text-muted-foreground text-xs block mb-1">Reason:</span>
-                                        <p className="text-sm bg-white/60 rounded p-2">{actionRequest.reason}</p>
-                                    </div>
+                                    <>
+                                        <div className="pt-2 border-t mt-2">
+                                            <span className="text-muted-foreground text-xs block mb-1">Reason:</span>
+                                            <p className="text-sm bg-white/60 rounded p-2">{actionRequest.reason}</p>
+                                        </div>
+                                        {actionRequest.return_notes && (
+                                            <div className="pt-2 border-t mt-2">
+                                                <span className="text-muted-foreground text-xs block mb-1">Return Notes:</span>
+                                                <p className="text-sm bg-blue-50/60 rounded p-2 border border-blue-100">{actionRequest.return_notes}</p>
+                                            </div>
+                                        )}
+                                        {(proofImagePreview || actionRequest.proof_photo_path || actionRequest.return_proof_photo) && (
+                                            <div className="pt-2 border-t mt-2">
+                                                <span className="text-muted-foreground text-xs block mb-2 flex items-center gap-1">
+                                                    <ImageIcon className="h-3.5 w-3.5" />
+                                                    Return Proof Photo
+                                                </span>
+                                                <div className="rounded-lg border border-slate-200 overflow-hidden">
+                                                    {proofImagePreview ? (
+                                                        <img
+                                                            src={proofImagePreview}
+                                                            alt="Return proof"
+                                                            className="w-full max-h-64 object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="bg-slate-50 p-4 text-center text-sm text-slate-400">
+                                                            Image not available
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                                 {actionRequest.license && (
                                     <div className="pt-2 border-t mt-2">
@@ -599,6 +657,22 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                             {actionType && actionConfig[actionType]?.buttonText}
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Proof Photo Preview Dialog */}
+            <Dialog open={!!proofImagePreview} onOpenChange={() => setProofImagePreview(null)}>
+                <DialogContent className="max-w-4xl border-0 bg-black/95 p-3 shadow-2xl">
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>Proof Photo Preview</DialogTitle>
+                    </DialogHeader>
+                    {proofImagePreview && (
+                        <img
+                            src={proofImagePreview}
+                            alt="Return proof preview"
+                            className="max-h-[85vh] w-full rounded-lg object-contain"
+                        />
+                    )}
                 </DialogContent>
             </Dialog>
 
