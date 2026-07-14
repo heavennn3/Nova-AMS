@@ -393,8 +393,8 @@ return;
                 />
             )}
             {selectedRows.length > 0 && (
-                <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-4 shadow-xs">
-                    <div className="flex items-center space-x-2 text-sm font-semibold">
+                <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/10 p-4 shadow-sm">
+                    <div className="flex items-center space-x-2 text-sm font-semibold text-primary">
                         <span>{selectedRows.length} items selected</span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -528,7 +528,7 @@ return;
                     </div>
                 </div>
             )}
-            <div className="rounded-md border bg-card">
+            <div className="rounded-lg border border-border/50 bg-card shadow-sm">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -557,6 +557,7 @@ return;
                                     data-state={
                                         row.getIsSelected() && 'selected'
                                     }
+                                    className="hover:bg-primary/5"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -572,9 +573,12 @@ return;
                             <TableRow>
                                 <TableCell
                                     colSpan={tableColumns.length}
-                                    className="h-24 text-center text-muted-foreground"
+                                    className="h-32 text-center text-muted-foreground"
                                 >
-                                    No results.
+                                    <div className="flex flex-col items-center justify-center space-y-2">
+                                        <Package className="h-8 w-8 opacity-20" />
+                                        <p>No results found</p>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         )}

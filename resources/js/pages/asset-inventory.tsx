@@ -271,14 +271,14 @@ export default function AssetInventory({
             {
                 id: 'no',
                 header: 'No',
-                cell: ({ row }: any) => <span className="text-muted-foreground text-sm">{row.index + 1}</span>,
+                cell: ({ row }: any) => <span className="text-muted-foreground text-sm font-medium">{row.index + 1}</span>,
                 enableSorting: false,
             },
             {
                 accessorKey: 'asset_id',
                 header: 'Asset ID',
                 cell: ({ row }: any) => (
-                    <Link href={`/assets/${row.original.id}`} className="text-primary hover:underline font-mono font-semibold">
+                    <Link href={`/assets/${row.original.id}`} className="text-primary hover:underline font-mono font-medium hover:text-primary/80 transition-colors">
                         {row.getValue('asset_id') ?? '—'}
                     </Link>
                 ),
@@ -305,7 +305,7 @@ export default function AssetInventory({
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="inline-block rounded-md px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-80"
+                                    className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
                                     style={{ backgroundColor: bgColor }}
                                 >
                                     {val}
@@ -316,12 +316,13 @@ export default function AssetInventory({
                                     <DropdownMenuItem
                                         key={status.id}
                                         onClick={() => updateAssetStatus(row.original.id, String(status.id))}
+                                        className="cursor-pointer"
                                     >
                                         <span
-                                            className="mr-2 h-2.5 w-2.5 rounded-full"
+                                            className="mr-2 h-2.5 w-2.5 rounded-full shadow-sm"
                                             style={{ backgroundColor: status.color || '#6B7280' }}
                                         />
-                                        {status.name}
+                                        <span className="font-medium">{status.name}</span>
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
@@ -338,7 +339,7 @@ export default function AssetInventory({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-2 text-blue-600"
+                            className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10"
                             onClick={() => openEditModal(row.original)}
                         >
                             <Edit className="mr-1 h-4 w-4" /> Edit
@@ -346,7 +347,7 @@ export default function AssetInventory({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-2 text-red-600"
+                            className="h-8 px-2 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                             onClick={() => {
                                 if (confirm('Delete this asset?')) {
                                     router.delete(`/assets/${row.original.id}`, {
@@ -612,36 +613,36 @@ export default function AssetInventory({
 
             {/* Metrics cards with loan stats */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="rounded-full bg-blue-500/10 p-3">
                         <Package className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Total Assets</p>
-                        <p className="text-2xl font-bold">{assets.length}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
+                        <p className="text-2xl font-bold text-foreground">{assets.length}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="rounded-full bg-green-500/10 p-3">
                         <Building2 className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Sites</p>
-                        <p className="text-2xl font-bold">{totalSites}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Sites</p>
+                        <p className="text-2xl font-bold text-foreground">{totalSites}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="rounded-full bg-violet-500/10 p-3">
                         <Layers className="h-6 w-6 text-violet-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Type Summary</p>
+                        <p className="text-sm font-medium text-muted-foreground">Type Summary</p>
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                             {typeSummary.slice(0, 3).map((t: any) => (
                                 <span key={t.id}>
-                                    <span className="font-semibold">{t.assets_count}</span> {t.name}
+                                    <span className="font-semibold text-foreground">{t.assets_count}</span> {t.name}
                                 </span>
                             ))}
                             {typeSummary.length > 3 && (
@@ -651,23 +652,23 @@ export default function AssetInventory({
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="rounded-full bg-emerald-500/10 p-3">
                         <Package className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Stored Items</p>
-                        <p className="text-2xl font-bold">{totalStored}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Stored Items</p>
+                        <p className="text-2xl font-bold text-foreground">{totalStored}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className={`rounded-full p-3 ${totalFaulty > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
                         <AlertTriangle className={`h-6 w-6 ${totalFaulty > 0 ? 'text-red-600' : 'text-amber-600'}`} />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Faulty Items</p>
-                        <p className={`text-2xl font-bold ${totalFaulty > 0 ? 'text-red-600' : ''}`}>
+                        <p className="text-sm font-medium text-muted-foreground">Faulty Items</p>
+                        <p className={`text-2xl font-bold ${totalFaulty > 0 ? 'text-red-600' : 'text-foreground'}`}>
                             {totalFaulty}
                         </p>
                     </div>
