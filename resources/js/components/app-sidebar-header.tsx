@@ -31,7 +31,7 @@ export function AppSidebarHeader({
     const { auth } = usePage().props;
     const getInitials = useInitials();
     const { resolvedAppearance, updateAppearance } = useAppearance();
-    
+
     // Fix SSR hydration mismatch: defer theme-dependent rendering until after mount
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
@@ -64,7 +64,7 @@ export function AppSidebarHeader({
                     {/* Top-level Left Nav Items */}
                     <nav className="hidden lg:flex items-center gap-1">
 
-                        <Link href="/assets" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <Link href="/asset-inventory" className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
                             <Package className="h-4 w-4 text-muted-foreground" />
                             <span>Assets</span>
                         </Link>
@@ -140,10 +140,10 @@ export function AppSidebarHeader({
                             className={cn(
                                 'relative flex h-7 w-[52px] items-center rounded-full border px-0.5 transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
                                 // Use neutral colors until mounted to prevent flash
-                                !mounted 
-                                    ? 'border-border bg-muted' 
-                                    : isDark 
-                                        ? 'border-slate-600 bg-slate-800' 
+                                !mounted
+                                    ? 'border-border bg-muted'
+                                    : isDark
+                                        ? 'border-slate-600 bg-slate-800'
                                         : 'border-amber-200 bg-amber-50',
                             )}
                         >
@@ -152,8 +152,8 @@ export function AppSidebarHeader({
                                     'absolute flex h-5 w-5 items-center justify-center rounded-full shadow-sm transition-all duration-300',
                                     !mounted
                                         ? 'left-[2px] bg-muted-foreground/20'
-                                        : isDark 
-                                            ? 'left-[28px] bg-slate-200' 
+                                        : isDark
+                                            ? 'left-[28px] bg-slate-200'
                                             : 'left-[2px] bg-amber-400',
                                 )}
                             >
