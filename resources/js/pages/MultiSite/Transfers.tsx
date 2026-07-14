@@ -65,7 +65,7 @@ export default function Transfers({
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
     const [fromSiteId, setFromSiteId] = useState('all');
     const [assetCategory, setAssetCategory] = useState('all');
-    const [assetStatus, setAssetStatus] = useState('available');
+    const [assetStatus, setAssetStatus] = useState('stored');
     const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
 
     const { data, setData, post, processing, reset, errors } = useForm({
@@ -240,6 +240,7 @@ export default function Transfers({
                                         value={assetStatus}
                                         onChange={(e) => setAssetStatus(e.target.value)}
                                     >
+                                        <option value="stored">Stored</option>
                                         <option value="available">Available</option>
                                         <option value="all">All Status</option>
                                     </select>

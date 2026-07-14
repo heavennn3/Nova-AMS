@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Site;
 use App\Models\Asset;
+use Illuminate\Support\Facades\DB;
 
 class MultiSiteController extends Controller
 {
@@ -88,7 +89,7 @@ class MultiSiteController extends Controller
         return Inertia::render('MultiSite/Transfers', [
             'sites' => Site::all(),
             'assets' => Asset::with(['site', 'category', 'status'])
-                ->whereHas('status', fn($status) => $status->whereRaw('LOWER(TRIM(name)) = ?', ['available']))
+                ->whereHas('status', fn($status) => $status->whereIn(DB::raw('LOWER(TRIM(name))'), ['available', 'stored']))
                 ->get()
                 ->map(fn($asset) => [
                     'id' => $asset->id,
@@ -96,7 +97,7 @@ class MultiSiteController extends Controller
                     'product_name' => $asset->product_name,
                     'site_id' => $asset->site_id,
                     'category' => $asset->category?->name ?? 'Uncategorized',
-                    'status' => strtolower($asset->status?->name ?? 'available'),
+                    'status' => strtolower($asset->status?->name ?? 'stored'),
                 ]),
             'transfers' => $transfers
         ]);
@@ -114,7 +115,7 @@ class MultiSiteController extends Controller
         foreach ($request->asset_ids as $assetId) {
             $asset = Asset::with('status')->findOrFail($assetId);
 
-            if (strtolower($asset->status?->name ?? '') !== 'available') {
+            if (!in_array(strtolower($asset->status?->name ?? ''), ['available', 'stored'], true)) {
                 continue;
             }
 
