@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Asset Inventory Module
     Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
+    Route::get('/licenses', [\App\Http\Controllers\LicenseController::class, 'index'])->name('licenses.index');
 
     Route::middleware(['permission:module.asset-inventory'])->group(function () {
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
@@ -61,7 +62,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // QR/Barcode Scanning routes — now in routes/api.php
 
         
-        Route::get('/licenses', [\App\Http\Controllers\LicenseController::class, 'index'])->name('licenses.index');
 
         Route::middleware(['role:Admin|Manager'])->group(function () {
             Route::post('/licenses/bulk-update-status', [\App\Http\Controllers\LicenseController::class, 'bulkUpdateStatus'])->name('licenses.bulk-update-status');
