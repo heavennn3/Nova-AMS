@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\Asset;
 use App\Models\AssetAssignment;
+use App\Models\AssetLoan;
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -39,10 +40,18 @@ class AssetTrackingController extends Controller
             $liveAssignmentsQuery->where('site_id', $siteFilter);
         }
 
-        $liveAssignments = $liveAssignmentsQuery
+        $assignmentRows = $liveAssignmentsQuery
             ->latest('assigned_at')
             ->get()
             ->map(fn($a) => $this->formatAssignment($a));
+
+        $loanRows = AssetLoan::with(['asset.category', 'asset.site', 'user', 'site'])
+            ->where('status', 'approved')
+            ->latest('approved_at')
+            ->get()
+            ->map(fn($loan) => $this->formatLoanAssignment($loan));
+
+        $liveAssignments = $assignmentRows->concat($loanRows)->values();
 
         // Group by site for admin view
         $assignmentsBySite = [];
@@ -94,7 +103,7 @@ class AssetTrackingController extends Controller
         $sites = \App\Models\Site::select('id', 'name')->orderBy('name')->get();
 
         $stats = [
-            'in_use'            => AssetAssignment::active()->count(),
+            'in_use'            => AssetAssignment::active()->count() + AssetLoan::where('status', 'approved')->count(),
             'total_returned'    => AssetAssignment::where('status', 'returned')->count(),
             'returned_today'    => AssetAssignment::whereDate('returned_at', today())
                                     ->where('status', 'returned')->count(),
@@ -421,6 +430,36 @@ class AssetTrackingController extends Controller
             'is_overdue'   => $isOverdue,
             'days_overdue' => $daysOverdue,
             'remarks'      => $a->remarks,
+        ];
+    }
+
+    private function formatLoanAssignment(AssetLoan $loan): array
+    {
+        $start = $loan->approved_at ?: $loan->loan_date ?: $loan->created_at;
+        $mins = (int) Carbon::parse($start)->diffInMinutes(now());
+        $expectedReturnDate = $loan->expected_return_date
+            ? Carbon::parse($loan->expected_return_date)
+            : Carbon::parse($start)->addDays(7);
+        $isOverdue = Carbon::now()->greaterThan($expectedReturnDate);
+
+        return [
+            'id'           => $loan->id,
+            'asset_id'     => $loan->asset?->asset_id ?? $loan->asset?->getField('aset_id') ?? '—',
+            'asset_db_id'  => $loan->asset_id,
+            'product_name' => $loan->asset?->product_name ?? $loan->asset?->getField('jenis_aset') ?? '—',
+            'category'     => $loan->asset?->category?->name ?? '—',
+            'site'         => $loan->site?->name ?? $loan->asset?->site?->name ?? '—',
+            'site_id'      => $loan->site_id ?? $loan->asset?->site_id,
+            'location'     => $loan->asset?->location?->name ?? $loan->asset?->getField('lokasi') ?? '—',
+            'user_name'    => $loan->user?->name ?? 'Unknown',
+            'user_email'   => $loan->user?->email ?? '',
+            'assigned_at'  => Carbon::parse($start)->toIso8601String(),
+            'expected_return_date' => $expectedReturnDate->toIso8601String(),
+            'duration'     => $this->humanDuration($mins),
+            'is_overdue'   => $isOverdue,
+            'days_overdue' => $isOverdue ? Carbon::now()->diffInDays($expectedReturnDate) : 0,
+            'remarks'      => $loan->purpose,
+            'source'       => 'loan',
         ];
     }
 

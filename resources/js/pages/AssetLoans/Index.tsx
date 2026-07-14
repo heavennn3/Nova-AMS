@@ -172,7 +172,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     <th className="p-3 text-left font-medium">Duration</th>
                                     <th className="p-3 text-left font-medium">Condition</th>
                                     <th className="p-3 text-left font-medium">Status</th>
-
+                                    <th className="p-3 text-left font-medium">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -191,7 +191,15 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                             <td className="p-3">{canReturn ? <span className={`inline-flex items-center gap-1 text-xs font-semibold ${duration.isOverdue ? 'text-red-600' : 'text-emerald-600'}`}>{duration.isOverdue ? <AlertTriangle className="h-3.5 w-3.5" /> : <Hourglass className="h-3.5 w-3.5" />}{duration.label}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
                                             <td className="p-3"><span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionColors[loan.condition_status] || 'bg-gray-100 text-gray-800'}`}>{loan.condition_status?.replace('_', ' ') || '—'}</span></td>
                                             <td className="p-3"><span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'bg-gray-100 text-gray-800'}`}>{loan.status}</span></td>
-
+                                            <td className="p-3">
+                                                {canReturn ? (
+                                                    <Button type="button" size="sm" variant="outline" onClick={() => openReturn(loan)}>
+                                                        <RotateCcw className="mr-2 h-4 w-4" /> Return
+                                                    </Button>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground">—</span>
+                                                )}
+                                            </td>
                                         </tr>
                                     );
                                 })}

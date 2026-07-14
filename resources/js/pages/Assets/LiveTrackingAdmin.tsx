@@ -191,8 +191,8 @@ export default function LiveTrackingAdmin({
     // Send single reminder
     const sendSingleReminder = (assignment: Assignment) => {
         if (!confirm(`Send reminder to ${assignment.user_name} about ${assignment.product_name}?`)) {
-return;
-}
+            return;
+        }
 
         router.post(`/asset-track/${assignment.id}/send-reminder`, {}, {
             onSuccess: () => {
@@ -228,8 +228,8 @@ return;
     // Check in asset
     const checkInAsset = (assignment: Assignment) => {
         if (!confirm(`Check in ${assignment.product_name} from ${assignment.user_name}?`)) {
-return;
-}
+            return;
+        }
 
         router.patch(`/asset-track/${assignment.id}/checkin`, {}, {
             onSuccess: () => {

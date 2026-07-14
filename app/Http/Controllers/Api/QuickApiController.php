@@ -13,6 +13,7 @@ use App\Models\Location;
 use App\Models\Manufacturer;
 use App\Models\Site;
 use App\Models\StatusLabel;
+use App\Models\SparePart;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Vendor;
@@ -131,6 +132,7 @@ class QuickApiController extends Controller
             'assets' => Asset::class, 'categories' => AssetCategory::class, 'departments' => Department::class,
             'suppliers' => Supplier::class, 'locations' => Location::class, 'manufacturers' => Manufacturer::class,
             'status-labels' => StatusLabel::class, 'users' => User::class, 'custom-fields' => CustomField::class,
+            'spare-parts' => SparePart::class,
         ];
 
         $class = $map[$type] ?? null;
@@ -154,6 +156,9 @@ class QuickApiController extends Controller
                 break;
             case 'users':
                 $count = User::whereIn('id', $ids)->update(['is_active' => $status === 'active']);
+                break;
+            case 'spare-parts':
+                $count = SparePart::whereIn('id', $ids)->update(['status' => $status]);
                 break;
             default:
                 return response()->json(['message' => "Unsupported type: $type"], 400);
