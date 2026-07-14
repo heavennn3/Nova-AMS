@@ -402,6 +402,18 @@ export default function AssetInventory({
         return result;
     }, [assets, search, siteFilter, categoryFilter, typeFilter, statusFilter]);
 
+    const totalStored = useMemo(() => {
+        return (assets || []).filter((asset: any) =>
+            String(asset.status ?? asset.asset_status ?? '').toLowerCase() === 'stored'
+        ).length;
+    }, [assets]);
+
+    const totalFaulty = useMemo(() => {
+        return (assets || []).filter((asset: any) =>
+            String(asset.status ?? asset.asset_status ?? '').toLowerCase() === 'faulty'
+        ).length;
+    }, [assets]);
+
     // ── Available-for-loan subset ──
     const availableForLoan = useMemo(() => {
         return filteredAssets.filter((a: any) =>
@@ -641,25 +653,22 @@ export default function AssetInventory({
 
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-emerald-500/10 p-3">
-                        <HandCoins className="h-6 w-6 text-emerald-600" />
+                        <Package className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Active Loans</p>
-                        <p className="text-2xl font-bold">{loanStats.active}</p>
-                        {loanStats.pending > 0 && (
-                            <p className="text-xs text-amber-600 mt-0.5">{loanStats.pending} pending</p>
-                        )}
+                        <p className="text-sm text-muted-foreground">Stored Items</p>
+                        <p className="text-2xl font-bold">{totalStored}</p>
                     </div>
                 </div>
 
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className={`rounded-full p-3 ${loanStats.overdue > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
-                        <AlertTriangle className={`h-6 w-6 ${loanStats.overdue > 0 ? 'text-red-600' : 'text-amber-600'}`} />
+                    <div className={`rounded-full p-3 ${totalFaulty > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
+                        <AlertTriangle className={`h-6 w-6 ${totalFaulty > 0 ? 'text-red-600' : 'text-amber-600'}`} />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Overdue</p>
-                        <p className={`text-2xl font-bold ${loanStats.overdue > 0 ? 'text-red-600' : ''}`}>
-                            {loanStats.overdue}
+                        <p className="text-sm text-muted-foreground">Faulty Items</p>
+                        <p className={`text-2xl font-bold ${totalFaulty > 0 ? 'text-red-600' : ''}`}>
+                            {totalFaulty}
                         </p>
                     </div>
                 </div>
