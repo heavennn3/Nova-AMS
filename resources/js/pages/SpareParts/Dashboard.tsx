@@ -43,6 +43,8 @@ export default function SparePartsDashboard({
     const [filterCategory, setFilterCategory] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
     const [search, setSearch] = useState('');
+    const [categoryPage, setCategoryPage] = useState(1);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const confirmImport = (importedData: any[]) => {
         if (!importedData || importedData.length === 0) {
@@ -158,6 +160,16 @@ export default function SparePartsDashboard({
 
         return true;
     });
+
+    const categoryPageSize = 6;
+    const categoryPageCount = Math.max(Math.ceil(categoryData.length / categoryPageSize), 1);
+    const pagedCategories = categoryData.slice(
+        (categoryPage - 1) * categoryPageSize,
+        categoryPage * categoryPageSize,
+    );
+    const selectedCategoryParts = selectedCategory
+        ? allParts.filter((part: any) => part.category === selectedCategory)
+        : [];
 
     const sparePartColumns = [
         {
@@ -299,8 +311,8 @@ export default function SparePartsDashboard({
                         {categoryData.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-8">No category data</p>
                         ) : (
-                            <div className="grid gap-2 sm:grid-cols-2">
-                                {categoryData.map((cat: any, i: number) => {
+                            <div className="space-y-2">
+                                {pagedCategories.map((cat: any, i: number) => {
                                     const colors = [
                                         { bar: 'bg-emerald-500', light: 'bg-emerald-50', label: 'text-emerald-700' },
                                         { bar: 'bg-blue-500', light: 'bg-blue-50', label: 'text-blue-700' },
@@ -309,27 +321,57 @@ export default function SparePartsDashboard({
                                         { bar: 'bg-rose-500', light: 'bg-rose-50', label: 'text-rose-700' },
                                         { bar: 'bg-cyan-500', light: 'bg-cyan-50', label: 'text-cyan-700' },
                                     ];
-                                    const c = colors[i % colors.length];
+                                    const c = colors[((categoryPage - 1) * categoryPageSize + i) % colors.length];
                                     const maxCount = Math.max(...categoryData.map((x: any) => x.count), 1);
                                     const pct = (cat.count / maxCount) * 100;
 
                                     return (
-                                        <div key={cat.category} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
-                                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${c.light}`}>
+                                        <button
+                                            key={cat.category}
+                                            type="button"
+                                            onClick={() => setSelectedCategory(cat.category)}
+                                            className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/40"
+                                        >
+                                            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${c.light}`}>
                                                 <span className={`text-xs font-bold ${c.label}`}>{cat.category[0]}</span>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center justify-between gap-2 mb-1">
-                                                    <p className="text-sm font-medium truncate">{cat.category}</p>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="mb-1 flex items-center justify-between gap-2">
+                                                    <p className="truncate text-sm font-medium">{cat.category}</p>
                                                     <span className={`text-xs font-semibold tabular-nums ${c.label}`}>{cat.count}</span>
                                                 </div>
-                                                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                                                     <div className={`h-full rounded-full ${c.bar}`} style={{ width: `${pct}%` }} />
                                                 </div>
                                             </div>
-                                        </div>
+                                        </button>
                                     );
                                 })}
+                                {categoryPageCount > 1 && (
+                                    <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 px-2 text-xs"
+                                            disabled={categoryPage === 1}
+                                            onClick={() => setCategoryPage((page) => Math.max(page - 1, 1))}
+                                        >
+                                            Prev
+                                        </Button>
+                                        <span>Page {categoryPage} / {categoryPageCount}</span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 px-2 text-xs"
+                                            disabled={categoryPage === categoryPageCount}
+                                            onClick={() => setCategoryPage((page) => Math.min(page + 1, categoryPageCount))}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </CardContent>
@@ -350,20 +392,25 @@ export default function SparePartsDashboard({
                                 <p className="text-xs text-muted-foreground/60 mt-1">No low stock </p>
                             </div>
                         ) : (
-                            <div className="space-y-3">
-                                {lowStockAlerts.map((alert: any, index: number) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-amber-50/50 rounded-lg border border-amber-200">
+                            <div className="space-y-2">
+                                {lowStockAlerts.slice(0, 5).map((alert: any, index: number) => (
+                                    <div key={index} className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 p-2.5">
                                         <div className="min-w-0">
-                                            <p className="font-medium text-sm truncate">{alert.name}</p>
-                                            <p className="text-xs text-muted-foreground truncate">{alert.location}</p>
+                                            <p className="truncate text-sm font-medium">{alert.name}</p>
+                                            <p className="truncate text-xs text-muted-foreground">{alert.location}</p>
                                         </div>
-                                        <div className="text-right shrink-0 ml-3">
-                                            <p className="text-sm font-semibold text-amber-700 tabular-nums">
+                                        <div className="ml-3 shrink-0 text-right">
+                                            <p className="text-sm font-semibold tabular-nums text-amber-700">
                                                 {alert.stock_level ?? '?'} / {alert.minimum_level ?? '?'}
                                             </p>
                                         </div>
                                     </div>
                                 ))}
+                                {lowStockAlerts.length > 5 && (
+                                    <p className="pt-1 text-center text-xs text-muted-foreground">
+                                        +{lowStockAlerts.length - 5} more alerts
+                                    </p>
+                                )}
                             </div>
                         )}
                     </CardContent>
@@ -507,6 +554,45 @@ export default function SparePartsDashboard({
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Category Detail Dialog */}
+            <Dialog open={!!selectedCategory} onOpenChange={(open) => !open && setSelectedCategory(null)}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>{selectedCategory} Parts</DialogTitle>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] space-y-2 overflow-y-auto py-2">
+                        {selectedCategoryParts.length === 0 ? (
+                            <p className="py-8 text-center text-sm text-muted-foreground">No parts found</p>
+                        ) : (
+                            selectedCategoryParts.map((part: any) => (
+                                <div key={part.id} className="rounded-lg border p-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold">{part.name}</p>
+                                            <p className="font-mono text-xs text-muted-foreground">{part.part_number || 'No part number'}</p>
+                                        </div>
+                                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">
+                                            {part.status || 'unknown'}
+                                        </span>
+                                    </div>
+                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                        <div><span className="font-medium text-foreground">Site:</span> {part.site_name || 'N/A'}</div>
+                                        <div><span className="font-medium text-foreground">Location:</span> {part.location || 'N/A'}</div>
+                                        <div><span className="font-medium text-foreground">Used By:</span> {part.used_by_name || '—'}</div>
+                                        <div><span className="font-medium text-foreground">Created By:</span> {part.created_by_name || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setSelectedCategory(null)}>
+                            Close
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
