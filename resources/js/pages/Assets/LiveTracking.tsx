@@ -541,21 +541,8 @@ export default function LiveTracking({
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={poll}
-                        disabled={polling}
-                    >
-                        <RefreshCw
-                            className={`mr-1.5 h-3.5 w-3.5 ${polling ? 'animate-spin' : ''}`}
-                        />
-                        Refresh
-                    </Button>
-                    <Button size="sm" onClick={() => setCheckoutOpen(true)}>
-                        <LogIn className="mr-1.5 h-3.5 w-3.5" />
-                        Withdraw Asset
-                    </Button>
+
+
                 </div>
             </div>
 
