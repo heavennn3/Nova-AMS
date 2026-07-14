@@ -16,7 +16,7 @@ class AssetLoanController extends Controller
     {
         $user = $request->user();
 
-        $loans = AssetLoan::with(['asset.fieldValues', 'site', 'approver'])
+        $loans = AssetLoan::with(['asset.fieldValues', 'site', 'approver', 'user'])
             ->where('user_id', $user->id)
             ->latest()
             ->get()
@@ -42,6 +42,12 @@ class AssetLoanController extends Controller
                     'status' => $loan->status,
                     'approved_at' => $loan->approved_at?->format('Y-m-d'),
                     'returned_at' => $loan->returned_at?->format('Y-m-d'),
+                    'return_proof_path' => $loan->return_proof_path,
+                    'return_notes' => $loan->return_notes,
+                    'return_requested_at' => $loan->return_requested_at?->format('Y-m-d H:i:s'),
+                    'user' => $loan->user?->name ?? 'Unknown User',
+                    'type' => 'loan',
+                    'original_model' => 'AssetLoan',
                 ];
             });
 
@@ -140,14 +146,25 @@ class AssetLoanController extends Controller
     {
         abort_unless($loan->status === 'approved', 403, 'Only approved loans can be returned.');
 
-        $validated = $request->validate(['return_notes' => ['nullable', 'string', 'max:1000'], 'proof_photo' => ['nullable', 'image', 'max:5120']]);
-
-        $loan->update([
-            'status' => 'return_pending',
-            'return_proof_path' => $request->hasFile('proof_photo') ? $request->file('proof_photo')->store('asset-loans/returns', 'public') : $loan->return_proof_path,
-            'notes' => trim((string) ($loan->notes ? $loan->notes . "\n" : '') . ($validated['return_notes'] ?? '')) ?: $loan->notes,
+        $validated = $request->validate([
+            'return_notes' => ['required', 'string', 'max:1000'],
+            'proof_photo' => ['required', 'image', 'max:5120']
         ]);
 
-        return back()->with('success', 'Return submitted for admin review.');
+        // Store the proof photo
+        if ($request->hasFile('proof_photo')) {
+            $proofPhotoPath = $request->file('proof_photo')->store('asset-loans/returns', 'public');
+
+            $loan->update([
+                'status' => 'return_pending',
+                'return_proof_path' => $proofPhotoPath,
+                'return_notes' => $validated['return_notes'],
+                'return_requested_at' => now(),
+            ]);
+
+            return back()->with('success', 'Return submitted for admin review with proof photo.');
+        }
+
+        return back()->with('error', 'Failed to upload proof photo. Please try again.');
     }
 }

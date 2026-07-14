@@ -126,6 +126,9 @@ class AssetRequestController extends Controller
                     'condition_status' => $loan->condition_status,
                     'purpose' => $loan->purpose,
                     'original_model' => 'AssetLoan', // Track original model for actions
+                    'return_proof_path' => $loan->return_proof_path,
+                    'return_notes' => $loan->return_notes,
+                    'return_requested_at' => $loan->return_requested_at,
                 ];
             });
 
@@ -174,6 +177,10 @@ class AssetRequestController extends Controller
                     'is_loan_request' => true,
                     'asset_name' => $assetName,
                     'asset_id' => $assetId,
+                    'return_proof_path' => $loan->return_proof_path,
+                    'return_notes' => $loan->return_notes,
+                    'return_requested_at' => $loan->return_requested_at,
+                    'returned_at' => $loan->returned_at,
                 ],
             ]);
         }

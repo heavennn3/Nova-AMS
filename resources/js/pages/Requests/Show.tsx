@@ -83,7 +83,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
             icon: RotateCcw,
             color: 'text-violet-500',
             done: !!r.returned_at,
-            hasProof: !!(r.proof_photo_path || r.return_proof_photo)
+            hasProof: !!(r.return_proof_path || r.proof_photo_path || r.return_proof_photo)
         }] : []),
     ];
 
@@ -219,7 +219,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                     </div>
                                 )}
 
-                                {(r.return_notes || r.proof_photo_path || r.return_proof_photo) && (
+                                {(r.return_notes || r.return_proof_path || r.proof_photo_path || r.return_proof_photo) && (
                                     <div className="pt-4 border-t">
                                         <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                                             <RotateCcw className="h-4 w-4 text-violet-600" />
@@ -233,7 +233,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                 </p>
                                             </div>
                                         )}
-                                        {(r.proof_photo_path || r.return_proof_photo) && (
+                                        {(r.return_proof_path || r.proof_photo_path || r.return_proof_photo) && (
                                             <div>
                                                 <span className="text-sm text-muted-foreground flex items-center gap-1 mb-2">
                                                     <ImageIcon className="h-3.5 w-3.5" />
@@ -241,17 +241,17 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                 </span>
                                                 <div className="rounded-lg border border-slate-200 overflow-hidden inline-block">
                                                     <img
-                                                        src={`/storage/${r.proof_photo_path || r.return_proof_photo}`}
+                                                        src={`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`}
                                                         alt="Return proof"
                                                         className="max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                        onClick={() => setImagePreview(`/storage/${r.proof_photo_path || r.return_proof_photo}`)}
+                                                        onClick={() => setImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`)}
                                                     />
                                                 </div>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     className="mt-2 text-xs"
-                                                    onClick={() => setImagePreview(`/storage/${r.proof_photo_path || r.return_proof_photo}`)}
+                                                    onClick={() => setImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`)}
                                                 >
                                                     <ZoomIn className="h-3 w-3 mr-1" />
                                                     View Full Size
@@ -411,7 +411,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                     {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
-                                            {(event.hasProof || (event.label === 'Returned' && (r.proof_photo_path || r.return_proof_photo))) && (
+                                            {(event.hasProof || (event.label === 'Returned' && (r.return_proof_path || r.proof_photo_path || r.return_proof_photo))) && (
                                                 <div className="mt-1 flex items-center gap-1 text-xs text-violet-600">
                                                     <ImageIcon className="h-3 w-3" />
                                                     <span>Proof photo attached</span>

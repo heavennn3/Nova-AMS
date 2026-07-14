@@ -21,6 +21,8 @@ class AssetLoan extends Model
         'approved_at',
         'returned_at',
         'return_proof_path',
+        'return_notes',
+        'return_requested_at',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class AssetLoan extends Model
         'expected_return_date' => 'date',
         'approved_at' => 'datetime',
         'returned_at' => 'datetime',
+        'return_requested_at' => 'datetime',
     ];
 
     public function scopeActive($query)

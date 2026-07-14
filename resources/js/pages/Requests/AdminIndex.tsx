@@ -169,16 +169,8 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
 
         // Set proof image preview if available for returns or return approvals
         if (type === 'return' || request.status === 'Return_pending') {
-            if (request.proof_photo_path) {
-                setProofImagePreview(`/storage/${request.proof_photo_path}`);
-            } else if (request.return_proof_photo) {
-                setProofImagePreview(`/storage/${request.return_proof_photo}`);
-            } else if (request.return_notes && !request.proof_photo_path && !request.return_proof_photo) {
-                // Show dialog even without proof photo
-                setProofImagePreview(null);
-            } else {
-                setProofImagePreview(null);
-            }
+            const proofPath = request.return_proof_path || request.proof_photo_path || request.return_proof_photo;
+            setProofImagePreview(proofPath ? `/storage/${proofPath}` : null);
         } else {
             setProofImagePreview(null);
         }
@@ -487,12 +479,12 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                             </td>
                                             <td className="px-4 py-3.5 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    {(r.proof_photo_path || r.return_proof_photo) && (
+                                                    {(r.return_proof_path || r.proof_photo_path || r.return_proof_photo) && (
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-7 w-7 text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-                                                            onClick={() => setProofImagePreview(`/storage/${r.proof_photo_path || r.return_proof_photo}`)}
+                                                            onClick={() => setProofImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`)}
                                                             title="View proof photo"
                                                         >
                                                             <ImageIcon className="h-3.5 w-3.5" />
@@ -588,10 +580,10 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                 <p className="text-sm bg-blue-50/60 rounded p-2 border border-blue-100">{actionRequest.return_notes}</p>
                                             </div>
                                         )}
-                                        {(proofImagePreview || actionRequest.proof_photo_path || actionRequest.return_proof_photo) && (
+                                        {(proofImagePreview || actionRequest.return_proof_path || actionRequest.proof_photo_path || actionRequest.return_proof_photo) && (
                                             <div className="pt-2 border-t mt-2">
-                                                <span className="text-muted-foreground text-xs block mb-2 flex items-center gap-1">
-                                                    <ImageIcon className="h-3.5 w-3.5" />
+                                                <span className="text-foreground text-sm font-semibold block mb-2 flex items-center gap-1">
+                                                    <ImageIcon className="h-4 w-4 text-violet-600" />
                                                     Return Proof Photo
                                                 </span>
                                                 <div className="rounded-lg border border-slate-200 overflow-hidden">
@@ -606,6 +598,28 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             Image not available
                                                         </div>
                                                     )}
+                                                </div>
+                                                {proofImagePreview && (
+                                                    <p className="text-xs text-muted-foreground mt-2">
+                                                        Review the proof photo above before approving the return.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Missing proof photo warning for return approvals */}
+                                        {actionType === 'return' && !(proofImagePreview || actionRequest.return_proof_path || actionRequest.proof_photo_path || actionRequest.return_proof_photo) && (
+                                            <div className="pt-2 border-t mt-2">
+                                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                                    <div className="flex items-start gap-2">
+                                                        <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-amber-800">No proof photo available</p>
+                                                            <p className="text-xs text-amber-700 mt-1">
+                                                                The user did not upload a proof photo for this return. You can still approve, but please consider requesting proof.
+                                                            </p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}

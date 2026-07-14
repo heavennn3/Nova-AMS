@@ -112,7 +112,11 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
         returnForm.post(`/asset-loans/${returnLoan.id}/return`, {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => setReturnLoan(null),
+            onSuccess: () => {
+                setReturnLoan(null);
+                // Reload the page to get updated loan data with proof photo
+                router.reload();
+            },
         });
     };
 
@@ -201,7 +205,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle>Submit return for review</DialogTitle>
-                        <DialogDescription>Upload proof optional. Asset stays active until admin approves return.</DialogDescription>
+                        <DialogDescription>Upload a proof photo (required). Asset stays active until admin approves return.</DialogDescription>
                     </DialogHeader>
 
                     <form onSubmit={submitReturn} className="space-y-4">
@@ -216,13 +220,14 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="proof-photo">Proof photo optional</Label>
+                            <Label htmlFor="proof-photo">Proof photo <span className="text-red-500">*</span></Label>
                             <div className="flex items-center gap-3 rounded-lg border bg-background p-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted"><ImagePlus className="h-5 w-5 text-muted-foreground" /></div>
                                 <Input
                                     id="proof-photo"
                                     type="file"
                                     accept="image/*"
+                                    required
                                     onChange={(e) => {
                                         const file = e.target.files?.[0] ?? null;
                                         returnForm.setData('proof_photo', file);
@@ -231,6 +236,9 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                 />
                             </div>
                             {proofPreview && <img src={proofPreview} alt="Proof preview" className="max-h-48 rounded-lg border object-cover" />}
+                            {!proofPreview && (
+                                <p className="text-xs text-muted-foreground">Please upload a clear photo of the returned item for admin review.</p>
+                            )}
                         </div>
 
                         <DialogFooter>
