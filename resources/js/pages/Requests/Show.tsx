@@ -41,6 +41,8 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
     };
 
     const r = assetRequest;
+    const statusLabel = String(r.status || '').replace(/_/g, ' ');
+    const isLoanFlow = ['Borrow', 'Checkout', 'Loan'].includes(r.request_type) || r.type === 'loan' || r.is_loan_request;
 
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {
@@ -69,15 +71,15 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
     const timelineEvents = [
         { label: 'Submitted', date: r.created_at, icon: FileText, color: 'text-slate-500', done: true },
         { label: 'Approved', date: r.approved_at, icon: CheckCircle2, color: 'text-emerald-500', done: !!r.approved_at && r.status !== 'Rejected' },
-        { label: r.status === 'Rejected' ? 'Rejected' : 'Fulfilled', date: r.status === 'Rejected' ? r.approved_at : r.fulfilled_at, icon: r.status === 'Rejected' ? XCircle : Package, color: r.status === 'Rejected' ? 'text-red-500' : 'text-blue-500', done: r.status === 'Rejected' || !!r.fulfilled_at },
-        ...(['Borrow', 'Checkout'].includes(r.request_type) || r.type === 'loan' ? [{
+        { label: r.status === 'Rejected' ? 'Rejected' : 'Fulfilled', date: r.status === 'Rejected' ? r.approved_at : r.fulfilled_at || r.approved_at, icon: r.status === 'Rejected' ? XCircle : Package, color: r.status === 'Rejected' ? 'text-red-500' : 'text-blue-500', done: r.status === 'Rejected' || !!(r.fulfilled_at || r.approved_at) },
+        ...(isLoanFlow ? [{
             label: 'Return Requested',
             date: r.return_requested_at,
             icon: Clock,
             color: 'text-orange-500',
             done: !!r.return_requested_at
         }] : []),
-        ...(['Borrow', 'Checkout'].includes(r.request_type) || r.type === 'loan' ? [{
+        ...(isLoanFlow ? [{
             label: 'Returned',
             date: r.returned_at,
             icon: RotateCcw,
@@ -112,7 +114,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                         <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
                             <div className="bg-muted/30 border-b px-6 py-4 flex items-center justify-between">
                                 <h2 className="text-lg font-semibold">Request Details</h2>
-                                {getStatusBadge(r.status)}
+                                {getStatusBadge(statusLabel)}
                             </div>
                             <div className="p-6 space-y-4">
                                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -264,7 +266,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                         </div>
 
                         {/* Admin Actions */}
-                        {isAdmin && ['Pending', 'Approved', 'Fulfilled'].includes(r.status) && (
+                        {isAdmin && ['Pending', 'Approved', 'Fulfilled', 'Return pending'].includes(statusLabel) && (
                             <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
                                 <div className="bg-muted/30 border-b px-6 py-4">
                                     <h2 className="text-lg font-semibold">Admin Actions</h2>
@@ -290,7 +292,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                 </Button>
                                             </>
                                         )}
-                                        {r.status === 'Fulfilled' && ['Borrow', 'Checkout'].includes(r.request_type) && (
+                                        {(statusLabel === 'Fulfilled' || statusLabel === 'Return pending') && isLoanFlow && (
                                             <Button className="bg-violet-600 hover:bg-violet-700 text-white" onClick={() => handleAction('return')}>
                                                 <RotateCcw className="h-4 w-4 mr-2" /> Mark Returned
                                             </Button>
