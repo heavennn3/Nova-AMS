@@ -57,6 +57,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('information');
+    const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
     const imageInputRef = React.useRef<HTMLInputElement | null>(null);
 
     // Form setup for Checkout
@@ -293,6 +294,22 @@ return;
         <div className="w-full p-8 space-y-6 print:p-0 bg-slate-50/40 dark:bg-transparent min-h-screen">
             <Head title={`Asset Details - ${assetCode}`} />
 
+            <Dialog open={isImagePreviewOpen} onOpenChange={setIsImagePreviewOpen}>
+                <DialogContent className="max-w-5xl border-0 bg-black/95 p-3 shadow-2xl">
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>{assetTitle} Image Preview</DialogTitle>
+                    </DialogHeader>
+                    {assetImageUrl && (
+                        <img
+                            src={assetImageUrl}
+                            alt={assetTitle}
+                            className="max-h-[82vh] w-full rounded-lg object-contain"
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
             {/* Header / Actions Row */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden pb-2">
                 <div>
@@ -377,13 +394,18 @@ return;
                 <Card className="lg:col-span-2 border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col justify-between print:col-span-3">
                     <div className="flex flex-col md:flex-row md:items-start gap-6">
                         {/* Rounded Square Asset Icon Container */}
-                        <div className="h-20 w-20 overflow-hidden rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750 flex items-center justify-center shrink-0">
+                        <button
+                            type="button"
+                            disabled={!assetImageUrl}
+                            onClick={() => assetImageUrl && setIsImagePreviewOpen(true)}
+                            className="h-20 w-20 overflow-hidden rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750 flex items-center justify-center shrink-0 transition hover:opacity-90 disabled:cursor-default disabled:hover:opacity-100"
+                        >
                             {assetImageUrl ? (
                                 <img src={assetImageUrl} alt={assetTitle} className="h-full w-full object-cover" />
                             ) : (
                                 <Monitor className="h-9 w-9 text-slate-400 dark:text-slate-500" />
                             )}
-                        </div>
+                        </button>
 
                         {/* Title, Subtitle, Badges */}
                         <div className="space-y-2.5 flex-1">
@@ -449,13 +471,18 @@ return;
 
                 {/* Right Card - Asset Hardware (1/3 width) */}
                 <Card className="border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden p-6 flex flex-col items-center justify-between print:hidden">
-                    <div className="my-4 flex h-32 w-32 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        disabled={!assetImageUrl}
+                        onClick={() => assetImageUrl && setIsImagePreviewOpen(true)}
+                        className="my-4 flex h-32 w-32 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 transition hover:opacity-90 disabled:cursor-default disabled:hover:opacity-100 dark:border-slate-800 dark:bg-slate-800/50"
+                    >
                         {assetImageUrl ? (
                             <img src={assetImageUrl} alt={assetTitle} className="h-full w-full object-cover" />
                         ) : (
                             <Monitor className="h-16 w-16 text-slate-400 dark:text-slate-500" aria-label="Hardware asset" />
                         )}
-                    </div>
+                    </button>
                     <input
                         ref={imageInputRef}
                         type="file"
