@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus, Edit, Trash2, Search, Upload, Package, Building2, Layers, Clock, Loader2,
-    HandCoins, Calendar, User, AlertTriangle,
+    HandCoins, Calendar, User, AlertTriangle, Download, FileText,
 } from 'lucide-react';
 import Papa from 'papaparse';
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -27,6 +27,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -184,10 +190,7 @@ export default function AssetInventory({
         });
     };
 
-    const openLoanModal = () => {
-        setLoanForm({ asset_ids: [], expected_return_date: '', purpose: '', notes: '' });
-        setShowLoan(true);
-    };
+
 
     const toggleLoanAsset = (id: number) => {
         setLoanForm(prev => ({
@@ -440,6 +443,78 @@ export default function AssetInventory({
         URL.revokeObjectURL(url);
     };
 
+    const exportHeaders = ['Asset ID', 'Asset Name', 'Category', 'Type', 'Site', 'Location', 'OEM', 'Purchase Year', 'Serial Number', 'Part Number', 'Quantity', 'Status'];
+    const selectedSiteName = siteFilter === 'all'
+        ? 'All Sites'
+        : sites.find((site: any) => String(site.id) === String(siteFilter))?.name || 'Selected Site';
+    const exportRows = filteredAssets.map((asset: any) => [
+        asset.asset_id,
+        asset.asset_name,
+        asset.category_name ?? asset.category,
+        asset.type_name ?? asset.type,
+        asset.site_name,
+        asset.location,
+        asset.oem_name ?? asset.oem,
+        asset.purchase_year,
+        asset.serial_number,
+        asset.part_number,
+        asset.quantity,
+        asset.status ?? asset.asset_status,
+    ].map((value) => String(value ?? '')));
+
+    const exportCsv = () => {
+        const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`;
+        const csvContent = [exportHeaders, ...exportRows]
+            .map((row) => row.map(escapeCsv).join(','))
+            .join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `asset_inventory_${selectedSiteName.replace(/\s+/g, '_').toLowerCase()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportPdf = () => {
+        const rows = exportRows.map((row) => `
+            <tr>${row.map((value) => `<td>${value.replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char] || char))}</td>`).join('')}</tr>
+        `).join('');
+        const win = window.open('', '_blank');
+
+        if (!win) {
+            toast.error('Popup blocked. Allow popups to export PDF.');
+            return;
+        }
+
+        win.document.write(`
+            <html>
+                <head>
+                    <title>Asset Inventory - ${selectedSiteName}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; color: #111827; padding: 24px; }
+                        h1 { margin: 0 0 4px; font-size: 22px; }
+                        .meta { color: #6b7280; margin-bottom: 18px; font-size: 12px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                        th { background: #f3f4f6; text-align: left; }
+                        th, td { border: 1px solid #d1d5db; padding: 6px; vertical-align: top; }
+                        @media print { body { padding: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>Asset Inventory</h1>
+                    <div class="meta">Site: ${selectedSiteName} · Total: ${filteredAssets.length} · Exported: ${new Date().toLocaleString()}</div>
+                    <table>
+                        <thead><tr>${exportHeaders.map((header) => `<th>${header}</th>`).join('')}</tr></thead>
+                        <tbody>${rows || `<tr><td colspan="${exportHeaders.length}">No assets found</td></tr>`}</tbody>
+                    </table>
+                    <script>window.onload = () => { window.print(); };</script>
+                </body>
+            </html>
+        `);
+        win.document.close();
+    };
+
     const renderField = (key: string, label: string, required = false, type = 'text') => (
         <div className="space-y-1.5">
             <Label htmlFor={`create-${key}`} className="text-sm font-medium">
@@ -489,9 +564,7 @@ export default function AssetInventory({
                     <Button variant="outline" size="sm" onClick={openFilePicker}>
                         <Upload className="mr-2 h-4 w-4" /> Import CSV
                     </Button>
-                    <Button size="sm" onClick={openLoanModal}>
-                        <HandCoins className="mr-2 h-4 w-4" /> Request Loan
-                    </Button>
+
                     <Button size="sm" onClick={openCreateModal}>
                         <Plus className="mr-2 h-4 w-4" /> New Asset
                     </Button>
@@ -633,6 +706,24 @@ export default function AssetInventory({
                         </SelectContent>
                     </Select>
                 )}
+
+                <div className="ml-auto flex items-center gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-8 text-xs">
+                                <Download className="mr-1.5 h-3.5 w-3.5" /> Export
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36">
+                            <DropdownMenuItem onClick={exportPdf}>
+                                <FileText className="mr-2 h-3.5 w-3.5" /> PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={exportCsv}>
+                                <Download className="mr-2 h-3.5 w-3.5" /> CSV
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
 
             <DataTable columns={columns} data={filteredAssets} hideToolbar />
