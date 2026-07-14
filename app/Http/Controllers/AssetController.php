@@ -152,7 +152,7 @@ class AssetController extends Controller
 
     public function show(Asset $asset)
     {
-        $asset->load('category', 'type', 'oem', 'site', 'assignments.user', 'assignments.location', 'audits.user', 'activeLoan.user');
+        $asset->load('category', 'type', 'oem', 'site', 'assignments.user', 'assignments.location', 'audits.user', 'activeLoan.user', 'loans.user');
 
         $users = \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get();
 

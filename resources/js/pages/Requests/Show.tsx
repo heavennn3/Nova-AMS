@@ -64,7 +64,10 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
             return;
         }
 
-        router.post(`/requests/${r.id}/${action}`, { admin_notes: adminNotes }, { preserveScroll: true });
+        router.post(`/requests/${r.id}/${action}`, {
+            admin_notes: adminNotes,
+            is_loan_request: isLoanFlow ? 'true' : 'false',
+        }, { preserveScroll: true });
     };
 
     // Timeline

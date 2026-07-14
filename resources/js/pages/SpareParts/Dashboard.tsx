@@ -246,19 +246,7 @@ export default function SparePartsDashboard({
                 <div className="flex items-center gap-2">
 
                     <div className="flex items-center gap-2">
-                        {sites.length > 0 && (
-                            <Select value={importSiteId} onValueChange={setImportSiteId}>
-                                <SelectTrigger className="h-9 w-[160px] text-sm">
-                                    <SelectValue placeholder="Select site" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map((s: any) => (
-                                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        )}
+
                         <Button variant="outline" size="sm" onClick={openFilePicker}>
                             <Upload className="mr-2 h-4 w-4" /> Import CSV
                         </Button>

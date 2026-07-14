@@ -69,6 +69,11 @@ class Asset extends Model implements Auditable
     }
 
     /** Update the normalized asset status used by the loan workflow. */
+    public function loans()
+    {
+        return $this->hasMany(AssetLoan::class);
+    }
+
     public function updateStatus(string $status): void
     {
         $statusId = AssetStatus::where('name', strtolower($status))->value('id');
