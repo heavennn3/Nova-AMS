@@ -71,7 +71,7 @@ const navSections: NavSection[] = [
 
             { title: 'Key & Licenses', href: '/licenses', icon: Key },
 
-            { title: 'License Usage', href: '/licenses/usage', icon: Key },
+
 
         ],
     },
@@ -166,8 +166,8 @@ export function AppSidebar() {
 
     const canAccess = (module?: string) => {
         if (!module) {
-return true;
-} // No restriction (e.g. Dashboard)
+            return true;
+        } // No restriction (e.g. Dashboard)
 
         return modulePermissions.includes(module);
     };
