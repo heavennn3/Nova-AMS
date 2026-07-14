@@ -12,14 +12,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
-    // Asset Requests (Admin)
-    Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');
-    Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
-    Route::post('/requests/{id}/approve', [\App\Http\Controllers\AssetRequestController::class, 'approve'])->name('requests.approve');
-    Route::post('/requests/{id}/reject', [\App\Http\Controllers\AssetRequestController::class, 'reject'])->name('requests.reject');
-    Route::post('/requests/{id}/return', [\App\Http\Controllers\AssetRequestController::class, 'markReturned'])->name('requests.return');
-    Route::post('/requests/batch-approve', [\App\Http\Controllers\AssetRequestController::class, 'batchApprove'])->name('requests.batch-approve');
-    Route::post('/requests/batch-reject', [\App\Http\Controllers\AssetRequestController::class, 'batchReject'])->name('requests.batch-reject');
+    // Asset Requests (Admin/Manager)
+    Route::middleware(['role:Admin|Manager'])->group(function () {
+        Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');
+        Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
+        Route::post('/requests/{id}/approve', [\App\Http\Controllers\AssetRequestController::class, 'approve'])->name('requests.approve');
+        Route::post('/requests/{id}/reject', [\App\Http\Controllers\AssetRequestController::class, 'reject'])->name('requests.reject');
+        Route::post('/requests/{id}/return', [\App\Http\Controllers\AssetRequestController::class, 'markReturned'])->name('requests.return');
+        Route::post('/requests/batch-approve', [\App\Http\Controllers\AssetRequestController::class, 'batchApprove'])->name('requests.batch-approve');
+        Route::post('/requests/batch-reject', [\App\Http\Controllers\AssetRequestController::class, 'batchReject'])->name('requests.batch-reject');
+    });
 
     // Asset Loans
     Route::prefix('asset-loans')->group(function () {
@@ -59,28 +61,40 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // QR/Barcode Scanning routes — now in routes/api.php
 
         
-        Route::post('/licenses/bulk-update-status', [\App\Http\Controllers\LicenseController::class, 'bulkUpdateStatus'])->name('licenses.bulk-update-status');
-        Route::post('/licenses/import-bulk', [\App\Http\Controllers\LicenseController::class, 'importBulk'])->name('licenses.import-bulk');
-        Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
-        Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
-        Route::get('/licenses/trash', [\App\Http\Controllers\LicenseController::class, 'trash'])->name('licenses.trash');
-        Route::post('/licenses/{id}/restore', [\App\Http\Controllers\LicenseController::class, 'restore'])->name('licenses.restore');
-        Route::delete('/licenses/{id}/force', [\App\Http\Controllers\LicenseController::class, 'forceDelete'])->name('licenses.force-delete');
-        Route::resource('licenses', \App\Http\Controllers\LicenseController::class);
+        Route::get('/licenses', [\App\Http\Controllers\LicenseController::class, 'index'])->name('licenses.index');
 
-        Route::get('/asset-track', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('asset-track');
-        Route::post('/asset-track/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('asset-track.checkout');
-        Route::patch('/asset-track/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('asset-track.checkin');
-        Route::post('/asset-track/{assignment}/send-reminder', [\App\Http\Controllers\AssetTrackingController::class, 'sendReminder'])->name('asset-track.send-reminder');
-        Route::post('/asset-track/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('asset-track.bulk-reminders');
+        Route::middleware(['role:Admin|Manager'])->group(function () {
+            Route::post('/licenses/bulk-update-status', [\App\Http\Controllers\LicenseController::class, 'bulkUpdateStatus'])->name('licenses.bulk-update-status');
+            Route::post('/licenses/import-bulk', [\App\Http\Controllers\LicenseController::class, 'importBulk'])->name('licenses.import-bulk');
+            Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
+            Route::post('/licenses/seats/{seat}/checkin', [\App\Http\Controllers\LicenseController::class, 'checkin'])->name('licenses.seats.checkin');
+            Route::post('/licenses', [\App\Http\Controllers\LicenseController::class, 'store'])->name('licenses.store');
+            Route::put('/licenses/{license}', [\App\Http\Controllers\LicenseController::class, 'update'])->name('licenses.update');
+            Route::delete('/licenses/{license}', [\App\Http\Controllers\LicenseController::class, 'destroy'])->name('licenses.destroy');
+        });
+
+        Route::middleware(['role:Admin'])->group(function () {
+            Route::get('/licenses/trash', [\App\Http\Controllers\LicenseController::class, 'trash'])->name('licenses.trash');
+            Route::post('/licenses/{id}/restore', [\App\Http\Controllers\LicenseController::class, 'restore'])->name('licenses.restore');
+            Route::delete('/licenses/{id}/force', [\App\Http\Controllers\LicenseController::class, 'forceDelete'])->name('licenses.force-delete');
+        });
+
+        Route::middleware(['role:Admin|Manager'])->group(function () {
+            Route::get('/asset-track', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('asset-track');
+            Route::post('/asset-track/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('asset-track.checkout');
+            Route::patch('/asset-track/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('asset-track.checkin');
+            Route::post('/asset-track/{assignment}/send-reminder', [\App\Http\Controllers\AssetTrackingController::class, 'sendReminder'])->name('asset-track.send-reminder');
+            Route::post('/asset-track/bulk-reminders', [\App\Http\Controllers\AssetTrackingController::class, 'sendBulkReminders'])->name('asset-track.bulk-reminders');
+        });
 
         // Asset Withdrawals Module
     });
 
     // Multi-Site Module
-    Route::middleware(['permission:module.multi-site'])->group(function () {
+    Route::get('/multi-site/dashboards', [\App\Http\Controllers\MultiSiteController::class, 'dashboards'])->name('multi-site.dashboards');
+
+    Route::middleware(['role:Admin|Manager'])->group(function () {
         Route::get('/multi-site/tracking', [\App\Http\Controllers\MultiSiteController::class, 'tracking'])->name('multi-site.tracking');
-        Route::get('/multi-site/dashboards', [\App\Http\Controllers\MultiSiteController::class, 'dashboards'])->name('multi-site.dashboards');
         Route::get('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'transfers'])->name('multi-site.transfers');
         Route::post('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'storeTransfer'])->name('multi-site.transfers.store');
         Route::patch('/multi-site/transfers/{id}/status', [\App\Http\Controllers\MultiSiteController::class, 'updateTransferStatus'])->name('multi-site.transfers.status');

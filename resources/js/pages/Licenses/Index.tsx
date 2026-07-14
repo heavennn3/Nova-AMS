@@ -1,4 +1,4 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import {
     Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
     Package, CheckCircle2, AlertTriangle, Clock, Users, Layers,
@@ -35,6 +35,8 @@ const statusConfig: Record<string, { bg: string; label: string }> = {
 };
 
 export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], currentSiteId = null }: any) {
+    const roles = usePage<any>().props.auth?.user?.roles ?? [];
+    const canManageLicenses = roles.includes('Admin') || roles.includes('Manager');
     const [error, setError] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -348,7 +350,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 return <Badge className={`text-xs px-2 py-0.5 ${cfg.bg}`}>{cfg.label}</Badge>;
             },
         },
-        {
+        ...(canManageLicenses ? [{
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
@@ -364,7 +366,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                     </Button>
                 </div>
             ),
-        },
+        }] : []),
     ];
 
     // ── Stats ──
@@ -397,14 +399,16 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                     <h1 className="text-2xl font-bold tracking-tight">Software Licenses</h1>
 
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
-                        <Upload className="mr-2 h-4 w-4" /> Import CSV
-                    </Button>
-                    <Button size="sm" onClick={() => setIsCreateOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" /> Add License
-                    </Button>
-                </div>
+                {canManageLicenses && (
+                    <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
+                            <Upload className="mr-2 h-4 w-4" /> Import CSV
+                        </Button>
+                        <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" /> Add License
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Stats Cards */}
@@ -512,7 +516,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             </div>
 
             {/* Table */}
-            <DataTable columns={columns} data={filteredLicenses} />
+            <DataTable columns={columns} data={filteredLicenses} hideToolbar={!canManageLicenses} />
 
             {/* ── License Detail Dialog ── */}
             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>

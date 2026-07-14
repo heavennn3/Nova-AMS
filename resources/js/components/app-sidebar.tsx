@@ -36,8 +36,11 @@ import type { NavItem } from '@/types';
 
 type NavSection = {
     title: string;
-    items: NavItem[];
+    items: (NavItem & { roles?: string[] })[];
 };
+
+const ADMIN_ONLY = ['Admin'];
+const ADMIN_MANAGER = ['Admin', 'Manager'];
 
 const navSections: NavSection[] = [
     {
@@ -84,7 +87,7 @@ const navSections: NavSection[] = [
         items: [
             { title: 'Site Dashboard', href: '/multi-site/dashboards', icon: MapPin },
 
-            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: MapPin },
+            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: MapPin, roles: ADMIN_MANAGER },
 
         ],
     },
@@ -99,6 +102,7 @@ const navSections: NavSection[] = [
                 href: '/requests/admin',
                 icon: ClipboardList,
                 module: 'Asset Inventory',
+                roles: ADMIN_MANAGER,
             },
 
             {
@@ -106,6 +110,7 @@ const navSections: NavSection[] = [
                 href: '/asset-track',
                 icon: Map,
                 module: 'Asset Inventory',
+                roles: ADMIN_MANAGER,
             },
 
 
@@ -122,12 +127,14 @@ const navSections: NavSection[] = [
                 href: '/security/logs',
                 icon: ScrollText,
                 module: 'System Settings',
+                roles: ADMIN_ONLY,
             },
             {
                 title: 'Deleted Items',
                 href: '/security/recycle-bin',
                 icon: Trash2,
                 module: 'System Settings',
+                roles: ADMIN_ONLY,
             },
         ],
     },
@@ -139,18 +146,21 @@ const navSections: NavSection[] = [
                 href: '/users',
                 icon: Users,
                 module: 'System Settings',
+                roles: ADMIN_ONLY,
             },
             {
                 title: 'Access Control',
                 href: '/security/roles',
                 icon: Shield,
                 module: 'System Settings',
+                roles: ADMIN_ONLY,
             },
             {
                 title: 'Settings',
                 href: '/settings',
                 icon: Settings,
                 module: 'System Settings',
+                roles: ADMIN_ONLY,
             },
         ],
     },
@@ -179,8 +189,10 @@ export function AppSidebar() {
             return {
                 ...section,
                 items: section.items.filter((item) => {
-                    // Standard module access check
-                    return canAccess((item as any).module);
+                    const roles = (item as any).roles as string[] | undefined;
+                    const canAccessRole = !roles || roles.some((role) => auth.user?.roles?.includes(role));
+
+                    return canAccessRole && canAccess((item as any).module);
                 }),
             };
         })
