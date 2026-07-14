@@ -12,7 +12,7 @@ import {
     getFilteredRowModel,
     useReactTable
 } from '@tanstack/react-table';
-import { RefreshCcw, Package, AlertTriangle, CheckCircle } from 'lucide-react';
+import { RefreshCcw, Package, AlertTriangle, CheckCircle, Download, FileText } from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -297,6 +297,89 @@ return;
         }
     };
 
+    const exportSelectedCsv = () => {
+        const headers = columns
+            .map((col: any) => col.headerText || col.accessorKey)
+            .filter(Boolean);
+        const rows = selectedRows.map((row) =>
+            columns
+                .map((col: any) => {
+                    if (!col.accessorKey) {
+                        return null;
+                    }
+
+                    const val = (row.original as any)[col.accessorKey];
+
+                    return typeof val === 'object' ? JSON.stringify(val) : String(val ?? '');
+                })
+                .filter((v) => v !== null) as string[]
+        );
+        const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`;
+        const csvContent = [headers, ...rows]
+            .map((row) => row.map(escapeCsv).join(','))
+            .join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'selected_items.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportSelectedPdf = () => {
+        const headers = columns
+            .map((col: any) => col.headerText || col.accessorKey)
+            .filter(Boolean);
+        const rows = selectedRows.map((row) =>
+            columns
+                .map((col: any) => {
+                    if (!col.accessorKey) {
+                        return null;
+                    }
+
+                    const val = (row.original as any)[col.accessorKey];
+
+                    return typeof val === 'object' ? JSON.stringify(val) : String(val ?? '');
+                })
+                .filter((v) => v !== null) as string[]
+        );
+        const escapeHtml = (value: string) => value.replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char] || char));
+        const win = window.open('', '_blank');
+
+        if (!win) {
+            toast.error('Popup blocked. Allow popups to export PDF.');
+            return;
+        }
+
+        win.document.write(`
+            <html>
+                <head>
+                    <title>Selected Items Export</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; color: #111827; padding: 24px; }
+                        h1 { margin: 0 0 4px; font-size: 22px; }
+                        .meta { color: #6b7280; margin-bottom: 18px; font-size: 12px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                        th { background: #f3f4f6; text-align: left; }
+                        th, td { border: 1px solid #d1d5db; padding: 6px; vertical-align: top; }
+                        @media print { body { padding: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>Selected Items</h1>
+                    <div class="meta">Total: ${selectedRows.length} · Exported: ${new Date().toLocaleString()}</div>
+                    <table>
+                        <thead><tr>${headers.map((header) => `<th>${escapeHtml(String(header))}</th>`).join('')}</tr></thead>
+                        <tbody>${rows.map((row) => `<tr>${row.map((value) => `<td>${escapeHtml(value)}</td>`).join('')}</tr>`).join('')}</tbody>
+                    </table>
+                    <script>window.onload = () => { window.print(); };</script>
+                </body>
+            </html>
+        `);
+        win.document.close();
+    };
+
     return (
         <div className="space-y-4">
             {!hideToolbar && (
@@ -315,40 +398,21 @@ return;
                         <span>{selectedRows.length} items selected</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                                const headers = columns
-                                    .map((col: any) => col.headerText || col.accessorKey)
-                                    .filter(Boolean);
-                                const rows = selectedRows.map((row) =>
-                                    columns
-                                        .map((col: any) => {
-                                            if (!col.accessorKey) {
-return null;
-}
-
-                                            const val = (row.original as any)[col.accessorKey];
-
-                                            return typeof val === 'object' ? JSON.stringify(val) : val;
-                                        })
-                                        .filter((v) => v !== null)
-                                );
-                                const csvContent =
-                                    'data:text/csv;charset=utf-8,' +
-                                    [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-                                const encodedUri = encodeURI(csvContent);
-                                const link = document.createElement('a');
-                                link.setAttribute('href', encodedUri);
-                                link.setAttribute('download', 'selected_items.csv');
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }}
-                        >
-                            Export Selected
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <Download className="mr-2 h-4 w-4" /> Export Selected
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={exportSelectedPdf}>
+                                    <FileText className="mr-2 h-4 w-4" /> PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={exportSelectedCsv}>
+                                    <Download className="mr-2 h-4 w-4" /> CSV
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         {canUpdateStatus && ['assets', 'work-orders', 'users', 'spare-parts', 'licenses'].includes(resourceType || '') && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>

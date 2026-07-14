@@ -762,7 +762,7 @@ export default function AssetInventory({
                 </div>
             </div>
 
-            <DataTable columns={columns} data={filteredAssets} hideToolbar />
+            <DataTable columns={columns} data={filteredAssets} hideToolbar assetStatuses={assetStatuses} />
 
             {/* ── Create Asset Modal ── */}
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
