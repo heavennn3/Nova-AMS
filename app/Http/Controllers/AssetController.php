@@ -58,7 +58,12 @@ class AssetController extends Controller
 
     public function inventory(Request $request)
     {
+        $user = $request->user();
         $siteId = $request->query('site_id');
+
+        if ($user && !$user->hasRole('Admin') && !$user->hasRole('Manager')) {
+            $siteId = $user->site_id;
+        }
 
         $assetsQuery = Asset::with('category', 'type', 'oem', 'site', 'activeLoan.user')->latest();
 
