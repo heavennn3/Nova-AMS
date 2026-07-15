@@ -135,56 +135,112 @@ export default function Dashboard({
             </div>
 
             {/* Metric Cards Row */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                <Link href="/asset-inventory" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Package className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Assets</p>
-                        <p className="text-2xl font-bold text-blue-600">{stats.totalAssets}</p>
-                    </div>
-                </Link>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                {isAdmin ? (
+                    <>
+                        <Link href="/asset-inventory" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-blue-500/10 p-3">
+                                <Package className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Assets</p>
+                                <p className="text-2xl font-bold text-blue-600">{stats.totalAssets}</p>
+                            </div>
+                        </Link>
 
-                <Link href="/sites" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-emerald-500/10 p-3">
-                        <Activity className="h-6 w-6 text-emerald-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Sites</p>
-                        <p className="text-2xl font-bold text-emerald-600">{stats.totalSites}</p>
-                    </div>
-                </Link>
+                        <Link href="/sites" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-emerald-500/10 p-3">
+                                <Activity className="h-6 w-6 text-emerald-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Sites</p>
+                                <p className="text-2xl font-bold text-emerald-600">{stats.totalSites}</p>
+                            </div>
+                        </Link>
 
-                <Link href="/users" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-indigo-500/10 p-3">
-                        <Users className="h-6 w-6 text-indigo-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Users</p>
-                        <p className="text-2xl font-bold text-indigo-600">{stats.totalUsers}</p>
-                    </div>
-                </Link>
+                        <Link href="/users" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-indigo-500/10 p-3">
+                                <Users className="h-6 w-6 text-indigo-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Users</p>
+                                <p className="text-2xl font-bold text-indigo-600">{stats.totalUsers}</p>
+                            </div>
+                        </Link>
 
-                <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-red-500/10 p-3">
-                        <AlertTriangle className="h-6 w-6 text-red-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Overdue</p>
-                        <p className="text-2xl font-bold text-red-600">{stats.totalOverdue}</p>
-                    </div>
-                </Link>
+                        <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-red-500/10 p-3">
+                                <AlertTriangle className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total Overdue</p>
+                                <p className="text-2xl font-bold text-red-600">{stats.totalOverdue}</p>
+                            </div>
+                        </Link>
 
-                <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Activity className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Assets Currently In Use</p>
-                        <p className="text-2xl font-bold text-blue-600">{stats.assetsCurrentlyInUse}</p>
-                    </div>
-                </Link>
+                        <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-blue-500/10 p-3">
+                                <Activity className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Assets Currently In Use</p>
+                                <p className="text-2xl font-bold text-blue-600">{stats.assetsCurrentlyInUse}</p>
+                            </div>
+                        </Link>
+                    </>
+                ) : (
+                    <>
+                        <Link href="/spare-parts" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-cyan-500/10 p-3">
+                                <Layers className="h-6 w-6 text-cyan-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Site Spare Parts</p>
+                                <p className="text-2xl font-bold text-cyan-600">{stats.employee?.siteSpareParts ?? 0}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-blue-500/10 p-3">
+                                <Activity className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Items Currently Using</p>
+                                <p className="text-2xl font-bold text-blue-600">{stats.employee?.itemsCurrentlyUsing ?? 0}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-red-500/10 p-3">
+                                <AlertTriangle className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">My Overdue</p>
+                                <p className="text-2xl font-bold text-red-600">{stats.employee?.myOverdue ?? 0}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/asset-inventory" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-emerald-500/10 p-3">
+                                <Package className="h-6 w-6 text-emerald-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Site Assets</p>
+                                <p className="text-2xl font-bold text-emerald-600">{stats.employee?.siteAssets ?? 0}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/licenses" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                            <div className="rounded-full bg-violet-500/10 p-3">
+                                <ShieldAlert className="h-6 w-6 text-violet-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Site Licenses</p>
+                                <p className="text-2xl font-bold text-violet-600">{stats.employee?.siteLicenses ?? 0}</p>
+                            </div>
+                        </Link>
+                    </>
+                )}
             </div>
 
             {/* Row 2: Urgent Alerts & Overdues */}

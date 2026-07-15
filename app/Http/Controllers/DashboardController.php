@@ -32,6 +32,19 @@ class DashboardController extends Controller
         $totalOverdue = \App\Models\AssetAssignment::active()->whereDate('assigned_at', '<', today())->count()
             + \App\Models\AssetLoan::overdue()->count();
 
+        $userSiteIds = $user
+            ? collect([$user->site_id])->merge($user->sites()->pluck('sites.id'))->filter()->unique()->values()
+            : collect();
+        $employeeStats = [
+            'siteSpareParts' => $userSiteIds->isEmpty() ? 0 : \App\Models\SparePart::whereIn('site_id', $userSiteIds)->count(),
+            'itemsCurrentlyUsing' => $user ? \App\Models\AssetAssignment::active()->where('user_id', $user->id)->count()
+                + \App\Models\AssetLoan::where('status', 'approved')->where('user_id', $user->id)->count() : 0,
+            'myOverdue' => $user ? \App\Models\AssetAssignment::active()->where('user_id', $user->id)->whereDate('assigned_at', '<', today())->count()
+                + \App\Models\AssetLoan::overdue()->where('user_id', $user->id)->count() : 0,
+            'siteAssets' => $userSiteIds->isEmpty() ? 0 : Asset::whereIn('site_id', $userSiteIds)->count(),
+            'siteLicenses' => $userSiteIds->isEmpty() ? 0 : \App\Models\License::whereIn('site_id', $userSiteIds)->count(),
+        ];
+
 
         // Low Spare Parts Alert (quantity/minimum_stock_level are dynamic fields now)
         $lowSpareParts = \App\Models\SparePart::with(['site', 'fieldValues'])
@@ -121,6 +134,7 @@ class DashboardController extends Controller
                 'pendingRequests' => $pendingRequestsCount,
                 'assetsCurrentlyInUse' => $assetsCurrentlyInUse,
                 'totalOverdue' => $totalOverdue,
+                'employee' => $employeeStats,
             ],
             'charts' => [
                 'assetsBySite' => $assetsBySite,
