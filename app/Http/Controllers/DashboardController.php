@@ -29,21 +29,29 @@ class DashboardController extends Controller
         $totalRecentAdded = Asset::where('created_at', '>=', Carbon::now()->subDays(30))->count();
 
 
-        // Low Spare Parts Alert
-        $lowSpareParts = \App\Models\SparePart::with('site')
-            ->where(function($query) {
-                $query->whereColumn('quantity', '<=', 'minimum_stock_level')
-                      ->orWhere('quantity', '<', 5);
-            })
+        // Low Spare Parts Alert (quantity/minimum_stock_level are dynamic fields now)
+        $lowSpareParts = \App\Models\SparePart::with(['site', 'fieldValues'])
             ->get()
-            ->map(fn($part) => [
-                'id' => $part->id,
-                'name' => $part->name,
-                'part_number' => $part->part_number,
-                'quantity' => $part->quantity,
-                'minimum_stock_level' => $part->minimum_stock_level,
-                'site' => $part->site?->name ?? 'HQ Central Store',
-            ]);
+            ->filter(function ($part) {
+                $quantity = (int) ($part->getField('quantity') ?? $part->getField('stock_level') ?? 0);
+                $minimumStock = (int) ($part->getField('minimum_stock_level') ?? $part->getField('minimum_stock') ?? 0);
+
+                return $quantity <= $minimumStock || $quantity < 5;
+            })
+            ->map(function ($part) {
+                $quantity = (int) ($part->getField('quantity') ?? $part->getField('stock_level') ?? 0);
+                $minimumStock = (int) ($part->getField('minimum_stock_level') ?? $part->getField('minimum_stock') ?? 0);
+
+                return [
+                    'id' => $part->id,
+                    'name' => $part->name,
+                    'part_number' => $part->part_number,
+                    'quantity' => $quantity,
+                    'minimum_stock_level' => $minimumStock,
+                    'site' => $part->site?->name ?? 'HQ Central Store',
+                ];
+            })
+            ->values();
 
         // Sites with Asset count — manual since assets are dynamic
         $allSites = Site::all();
