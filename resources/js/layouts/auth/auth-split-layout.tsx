@@ -18,11 +18,7 @@ export default function AuthSplitLayout({
                     href={home()}
                     className="relative z-20 flex items-center gap-3"
                 >
-                    <img
-                        src="/images/novatis-logo.png"
-                        alt="Novatis Resources"
-                        className="h-9 w-auto object-contain brightness-0 invert"
-                    />
+
                 </Link>
                 <div className="relative z-20 mt-auto">
                     <blockquote className="space-y-2">
@@ -30,7 +26,7 @@ export default function AuthSplitLayout({
                             "Empowering asset management across every site."
                         </p>
                         <footer className="text-sm text-white/60">
-                            Nova-AMS · Novatis Resources
+                            Nova-AMS
                         </footer>
                     </blockquote>
                 </div>
@@ -44,11 +40,7 @@ export default function AuthSplitLayout({
                         href={home()}
                         className="relative z-20 flex items-center justify-center lg:hidden"
                     >
-                        <img
-                            src="/images/novatis-logo.png"
-                            alt="Novatis Resources"
-                            className="h-12 w-auto object-contain"
-                        />
+
                     </Link>
 
                     <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">

@@ -79,8 +79,8 @@ export default function AssetIndex({
             const file = e.target?.files?.[0];
 
             if (!file) {
-return;
-}
+                return;
+            }
 
             Papa.parse(file, {
                 header: true,

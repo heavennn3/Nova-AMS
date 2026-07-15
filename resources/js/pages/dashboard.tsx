@@ -150,7 +150,7 @@ export default function Dashboard({
                             </div>
                         </Link>
 
-                        <Link href={isManager ? "/spare-parts" : "/sites"} className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                        <Link href={isManager ? "/spare-parts/dashboard" : "/multi-site/dashboards"} className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                             <div className="rounded-full bg-emerald-500/10 p-3">
                                 {isManager ? <Layers className="h-6 w-6 text-emerald-600" /> : <Activity className="h-6 w-6 text-emerald-600" />}
                             </div>
@@ -192,7 +192,7 @@ export default function Dashboard({
                     </>
                 ) : (
                     <>
-                        <Link href="/spare-parts" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                        <Link href="/spare-parts/dashboard" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                             <div className="rounded-full bg-cyan-500/10 p-3">
                                 <Layers className="h-6 w-6 text-cyan-600" />
                             </div>
@@ -202,7 +202,7 @@ export default function Dashboard({
                             </div>
                         </Link>
 
-                        <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                        <Link href="/asset-loans" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                             <div className="rounded-full bg-blue-500/10 p-3">
                                 <Activity className="h-6 w-6 text-blue-600" />
                             </div>
@@ -212,7 +212,7 @@ export default function Dashboard({
                             </div>
                         </Link>
 
-                        <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                        <Link href="/asset-loans" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                             <div className="rounded-full bg-red-500/10 p-3">
                                 <AlertTriangle className="h-6 w-6 text-red-600" />
                             </div>

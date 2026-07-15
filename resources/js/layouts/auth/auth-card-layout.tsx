@@ -25,11 +25,7 @@ export default function AuthCardLayout({
                     href={home()}
                     className="flex items-center justify-center self-center"
                 >
-                    <img
-                        src="/images/novatis-logo.png"
-                        alt="Novatis Resources"
-                        className="h-10 w-auto object-contain"
-                    />
+
                 </Link>
 
                 <div className="flex flex-col gap-6">

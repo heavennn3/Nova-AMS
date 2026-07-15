@@ -12,7 +12,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
             <header className="border-b bg-background/95 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-3">
-                        <img src="/images/novatis-logo.png" alt="Novatis Resources" className="h-9 w-auto" />
+
                         <div>
                             <p className="text-sm font-semibold leading-none">Nova AMS</p>
                             <p className="text-xs text-muted-foreground">Asset Management System</p>
@@ -97,7 +97,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
             </main>
 
             <footer className="border-t px-6 py-6 text-center text-sm text-muted-foreground">
-                © 2026 Novatis Resources. Nova Asset Management System.
+                © 2026 Nova Asset Management System.
             </footer>
         </div>
     );
