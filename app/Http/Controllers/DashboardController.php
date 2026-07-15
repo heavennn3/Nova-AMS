@@ -27,6 +27,10 @@ class DashboardController extends Controller
         $totalSites = Site::count();
         $totalUsers = \App\Models\User::count();
         $totalRecentAdded = Asset::where('created_at', '>=', Carbon::now()->subDays(30))->count();
+        $assetsCurrentlyInUse = \App\Models\AssetAssignment::active()->count()
+            + \App\Models\AssetLoan::where('status', 'approved')->count();
+        $totalOverdue = \App\Models\AssetAssignment::active()->whereDate('assigned_at', '<', today())->count()
+            + \App\Models\AssetLoan::overdue()->count();
 
 
         // Low Spare Parts Alert (quantity/minimum_stock_level are dynamic fields now)
@@ -115,6 +119,8 @@ class DashboardController extends Controller
                 'lowSpareParts' => $lowSpareParts,
                 'sitesWithStats' => $sitesWithStats,
                 'pendingRequests' => $pendingRequestsCount,
+                'assetsCurrentlyInUse' => $assetsCurrentlyInUse,
+                'totalOverdue' => $totalOverdue,
             ],
             'charts' => [
                 'assetsBySite' => $assetsBySite,

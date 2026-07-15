@@ -7,7 +7,6 @@ import {
     Activity,
     DollarSign,
     TrendingDown,
-    Headset,
     Cpu,
     Layers,
     HardDrive,
@@ -61,6 +60,8 @@ export default function Dashboard({
         totalUsers: 0,
         activeWorkOrders: 0,
         openTickets: 0,
+        assetsCurrentlyInUse: 0,
+        totalOverdue: 0,
         lowSpareParts: [],
         sitesWithStats: [],
         pendingRequests: 0,
@@ -135,7 +136,7 @@ export default function Dashboard({
 
             {/* Metric Cards Row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                <Link href="/assets" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                <Link href="/asset-inventory" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                     <div className="rounded-full bg-blue-500/10 p-3">
                         <Package className="h-6 w-6 text-blue-600" />
                     </div>
@@ -165,23 +166,23 @@ export default function Dashboard({
                     </div>
                 </Link>
 
-                <Link href="/assets" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-cyan-500/10 p-3">
-                        <Plus className="h-6 w-6 text-cyan-600" />
+                <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                    <div className="rounded-full bg-red-500/10 p-3">
+                        <AlertTriangle className="h-6 w-6 text-red-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Recently Added</p>
-                        <p className="text-2xl font-bold text-cyan-600">{stats.totalRecentAdded}</p>
+                        <p className="text-sm text-muted-foreground">Total Overdue</p>
+                        <p className="text-2xl font-bold text-red-600">{stats.totalOverdue}</p>
                     </div>
                 </Link>
 
-                <Link href="/support/tickets" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-                    <div className="rounded-full bg-rose-500/10 p-3">
-                        <Headset className="h-6 w-6 text-rose-600" />
+                <Link href="/asset-track" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                    <div className="rounded-full bg-blue-500/10 p-3">
+                        <Activity className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Open Tickets</p>
-                        <p className="text-2xl font-bold text-rose-600">{stats.openTickets}</p>
+                        <p className="text-sm text-muted-foreground">Assets Currently In Use</p>
+                        <p className="text-2xl font-bold text-blue-600">{stats.assetsCurrentlyInUse}</p>
                     </div>
                 </Link>
             </div>
