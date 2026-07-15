@@ -10,10 +10,10 @@ Route::inertia('/', 'nova-ams', [
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware('role_or_permission:Admin|module.dashboard')->name('dashboard');
 
     // Asset Requests (Admin/Manager)
-    Route::middleware(['role:Admin|Manager'])->group(function () {
+    Route::middleware(['role_or_permission:Admin|module.requests-admin'])->group(function () {
         Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');
         Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
         Route::post('/requests/{id}/approve', [\App\Http\Controllers\AssetRequestController::class, 'approve'])->name('requests.approve');
@@ -24,7 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Asset Loans
-    Route::prefix('asset-loans')->group(function () {
+    Route::prefix('asset-loans')->middleware('role_or_permission:Admin|module.asset-loans')->group(function () {
         Route::get('/', [\App\Http\Controllers\AssetLoanController::class, 'index'])->name('asset-loans.index');
         Route::get('/create', [\App\Http\Controllers\AssetLoanController::class, 'create'])->name('asset-loans.create');
         Route::post('/', [\App\Http\Controllers\AssetLoanController::class, 'store'])->name('asset-loans.store');
@@ -32,10 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Asset Inventory Module
-    Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->name('asset-inventory');
-    Route::get('/licenses', [\App\Http\Controllers\LicenseController::class, 'index'])->name('licenses.index');
+    Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->middleware('role_or_permission:Admin|module.asset-inventory')->name('asset-inventory');
+    Route::get('/licenses', [\App\Http\Controllers\LicenseController::class, 'index'])->middleware('role_or_permission:Admin|module.licenses')->name('licenses.index');
 
-    Route::middleware(['permission:module.asset-inventory'])->group(function () {
+    Route::middleware(['role_or_permission:Admin|module.asset-inventory|module.licenses|module.asset-track'])->group(function () {
         Route::post('assets/import-bulk', [\App\Http\Controllers\AssetController::class, 'importBulk'])->name('assets.import');
         Route::get('/assets/export', [\App\Http\Controllers\AssetController::class, 'exportCsv'])->name('assets.export');
         Route::patch('assets/{asset}/status', [\App\Http\Controllers\AssetController::class, 'updateStatus'])->name('assets.status');
@@ -63,7 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         
 
-        Route::middleware(['role:Admin|Manager'])->group(function () {
+        Route::middleware(['role_or_permission:Admin|module.licenses'])->group(function () {
             Route::post('/licenses/bulk-update-status', [\App\Http\Controllers\LicenseController::class, 'bulkUpdateStatus'])->name('licenses.bulk-update-status');
             Route::post('/licenses/import-bulk', [\App\Http\Controllers\LicenseController::class, 'importBulk'])->name('licenses.import-bulk');
             Route::post('/licenses/seats/{seat}/checkout', [\App\Http\Controllers\LicenseController::class, 'checkout'])->name('licenses.seats.checkout');
@@ -79,8 +79,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/licenses/{id}/force', [\App\Http\Controllers\LicenseController::class, 'forceDelete'])->name('licenses.force-delete');
         });
 
-        Route::middleware(['role:Admin|Manager'])->group(function () {
-            Route::get('/asset-track', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->name('asset-track');
+        Route::middleware(['role_or_permission:Admin|module.asset-track'])->group(function () {
+            Route::get('/asset-track', [\App\Http\Controllers\AssetTrackingController::class, 'index'])->middleware('role_or_permission:Admin|module.asset-track')->name('asset-track');
             Route::post('/asset-track/checkout', [\App\Http\Controllers\AssetTrackingController::class, 'checkout'])->name('asset-track.checkout');
             Route::patch('/asset-track/{assignment}/checkin', [\App\Http\Controllers\AssetTrackingController::class, 'checkin'])->name('asset-track.checkin');
             Route::post('/asset-track/{assignment}/send-reminder', [\App\Http\Controllers\AssetTrackingController::class, 'sendReminder'])->name('asset-track.send-reminder');
@@ -91,11 +91,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Multi-Site Module
-    Route::get('/multi-site/dashboards', [\App\Http\Controllers\MultiSiteController::class, 'dashboards'])->name('multi-site.dashboards');
+    Route::get('/multi-site/dashboards', [\App\Http\Controllers\MultiSiteController::class, 'dashboards'])->middleware('role_or_permission:Admin|module.multi-site-dashboards')->name('multi-site.dashboards');
 
-    Route::middleware(['role:Admin|Manager'])->group(function () {
+    Route::middleware(['role_or_permission:Admin|module.asset-transfer'])->group(function () {
         Route::get('/multi-site/tracking', [\App\Http\Controllers\MultiSiteController::class, 'tracking'])->name('multi-site.tracking');
-        Route::get('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'transfers'])->name('multi-site.transfers');
+        Route::get('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'transfers'])->middleware('role_or_permission:Admin|module.asset-transfer')->name('multi-site.transfers');
         Route::post('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'storeTransfer'])->name('multi-site.transfers.store');
         Route::patch('/multi-site/transfers/{id}/status', [\App\Http\Controllers\MultiSiteController::class, 'updateTransferStatus'])->name('multi-site.transfers.status');
         Route::get('/multi-site/access', [\App\Http\Controllers\MultiSiteController::class, 'access'])->name('multi-site.access');
@@ -110,7 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Spare Parts Module (moved outside Operations module)
-    Route::prefix('spare-parts')->group(function () {
+    Route::prefix('spare-parts')->middleware('role_or_permission:Admin|module.spare-parts')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\SparePartController::class, 'dashboard'])->name('spare-parts.dashboard');
         Route::get('/', [\App\Http\Controllers\SparePartController::class, 'index'])->name('spare-parts.index');
         Route::post('/', [\App\Http\Controllers\SparePartController::class, 'store'])->name('spare-parts.store');
@@ -126,16 +126,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // System Settings Module
-    Route::middleware(['permission:module.system-settings'])->group(function () {
-        Route::get('/security/logs', [\App\Http\Controllers\SecurityController::class, 'logs']);
-        Route::get('/security/roles', [\App\Http\Controllers\RoleAccessController::class, 'index'])->name('roles.index');
-        Route::post('/security/roles/matrix', [\App\Http\Controllers\RoleAccessController::class, 'saveMatrix'])->name('roles.save-matrix');
-        Route::resource('users', \App\Http\Controllers\UserController::class);
+    Route::middleware(['role_or_permission:Admin|module.settings|module.security-logs|module.access-control|module.users|module.recycle-bin'])->group(function () {
+        Route::get('/security/logs', [\App\Http\Controllers\SecurityController::class, 'logs'])->middleware('role_or_permission:Admin|module.security-logs');
+        Route::get('/security/roles', [\App\Http\Controllers\RoleAccessController::class, 'index'])->middleware('role_or_permission:Admin|module.access-control')->name('roles.index');
+        Route::post('/security/roles/matrix', [\App\Http\Controllers\RoleAccessController::class, 'saveMatrix'])->middleware('role:Admin')->name('roles.save-matrix');
+        Route::resource('users', \App\Http\Controllers\UserController::class)->middleware('role_or_permission:Admin|module.users');
         Route::patch('/users/{user}/toggle-active', [\App\Http\Controllers\UserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('/users/bulk-update', [\App\Http\Controllers\UserController::class, 'bulkUpdate'])->name('users.bulk-update');
 
         // Recycle Bin
-        Route::get('/security/recycle-bin', [\App\Http\Controllers\RecycleBinController::class, 'index'])->name('recycle-bin.index');
+        Route::get('/security/recycle-bin', [\App\Http\Controllers\RecycleBinController::class, 'index'])->middleware('role_or_permission:Admin|module.recycle-bin')->name('recycle-bin.index');
         Route::post('/security/recycle-bin/{id}/restore', [\App\Http\Controllers\RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
 

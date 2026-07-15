@@ -46,7 +46,7 @@ const navSections: NavSection[] = [
     {
         title: 'MAIN',
         items: [
-            { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+            { title: 'Dashboard', href: dashboard(), icon: LayoutGrid, module: 'Dashboard' },
         ],
     },
     {
@@ -56,10 +56,10 @@ const navSections: NavSection[] = [
         items: [
 
 
-            { title: 'ICT Asset List', href: assetInventory(), icon: Package },
-            { title: 'Asset Loan', href: '/asset-loans', icon: Package },
+            { title: 'ICT Asset List', href: assetInventory(), icon: Package, module: 'ICT Asset List' },
+            { title: 'Asset Loan', href: '/asset-loans', icon: Package, module: 'Asset Loan' },
 
-            { title: 'Spare Part ', href: '/spare-parts/dashboard', icon: Wrench },
+            { title: 'Spare Part ', href: '/spare-parts/dashboard', icon: Wrench, module: 'Spare Part' },
 
 
 
@@ -74,7 +74,7 @@ const navSections: NavSection[] = [
 
         items: [
 
-            { title: 'Key & Licenses', href: '/licenses', icon: Key },
+            { title: 'Key & Licenses', href: '/licenses', icon: Key, module: 'Key & Licenses' },
 
 
 
@@ -85,9 +85,9 @@ const navSections: NavSection[] = [
         title: 'SITES MANAGEMENT',
 
         items: [
-            { title: 'Site Dashboard', href: '/multi-site/dashboards', icon: MapPin },
+            { title: 'Site Dashboard', href: '/multi-site/dashboards', icon: MapPin, module: 'Site Dashboard' },
 
-            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: MapPin, roles: ADMIN_MANAGER },
+            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: MapPin, module: 'Asset Transfer' },
 
         ],
     },
@@ -101,16 +101,14 @@ const navSections: NavSection[] = [
                 title: ' Requests',
                 href: '/requests/admin',
                 icon: ClipboardList,
-                module: 'Asset Inventory',
-                roles: ADMIN_MANAGER,
+                module: 'Requests',
             },
 
             {
                 title: ' Asset Track',
                 href: '/asset-track',
                 icon: Map,
-                module: 'Asset Inventory',
-                roles: ADMIN_MANAGER,
+                module: 'Asset Track',
             },
 
 
@@ -126,15 +124,13 @@ const navSections: NavSection[] = [
                 title: 'Audit Log',
                 href: '/security/logs',
                 icon: ScrollText,
-                module: 'System Settings',
-                roles: ADMIN_ONLY,
+                module: 'Audit Log',
             },
             {
                 title: 'Deleted Items',
                 href: '/security/recycle-bin',
                 icon: Trash2,
-                module: 'System Settings',
-                roles: ADMIN_ONLY,
+                module: 'Deleted Items',
             },
         ],
     },
@@ -145,22 +141,19 @@ const navSections: NavSection[] = [
                 title: 'Users',
                 href: '/users',
                 icon: Users,
-                module: 'System Settings',
-                roles: ADMIN_ONLY,
+                module: 'Users',
             },
             {
                 title: 'Access Control',
                 href: '/security/roles',
                 icon: Shield,
-                module: 'System Settings',
-                roles: ADMIN_ONLY,
+                module: 'Access Control',
             },
             {
                 title: 'Settings',
                 href: '/settings',
                 icon: Settings,
-                module: 'System Settings',
-                roles: ADMIN_ONLY,
+                module: 'Setting',
             },
         ],
     },
@@ -173,13 +166,11 @@ export function AppSidebar() {
 
     const modulePermissions: string[] = auth.user?.modulePermissions ?? [];
     const isAdmin = auth.user?.roles?.includes('Admin') ?? false;
-    const isManager = auth.user?.roles?.includes('Manager') || auth.user?.roles?.includes('Site Manager') || false;
-    const isEmployee = auth.user?.roles?.includes('Employee') || auth.user?.roles?.includes('Technician') || auth.user?.roles?.includes('Viewer') || false;
 
     const canAccess = (module?: string) => {
-        if (!module) {
+        if (isAdmin || !module) {
             return true;
-        } // No restriction (e.g. Dashboard)
+        }
 
         return modulePermissions.includes(module);
     };

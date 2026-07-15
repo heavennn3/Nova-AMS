@@ -14,14 +14,20 @@ class RoleAccessController extends Controller
      * A role having this permission = it has access to that module.
      */
     private const MODULE_PERMISSIONS = [
-        'Asset Inventory'         => 'module.asset-inventory',
-        'Master Data'             => 'module.master-data',
-        'Multi-Site Management'   => 'module.multi-site',
-        'Operations & Maintenance'=> 'module.operations',
-        'Financial Management'    => 'module.finance',
-        'Analytics & Reporting'   => 'module.analytics',
-        'Advanced Features'       => 'module.advanced',
-        'System Settings'         => 'module.system-settings',
+        'Dashboard'       => 'module.dashboard',
+        'ICT Asset List'  => 'module.asset-inventory',
+        'Asset Loan'      => 'module.asset-loans',
+        'Spare Part'      => 'module.spare-parts',
+        'Key & Licenses'  => 'module.licenses',
+        'Site Dashboard'  => 'module.multi-site-dashboards',
+        'Asset Transfer'  => 'module.asset-transfer',
+        'Requests'        => 'module.requests-admin',
+        'Asset Track'     => 'module.asset-track',
+        'Audit Log'       => 'module.security-logs',
+        'Deleted Items'   => 'module.recycle-bin',
+        'Users'           => 'module.users',
+        'Access Control'  => 'module.access-control',
+        'Setting'         => 'module.settings',
     ];
 
     private array $roleDescriptions = [

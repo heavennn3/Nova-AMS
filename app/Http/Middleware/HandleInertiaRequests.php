@@ -12,14 +12,20 @@ class HandleInertiaRequests extends Middleware
 
     /** Module permission slug → human-readable label (must match RoleAccessController). */
     private const MODULE_PERMISSIONS = [
-        'module.asset-inventory' => 'Asset Inventory',
-        'module.master-data'     => 'Master Data',
-        'module.multi-site'      => 'Multi-Site Management',
-        'module.operations'      => 'Operations & Maintenance',
-        'module.finance'         => 'Financial Management',
-        'module.analytics'       => 'Analytics & Reporting',
-        'module.advanced'        => 'Advanced Features',
-        'module.system-settings' => 'System Settings',
+        'module.dashboard'              => 'Dashboard',
+        'module.asset-inventory'        => 'ICT Asset List',
+        'module.asset-loans'            => 'Asset Loan',
+        'module.spare-parts'            => 'Spare Part',
+        'module.licenses'               => 'Key & Licenses',
+        'module.multi-site-dashboards'  => 'Site Dashboard',
+        'module.asset-transfer'         => 'Asset Transfer',
+        'module.requests-admin'         => 'Requests',
+        'module.asset-track'            => 'Asset Track',
+        'module.security-logs'          => 'Audit Log',
+        'module.recycle-bin'            => 'Deleted Items',
+        'module.users'                  => 'Users',
+        'module.access-control'         => 'Access Control',
+        'module.settings'               => 'Setting',
     ];
 
     public function version(Request $request): ?string
