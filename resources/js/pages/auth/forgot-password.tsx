@@ -32,7 +32,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     name="email"
                                     autoComplete="off"
                                     autoFocus
-                                    placeholder="email@nova.com"
+                                    placeholder="email@novatis.com"
                                 />
 
                                 <InputError message={errors.email} />

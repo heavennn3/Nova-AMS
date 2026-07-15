@@ -23,17 +23,22 @@ export default function Login({
     canRegister,
 }: Props) {
     return (
-        <>
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
             <Head title="Log in" />
 
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-5"
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-primary">Nova AMS</p>
+                            <p className="text-sm text-muted-foreground">Sign in to Asset Management System.</p>
+                        </div>
+
+                        <div className="grid gap-5">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email address</Label>
                                 <Input
@@ -44,7 +49,8 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@nova.com"
+                                    placeholder="email@novatis.com"
+                                    className="h-11"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -55,7 +61,7 @@ export default function Login({
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="ml-auto text-sm font-medium"
                                             tabIndex={5}
                                         >
                                             Forgot password?
@@ -69,22 +75,23 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
+                                    className="h-11"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-3 rounded-lg border bg-muted/30 px-3 py-2">
                                 <Checkbox
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember" className="text-sm font-normal">Remember me</Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="h-11 w-full shadow-sm"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -107,15 +114,15 @@ export default function Login({
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700">
                     {status}
                 </div>
             )}
-        </>
+        </div>
     );
 }
 
 Login.layout = {
     title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    description: 'Enter your credentials below to login',
 };

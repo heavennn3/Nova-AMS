@@ -16,11 +16,7 @@ export default function AuthSimpleLayout({
                             href={home()}
                             className="flex flex-col items-center gap-2 font-medium"
                         >
-                            <img
-                                src="/images/novatis-logo.png"
-                                alt="Novatis Resources"
-                                className="h-12 w-auto object-contain"
-                            />
+
                             <span className="sr-only">{title}</span>
                         </Link>
 

@@ -49,7 +49,7 @@ export default function Register() {
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@nova.com"
+                                    placeholder="email@novatis.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>
