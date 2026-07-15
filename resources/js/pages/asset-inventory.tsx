@@ -731,6 +731,7 @@ export default function AssetInventory({
                     </SelectContent>
                 </Select>
 
+
                 {sites.length > 0 && (
                     <Select value={siteFilter} onValueChange={handleSiteFilterChange}>
                         <SelectTrigger className="h-8 w-[200px] text-sm">
