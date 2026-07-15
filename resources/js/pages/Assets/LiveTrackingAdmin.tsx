@@ -124,6 +124,28 @@ export default function LiveTrackingAdmin({
     const [localSiteFilter, setLocalSiteFilter] = useState(filters.site_id);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const formatTimeDistance = (ms: number) => {
+        const absHours = Math.ceil(Math.abs(ms) / (1000 * 60 * 60));
+
+        if (absHours < 24) {
+            return `${absHours} hour${absHours === 1 ? '' : 's'}`;
+        }
+
+        const days = Math.ceil(absHours / 24);
+        return `${days} day${days === 1 ? '' : 's'}`;
+    };
+
+    const getReturnStatus = (date: string) => {
+        const diff = new Date(date).getTime() - Date.now();
+        const label = formatTimeDistance(diff);
+
+        return diff < 0
+            ? { overdue: true, message: `${label} overdue` }
+            : { overdue: false, message: `${label} remaining` };
+    };
+
+    const getLoanAge = (date: string) => `${formatTimeDistance(Date.now() - new Date(date).getTime())} loaned`;
+
     const reminderForm = useForm({
         assignment_ids: [] as number[],
     });
@@ -340,9 +362,17 @@ export default function LiveTrackingAdmin({
             cell: ({ row }: any) => {
                 const assignment = row.original;
 
+                const loanAge = getLoanAge(assignment.assigned_at);
+
                 return (
-                    <div className="text-sm">
-                        {new Date(assignment.assigned_at).toLocaleDateString()}
+                    <div className="space-y-1">
+                        <div className="text-sm">
+                            {new Date(assignment.assigned_at).toLocaleDateString()}
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {loanAge}
+                        </Badge>
                     </div>
                 );
             },
@@ -355,22 +385,22 @@ export default function LiveTrackingAdmin({
             cell: ({ row }: any) => {
                 const assignment = row.original;
                 const expectedDate = new Date(assignment.expected_return_date);
-                const isOverdue = assignment.is_overdue;
+                const returnStatus = getReturnStatus(assignment.expected_return_date);
 
                 return (
                     <div className="space-y-1">
                         <div className="text-sm">
                             {expectedDate.toLocaleDateString()}
                         </div>
-                        {isOverdue ? (
+                        {returnStatus.overdue ? (
                             <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
-                                {assignment.days_overdue}d overdue
+                                {returnStatus.message}
                             </Badge>
                         ) : (
                             <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
-                                On track
+                                {returnStatus.message}
                             </Badge>
                         )}
                     </div>
@@ -612,15 +642,15 @@ export default function LiveTrackingAdmin({
                                     <div>
                                         <Label className="text-muted-foreground">Status</Label>
                                         <div className="mt-1">
-                                            {selectedAssignment.is_overdue ? (
+                                            {getReturnStatus(selectedAssignment.expected_return_date).overdue ? (
                                                 <Badge className="bg-red-100 text-red-700 border-red-200">
                                                     <AlertTriangle className="h-3 w-3 mr-1" />
-                                                    {selectedAssignment.days_overdue} days overdue
+                                                    {getReturnStatus(selectedAssignment.expected_return_date).message}
                                                 </Badge>
                                             ) : (
                                                 <Badge className="bg-green-100 text-green-700 border-green-200">
                                                     <CheckCircle2 className="h-3 w-3 mr-1" />
-                                                    Active - On track
+                                                    {getReturnStatus(selectedAssignment.expected_return_date).message}
                                                 </Badge>
                                             )}
                                         </div>
