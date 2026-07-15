@@ -72,7 +72,9 @@ export default function Dashboard({
     warrantyExpiring = [],
 }: any) {
     const { auth } = usePage<any>().props;
-    const isAdmin = auth.user?.roles?.includes('Admin');
+    const roles = auth.user?.roles ?? [];
+    const isManager = roles.includes('Manager') || roles.includes('Site Manager');
+    const canViewGlobalCards = roles.includes('Admin') || isManager;
 
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
@@ -136,7 +138,7 @@ export default function Dashboard({
 
             {/* Metric Cards Row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-                {isAdmin ? (
+                {canViewGlobalCards ? (
                     <>
                         <Link href="/asset-inventory" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                             <div className="rounded-full bg-blue-500/10 p-3">
@@ -148,13 +150,13 @@ export default function Dashboard({
                             </div>
                         </Link>
 
-                        <Link href="/sites" className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                        <Link href={isManager ? "/spare-parts" : "/sites"} className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                             <div className="rounded-full bg-emerald-500/10 p-3">
-                                <Activity className="h-6 w-6 text-emerald-600" />
+                                {isManager ? <Layers className="h-6 w-6 text-emerald-600" /> : <Activity className="h-6 w-6 text-emerald-600" />}
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Total Sites</p>
-                                <p className="text-2xl font-bold text-emerald-600">{stats.totalSites}</p>
+                                <p className="text-sm text-muted-foreground">{isManager ? 'Total Spare Parts' : 'Total Sites'}</p>
+                                <p className="text-2xl font-bold text-emerald-600">{isManager ? (stats.employee?.siteSpareParts ?? 0) : stats.totalSites}</p>
                             </div>
                         </Link>
 
@@ -163,8 +165,8 @@ export default function Dashboard({
                                 <Users className="h-6 w-6 text-indigo-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Total Users</p>
-                                <p className="text-2xl font-bold text-indigo-600">{stats.totalUsers}</p>
+                                <p className="text-sm text-muted-foreground">{isManager ? 'Total Users (Site Managed)' : 'Total Users'}</p>
+                                <p className="text-2xl font-bold text-indigo-600">{isManager ? (stats.employee?.siteUsers ?? 0) : stats.totalUsers}</p>
                             </div>
                         </Link>
 

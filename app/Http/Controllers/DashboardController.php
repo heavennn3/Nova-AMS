@@ -43,6 +43,7 @@ class DashboardController extends Controller
                 + \App\Models\AssetLoan::overdue()->where('user_id', $user->id)->count() : 0,
             'siteAssets' => $userSiteIds->isEmpty() ? 0 : Asset::whereIn('site_id', $userSiteIds)->count(),
             'siteLicenses' => $userSiteIds->isEmpty() ? 0 : \App\Models\License::whereIn('site_id', $userSiteIds)->count(),
+            'siteUsers' => $userSiteIds->isEmpty() ? 0 : \App\Models\User::whereIn('site_id', $userSiteIds)->count(),
         ];
 
 
