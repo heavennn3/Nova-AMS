@@ -46,6 +46,34 @@ class DashboardController extends Controller
             'siteUsers' => $userSiteIds->isEmpty() ? 0 : \App\Models\User::whereIn('site_id', $userSiteIds)->count(),
         ];
 
+        $overdueCheckoutQuery = \App\Models\AssetLoan::with(['asset', 'user.site', 'site'])->overdue();
+
+        if ($user?->hasRole('Admin')) {
+            // Admin sees all overdue checkouts.
+        } elseif ($user?->hasRole('Manager') || $user?->hasRole('Site Manager')) {
+            $overdueCheckoutQuery->whereIn('site_id', $userSiteIds);
+        } else {
+            $overdueCheckoutQuery->where('user_id', $user?->id);
+        }
+
+        $overdueCheckouts = $overdueCheckoutQuery
+            ->orderBy('expected_return_date')
+            ->limit(50)
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'id' => $loan->id,
+                    'asset_id' => $loan->asset?->asset_id ?? $loan->asset_id,
+                    'asset_name' => $loan->asset?->asset_name ?? 'Unknown Asset',
+                    'user_name' => $loan->user?->name ?? 'Unknown User',
+                    'user_email' => $loan->user?->email ?? '-',
+                    'site' => $loan->site?->name ?? $loan->user?->site?->name ?? 'No Site',
+                    'checkout_date' => optional($loan->loan_date)->format('Y-m-d'),
+                    'expected_return_date' => optional($loan->expected_return_date)->format('Y-m-d'),
+                    'days_late' => max(1, (int) $loan->expected_return_date->copy()->startOfDay()->diffInDays(now()->startOfDay())),
+                ];
+            });
+
 
         // Low Spare Parts Alert (quantity/minimum_stock_level are dynamic fields now)
         $lowSpareParts = \App\Models\SparePart::with(['site', 'fieldValues'])
@@ -115,8 +143,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Overdue Checkouts — removed (Withdrawals module deleted)
-        $overdueCheckouts = collect([]);
+        // Overdue Checkouts
 
         // Warranty Expiring — no longer queryable by old columns, skip for now
         $warrantyExpiring = collect();

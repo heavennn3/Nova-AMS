@@ -311,31 +311,34 @@ export default function Dashboard({
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                            <th className="pb-3 pl-2">Asset</th>
-                                            <th className="pb-3">Person</th>
-                                            <th className="pb-3">Checkout Date</th>
-                                            <th className="pb-3 pr-2 text-right">Days Late</th>
+                                            <th className="pb-3 pl-2">Name / Email</th>
+                                            <th className="pb-3">Site</th>
+                                            <th className="pb-3">Item</th>
+                                            <th className="pb-3 pr-2 text-right">Day Overdue</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/40 text-sm">
                                         {overdueCheckouts.map((item: any) => (
                                             <tr key={item.id} className="hover:bg-muted/10 transition-colors">
                                                 <td className="py-3 pl-2">
-                                                    <span className="font-semibold text-foreground">
-                                                        {item.asset_name}
-                                                    </span>
-                                                    <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.asset_id}</p>
-                                                </td>
-                                                <td className="py-3">
                                                     <div className="flex items-center space-x-2">
                                                         <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">
                                                             {item.user_name?.substring(0, 2)}
                                                         </div>
-                                                        <span className="font-medium text-foreground">{item.user_name}</span>
+                                                        <div>
+                                                            <p className="font-medium text-foreground">{item.user_name}</p>
+                                                            <p className="text-xs text-muted-foreground">{item.user_email}</p>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td className="py-3 font-mono text-xs text-muted-foreground">
-                                                    {item.checkout_date}
+                                                <td className="py-3 text-sm text-muted-foreground">
+                                                    {item.site}
+                                                </td>
+                                                <td className="py-3">
+                                                    <span className="font-semibold text-foreground">
+                                                        {item.asset_name}
+                                                    </span>
+                                                    <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.asset_id}</p>
                                                 </td>
                                                 <td className="py-3 pr-2 text-right">
                                                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold ${item.days_late > 14
@@ -344,7 +347,7 @@ export default function Dashboard({
                                                             ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
                                                             : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
                                                         }`}>
-                                                        {item.days_late}d late
+                                                        {item.days_late}d overdue
                                                     </span>
                                                 </td>
                                             </tr>
