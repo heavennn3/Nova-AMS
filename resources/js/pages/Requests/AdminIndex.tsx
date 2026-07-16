@@ -119,16 +119,16 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
 
     const getStatusConfig = (status: string) => {
         const config: Record<string, { color: string; bg: string; border: string; icon: any }> = {
-            Pending: { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', icon: Clock },
-            Approved: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', icon: CheckCircle2 },
-            Fulfilled: { color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200', icon: Package },
-            Returned: { color: 'text-violet-700', bg: 'bg-violet-50', border: 'border-violet-200', icon: RotateCcw },
-            Rejected: { color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200', icon: XCircle },
-            Cancelled: { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', icon: XCircle },
-            'Return_pending': { color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200', icon: BellRing },
+            Pending: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', icon: Clock },
+            Approved: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2 },
+            Fulfilled: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Package },
+            Returned: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30', icon: RotateCcw },
+            Rejected: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: XCircle },
+            Cancelled: { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: XCircle },
+            'Return_pending': { color: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30', icon: BellRing },
         };
 
-        return config[status] || { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', icon: Clock };
+        return config[status] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock };
     };
 
     const getStatusBadge = (status: string) => {
@@ -147,13 +147,13 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         switch (priority) {
             case 'Urgent':
                 return (
-                    <Badge variant="outline" className="text-rose-700 border-rose-200 bg-rose-50 gap-1">
+                    <Badge variant="outline" className="text-rose-700 border-rose-200 bg-rose-50 gap-1 dark:text-rose-300 dark:border-rose-500/30 dark:bg-rose-500/10">
                         <AlertTriangle className="h-3 w-3" /> Urgent
                     </Badge>
                 );
             case 'High':
                 return (
-                    <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50 gap-1">
+                    <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50 gap-1 dark:text-amber-300 dark:border-amber-500/30 dark:bg-amber-500/10">
                         <BellRing className="h-3 w-3" /> High
                     </Badge>
                 );
@@ -206,11 +206,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const urgentPendingCount = requests.filter(r => (r.status === 'Pending' || r.status === 'pending') && r.priority === 'Urgent').length;
     const returnPendingCount = requests.filter(r => r.status === 'Return_pending').length;
     const stats = [
-        { label: 'Pending Review', value: pendingCount, color: 'text-amber-700', bg: 'from-amber-50 to-amber-100/50', iconBg: 'bg-amber-100', icon: Clock, ring: pendingCount > 0 ? 'ring-2 ring-amber-300/50' : '' },
-        { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-700', bg: 'from-emerald-50 to-emerald-100/50', iconBg: 'bg-emerald-100', icon: CheckCircle2, ring: '' },
-        { label: 'Return Review', value: returnPendingCount, color: 'text-orange-700', bg: 'from-orange-50 to-orange-100/50', iconBg: 'bg-orange-100', icon: BellRing, ring: returnPendingCount > 0 ? 'ring-2 ring-orange-300/50' : '' },
-        { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-700', bg: 'from-blue-50 to-blue-100/50', iconBg: 'bg-blue-100', icon: Package, ring: '' },
-        { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-700', bg: 'from-rose-50 to-rose-100/50', iconBg: 'bg-rose-100', icon: XCircle, ring: '' },
+        { label: 'Pending Review', value: pendingCount, color: 'text-amber-700 dark:text-amber-300', bg: 'from-amber-50 to-amber-100/50 dark:from-amber-500/10 dark:to-amber-500/5', iconBg: 'bg-amber-100 dark:bg-amber-500/15', icon: Clock, ring: pendingCount > 0 ? 'ring-2 ring-amber-300/50 dark:ring-amber-500/30' : '' },
+        { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-700 dark:text-emerald-300', bg: 'from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-emerald-500/5', iconBg: 'bg-emerald-100 dark:bg-emerald-500/15', icon: CheckCircle2, ring: '' },
+        { label: 'Return Review', value: returnPendingCount, color: 'text-orange-700 dark:text-orange-300', bg: 'from-orange-50 to-orange-100/50 dark:from-orange-500/10 dark:to-orange-500/5', iconBg: 'bg-orange-100 dark:bg-orange-500/15', icon: BellRing, ring: returnPendingCount > 0 ? 'ring-2 ring-orange-300/50 dark:ring-orange-500/30' : '' },
+        { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-700 dark:text-blue-300', bg: 'from-blue-50 to-blue-100/50 dark:from-blue-500/10 dark:to-blue-500/5', iconBg: 'bg-blue-100 dark:bg-blue-500/15', icon: Package, ring: '' },
+        { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-700 dark:text-rose-300', bg: 'from-rose-50 to-rose-100/50 dark:from-rose-500/10 dark:to-rose-500/5', iconBg: 'bg-rose-100 dark:bg-rose-500/15', icon: XCircle, ring: '' },
     ];
 
     const clearFilters = () => {
@@ -239,14 +239,14 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                             </p>
                         </div>
                         {(pendingCount > 0 || returnPendingCount > 0) && (
-                            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 animate-pulse">
-                                <Bell className="h-4 w-4 text-amber-600" />
-                                <span className="text-sm font-semibold text-amber-700">
+                            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 animate-pulse dark:bg-amber-500/10 dark:border-amber-500/30">
+                                <Bell className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+                                <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
                                     {pendingCount > 0 && `${pendingCount} pending`}
                                     {pendingCount > 0 && returnPendingCount > 0 && ' • '}
                                     {returnPendingCount > 0 && `${returnPendingCount} return review`}
                                     {urgentPendingCount > 0 && (
-                                        <span className="text-rose-600"> ({urgentPendingCount} urgent)</span>
+                                        <span className="text-rose-600 dark:text-rose-300"> ({urgentPendingCount} urgent)</span>
                                     )}
                                 </span>
                             </div>
@@ -410,10 +410,10 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     return (
                                         <tr
                                             key={r.id}
-                                            className={`transition-colors ${isUrgent ? 'bg-rose-50/50 hover:bg-rose-50' :
-                                                isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50' :
-                                                    isReturnPending ? 'bg-orange-50/30 hover:bg-orange-50/50' :
-                                                        isPending ? 'bg-amber-50/20 hover:bg-amber-50/30' :
+                                            className={`transition-colors ${isUrgent ? 'bg-rose-50/50 hover:bg-rose-50 dark:bg-rose-500/10 dark:hover:bg-rose-500/15' :
+                                                isHigh ? 'bg-amber-50/30 hover:bg-amber-50/50 dark:bg-amber-500/10 dark:hover:bg-amber-500/15' :
+                                                    isReturnPending ? 'bg-orange-50/30 hover:bg-orange-50/50 dark:bg-orange-500/10 dark:hover:bg-orange-500/15' :
+                                                        isPending ? 'bg-amber-50/20 hover:bg-amber-50/30 dark:bg-amber-500/5 dark:hover:bg-amber-500/10' :
                                                             'hover:bg-muted/30'
                                                 }`}
                                         >
@@ -433,7 +433,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     {isReturnPending && (
                                                         <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
                                                     )}
-                                                    <span className="font-mono text-xs font-semibold text-emerald-700">{r.request_number}</span>
+                                                    <span className="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-300">{r.request_number}</span>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3.5">
@@ -442,7 +442,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 {r.user?.site ? (
-                                                    <Badge variant="outline" className="text-slate-600 bg-slate-50 border-slate-200 gap-1 text-xs">
+                                                    <Badge variant="outline" className="text-slate-600 bg-slate-50 border-slate-200 gap-1 text-xs dark:text-slate-300 dark:bg-slate-500/10 dark:border-slate-500/30">
                                                         <MapPin className="h-3 w-3" />
                                                         {r.user.site.name}
                                                     </Badge>
@@ -451,7 +451,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                 )}
                                             </td>
                                             <td className="px-4 py-3.5">
-                                                <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-transparent text-xs">
+                                                <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-transparent text-xs dark:bg-indigo-500/10 dark:text-indigo-300">
                                                     {r.request_type}
                                                 </Badge>
                                             </td>
@@ -463,7 +463,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     </div>
                                                 ) : r.license ? (
                                                     <div>
-                                                        <div className="font-medium text-xs text-violet-700">{r.license.name}</div>
+                                                        <div className="font-medium text-xs text-violet-700 dark:text-violet-300">{r.license.name}</div>
                                                         <div className="text-[11px] text-muted-foreground">{r.license.available_seats ?? '?'} seat(s) available</div>
                                                     </div>
                                                 ) : r.category ? (
@@ -483,7 +483,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-7 w-7 text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+                                                            className="h-7 w-7 text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-500/15"
                                                             onClick={() => setProofImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`)}
                                                             title="View proof photo"
                                                         >
@@ -572,12 +572,12 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                     <>
                                         <div className="pt-2 border-t mt-2">
                                             <span className="text-muted-foreground text-xs block mb-1">Reason:</span>
-                                            <p className="text-sm bg-white/60 rounded p-2">{actionRequest.reason}</p>
+                                            <p className="text-sm bg-white/60 rounded p-2 dark:bg-background/60">{actionRequest.reason}</p>
                                         </div>
                                         {actionRequest.return_notes && (
                                             <div className="pt-2 border-t mt-2">
                                                 <span className="text-muted-foreground text-xs block mb-1">Return Notes:</span>
-                                                <p className="text-sm bg-blue-50/60 rounded p-2 border border-blue-100">{actionRequest.return_notes}</p>
+                                                <p className="text-sm bg-blue-50/60 rounded p-2 border border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/30">{actionRequest.return_notes}</p>
                                             </div>
                                         )}
                                         {(proofImagePreview || actionRequest.return_proof_path || actionRequest.proof_photo_path || actionRequest.return_proof_photo) && (
@@ -586,7 +586,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     <ImageIcon className="h-4 w-4 text-violet-600" />
                                                     Return Proof Photo
                                                 </span>
-                                                <div className="rounded-lg border border-slate-200 overflow-hidden">
+                                                <div className="rounded-lg border border-slate-200 overflow-hidden dark:border-slate-700">
                                                     {proofImagePreview ? (
                                                         <img
                                                             src={proofImagePreview}
@@ -594,7 +594,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             className="w-full max-h-64 object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="bg-slate-50 p-4 text-center text-sm text-slate-400">
+                                                        <div className="bg-slate-50 p-4 text-center text-sm text-slate-400 dark:bg-slate-900 dark:text-slate-500">
                                                             Image not available
                                                         </div>
                                                     )}
@@ -610,12 +610,12 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                         {/* Missing proof photo warning for return approvals */}
                                         {actionType === 'return' && !(proofImagePreview || actionRequest.return_proof_path || actionRequest.proof_photo_path || actionRequest.return_proof_photo) && (
                                             <div className="pt-2 border-t mt-2">
-                                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 dark:bg-amber-500/10 dark:border-amber-500/30">
                                                     <div className="flex items-start gap-2">
-                                                        <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                                                        <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 dark:text-amber-300" />
                                                         <div>
-                                                            <p className="text-sm font-semibold text-amber-800">No proof photo available</p>
-                                                            <p className="text-xs text-amber-700 mt-1">
+                                                            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">No proof photo available</p>
+                                                            <p className="text-xs text-amber-700 mt-1 dark:text-amber-300">
                                                                 The user did not upload a proof photo for this return. You can still approve, but please consider requesting proof.
                                                             </p>
                                                         </div>
@@ -628,14 +628,14 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                 {actionRequest.license && (
                                     <div className="pt-2 border-t mt-2">
                                         <span className="text-muted-foreground text-xs block mb-1">License:</span>
-                                        <div className="flex items-center justify-between bg-violet-50 rounded p-2">
+                                        <div className="flex items-center justify-between bg-violet-50 rounded p-2 dark:bg-violet-500/10">
                                             <div>
-                                                <div className="text-sm font-medium text-violet-700">{actionRequest.license.name}</div>
+                                                <div className="text-sm font-medium text-violet-700 dark:text-violet-300">{actionRequest.license.name}</div>
                                                 {actionRequest.license.product_key && (
                                                     <div className="text-[11px] font-mono text-muted-foreground mt-0.5">Key: {actionRequest.license.product_key}</div>
                                                 )}
                                             </div>
-                                            <Badge variant="outline" className="text-violet-600 border-violet-200 bg-violet-50 text-xs">
+                                            <Badge variant="outline" className="text-violet-600 border-violet-200 bg-violet-50 text-xs dark:text-violet-300 dark:border-violet-500/30 dark:bg-violet-500/10">
                                                 {actionRequest.license.available_seats ?? '?'} seat(s) left
                                             </Badge>
                                         </div>
