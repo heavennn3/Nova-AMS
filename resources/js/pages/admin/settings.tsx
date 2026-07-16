@@ -57,30 +57,8 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
     const [settingConfig, setSettingConfig] = useState<any>({});
 
     const settingsItems = [
-        {
-            id: 'branding',
-            title: 'Branding',
-            description: 'Logo, Site Name',
-            icon: Paintbrush,
-            color: 'text-blue-500',
-            bg: 'bg-blue-500/10',
-            fields: [
-                { label: 'Site Name', name: 'site_name', type: 'text', defaultValue: 'Nova AMS' },
-                { label: 'Logo URL', name: 'logo_url', type: 'text', defaultValue: '/logo.png' },
-            ],
-        },
-        {
-            id: 'general',
-            title: 'General Settings',
-            description: 'Default EULA and more',
-            icon: FileText,
-            color: 'text-indigo-500',
-            bg: 'bg-indigo-500/10',
-            fields: [
-                { label: 'Default EULA', name: 'default_eula', type: 'textarea', defaultValue: 'Standard End User License Agreement' },
-                { label: 'Footer Text', name: 'footer_text', type: 'text', defaultValue: 'Nova Asset Management System' },
-            ],
-        },
+
+
         {
             id: 'security',
             title: 'Security',
@@ -92,7 +70,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
         },
         {
             id: 'groups',
-            title: 'Groups',
+            title: 'Access Control',
             description: 'Account permission groups',
             icon: Users,
             color: 'text-cyan-500',
@@ -115,104 +93,11 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
             icon: MapPin,
             color: 'text-green-500',
             bg: 'bg-green-500/10',
-            link: '/admin/sites',
+            link: '/multi-site/dashboards',
         },
-        {
-            id: 'localization',
-            title: 'Localization',
-            description: 'Language, date display',
-            icon: Globe,
-            color: 'text-sky-500',
-            bg: 'bg-sky-500/10',
-            fields: [
-                { label: 'Language', name: 'language', type: 'select', options: ['English', 'Spanish', 'French', 'German'], defaultValue: 'English' },
-                { label: 'Date Format', name: 'date_format', type: 'text', defaultValue: 'YYYY-MM-DD' },
-            ],
-        },
-        {
-            id: 'notifications',
-            title: 'Notifications',
-            description: 'Email Alerts & Audit Settings',
-            icon: Bell,
-            color: 'text-amber-500',
-            bg: 'bg-amber-500/10',
-            fields: [
-                { label: 'Alert Email', name: 'alert_email', type: 'email', defaultValue: 'alerts@nova-ams.com' },
-                { label: 'Enable Audit Reminders', name: 'audit_reminders', type: 'checkbox', defaultValue: true },
-            ],
-        },
-        {
-            id: 'integrations',
-            title: 'Integrations',
-            description: 'Integration settings',
-            icon: Terminal,
-            color: 'text-purple-500',
-            bg: 'bg-purple-500/10',
-            fields: [
-                { label: 'Slack Webhook URL', name: 'slack_webhook', type: 'text', defaultValue: '' },
-                { label: 'Microsoft Teams Webhook', name: 'teams_webhook', type: 'text', defaultValue: '' },
-            ],
-        },
-        {
-            id: 'asset_tags',
-            title: 'Asset Tags',
-            description: 'Incrementing and prefixes',
-            icon: Hash,
-            color: 'text-blue-500',
-            bg: 'bg-blue-500/10',
-            fields: [
-                { label: 'Asset Tag Prefix', name: 'asset_prefix', type: 'text', defaultValue: 'NOVA-' },
-                { label: 'Next Auto-increment Number', name: 'next_number', type: 'number', defaultValue: 1001 },
-            ],
-        },
-        {
-            id: 'labels',
-            title: 'Labels',
-            description: 'Barcodes & label settings',
-            icon: QrCode,
-            color: 'text-violet-500',
-            bg: 'bg-violet-500/10',
-            fields: [
-                { label: 'Barcode Type', name: 'barcode_type', type: 'select', options: ['QR Code', '1D Barcode', 'DataMatrix'], defaultValue: 'QR Code' },
-                { label: 'Label Width (in)', name: 'label_width', type: 'number', defaultValue: 2 },
-            ],
-        },
-        {
-            id: 'ldap',
-            title: 'LDAP',
-            description: 'LDAP/Active Directory',
-            icon: Network,
-            color: 'text-teal-500',
-            bg: 'bg-teal-500/10',
-            fields: [
-                { label: 'LDAP Server Address', name: 'ldap_server', type: 'text', defaultValue: 'ldap://corp.nova-ams.internal' },
-                { label: 'Base DN', name: 'ldap_base_dn', type: 'text', defaultValue: 'dc=corp,dc=nova-ams,dc=internal' },
-            ],
-        },
-        {
-            id: 'google',
-            title: 'Google',
-            description: 'Google Workspace Login Settings',
-            icon: Chrome,
-            color: 'text-sky-500',
-            bg: 'bg-sky-500/10',
-            fields: [
-                { label: 'Client ID', name: 'google_client_id', type: 'text', defaultValue: '' },
-                { label: 'Client Secret', name: 'google_client_secret', type: 'password', defaultValue: '' },
-            ],
-        },
-        {
-            id: 'saml',
-            title: 'SAML',
-            description: 'SAML settings',
-            icon: KeyRound,
-            color: 'text-blue-600',
-            bg: 'bg-blue-600/10',
-            fields: [
-                { label: 'Identity Provider Metadata URL', name: 'saml_idp_metadata', type: 'text', defaultValue: '' },
-                { label: 'Entity ID', name: 'saml_entity_id', type: 'text', defaultValue: 'nova-ams' },
-            ],
-        },
+
+
+
         {
             id: 'backups',
             title: 'Backups',
