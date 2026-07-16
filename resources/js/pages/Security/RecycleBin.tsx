@@ -104,7 +104,7 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
         }
 
         toast.promise(
-            fetch('/api/recycle-bin/bulk-restore', {
+            fetch('/security/recycle-bin/bulk-restore', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
         }
 
         toast.promise(
-            fetch('/api/recycle-bin/bulk-delete', {
+            fetch('/security/recycle-bin/bulk-delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -137,6 +137,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Recycle Bin
         Route::get('/security/recycle-bin', [\App\Http\Controllers\RecycleBinController::class, 'index'])->middleware('role_or_permission:Admin|module.recycle-bin')->name('recycle-bin.index');
         Route::post('/security/recycle-bin/{id}/restore', [\App\Http\Controllers\RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
+        Route::post('/security/recycle-bin/bulk-restore', [\App\Http\Controllers\RecycleBinController::class, 'bulkRestore'])->name('recycle-bin.bulk-restore');
+        Route::post('/security/recycle-bin/bulk-delete', [\App\Http\Controllers\RecycleBinController::class, 'bulkForceDelete'])->name('recycle-bin.bulk-delete');
         Route::delete('/security/recycle-bin/{id}', [\App\Http\Controllers\RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
 
         // Admin Site Management Routes

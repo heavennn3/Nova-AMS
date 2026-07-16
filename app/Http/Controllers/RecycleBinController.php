@@ -131,4 +131,42 @@ class RecycleBinController extends Controller
 
         return redirect()->back()->with('success', 'Item permanently deleted.');
     }
+
+    public function bulkRestore(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string|in:' . $this->validTypes(),
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ]);
+
+        $modelClass = $this->models[$request->type];
+        $count = $modelClass::onlyTrashed()
+            ->whereIn('id', $request->ids)
+            ->restore();
+
+        return response()->json([
+            'message' => "Restored {$count} records",
+            'count' => $count,
+        ]);
+    }
+
+    public function bulkForceDelete(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string|in:' . $this->validTypes(),
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ]);
+
+        $modelClass = $this->models[$request->type];
+        $count = $modelClass::onlyTrashed()
+            ->whereIn('id', $request->ids)
+            ->forceDelete();
+
+        return response()->json([
+            'message' => "Permanently deleted {$count} records",
+            'count' => $count,
+        ]);
+    }
 }
