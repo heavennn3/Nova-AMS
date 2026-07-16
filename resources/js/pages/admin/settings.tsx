@@ -288,7 +288,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
                         Admin Settings
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Configure global parameters, security defaults, integrations, and view server diagnostics.
+                        Nova AMS System Setting
                     </p>
                 </div>
             </div>

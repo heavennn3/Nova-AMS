@@ -55,41 +55,41 @@ const ROLE_COLORS: Record<
     { bg: string; border: string; text: string; badge: string; bar: string }
 > = {
     Admin: {
-        bg: 'bg-purple-50 dark:bg-purple-950/30',
-        border: 'border-purple-200 dark:border-purple-800',
-        text: 'text-purple-700 dark:text-purple-300',
-        badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-        bar: 'bg-purple-500',
+        bg: 'bg-gradient-to-br from-fuchsia-50 to-purple-100/70 dark:from-fuchsia-500/15 dark:to-purple-500/10',
+        border: 'border-fuchsia-200/80 dark:border-fuchsia-400/30',
+        text: 'text-fuchsia-700 dark:text-fuchsia-200',
+        badge: 'bg-fuchsia-100/80 text-fuchsia-700 ring-1 ring-fuchsia-200/80 dark:bg-fuchsia-500/15 dark:text-fuchsia-200 dark:ring-fuchsia-400/30',
+        bar: 'bg-gradient-to-r from-fuchsia-500 to-purple-500',
     },
     'Site Manager': {
-        bg: 'bg-blue-50 dark:bg-blue-950/30',
-        border: 'border-blue-200 dark:border-blue-800',
-        text: 'text-blue-700 dark:text-blue-300',
-        badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-        bar: 'bg-blue-500',
+        bg: 'bg-gradient-to-br from-sky-50 to-cyan-100/70 dark:from-sky-500/15 dark:to-cyan-500/10',
+        border: 'border-sky-200/80 dark:border-sky-400/30',
+        text: 'text-sky-700 dark:text-sky-200',
+        badge: 'bg-sky-100/80 text-sky-700 ring-1 ring-sky-200/80 dark:bg-sky-500/15 dark:text-sky-200 dark:ring-sky-400/30',
+        bar: 'bg-gradient-to-r from-sky-500 to-cyan-500',
     },
     Technician: {
-        bg: 'bg-amber-50 dark:bg-amber-950/30',
-        border: 'border-amber-200 dark:border-amber-800',
-        text: 'text-amber-700 dark:text-amber-300',
-        badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
-        bar: 'bg-amber-500',
+        bg: 'bg-gradient-to-br from-amber-50 to-orange-100/70 dark:from-amber-500/15 dark:to-orange-500/10',
+        border: 'border-amber-200/80 dark:border-amber-400/30',
+        text: 'text-amber-700 dark:text-amber-200',
+        badge: 'bg-amber-100/80 text-amber-700 ring-1 ring-amber-200/80 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/30',
+        bar: 'bg-gradient-to-r from-amber-500 to-orange-500',
     },
     Viewer: {
-        bg: 'bg-slate-50 dark:bg-slate-950/30',
-        border: 'border-slate-200 dark:border-slate-800',
-        text: 'text-slate-600 dark:text-slate-400',
-        badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-        bar: 'bg-slate-500',
+        bg: 'bg-gradient-to-br from-slate-50 to-zinc-100/80 dark:from-slate-500/15 dark:to-zinc-500/10',
+        border: 'border-slate-200/80 dark:border-slate-400/30',
+        text: 'text-slate-700 dark:text-slate-200',
+        badge: 'bg-slate-100/80 text-slate-700 ring-1 ring-slate-200/80 dark:bg-slate-500/15 dark:text-slate-200 dark:ring-slate-400/30',
+        bar: 'bg-gradient-to-r from-slate-500 to-zinc-500',
     },
 };
 
 const DEFAULT_COLOR = {
-    bg: 'bg-gray-50 dark:bg-gray-500/10',
-    border: 'border-gray-200 dark:border-gray-500/30',
-    text: 'text-gray-700 dark:text-gray-300',
-    badge: 'bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-300',
-    bar: 'bg-gray-400 dark:bg-gray-500',
+    bg: 'bg-gradient-to-br from-zinc-50 to-stone-100/80 dark:from-zinc-500/15 dark:to-stone-500/10',
+    border: 'border-zinc-200/80 dark:border-zinc-400/30',
+    text: 'text-zinc-700 dark:text-zinc-200',
+    badge: 'bg-zinc-100/80 text-zinc-700 ring-1 ring-zinc-200/80 dark:bg-zinc-500/15 dark:text-zinc-200 dark:ring-zinc-400/30',
+    bar: 'bg-gradient-to-r from-zinc-500 to-stone-500',
 };
 
 // ── Build initial matrix from server-provided role data ──────────────────────
@@ -247,7 +247,7 @@ export default function Roles({ roles, modules }: Props) {
                         return (
                             <Card
                                 key={role.id}
-                                className={`border ${colors.border} ${colors.bg} shadow-sm transition-all hover:shadow-md`}
+                                className={`border ${colors.border} ${colors.bg} shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg dark:shadow-black/20`}
                             >
                                 <CardHeader className="px-4 pt-4 pb-2">
                                     <div className="mb-1 flex items-center justify-between">
