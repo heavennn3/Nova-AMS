@@ -143,10 +143,10 @@ export default function Transfers({
 
     const StatusBadge = ({ status }: { status: string }) => {
         const badges: Record<string, { cls: string; icon: any; label: string }> = {
-            pending: { cls: 'bg-amber-100 text-amber-700', icon: Clock, label: 'Pending' },
-            approved: { cls: 'bg-blue-100 text-blue-700', icon: CheckCircle2, label: 'Approved' },
-            completed: { cls: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2, label: 'Completed' },
-            rejected: { cls: 'bg-red-100 text-red-700', icon: XCircle, label: 'Rejected' },
+            pending: { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300', icon: Clock, label: 'Pending' },
+            approved: { cls: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300', icon: CheckCircle2, label: 'Approved' },
+            completed: { cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300', icon: CheckCircle2, label: 'Completed' },
+            rejected: { cls: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300', icon: XCircle, label: 'Rejected' },
         };
         const b = badges[status] || badges.pending;
         const Icon = b.icon;
@@ -172,21 +172,21 @@ export default function Transfers({
 
             {/* Stats Cards */}
             <div className="grid grid-cols-4 gap-4">
-                <div className="bg-amber-50 border border-amber-200 p-4 rounded transition-all duration-200 hover:shadow-lg">
-                    <h3 className="font-semibold text-amber-900">Pending</h3>
-                    <p className="text-2xl font-bold text-amber-600">{counts.pending}</p>
+                <div className="bg-amber-50 border border-amber-200 p-4 rounded transition-all duration-200 hover:shadow-lg dark:bg-amber-500/10 dark:border-amber-500/30">
+                    <h3 className="font-semibold text-amber-900 dark:text-amber-200">Pending</h3>
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-300">{counts.pending}</p>
                 </div>
-                <div className="bg-blue-50 border border-blue-200 p-4 rounded transition-all duration-200 hover:shadow-lg">
-                    <h3 className="font-semibold text-blue-900">Approved</h3>
-                    <p className="text-2xl font-bold text-blue-600">{counts.approved}</p>
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded transition-all duration-200 hover:shadow-lg dark:bg-blue-500/10 dark:border-blue-500/30">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-200">Approved</h3>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{counts.approved}</p>
                 </div>
-                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded transition-all duration-200 hover:shadow-lg">
-                    <h3 className="font-semibold text-emerald-900">Completed</h3>
-                    <p className="text-2xl font-bold text-emerald-600">{counts.completed}</p>
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded transition-all duration-200 hover:shadow-lg dark:bg-emerald-500/10 dark:border-emerald-500/30">
+                    <h3 className="font-semibold text-emerald-900 dark:text-emerald-200">Completed</h3>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">{counts.completed}</p>
                 </div>
-                <div className="bg-red-50 border border-red-200 p-4 rounded transition-all duration-200 hover:shadow-lg">
-                    <h3 className="font-semibold text-red-900">Rejected</h3>
-                    <p className="text-2xl font-bold text-red-600">{counts.rejected}</p>
+                <div className="bg-red-50 border border-red-200 p-4 rounded transition-all duration-200 hover:shadow-lg dark:bg-red-500/10 dark:border-red-500/30">
+                    <h3 className="font-semibold text-red-900 dark:text-red-200">Rejected</h3>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-300">{counts.rejected}</p>
                 </div>
             </div>
 
@@ -409,12 +409,12 @@ export default function Transfers({
                                                     <>
                                                         <Button
                                                             variant="outline" size="sm"
-                                                            className="h-7 text-[10px] font-semibold border-emerald-500/30 text-emerald-600 hover:bg-emerald-50"
+                                                            className="h-7 text-[10px] font-semibold border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/15"
                                                             onClick={() => handleUpdateStatus(transfer.id, 'approved')}
                                                         >Approve</Button>
                                                         <Button
                                                             variant="outline" size="sm"
-                                                            className="h-7 text-[10px] font-semibold border-red-500/30 text-red-600 hover:bg-red-50"
+                                                            className="h-7 text-[10px] font-semibold border-red-500/30 text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15"
                                                             onClick={() => handleUpdateStatus(transfer.id, 'rejected')}
                                                         >Reject</Button>
                                                     </>
@@ -422,7 +422,7 @@ export default function Transfers({
                                                 {transfer.status === 'approved' && (
                                                     <Button
                                                         variant="outline" size="sm"
-                                                        className="h-7 text-[10px] font-semibold border-blue-500/30 text-blue-600 hover:bg-blue-50"
+                                                        className="h-7 text-[10px] font-semibold border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-500/15"
                                                         onClick={() => handleUpdateStatus(transfer.id, 'completed')}
                                                     >Mark Complete</Button>
                                                 )}
