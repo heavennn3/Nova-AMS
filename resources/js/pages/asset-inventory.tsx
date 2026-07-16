@@ -631,7 +631,7 @@ export default function AssetInventory({
                         <Building2 className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground">Sites</p>
+                        <p className="text-sm font-medium text-muted-foreground">All Sites</p>
                         <p className="text-2xl font-bold text-foreground">{totalSites}</p>
                     </div>
                 </div>
