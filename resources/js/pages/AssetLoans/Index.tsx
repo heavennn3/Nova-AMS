@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     Plus,
     Search,
@@ -34,18 +34,18 @@ import {
 } from '@/components/ui/select';
 
 const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    approved: 'bg-blue-100 text-blue-800 border-blue-200',
-    rejected: 'bg-red-100 text-red-800 border-red-200',
-    returned: 'bg-green-100 text-green-800 border-green-200',
-    return_pending: 'bg-amber-100 text-amber-800 border-amber-200',
-    cancelled: 'bg-gray-100 text-gray-800 border-gray-200',
+    pending: 'border-yellow-200 bg-yellow-100 text-yellow-800 dark:border-yellow-800/60 dark:bg-yellow-950/30 dark:text-yellow-300',
+    approved: 'border-blue-200 bg-blue-100 text-blue-800 dark:border-blue-800/60 dark:bg-blue-950/30 dark:text-blue-300',
+    rejected: 'border-red-200 bg-red-100 text-red-800 dark:border-red-800/60 dark:bg-red-950/30 dark:text-red-300',
+    returned: 'border-green-200 bg-green-100 text-green-800 dark:border-green-800/60 dark:bg-green-950/30 dark:text-green-300',
+    return_pending: 'border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-300',
+    cancelled: 'border-gray-200 bg-gray-100 text-gray-800 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-300',
 };
 
 const conditionColors: Record<string, string> = {
-    good: 'bg-green-100 text-green-800',
-    semi_faulty: 'bg-yellow-100 text-yellow-800',
-    faulty: 'bg-red-100 text-red-800',
+    good: 'bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300',
+    semi_faulty: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-300',
+    faulty: 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-300',
 };
 
 function parseDate(value: string): Date | null {
@@ -134,11 +134,11 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                 </div>
 
                 <div className="grid grid-cols-5 gap-4">
-                    <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold text-yellow-600">{stats.pending}</p></div>
-                    <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Active Loans</p><p className="text-2xl font-bold text-blue-600">{stats.approved}</p></div>
-                    <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Return Review</p><p className="text-2xl font-bold text-amber-600">{stats.return_pending}</p></div>
-                    <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Overdue</p><p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600' : 'text-muted-foreground'}`}>{stats.overdue}{stats.overdue > 0 && <AlertTriangle className="ml-1 inline h-5 w-5 animate-pulse text-red-500" />}</p></div>
-                    <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">Returned</p><p className="text-2xl font-bold text-green-600">{stats.returned}</p></div>
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">{stats.pending}</p></div>
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Active Loans</p><p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{stats.approved}</p></div>
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Return Review</p><p className="text-2xl font-bold text-amber-600 dark:text-amber-300">{stats.return_pending}</p></div>
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Overdue</p><p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600 dark:text-red-300' : 'text-muted-foreground'}`}>{stats.overdue}{stats.overdue > 0 && <AlertTriangle className="ml-1 inline h-5 w-5 animate-pulse text-red-500 dark:text-red-300" />}</p></div>
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Returned</p><p className="text-2xl font-bold text-green-600 dark:text-green-300">{stats.returned}</p></div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -182,15 +182,15 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     const duration = calcDaysRemaining(loan.expected_return_date);
                                     const canReturn = loan.status === 'approved';
                                     return (
-                                        <tr key={loan.id} className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${duration.isOverdue && canReturn ? 'bg-red-50/50' : ''}`}>
+                                        <tr key={loan.id} className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${duration.isOverdue && canReturn ? 'bg-red-50/60 dark:bg-red-950/15' : ''}`}>
                                             <td className="p-3"><Link href={`/requests/${loan.id}?is_loan=true`} className="font-mono text-sm font-medium text-primary hover:underline">{loan.loan_id}</Link></td>
-                                            <td className="p-3"><p className="font-medium">{loan.asset_name || '—'}</p></td>
+                                            <td className="p-3"><p className="font-medium text-foreground">{loan.asset_name || '—'}</p></td>
                                             <td className="p-3"><p className="font-mono text-xs text-muted-foreground">{loan.asset_id || '—'}</p></td>
-                                            <td className="p-3"><div className="flex items-center gap-1.5 text-sm"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></td>
-                                            <td className="p-3"><div className="flex items-center gap-1.5 text-sm"><Clock className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.expected_return_date)}</div></td>
-                                            <td className="p-3">{canReturn ? <span className={`inline-flex items-center gap-1 text-xs font-semibold ${duration.isOverdue ? 'text-red-600' : 'text-emerald-600'}`}>{duration.isOverdue ? <AlertTriangle className="h-3.5 w-3.5" /> : <Hourglass className="h-3.5 w-3.5" />}{duration.label}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
-                                            <td className="p-3"><span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionColors[loan.condition_status] || 'bg-gray-100 text-gray-800'}`}>{loan.condition_status?.replace('_', ' ') || '—'}</span></td>
-                                            <td className="p-3"><span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'bg-gray-100 text-gray-800'}`}>{loan.status}</span></td>
+                                            <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></td>
+                                            <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Clock className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.expected_return_date)}</div></td>
+                                            <td className="p-3">{canReturn ? <span className={`inline-flex items-center gap-1 text-xs font-semibold ${duration.isOverdue ? 'text-red-600 dark:text-red-300' : 'text-emerald-600 dark:text-emerald-300'}`}>{duration.isOverdue ? <AlertTriangle className="h-3.5 w-3.5" /> : <Hourglass className="h-3.5 w-3.5" />}{duration.label}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
+                                            <td className="p-3"><span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionColors[loan.condition_status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/60 dark:text-gray-300'}`}>{loan.condition_status?.replace('_', ' ') || '—'}</span></td>
+                                            <td className="p-3"><span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'border-gray-200 bg-gray-100 text-gray-800 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-300'}`}>{loan.status}</span></td>
                                             <td className="p-3">
                                                 {canReturn ? (
                                                     <Button type="button" size="sm" variant="outline" onClick={() => openReturn(loan)}>
