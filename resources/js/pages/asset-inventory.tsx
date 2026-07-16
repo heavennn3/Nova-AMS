@@ -518,8 +518,8 @@ export default function AssetInventory({
     };
 
     const exportPdf = () => {
-        const rows = exportRows.map((row) => `
-            <tr>${row.map((value) => `<td>${value.replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char] || char))}</td>`).join('')}</tr>
+        const rows = exportRows.map((row: string[]) => `
+            <tr>${row.map((value: string) => `<td>${value.replace(/[&<>]/g, (char: string) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char as '&' | '<' | '>'] || char))}</td>`).join('')}</tr>
         `).join('');
         const win = window.open('', '_blank');
 
@@ -695,7 +695,7 @@ export default function AssetInventory({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Categories</SelectItem>
-                        {[...(new Set((assets || []).map((a: any) => String(a.category_name ?? a.category ?? '').trim()).filter(Boolean)))].map((category) => (
+                        {Array.from(new Set<string>((assets || []).map((a: any) => String(a.category_name ?? a.category ?? '').trim()).filter(Boolean))).map((category) => (
                             <SelectItem key={category} value={category.toLowerCase()}>
                                 {category}
                             </SelectItem>
@@ -709,7 +709,7 @@ export default function AssetInventory({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Types</SelectItem>
-                        {[...(new Set((assets || []).map((a: any) => String(a.type_name ?? a.type ?? '').trim()).filter(Boolean)))].map((type) => (
+                        {Array.from(new Set<string>((assets || []).map((a: any) => String(a.type_name ?? a.type ?? '').trim()).filter(Boolean))).map((type) => (
                             <SelectItem key={type} value={type.toLowerCase()}>
                                 {type}
                             </SelectItem>
@@ -723,7 +723,7 @@ export default function AssetInventory({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Status</SelectItem>
-                        {[...(new Set((assets || []).map((a: any) => String(a.status ?? a.asset_status ?? '').trim()).filter(Boolean)))].map((status) => (
+                        {Array.from(new Set<string>((assets || []).map((a: any) => String(a.status ?? a.asset_status ?? '').trim()).filter(Boolean))).map((status) => (
                             <SelectItem key={status} value={status.toLowerCase()}>
                                 {status}
                             </SelectItem>
