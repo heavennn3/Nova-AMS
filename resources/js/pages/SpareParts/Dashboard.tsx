@@ -263,13 +263,13 @@ export default function SparePartsDashboard({
             cell: ({ row }: any) => {
                 const status = row.getValue('status') as string;
                 const colors: Record<string, string> = {
-                    available: 'bg-green-100 text-green-700',
-                    in_used: 'bg-blue-100 text-blue-700',
-                    faulty: 'bg-red-100 text-red-700',
+                    available: 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300',
+                    in_used: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300',
+                    faulty: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300',
                 };
 
                 return (
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/60 dark:text-gray-300'}`}>
                         {status?.replace('_', ' ')}
                     </span>
                 );
@@ -325,10 +325,10 @@ export default function SparePartsDashboard({
             {/* ── Stats Cards ── */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
-                    { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10', text: 'text-blue-600' },
-                    { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-green-500/10', text: 'text-green-600' },
-                    { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: 'bg-red-500/10', text: 'text-red-600' },
-                    { label: 'Recently Added', value: recentlyAdded, icon: Package, bg: 'bg-purple-500/10', text: 'text-purple-600' },
+                    { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10 dark:bg-blue-500/15', text: 'text-blue-600 dark:text-blue-300' },
+                    { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-green-500/10 dark:bg-green-500/15', text: 'text-green-600 dark:text-green-300' },
+                    { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: 'bg-red-500/10 dark:bg-red-500/15', text: 'text-red-600 dark:text-red-300' },
+                    { label: 'Recently Added', value: recentlyAdded, icon: Package, bg: 'bg-purple-500/10 dark:bg-purple-500/15', text: 'text-purple-600 dark:text-purple-300' },
                 ].map(s => (
                     <div key={s.label} className="flex items-center gap-4 rounded-xl border bg-card p-5 shadow-sm min-h-[90px]">
                         <div className={`rounded-full ${s.bg} p-3 shrink-0`}>
@@ -336,7 +336,7 @@ export default function SparePartsDashboard({
                         </div>
                         <div className="min-w-0">
                             <p className="text-sm text-muted-foreground truncate">{s.label}</p>
-                            <p className="text-2xl font-bold tabular-nums">{s.value}</p>
+                            <p className="text-2xl font-bold tabular-nums text-foreground">{s.value}</p>
                         </div>
                     </div>
                 ))}
@@ -345,13 +345,13 @@ export default function SparePartsDashboard({
             {/* ── Category Breakdown + Low Stock ── */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Card className="lg:col-span-2 overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b py-3 px-4">
+                    <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b py-3 px-4 dark:from-emerald-950/30 dark:to-teal-950/20">
                         <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                                <Package className="h-4 w-4 text-emerald-600" />
+                            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                <Package className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
                                 Inventory by Category
                             </CardTitle>
-                            <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-full border">
+                            <span className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border">
                                 {categoryData.length} categories
                             </span>
                         </div>
@@ -363,12 +363,12 @@ export default function SparePartsDashboard({
                             <div className="space-y-2">
                                 {pagedCategories.map((cat: any, i: number) => {
                                     const colors = [
-                                        { bar: 'bg-emerald-500', light: 'bg-emerald-50', label: 'text-emerald-700' },
-                                        { bar: 'bg-blue-500', light: 'bg-blue-50', label: 'text-blue-700' },
-                                        { bar: 'bg-purple-500', light: 'bg-purple-50', label: 'text-purple-700' },
-                                        { bar: 'bg-amber-500', light: 'bg-amber-50', label: 'text-amber-700' },
-                                        { bar: 'bg-rose-500', light: 'bg-rose-50', label: 'text-rose-700' },
-                                        { bar: 'bg-cyan-500', light: 'bg-cyan-50', label: 'text-cyan-700' },
+                                        { bar: 'bg-emerald-500', light: 'bg-emerald-50 dark:bg-emerald-950/30', label: 'text-emerald-700 dark:text-emerald-300' },
+                                        { bar: 'bg-blue-500', light: 'bg-blue-50 dark:bg-blue-950/30', label: 'text-blue-700 dark:text-blue-300' },
+                                        { bar: 'bg-purple-500', light: 'bg-purple-50 dark:bg-purple-950/30', label: 'text-purple-700 dark:text-purple-300' },
+                                        { bar: 'bg-amber-500', light: 'bg-amber-50 dark:bg-amber-950/30', label: 'text-amber-700 dark:text-amber-300' },
+                                        { bar: 'bg-rose-500', light: 'bg-rose-50 dark:bg-rose-950/30', label: 'text-rose-700 dark:text-rose-300' },
+                                        { bar: 'bg-cyan-500', light: 'bg-cyan-50 dark:bg-cyan-950/30', label: 'text-cyan-700 dark:text-cyan-300' },
                                     ];
                                     const c = colors[((categoryPage - 1) * categoryPageSize + i) % colors.length];
                                     const maxCount = Math.max(...categoryData.map((x: any) => x.count), 1);
@@ -386,7 +386,7 @@ export default function SparePartsDashboard({
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <div className="mb-1 flex items-center justify-between gap-2">
-                                                    <p className="truncate text-sm font-medium">{cat.category}</p>
+                                                    <p className="truncate text-sm font-medium text-foreground">{cat.category}</p>
                                                     <span className={`text-xs font-semibold tabular-nums ${c.label}`}>{cat.count}</span>
                                                 </div>
                                                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -427,9 +427,9 @@ export default function SparePartsDashboard({
                 </Card>
 
                 <Card className="overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b py-3 px-4">
-                        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b py-3 px-4 dark:from-amber-950/30 dark:to-yellow-950/20">
+                        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-300" />
                             Low Stock Alerts
                         </CardTitle>
                     </CardHeader>
@@ -443,13 +443,13 @@ export default function SparePartsDashboard({
                         ) : (
                             <div className="space-y-2">
                                 {lowStockAlerts.slice(0, 5).map((alert: any, index: number) => (
-                                    <div key={index} className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 p-2.5">
+                                    <div key={index} className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 p-2.5 dark:border-amber-800/50 dark:bg-amber-950/20">
                                         <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium">{alert.name}</p>
+                                            <p className="truncate text-sm font-medium text-foreground">{alert.name}</p>
                                             <p className="truncate text-xs text-muted-foreground">{alert.location}</p>
                                         </div>
                                         <div className="ml-3 shrink-0 text-right">
-                                            <p className="text-sm font-semibold tabular-nums text-amber-700">
+                                            <p className="text-sm font-semibold tabular-nums text-amber-700 dark:text-amber-300">
                                                 {alert.stock_level ?? '?'} / {alert.minimum_level ?? '?'}
                                             </p>
                                         </div>
@@ -679,10 +679,10 @@ export default function SparePartsDashboard({
                             <p className="py-8 text-center text-sm text-muted-foreground">No parts found</p>
                         ) : (
                             selectedCategoryParts.map((part: any) => (
-                                <div key={part.id} className="rounded-lg border p-3">
+                                <div key={part.id} className="rounded-lg border border-border bg-card p-3">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="min-w-0">
-                                            <p className="truncate text-sm font-semibold">{part.name}</p>
+                                            <p className="truncate text-sm font-semibold text-foreground">{part.name}</p>
                                             <p className="font-mono text-xs text-muted-foreground">{part.part_number || 'No part number'}</p>
                                         </div>
                                         <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">
