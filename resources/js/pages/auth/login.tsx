@@ -35,7 +35,7 @@ export default function Login({
                     <>
                         <div className="space-y-1">
                             <p className="text-sm font-medium text-primary">Nova AMS</p>
-                            <p className="text-sm text-muted-foreground">Sign in to Asset Management System.</p>
+                            <p className="text-sm text-muted-foreground">Sign in</p>
                         </div>
 
                         <div className="grid gap-5">

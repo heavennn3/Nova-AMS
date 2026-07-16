@@ -65,7 +65,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             </Link>
                             {canRegister && !auth.user && (
                                 <Link href={register()} className="inline-flex h-11 items-center rounded-lg border bg-card px-5 text-sm font-medium shadow-sm transition hover:bg-muted">
-                                    Request account
+                                    Register
                                 </Link>
                             )}
                         </div>
@@ -74,8 +74,8 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                     <div className="rounded-2xl border bg-card p-5 shadow-sm">
                         <div className="mb-5 flex items-center justify-between border-b pb-4">
                             <div>
-                                <p className="text-sm font-semibold">Operations overview</p>
-                                <p className="text-xs text-muted-foreground">Example module coverage</p>
+                                <p className="text-sm font-semibold">Nova AMS </p>
+
                             </div>
                             <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">Active</span>
                         </div>
@@ -84,7 +84,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             <Metric label="Assets tracked" value="Inventory" icon={Boxes} />
                             <Metric label="Borrowed items" value="Loans" icon={ClipboardList} />
                             <Metric label="Site records" value="Locations" icon={MapPin} />
-                            <Metric label="Maintenance" value="Work orders" icon={Wrench} />
+                            <Metric label="Maintenance" value="Sparepart" icon={Wrench} />
                         </div>
                     </div>
                 </section>

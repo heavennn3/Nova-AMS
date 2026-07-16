@@ -329,7 +329,7 @@ export default function Dashboard({
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                            <th className="pb-3 pl-2">Name / Email</th>
+                                            <th className="pb-3 pl-2">Employee</th>
                                             <th className="pb-3">Site</th>
                                             <th className="pb-3">Item</th>
                                             <th className="pb-3 pr-2 text-right">Day Overdue</th>
