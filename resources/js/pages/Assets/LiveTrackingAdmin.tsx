@@ -369,7 +369,7 @@ export default function LiveTrackingAdmin({
                         <div className="text-sm">
                             {new Date(assignment.assigned_at).toLocaleDateString()}
                         </div>
-                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30">
                             <Clock className="h-3 w-3 mr-1" />
                             {loanAge}
                         </Badge>
@@ -393,12 +393,12 @@ export default function LiveTrackingAdmin({
                             {expectedDate.toLocaleDateString()}
                         </div>
                         {returnStatus.overdue ? (
-                            <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">
+                            <Badge className="bg-red-100 text-red-700 border-red-200 text-xs dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
                                 {returnStatus.message}
                             </Badge>
                         ) : (
-                            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
                                 {returnStatus.message}
                             </Badge>
@@ -460,9 +460,9 @@ export default function LiveTrackingAdmin({
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-4">
                 <div
-                    className={`bg-blue-50 border border-blue-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `} >
-                    <h3 className="font-semibold text-blue-900">In Use</h3>
-                    <p className="text-2xl font-bold text-blue-600">{stats.in_use}</p>
+                    className={`bg-blue-50 border border-blue-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg dark:bg-blue-500/10 dark:border-blue-500/30 `} >
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-200">In Use</h3>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{stats.in_use}</p>
                 </div>
 
 
@@ -470,23 +470,23 @@ export default function LiveTrackingAdmin({
 
 
                 <div
-                    className={`bg-green-50 border border-green-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `}
+                    className={`bg-green-50 border border-green-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg dark:bg-green-500/10 dark:border-green-500/30 `}
 
                 >
-                    <h3 className="font-semibold text-green-900">Returned Today</h3>
+                    <h3 className="font-semibold text-green-900 dark:text-green-200">Returned Today</h3>
 
 
-                    <p className="text-2xl font-bold text-green-600">{stats.returned_today}</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-300">{stats.returned_today}</p>
 
                 </div>
 
 
                 <div
-                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg `}
+                    className={`bg-red-50 border border-red-200 p-4 rounded cursor-pointer transition-all duration-200 hover:shadow-lg dark:bg-red-500/10 dark:border-red-500/30 `}
 
                 >
-                    <h3 className="font-semibold text-red-900">Overdue </h3>
-                    <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
+                    <h3 className="font-semibold text-red-900 dark:text-red-200">Overdue </h3>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-300">{stats.overdue}</p>
 
                 </div>
 
@@ -643,12 +643,12 @@ export default function LiveTrackingAdmin({
                                         <Label className="text-muted-foreground">Status</Label>
                                         <div className="mt-1">
                                             {getReturnStatus(selectedAssignment.expected_return_date).overdue ? (
-                                                <Badge className="bg-red-100 text-red-700 border-red-200">
+                                                <Badge className="bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
                                                     <AlertTriangle className="h-3 w-3 mr-1" />
                                                     {getReturnStatus(selectedAssignment.expected_return_date).message}
                                                 </Badge>
                                             ) : (
-                                                <Badge className="bg-green-100 text-green-700 border-green-200">
+                                                <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
                                                     <CheckCircle2 className="h-3 w-3 mr-1" />
                                                     {getReturnStatus(selectedAssignment.expected_return_date).message}
                                                 </Badge>
