@@ -244,7 +244,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
         },
         {
             id: 'purge',
-            title: 'Purge Deleted Records',
+            title: 'Trash ',
             description: 'Permanently delete soft-deleted r...',
             icon: Trash2,
             color: 'text-rose-500',
