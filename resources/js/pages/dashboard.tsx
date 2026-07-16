@@ -263,24 +263,42 @@ export default function Dashboard({
                             {stats.lowSpareParts?.length ?? 0} Low
                         </span>
                     </div>
-                    <div className="divide-y divide-border/60 px-5 py-2">
+                    <div className="px-5 py-4">
                         {stats.lowSpareParts && stats.lowSpareParts.length > 0 ? (
-                            stats.lowSpareParts.map((part: any) => (
-                                <div key={part.id} className="py-3 flex items-center justify-between text-sm">
-                                    <div>
-                                        <p className="font-medium text-foreground">{part.name}</p>
-                                        <p className="text-xs text-muted-foreground flex items-center mt-0.5">
-                                            <span className="font-mono bg-muted px-1.5 py-0.5 rounded border mr-2">{part.part_number}</span>
-                                            <MapPin className="h-3 w-3 mr-1 text-slate-400" /> {part.site}
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="rounded-lg border bg-red-50 p-3 dark:bg-red-950/20">
+                                        <p className="text-xs text-muted-foreground">Low stock items</p>
+                                        <p className="text-2xl font-bold text-red-600">{stats.lowSpareParts.length}</p>
+                                    </div>
+                                    <div className="rounded-lg border bg-amber-50 p-3 dark:bg-amber-950/20">
+                                        <p className="text-xs text-muted-foreground">Need restock</p>
+                                        <p className="text-2xl font-bold text-amber-600">
+                                            {stats.lowSpareParts.reduce((total: number, part: any) => total + Math.max(0, (part.minimum_stock_level ?? 0) - (part.quantity ?? 0)), 0)}
                                         </p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="inline-flex items-center rounded bg-amber-50 dark:bg-amber-950/20 px-2 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30">
-                                            Stock: {part.quantity} (Min: {part.minimum_stock_level})
-                                        </span>
-                                    </div>
                                 </div>
-                            ))
+
+                                <div className="divide-y divide-border/60 rounded-lg border">
+                                    {stats.lowSpareParts.slice(0, 3).map((part: any) => (
+                                        <div key={part.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                                            <div className="min-w-0">
+                                                <p className="truncate font-medium text-foreground">{part.name}</p>
+                                                <p className="truncate text-xs text-muted-foreground">{part.site}</p>
+                                            </div>
+                                            <span className="ml-3 shrink-0 rounded bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
+                                                {part.quantity}/{part.minimum_stock_level}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {stats.lowSpareParts.length > 3 && (
+                                    <Link href="/spare-parts/dashboard" className="block text-center text-xs font-medium text-primary hover:underline">
+                                        View {stats.lowSpareParts.length - 3} more low stock items
+                                    </Link>
+                                )}
+                            </div>
                         ) : (
                             <div className="py-8 text-center text-muted-foreground text-xs">
                                 All sparepart inventory levels are within normal range.
