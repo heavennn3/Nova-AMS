@@ -27,11 +27,10 @@ interface RecycleBinProps {
 
 const typeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
     users: { label: 'Users', icon: Users, color: 'blue' },
-    vendors: { label: 'Vendors', icon: Building2, color: 'emerald' },
     assets: { label: 'Assets', icon: Package, color: 'purple' },
     spareparts: { label: 'Spareparts', icon: Wrench, color: 'orange' },
-    asset_categories: { label: 'Categories', icon: FolderOpen, color: 'cyan' },
-    table_configurations: { label: 'Table Configs', icon: Columns3, color: 'rose' },
+
+
 };
 
 const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
@@ -40,7 +39,7 @@ const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
     purple: { bg: 'bg-purple-500/10', text: 'text-purple-600', ring: 'ring-purple-500' },
     orange: { bg: 'bg-orange-500/10', text: 'text-orange-600', ring: 'ring-orange-500' },
     cyan: { bg: 'bg-cyan-500/10', text: 'text-cyan-600', ring: 'ring-cyan-500' },
-    rose: { bg: 'bg-rose-500/10', text: 'text-rose-600', ring: 'ring-rose-500' },
+
 };
 
 export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
@@ -95,14 +94,14 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
 
     const handleBatchRestore = (selectedRows: any[]) => {
         if (!type) {
-return;
-}
+            return;
+        }
 
         const ids = selectedRows.map((r) => r.id).filter(Boolean);
 
         if (ids.length === 0) {
-return;
-}
+            return;
+        }
 
         toast.promise(
             fetch('/api/recycle-bin/bulk-restore', {
@@ -136,14 +135,14 @@ return;
 
     const handleBatchDelete = (selectedRows: any[]) => {
         if (!type) {
-return;
-}
+            return;
+        }
 
         const ids = selectedRows.map((r) => r.id).filter(Boolean);
 
         if (ids.length === 0) {
-return;
-}
+            return;
+        }
 
         toast.promise(
             fetch('/api/recycle-bin/bulk-delete', {

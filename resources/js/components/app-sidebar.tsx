@@ -1,17 +1,19 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutGrid,
-    Map,
     Package,
     Wrench,
-    MapPin,
-    Shield,
+    Building2,
+    ShieldCheck,
     Users,
     Trash2,
     Settings,
     ClipboardList,
-    Key,
+    KeyRound,
     ScrollText,
+    Handshake,
+    ArrowRightLeft,
+    Activity,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -57,9 +59,10 @@ const navSections: NavSection[] = [
 
 
             { title: 'ICT Asset List', href: assetInventory(), icon: Package, module: 'ICT Asset List' },
-            { title: 'Asset Loan', href: '/asset-loans', icon: Package, module: 'Asset Loan' },
+            { title: 'Asset Loan', href: '/asset-loans', icon: Handshake, module: 'Asset Loan' },
 
             { title: 'Spare Part ', href: '/spare-parts/dashboard', icon: Wrench, module: 'Spare Part' },
+
 
 
 
@@ -74,7 +77,7 @@ const navSections: NavSection[] = [
 
         items: [
 
-            { title: 'Key & Licenses', href: '/licenses', icon: Key, module: 'Key & Licenses' },
+            { title: 'Key & Licenses', href: '/licenses', icon: KeyRound, module: 'Key & Licenses' },
 
 
 
@@ -85,9 +88,9 @@ const navSections: NavSection[] = [
         title: 'SITES MANAGEMENT',
 
         items: [
-            { title: 'Site Dashboard', href: '/multi-site/dashboards', icon: MapPin, module: 'Site Dashboard' },
+            { title: 'Site Dashboard', href: '/multi-site/dashboards', icon: Building2, module: 'Site Dashboard' },
 
-            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: MapPin, module: 'Asset Transfer' },
+            { title: 'Asset Transfer', href: '/multi-site/transfers', icon: ArrowRightLeft, module: 'Asset Transfer' },
 
         ],
     },
@@ -107,7 +110,7 @@ const navSections: NavSection[] = [
             {
                 title: ' Asset Track',
                 href: '/asset-track',
-                icon: Map,
+                icon: Activity,
                 module: 'Asset Track',
             },
 
@@ -146,7 +149,7 @@ const navSections: NavSection[] = [
             {
                 title: 'Access Control',
                 href: '/security/roles',
-                icon: Shield,
+                icon: ShieldCheck,
                 module: 'Access Control',
             },
             {

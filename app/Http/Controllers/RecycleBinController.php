@@ -20,7 +20,7 @@ class RecycleBinController extends Controller
         'assets' => Asset::class,
         'asset_categories' => AssetCategory::class,
         'spareparts' => \App\Models\SparePart::class,
-        'table_configurations' => TableConfiguration::class,
+
     ];
 
     private function validTypes(): string
