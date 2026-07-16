@@ -57,7 +57,7 @@ class RoleAccessController extends Controller
             return [
                 'id'           => $role->id,
                 'name'         => $role->name,
-                'description'  => $this->roleDescriptions[$role->name] ?? 'Custom role.',
+                'description'  => $this->roleDescriptions[$role->name] ?? '',
                 'moduleAccess' => $moduleAccess,
             ];
         })->values()->toArray();

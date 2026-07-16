@@ -85,11 +85,11 @@ const ROLE_COLORS: Record<
 };
 
 const DEFAULT_COLOR = {
-    bg: 'bg-gray-50',
-    border: 'border-gray-200',
-    text: 'text-gray-700',
-    badge: 'bg-gray-100 text-gray-700',
-    bar: 'bg-gray-400',
+    bg: 'bg-gray-50 dark:bg-gray-500/10',
+    border: 'border-gray-200 dark:border-gray-500/30',
+    text: 'text-gray-700 dark:text-gray-300',
+    badge: 'bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-300',
+    bar: 'bg-gray-400 dark:bg-gray-500',
 };
 
 // ── Build initial matrix from server-provided role data ──────────────────────
@@ -408,10 +408,10 @@ export default function Roles({ roles, modules }: Props) {
                                                                 disabled={
                                                                     saving
                                                                 }
-                                                                className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${changed ? 'ring-2 ring-amber-400 ring-offset-1' : ''} ${
+                                                                className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-background ${changed ? 'ring-2 ring-amber-400 ring-offset-1 dark:ring-amber-300 dark:ring-offset-background' : ''} ${
                                                                     hasAccess
-                                                                        ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 focus:ring-emerald-400 dark:bg-emerald-900/40 dark:text-emerald-400'
-                                                                        : 'bg-red-100 text-red-500 hover:bg-red-200 focus:ring-red-400 dark:bg-red-900/30 dark:text-red-400'
+                                                                        ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 focus:ring-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25'
+                                                                        : 'bg-red-100 text-red-500 hover:bg-red-200 focus:ring-red-400 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25'
                                                                 } `}
                                                             >
                                                                 {hasAccess ? (
@@ -421,7 +421,7 @@ export default function Roles({ roles, modules }: Props) {
                                                                 )}
                                                             </button>
                                                             {changed && (
-                                                                <div className="mt-0.5 text-[9px] leading-none font-semibold text-amber-500">
+                                                                <div className="mt-0.5 text-[9px] leading-none font-semibold text-amber-500 dark:text-amber-300">
                                                                     unsaved
                                                                 </div>
                                                             )}
@@ -439,8 +439,8 @@ export default function Roles({ roles, modules }: Props) {
 
             {/* ── Sticky bottom save bar ── */}
             {dirty && (
-                <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-border bg-background px-5 py-3 shadow-2xl">
-                    <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-border bg-background px-5 py-3 shadow-2xl dark:shadow-black/40">
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400 dark:bg-amber-300" />
                     <span className="text-sm font-medium">Unsaved changes</span>
                     <Button
                         size="sm"
