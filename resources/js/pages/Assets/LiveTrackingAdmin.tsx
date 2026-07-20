@@ -25,12 +25,10 @@ import {
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
-import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -48,6 +46,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Assignment {
     id: number;
@@ -493,8 +497,8 @@ export default function LiveTrackingAdmin({
         },
         {
             id: 'actions',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Actions" />
+            header: () => (
+                <div className="text-right">Actions</div>
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
@@ -504,6 +508,23 @@ export default function LiveTrackingAdmin({
                     { label: 'Check In', icon: CheckCircle2, onClick: () => checkInAsset(assignment) },
                 ];
 
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {actions.map((action) => (
+                                <DropdownMenuItem key={action.label} onClick={action.onClick}>
+                                    <action.icon className="mr-2 h-4 w-4" />
+                                    {action.label}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
             },
         },
     ], []);
