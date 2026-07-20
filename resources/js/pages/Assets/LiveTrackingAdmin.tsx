@@ -20,7 +20,6 @@ import {
     XCircle,
     Eye,
     Wrench,
-    MoreHorizontal,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -46,12 +45,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 interface Assignment {
     id: number;
@@ -492,21 +485,21 @@ export default function LiveTrackingAdmin({
                 ];
 
                 return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
+                    <div className="flex items-center justify-end gap-1">
+                        {actions.map((action) => (
+                            <Button
+                                key={action.label}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={action.onClick}
+                                title={action.label}
+                                aria-label={action.label}
+                            >
+                                <action.icon className="h-4 w-4" />
                             </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            {actions.map((action) => (
-                                <DropdownMenuItem key={action.label} onClick={action.onClick}>
-                                    <action.icon className="mr-2 h-4 w-4" />
-                                    {action.label}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        ))}
+                    </div>
                 );
             },
         },
