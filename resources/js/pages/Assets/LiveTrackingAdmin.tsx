@@ -646,42 +646,42 @@ export default function LiveTrackingAdmin({
             {/* Assignment Details Dialog */}
             <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
                 <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>Withdrawal Details</DialogTitle>
+                    <DialogHeader className="space-y-1.5">
+                        <DialogTitle>Loan Details</DialogTitle>
                         <DialogDescription>
-                            Detailed information about this asset withdrawal
+                            Detailed information about this asset loan
                         </DialogDescription>
                     </DialogHeader>
                     {selectedAssignment && (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {/* Asset Information */}
-                            <div className="space-y-3">
-                                <h4 className="font-semibold flex items-center gap-2">
+                            <div className="rounded-lg border bg-card/50 p-4">
+                                <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
                                     <Package className="h-4 w-4 text-primary" />
                                     Asset Information
                                 </h4>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <Label className="text-muted-foreground">Asset ID</Label>
-                                        <div className="font-mono bg-muted px-2 py-1 rounded mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Asset ID</Label>
+                                        <div className="w-fit rounded bg-muted px-2 py-1 font-mono text-xs">
                                             {selectedAssignment.asset_id}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Product Name</Label>
-                                        <div className="font-semibold mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Product Name</Label>
+                                        <div className="font-semibold leading-6">
                                             {selectedAssignment.product_name}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Category</Label>
-                                        <div className="mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Category</Label>
+                                        <div className="leading-6">
                                             {selectedAssignment.category || 'N/A'}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Withdrawal ID</Label>
-                                        <div className="font-mono text-xs mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Loan ID</Label>
+                                        <div className="font-mono text-xs leading-6">
                                             #{selectedAssignment.id}
                                         </div>
                                     </div>
@@ -689,22 +689,22 @@ export default function LiveTrackingAdmin({
                             </div>
 
                             {/* User Information */}
-                            <div className="space-y-3">
-                                <h4 className="font-semibold flex items-center gap-2">
+                            <div className="rounded-lg border bg-card/50 p-4">
+                                <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
                                     <User className="h-4 w-4 text-primary" />
                                     Assigned User
                                 </h4>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <Label className="text-muted-foreground">Name</Label>
-                                        <div className="font-semibold mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Name</Label>
+                                        <div className="font-semibold leading-6">
                                             {selectedAssignment.user_name}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Email</Label>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Mail className="h-3 w-3 text-muted-foreground" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Email</Label>
+                                        <div className="flex items-center gap-2 leading-6">
+                                            <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                                             {selectedAssignment.user_email}
                                         </div>
                                     </div>
@@ -712,61 +712,60 @@ export default function LiveTrackingAdmin({
                             </div>
 
                             {/* Location Information */}
-                            <div className="space-y-3">
-                                <h4 className="font-semibold flex items-center gap-2">
+                            <div className="rounded-lg border bg-card/50 p-4">
+                                <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
                                     <MapPin className="h-4 w-4 text-primary" />
                                     Location Information
                                 </h4>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <Label className="text-muted-foreground">Site</Label>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Building2 className="h-3 w-3 text-muted-foreground" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Site</Label>
+                                        <div className="flex items-center gap-2 leading-6">
+                                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                                             {selectedAssignment.site}
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 
                             {/* Timeline Information */}
-                            <div className="space-y-3">
-                                <h4 className="font-semibold flex items-center gap-2">
+                            <div className="rounded-lg border bg-card/50 p-4">
+                                <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
                                     <Calendar className="h-4 w-4 text-primary" />
                                     Timeline Information
                                 </h4>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <Label className="text-muted-foreground">Assigned Date</Label>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Clock className="h-3 w-3 text-muted-foreground" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Assigned Date</Label>
+                                        <div className="flex items-center gap-2 leading-6">
+                                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                                             {new Date(selectedAssignment.assigned_at).toLocaleString()}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Expected Return</Label>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Expected Return</Label>
+                                        <div className="flex items-center gap-2 leading-6">
+                                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                                             {new Date(selectedAssignment.expected_return_date).toLocaleString()}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Duration</Label>
-                                        <div className="font-semibold mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Duration</Label>
+                                        <div className="font-semibold leading-6">
                                             {selectedAssignment.duration}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Status</Label>
-                                        <div className="mt-1">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Status</Label>
+                                        <div className="leading-6">
                                             {getReturnStatus(selectedAssignment.expected_return_date).overdue ? (
-                                                <Badge className="bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
-                                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                                <Badge className="gap-1 bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
+                                                    <AlertTriangle className="h-3 w-3" />
                                                     {getReturnStatus(selectedAssignment.expected_return_date).message}
                                                 </Badge>
                                             ) : (
-                                                <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
-                                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                <Badge className="gap-1 bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
+                                                    <CheckCircle2 className="h-3 w-3" />
                                                     {getReturnStatus(selectedAssignment.expected_return_date).message}
                                                 </Badge>
                                             )}
@@ -777,19 +776,19 @@ export default function LiveTrackingAdmin({
 
                             {/* Remarks */}
                             {selectedAssignment.remarks && (
-                                <div className="space-y-3">
-                                    <h4 className="font-semibold flex items-center gap-2">
+                                <div className="rounded-lg border bg-card/50 p-4">
+                                    <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
                                         <Wrench className="h-4 w-4 text-primary" />
                                         Remarks
                                     </h4>
-                                    <div className="text-sm bg-muted p-3 rounded-lg">
+                                    <div className="rounded-lg bg-muted p-3 text-sm leading-6">
                                         {selectedAssignment.remarks}
                                     </div>
                                 </div>
                             )}
                         </div>
                     )}
-                    <DialogFooter className="mt-6">
+                    <DialogFooter className="mt-4 gap-2">
                         <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
                             Close
                         </Button>
