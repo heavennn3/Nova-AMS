@@ -49,7 +49,7 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@novatis.com"
+                                    placeholder="email@nova.com"
                                     className="h-11"
                                 />
                                 <InputError message={errors.email} />

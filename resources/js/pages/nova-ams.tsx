@@ -46,7 +46,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                     <div className="space-y-6">
                         <div className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                            Built for Novatis operations
+                            Nova AMS
                         </div>
 
                         <div className="space-y-4">
