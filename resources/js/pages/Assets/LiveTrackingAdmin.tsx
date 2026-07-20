@@ -293,7 +293,7 @@ export default function LiveTrackingAdmin({
             return;
         }
 
-        router.patch(`/asset-track/${assignment.id}/checkin`, {}, {
+        router.patch(`/asset-track/${assignment.id}/checkin`, { source: assignment.source ?? 'assignment' }, {
             onSuccess: () => {
                 toast.success('Asset checked in successfully!');
                 window.location.reload();
@@ -419,10 +419,7 @@ export default function LiveTrackingAdmin({
                             <Building2 className="h-3 w-3 text-muted-foreground" />
                             {assignment.site}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            {assignment.location}
-                        </div>
+
                     </div>
                 );
             },
@@ -480,21 +477,7 @@ export default function LiveTrackingAdmin({
                 );
             },
         },
-        {
-            accessorKey: 'duration',
-            header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="Duration" />
-            ),
-            cell: ({ row }: any) => {
-                const assignment = row.original;
 
-                return (
-                    <div className="text-sm text-muted-foreground">
-                        {assignment.duration}
-                    </div>
-                );
-            },
-        },
         {
             id: 'actions',
             header: () => (
@@ -752,12 +735,7 @@ export default function LiveTrackingAdmin({
                                             {selectedAssignment.site}
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Location</Label>
-                                        <div className="mt-1">
-                                            {selectedAssignment.location}
-                                        </div>
-                                    </div>
+
                                 </div>
                             </div>
 

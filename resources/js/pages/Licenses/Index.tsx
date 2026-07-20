@@ -414,34 +414,18 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <Package className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Total</p>
+                        <p className="text-sm text-muted-foreground">Total Licenses</p>
                         <p className="text-2xl font-bold">{stats.total}</p>
                     </div>
                 </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-green-500/10 p-3">
-                        <CheckCircle2 className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Available</p>
-                        <p className="text-2xl font-bold">{stats.available}</p>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Users className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Full</p>
-                        <p className="text-2xl font-bold">{stats.full}</p>
-                    </div>
-                </div>
+
+
                 <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
                     <div className="rounded-full bg-amber-500/10 p-3">
                         <Clock className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Expiring</p>
+                        <p className="text-sm text-muted-foreground">Expiring Soon</p>
                         <p className="text-2xl font-bold">{stats.expiring}</p>
                     </div>
                 </div>
@@ -454,15 +438,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         <p className="text-2xl font-bold">{stats.expired}</p>
                     </div>
                 </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-violet-500/10 p-3">
-                        <Layers className="h-6 w-6 text-violet-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Seats Used</p>
-                        <p className="text-2xl font-bold">{stats.used}/{stats.totalSeats}</p>
-                    </div>
-                </div>
+
             </div>
 
             {/* Filters */}

@@ -72,6 +72,7 @@ interface Assignment {
     assigned_at: string;
     duration: string;
     remarks: string | null;
+    source?: 'assignment' | 'loan';
 }
 
 interface HistoryRecord {
@@ -474,7 +475,7 @@ export default function LiveTracking({
     const handleCheckin = (assignment: Assignment) => {
         router.patch(
             `/asset-track/${assignment.id}/checkin`,
-            {},
+            { source: assignment.source ?? 'assignment' },
             {
                 preserveScroll: true,
                 onSuccess: () => {

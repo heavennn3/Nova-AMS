@@ -12,6 +12,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware('role_or_permission:Admin|module.dashboard')->name('dashboard');
 
+    // Live Tracking polling for Inertia pages (uses web session auth)
+    Route::get('/api/live-tracking/poll', [\App\Http\Controllers\Api\TrackingApiController::class, 'poll']);
+    Route::get('/api/live-tracking/history', [\App\Http\Controllers\Api\TrackingApiController::class, 'history']);
+    Route::get('/api/live-tracking/report', [\App\Http\Controllers\Api\TrackingApiController::class, 'report']);
+
     // Asset Requests (Admin/Manager)
     Route::middleware(['role_or_permission:Admin|module.requests-admin'])->group(function () {
         Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');

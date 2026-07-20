@@ -25,6 +25,12 @@ class AssetTrackingController extends Controller
         $siteFilter = $request->get('site_id', 'all');
         $statusFilter = $request->get('status', 'all');
 
+        $userSiteIds = collect([$user->site_id])
+            ->merge($user->sites()->pluck('sites.id'))
+            ->filter()
+            ->unique()
+            ->values();
+
         // Base query for live assignments
         $liveAssignmentsQuery = AssetAssignment::with([
                 'asset.category',
@@ -35,9 +41,11 @@ class AssetTrackingController extends Controller
             ])
             ->active();
 
-        // Apply site filter for admins
+        // Apply site filter for admins, user-site scope for managers
         if ($isAdmin && $siteFilter !== 'all') {
             $liveAssignmentsQuery->where('site_id', $siteFilter);
+        } elseif (!$isAdmin) {
+            $liveAssignmentsQuery->whereIn('site_id', $userSiteIds);
         }
 
         $assignmentRows = $liveAssignmentsQuery
@@ -45,37 +53,45 @@ class AssetTrackingController extends Controller
             ->get()
             ->map(fn($a) => $this->formatAssignment($a));
 
-        $loanRows = AssetLoan::with(['asset.category', 'asset.site', 'user', 'site'])
-            ->where('status', 'approved')
+        $loanRowsQuery = AssetLoan::with(['asset.category', 'asset.site', 'user', 'site'])
+            ->where('status', 'approved');
+
+        if (!$isAdmin) {
+            $loanRowsQuery->whereIn('site_id', $userSiteIds);
+        }
+
+        $loanRows = $loanRowsQuery
             ->latest('approved_at')
             ->get()
             ->map(fn($loan) => $this->formatLoanAssignment($loan));
 
         $liveAssignments = $assignmentRows->concat($loanRows)->values();
 
-        // Group by site for admin view
+        // Group by site for admin and manager views
+        $siteRowsQuery = \App\Models\Site::query();
+
+        if (!$isAdmin) {
+            $siteRowsQuery->whereIn('id', $userSiteIds);
+        }
+
+        $sitesForAssignments = $siteRowsQuery->get();
         $assignmentsBySite = [];
-        if ($isAdmin) {
-            $sites = \App\Models\Site::withCount(['assetAssignments' => function($query) {
-                $query->active();
-            }])->get();
 
-            foreach ($sites as $site) {
-                $siteAssignments = $liveAssignments->filter(function($assignment) use ($site) {
-                    return $assignment['site_id'] == $site->id || $assignment['site'] == $site->name;
-                });
+        foreach ($sitesForAssignments as $site) {
+            $siteAssignments = $liveAssignments->filter(function($assignment) use ($site) {
+                return $assignment['site_id'] == $site->id || $assignment['site'] == $site->name;
+            });
 
-                $assignmentsBySite[] = [
-                    'site' => [
-                        'id' => $site->id,
-                        'name' => $site->name,
-                        'code' => $site->code,
-                    ],
-                    'assignments' => $siteAssignments->values(),
-                    'total_count' => $siteAssignments->count(),
-                    'overdue_count' => $siteAssignments->where('is_overdue', true)->count(),
-                ];
-            }
+            $assignmentsBySite[] = [
+                'site' => [
+                    'id' => $site->id,
+                    'name' => $site->name,
+                    'code' => $site->code,
+                ],
+                'assignments' => $siteAssignments->values(),
+                'total_count' => $siteAssignments->count(),
+                'overdue_count' => $siteAssignments->where('is_overdue', true)->count(),
+            ];
         }
 
         $availableAssets = Asset::with(['category', 'site', 'status'])
@@ -100,7 +116,13 @@ class AssetTrackingController extends Controller
             'site_ids' => $u->sites->pluck('id')->toArray(),
         ]);
 
-        $sites = \App\Models\Site::select('id', 'name')->orderBy('name')->get();
+        $sitesQuery = \App\Models\Site::select('id', 'name')->orderBy('name');
+
+        if (!$isAdmin) {
+            $sitesQuery->whereIn('id', $userSiteIds);
+        }
+
+        $sites = $sitesQuery->get();
 
         $stats = [
             'in_use'            => AssetAssignment::active()->count() + AssetLoan::where('status', 'approved')->count(),
@@ -117,14 +139,13 @@ class AssetTrackingController extends Controller
                 'asset.category',
                 'asset.site',
                 'asset.type',
-                'asset.vendor',
                 'user',
             ])
             ->where('status', 'returned')
             ->latest('returned_at')
             ->paginate(50);
 
-        $view = $isAdmin ? 'Assets/LiveTrackingAdmin' : 'Assets/LiveTracking';
+        $view = 'Assets/LiveTrackingAdmin';
 
         return Inertia::render($view, [
             'liveAssignments' => $liveAssignments,
@@ -237,21 +258,30 @@ class AssetTrackingController extends Controller
     /**
      * Return (check in) an asset.
      */
-    public function checkin(Request $request, AssetAssignment $assignment)
+    public function checkin(Request $request, int $assignment)
     {
         $request->validate([
             'remarks' => 'nullable|string|max:500',
         ]);
 
-        $assignment->update([
+        $source = $request->input('source', 'assignment');
+        $record = $source === 'loan'
+            ? AssetLoan::with('asset')->find($assignment)
+            : AssetAssignment::with('asset')->find($assignment);
+
+        if (! $record) {
+            return back()->with('error', 'Loan record not found.');
+        }
+
+        $record->update([
             'returned_at' => Carbon::now(),
             'status'      => 'returned',
-            'remarks'     => $request->remarks ?? $assignment->remarks,
+            'remarks'     => $request->remarks ?? $record->remarks ?? null,
         ]);
 
         // Mark asset available again
-        if ($assignment->asset) {
-            $assignment->asset->update(['status' => 'available']);
+        if ($record->asset) {
+            $record->asset->updateStatus('stored');
         }
 
         return back()->with('success', 'Asset returned successfully.');
@@ -350,7 +380,6 @@ class AssetTrackingController extends Controller
         $query = AssetAssignment::with([
                 'asset.category',
                 'asset.type',
-                'asset.vendor',
                 'site',
                 'location',
                 'user',
@@ -518,7 +547,6 @@ class AssetTrackingController extends Controller
         $query = AssetAssignment::with([
                 'asset.category',
                 'asset.type',
-                'asset.vendor',
                 'site',
                 'location',
                 'user',

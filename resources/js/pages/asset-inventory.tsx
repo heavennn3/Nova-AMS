@@ -626,34 +626,9 @@ export default function AssetInventory({
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="rounded-full bg-green-500/10 p-3">
-                        <Building2 className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">All Sites</p>
-                        <p className="text-2xl font-bold text-foreground">{totalSites}</p>
-                    </div>
-                </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="rounded-full bg-violet-500/10 p-3">
-                        <Layers className="h-6 w-6 text-violet-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">Type Summary</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                            {typeSummary.slice(0, 3).map((t: any) => (
-                                <span key={t.id}>
-                                    <span className="font-semibold text-foreground">{t.assets_count}</span> {t.name}
-                                </span>
-                            ))}
-                            {typeSummary.length > 3 && (
-                                <span className="text-muted-foreground/60">+{typeSummary.length - 3} more</span>
-                            )}
-                        </div>
-                    </div>
-                </div>
+
+
 
                 <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="rounded-full bg-emerald-500/10 p-3">
