@@ -13,7 +13,6 @@ import {
     BellRing,
     MapPin,
     CalendarDays,
-    Filter,
     AlertTriangle,
     Image as ImageIcon,
 } from 'lucide-react';
@@ -270,87 +269,87 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                 </div>
 
                 {/* Filters */}
-                <div className="rounded-xl border bg-card shadow-sm p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Filter className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-semibold text-muted-foreground">Filters</span>
-                        {hasFilters && (
-                            <Button variant="ghost" size="sm" className="h-6 text-xs ml-auto" onClick={clearFilters}>
-                                Clear All
-                            </Button>
-                        )}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative w-[280px]">
+                        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Search"
+                            className="h-8 pl-8 text-sm"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-                        <div className="relative col-span-2 md:col-span-1">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search"
-                                className="pl-8 h-9 text-sm"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                        <Select value={selectedSite} onValueChange={setSelectedSite}>
-                            <SelectTrigger className="h-9 text-sm">
-                                <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                                <SelectValue placeholder="All Sites" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Sites</SelectItem>
-                                {sites.map((site: any) => (
-                                    <SelectItem key={site.id} value={site.id.toString()}>{site.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                            <SelectTrigger className="h-9 text-sm">
-                                <SelectValue placeholder="All Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="Pending">Pending</SelectItem>
-                                <SelectItem value="Approved">Approved</SelectItem>
-                                <SelectItem value="Fulfilled">Fulfilled</SelectItem>
-                                <SelectItem value="Returned">Returned</SelectItem>
-                                <SelectItem value="Return_pending">Return Review</SelectItem>
-                                <SelectItem value="Rejected">Rejected</SelectItem>
-                                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedType} onValueChange={setSelectedType}>
-                            <SelectTrigger className="h-9 text-sm">
-                                <SelectValue placeholder="All Types" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Types</SelectItem>
-                                <SelectItem value="Borrow">Borrow</SelectItem>
-                                <SelectItem value="Checkout">Checkout</SelectItem>
-                                <SelectItem value="Software License">Software License</SelectItem>
-                                <SelectItem value="Maintenance Request">Maintenance</SelectItem>
-                                <SelectItem value="Purchase Request">Purchase</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <div className="relative">
-                            <CalendarDays className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-                            <Input
-                                type="date"
-                                className="h-9 text-sm pl-8"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                title="From date"
-                            />
-                        </div>
-                        <div className="relative">
-                            <CalendarDays className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-                            <Input
-                                type="date"
-                                className="h-9 text-sm pl-8"
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                title="To date"
-                            />
-                        </div>
+
+                    <Select value={selectedSite} onValueChange={setSelectedSite}>
+                        <SelectTrigger className="h-8 w-[150px] text-sm">
+                            <SelectValue placeholder="Site" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Sites</SelectItem>
+                            {sites.map((site: any) => (
+                                <SelectItem key={site.id} value={site.id.toString()}>{site.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                        <SelectTrigger className="h-8 w-[150px] text-sm">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Approved">Approved</SelectItem>
+                            <SelectItem value="Fulfilled">Fulfilled</SelectItem>
+                            <SelectItem value="Returned">Returned</SelectItem>
+                            <SelectItem value="Return_pending">Return Review</SelectItem>
+                            <SelectItem value="Rejected">Rejected</SelectItem>
+                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={selectedType} onValueChange={setSelectedType}>
+                        <SelectTrigger className="h-8 w-[170px] text-sm">
+                            <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="Borrow">Borrow</SelectItem>
+                            <SelectItem value="Checkout">Checkout</SelectItem>
+                            <SelectItem value="Software License">Software License</SelectItem>
+                            <SelectItem value="Maintenance Request">Maintenance</SelectItem>
+                            <SelectItem value="Purchase Request">Purchase</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <div className="relative w-[150px]">
+                        <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            type="date"
+                            className="h-8 pl-8 text-sm"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            title="From date"
+                        />
                     </div>
+
+                    <div className="relative w-[150px]">
+                        <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            type="date"
+                            className="h-8 pl-8 text-sm"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            title="To date"
+                        />
+                    </div>
+
+                    {hasFilters && (
+                        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={clearFilters}>
+                            <RotateCcw className="mr-1 h-3 w-3" />
+                            Clear
+                        </Button>
+                    )}
                 </div>
 
                 {/* Batch Action Bar */}

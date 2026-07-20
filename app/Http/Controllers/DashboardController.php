@@ -32,6 +32,30 @@ class DashboardController extends Controller
         $totalOverdue = \App\Models\AssetAssignment::active()->whereDate('assigned_at', '<', today())->count()
             + \App\Models\AssetLoan::overdue()->count();
 
+        $assetSummary = [
+            'byStatus' => Asset::with('status')
+                ->get()
+                ->groupBy(fn($asset) => $asset->status?->name ?? 'No Status')
+                ->map(fn($items, $name) => ['name' => $name, 'count' => $items->count()])
+                ->sortByDesc('count')
+                ->values()
+                ->take(6),
+            'byCategory' => Asset::with('category')
+                ->get()
+                ->groupBy(fn($asset) => $asset->category?->name ?? 'Uncategorized')
+                ->map(fn($items, $name) => ['name' => $name, 'count' => $items->count()])
+                ->sortByDesc('count')
+                ->values()
+                ->take(6),
+            'bySite' => Asset::with('site')
+                ->get()
+                ->groupBy(fn($asset) => $asset->site?->name ?? 'No Site')
+                ->map(fn($items, $name) => ['name' => $name, 'count' => $items->count()])
+                ->sortByDesc('count')
+                ->values()
+                ->take(6),
+        ];
+
         $userSiteIds = $user
             ? collect([$user->site_id])->merge($user->sites()->pluck('sites.id'))->filter()->unique()->values()
             : collect();
@@ -163,6 +187,7 @@ class DashboardController extends Controller
                 'assetsCurrentlyInUse' => $assetsCurrentlyInUse,
                 'totalOverdue' => $totalOverdue,
                 'employee' => $employeeStats,
+                'assetSummary' => $assetSummary,
             ],
             'charts' => [
                 'assetsBySite' => $assetsBySite,

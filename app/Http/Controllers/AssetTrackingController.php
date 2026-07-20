@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\AssetAssignment;
 use App\Models\AssetLoan;
 use App\Models\User;
+use App\Notifications\AssetReturnReminderNotification;
 use Carbon\Carbon;
 
 class AssetTrackingController extends Controller
@@ -258,41 +259,39 @@ class AssetTrackingController extends Controller
     }
 
     /**
-     * Send reminder email for overdue asset
+     * Send inbox reminder for overdue asset assignment or loan.
      */
-    public function sendReminder(Request $request, AssetAssignment $assignment)
+    public function sendReminder(Request $request, int $assignment)
     {
-        if (!$assignment->user || !$assignment->user->email) {
-            return back()->with('error', 'User email not found.');
+        $source = $request->input('source', 'assignment');
+        $record = $source === 'loan'
+            ? AssetLoan::with(['asset.fieldValues', 'user'])->find($assignment)
+            : AssetAssignment::with(['asset.fieldValues', 'user'])->find($assignment);
+
+        if (! $record) {
+            return back()->with('error', 'Loan record not found.');
         }
 
-        try {
-            // Calculate days overdue
-            $expectedReturnDate = $assignment->expected_return_date
-                ? Carbon::parse($assignment->expected_return_date)
-                : Carbon::parse($assignment->assigned_at)->addDays(7);
-
-            $daysOverdue = Carbon::now()->diffInDays($expectedReturnDate, false);
-
-            // Send email using Laravel's mail system
-            \Illuminate\Support\Facades\Mail::raw(
-                view('emails.asset-reminder', [
-                    'user' => $assignment->user,
-                    'assignment' => $assignment,
-                    'asset' => $assignment->asset,
-                    'expectedReturnDate' => $expectedReturnDate,
-                    'daysOverdue' => $daysOverdue,
-                ]),
-                function ($message) use ($assignment) {
-                    $message->to($assignment->user->email)
-                        ->subject('Overdue Asset Return Reminder - ' . ($assignment->asset->product_name ?? 'Asset'));
-                }
-            );
-
-            return back()->with('success', 'Reminder email sent successfully.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to send reminder: ' . $e->getMessage());
+        if (! $record->user) {
+            return back()->with('error', 'User not found.');
         }
+
+        $start = $source === 'loan'
+            ? ($record->approved_at ?: $record->loan_date ?: $record->created_at)
+            : $record->assigned_at;
+
+        $expectedReturnDate = $record->expected_return_date
+            ? Carbon::parse($record->expected_return_date)
+            : Carbon::parse($start)->addDays(7);
+
+        $record->user->notify(new AssetReturnReminderNotification(
+            $record->asset,
+            $this->assetDisplayName($record->asset),
+            $expectedReturnDate->format('Y-m-d'),
+            max(0, (int) $expectedReturnDate->diffInDays(now()))
+        ));
+
+        return back()->with('success', 'Reminder sent to user inbox.');
     }
 
     /**
@@ -446,6 +445,7 @@ class AssetTrackingController extends Controller
             'is_overdue'   => $isOverdue,
             'days_overdue' => $daysOverdue,
             'remarks'      => $a->remarks,
+            'source'       => 'assignment',
         ];
     }
 

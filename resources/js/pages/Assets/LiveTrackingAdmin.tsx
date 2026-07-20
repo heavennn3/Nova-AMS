@@ -66,6 +66,7 @@ interface Assignment {
     is_overdue: boolean;
     days_overdue: number;
     remarks: string | null;
+    source?: 'assignment' | 'loan';
 }
 
 interface SiteAssignment {
@@ -251,7 +252,7 @@ export default function LiveTrackingAdmin({
             return;
         }
 
-        router.post(`/asset-track/${assignment.id}/send-reminder`, {}, {
+        router.post(`/asset-track/${assignment.id}/send-reminder`, { source: assignment.source ?? 'assignment' }, {
             onSuccess: () => {
                 toast.success('Reminder sent successfully!');
             },

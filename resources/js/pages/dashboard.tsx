@@ -245,6 +245,35 @@ export default function Dashboard({
                 )}
             </div>
 
+            {canViewGlobalCards && (
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    {[
+                        { title: 'Assets by Status', items: stats.assetSummary?.byStatus ?? [], icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
+                        { title: 'Assets by Category', items: stats.assetSummary?.byCategory ?? [], icon: Layers, color: 'text-blue-600', bg: 'bg-blue-500/10' },
+                        { title: 'Assets by Site', items: stats.assetSummary?.bySite ?? [], icon: MapPin, color: 'text-violet-600', bg: 'bg-violet-500/10' },
+                    ].map((section) => (
+                        <div key={section.title} className="rounded-lg border bg-card shadow-sm">
+                            <div className="flex items-center gap-3 border-b px-5 py-4">
+                                <div className={`rounded-full p-2.5 ${section.bg}`}>
+                                    <section.icon className={`h-5 w-5 ${section.color}`} />
+                                </div>
+                                <h3 className="text-sm font-semibold text-foreground">{section.title}</h3>
+                            </div>
+                            <div className="divide-y divide-border/60">
+                                {section.items.length > 0 ? section.items.map((item: any) => (
+                                    <div key={item.name} className="flex items-center justify-between px-5 py-3 text-sm">
+                                        <span className="truncate text-muted-foreground">{item.name}</span>
+                                        <span className="ml-3 rounded bg-muted px-2 py-1 text-xs font-semibold text-foreground">{item.count}</span>
+                                    </div>
+                                )) : (
+                                    <div className="px-5 py-6 text-center text-xs text-muted-foreground">No assets found.</div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {/* Row 2: Urgent Alerts & Overdues */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Low Stock Alerts */}
