@@ -55,8 +55,8 @@ export function UserFormDialog({
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
- setMounted(true); 
-}, []);
+        setMounted(true);
+    }, []);
 
     // Get role ID from role name for editing
     const getRoleIdFromName = (roleName: string | undefined): string => {
@@ -159,7 +159,7 @@ export function UserFormDialog({
                         <div className="space-y-1.5">
                             <Label htmlFor="dlg-pw">
                                 {isEditing
-                                    ? 'New Password (leave blank to keep)'
+                                    ? 'New Password '
                                     : 'Password *'}
                             </Label>
                             <Input

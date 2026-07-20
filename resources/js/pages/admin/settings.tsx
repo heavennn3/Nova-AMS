@@ -77,15 +77,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
             bg: 'bg-cyan-500/10',
             link: '/security/roles',
         },
-        {
-            id: 'page-permissions',
-            title: 'Page Permissions',
-            description: 'User CRUD permissions per page',
-            icon: ShieldCheck,
-            color: 'text-purple-500',
-            bg: 'bg-purple-500/10',
-            link: '/admin/page-permissions',
-        },
+
         {
             id: 'sites',
             title: 'Sites',
@@ -111,7 +103,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
         {
             id: 'purge',
             title: 'Trash ',
-            description: 'Permanently delete soft-deleted r...',
+            description: 'View Deleted Item',
             icon: Trash2,
             color: 'text-rose-500',
             bg: 'bg-rose-500/10',
@@ -230,10 +222,7 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
                                 <span className="font-medium text-muted-foreground">Database Driver:</span>
                                 <span className="font-mono text-xs text-foreground">{systemInfo.databaseDriver}</span>
                             </div>
-                            <div className="flex justify-between items-center py-1">
-                                <span className="font-medium text-muted-foreground">Timezone:</span>
-                                <span className="font-mono text-xs text-foreground">{systemInfo.timezone}</span>
-                            </div>
+
                         </div>
 
                         <div className="p-4 space-y-3">
@@ -249,33 +238,16 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
                                     {systemInfo.mailReplyToAddress}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-center py-1 text-left">
-                                <span className="font-medium text-muted-foreground">API Base URL:</span>
-                                <a
-                                    href={systemInfo.apiBaseUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="font-mono text-xs text-blue-500 hover:underline inline-flex items-center gap-1"
-                                >
-                                    {systemInfo.apiBaseUrl}
-                                    <ExternalLink className="h-3 w-3" />
-                                </a>
-                            </div>
-                            <div className="flex justify-between items-center py-1 text-left">
-                                <span className="font-medium text-muted-foreground">SCIM Base URL:</span>
-                                <a
-                                    href={systemInfo.scimBaseUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="font-mono text-xs text-blue-500 hover:underline inline-flex items-center gap-1"
-                                >
-                                    {systemInfo.scimBaseUrl}
-                                    <ExternalLink className="h-3 w-3" />
-                                </a>
-                            </div>
+
+
                             <div className="flex justify-between items-center py-1">
                                 <span className="font-medium text-muted-foreground">Table Storage:</span>
                                 <span className="font-mono text-xs text-foreground">{systemInfo.tableStorage}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center py-1">
+                                <span className="font-medium text-muted-foreground">Timezone:</span>
+                                <span className="font-mono text-xs text-foreground">{systemInfo.timezone}</span>
                             </div>
                         </div>
                     </div>

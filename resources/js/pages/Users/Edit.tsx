@@ -39,8 +39,8 @@ export default function UserEdit({
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
- setMounted(true); 
-}, []);
+        setMounted(true);
+    }, []);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,7 +62,7 @@ export default function UserEdit({
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2"><Label htmlFor="name">Full Name *</Label><Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} required />{errors.name && <div className="text-sm text-red-500">{errors.name}</div>}</div>
                     <div className="space-y-2"><Label htmlFor="email">Email Address *</Label><Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} required />{errors.email && <div className="text-sm text-red-500">{errors.email}</div>}</div>
-                    <div className="space-y-2"><Label htmlFor="password">New Password (leave blank to keep current)</Label><Input id="password" type="password" value={data.password} onChange={(e) => setData('password', e.target.value)} />{errors.password && <div className="text-sm text-red-500">{errors.password}</div>}</div>
+                    <div className="space-y-2"><Label htmlFor="password">New Password </Label><Input id="password" type="password" value={data.password} onChange={(e) => setData('password', e.target.value)} />{errors.password && <div className="text-sm text-red-500">{errors.password}</div>}</div>
                     <div className="space-y-2"><Label htmlFor="password_confirmation">Confirm New Password</Label><Input id="password_confirmation" type="password" value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} /></div>
                     <div className="space-y-2">
                         <Label htmlFor="role_id">Role *</Label>

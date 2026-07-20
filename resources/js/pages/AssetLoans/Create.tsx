@@ -43,6 +43,14 @@ const fieldValue = (asset: Asset, keys: string[]) => {
 
 const assetTitle = (asset: Asset) => asset.asset_name || fieldValue(asset, ['asset_name', 'nama_aset', 'jenis_aset', 'product', 'aset_id', 'asset_id']) || `Asset #${asset.id}`;
 const assetCode = (asset: Asset) => asset.asset_id || asset.serial_number || fieldValue(asset, ['aset_id', 'asset_id', 'serial_number', 'no_siri']) || `#${asset.id}`;
+const assetSearchText = (asset: Asset) => [
+    asset.asset_id,
+    fieldValue(asset, ['aset_id', 'asset_id']),
+    asset.asset_name,
+    fieldValue(asset, ['asset_name', 'nama_aset']),
+    asset.serial_number,
+    fieldValue(asset, ['serial_number', 'no_siri', 'sn']),
+].filter(Boolean).join(' ').toLowerCase();
 const assetCategory = (asset: Asset) => asset.category_name || fieldValue(asset, ['kategori_aset', 'category', 'kategori']) || '—';
 const assetType = (asset: Asset) => asset.type_name || fieldValue(asset, ['jenis_aset', 'type', 'asset_type', 'product']) || '—';
 const assetLocation = (asset: Asset) => asset.location || fieldValue(asset, ['location', 'lokasi', 'room', 'department']) || '—';
@@ -93,10 +101,7 @@ export default function AssetLoansCreate({
         return assets.filter((asset) => {
             const sameSite = !selectedAssets.length || asset.site_id === selectedAssets[0].site_id;
             const matchesSite = siteFilter === 'all' || String(asset.site_id ?? '') === siteFilter;
-            const matchesSearch =
-                !q ||
-                [assetTitle(asset), assetCode(asset), assetCategory(asset), assetType(asset), assetLocation(asset)].join(' ').toLowerCase().includes(q) ||
-                Object.values(asset.fields ?? {}).some((value) => String(value ?? '').toLowerCase().includes(q));
+            const matchesSearch = !q || assetSearchText(asset).includes(q);
             const matchesCategory = categoryFilter === 'all' || assetCategory(asset) === categoryFilter;
             const matchesType = typeFilter === 'all' || assetType(asset) === typeFilter;
 
