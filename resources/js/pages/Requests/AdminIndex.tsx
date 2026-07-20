@@ -489,27 +489,27 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             <ImageIcon className="h-3.5 w-3.5" />
                                                         </Button>
                                                     )}
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.get(`/requests/${r.id}${r.type === 'loan' || r.original_model === 'AssetLoan' ? '?is_loan=true' : ''}`)}>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.get(`/requests/${r.id}${r.type === 'loan' || r.original_model === 'AssetLoan' ? '?is_loan=true' : ''}`)} title="View details" aria-label="View request details">
                                                         <Eye className="h-3.5 w-3.5" />
                                                     </Button>
                                                     {r.status === 'Pending' && (
                                                         <>
-                                                            <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2" onClick={() => openAction(r, 'approve')}>
-                                                                <CheckCircle className="h-3 w-3 mr-1" /> Approve
+                                                            <Button size="icon" className="h-7 w-7 bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => openAction(r, 'approve')} title="Approve" aria-label="Approve request">
+                                                                <CheckCircle className="h-3.5 w-3.5" />
                                                             </Button>
-                                                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => openAction(r, 'reject')}>
-                                                                <XCircle className="h-3 w-3 mr-1" /> Reject
+                                                            <Button size="icon" variant="destructive" className="h-7 w-7" onClick={() => openAction(r, 'reject')} title="Reject" aria-label="Reject request">
+                                                                <XCircle className="h-3.5 w-3.5" />
                                                             </Button>
                                                         </>
                                                     )}
                                                     {r.status === 'Fulfilled' && ['Borrow', 'Checkout'].includes(r.request_type) && (
-                                                        <Button size="sm" className="h-7 bg-violet-600 hover:bg-violet-700 text-white text-xs px-2" onClick={() => openAction(r, 'return')}>
-                                                            <RotateCcw className="h-3 w-3 mr-1" /> Return
+                                                        <Button size="icon" className="h-7 w-7 bg-violet-600 text-white hover:bg-violet-700" onClick={() => openAction(r, 'return')} title="Return" aria-label="Return asset">
+                                                            <RotateCcw className="h-3.5 w-3.5" />
                                                         </Button>
                                                     )}
                                                     {r.status === 'Return_pending' && r.type === 'loan' && (
-                                                        <Button size="sm" className="h-7 bg-orange-600 hover:bg-orange-700 text-white text-xs px-2" onClick={() => openAction(r, 'return')}>
-                                                            <CheckCircle className="h-3 w-3 mr-1" /> Approve Return
+                                                        <Button size="icon" className="h-7 w-7 bg-orange-600 text-white hover:bg-orange-700" onClick={() => openAction(r, 'return')} title="Approve return" aria-label="Approve return">
+                                                            <CheckCircle className="h-3.5 w-3.5" />
                                                         </Button>
                                                     )}
                                                 </div>
