@@ -137,7 +137,7 @@ class DashboardController extends Controller
                     'user' => $audit->user ? $audit->user->name : 'System',
                     'action' => $audit->event,
                     'details' => ucfirst($audit->event) . " " . class_basename($audit->auditable_type),
-                    'location' => ($audit->user && $audit->user->site) ? $audit->user->site->name : 'Global/HQ',
+                    'location' => ($audit->user && $audit->user->site) ? $audit->user->site->name : 'Global',
                     'site_id' => $audit->user ? $audit->user->site_id : null,
                     'date_time' => $audit->created_at->format('Y-m-d H:i:s'),
                 ];

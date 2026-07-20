@@ -61,8 +61,8 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
 
         {
             id: 'security',
-            title: 'Security',
-            description: 'Two-factor, Password Restrictions',
+            title: 'Profile',
+            description: 'Edit Profile ',
             icon: ShieldCheck,
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
@@ -99,34 +99,15 @@ export default function AdminSettings({ systemInfo }: { systemInfo: SystemInfo }
 
 
         {
-            id: 'backups',
-            title: 'Backups',
-            description: 'Create, download, and restore ba...',
-            icon: Database,
-            color: 'text-emerald-500',
-            bg: 'bg-emerald-500/10',
-            link: '/security/logs',
-        },
-        {
             id: 'login_attempts',
-            title: 'Login Attempts',
+            title: 'Logs',
             description: 'List of attempted logins',
             icon: History,
             color: 'text-sky-500',
             bg: 'bg-sky-500/10',
             link: '/security/logs',
         },
-        {
-            id: 'oauth',
-            title: 'OAuth & API',
-            description: 'Oauth Endpoint Settings and API t...',
-            icon: Cpu,
-            color: 'text-cyan-500',
-            bg: 'bg-cyan-500/10',
-            fields: [
-                { label: 'Access Token Expiry (Days)', name: 'token_expiry', type: 'number', defaultValue: 30 },
-            ],
-        },
+
         {
             id: 'purge',
             title: 'Trash ',

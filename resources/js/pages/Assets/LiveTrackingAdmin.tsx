@@ -124,6 +124,14 @@ export default function LiveTrackingAdmin({
     const [localSiteFilter, setLocalSiteFilter] = useState(filters.site_id);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // New filter states
+    const [overdueFilter, setOverdueFilter] = useState<'all' | 'overdue' | 'on-time'>('all');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
+    const [assignedDateFrom, setAssignedDateFrom] = useState<string>('');
+    const [assignedDateTo, setAssignedDateTo] = useState<string>('');
+    const [returnDateFrom, setReturnDateFrom] = useState<string>('');
+    const [returnDateTo, setReturnDateTo] = useState<string>('');
+
     const formatTimeDistance = (ms: number) => {
         const absHours = Math.ceil(Math.abs(ms) / (1000 * 60 * 60));
 
@@ -164,6 +172,34 @@ export default function LiveTrackingAdmin({
             assignments = assignments.filter(a => a.site_id === parseInt(localSiteFilter));
         }
 
+        // Apply overdue filter
+        if (overdueFilter === 'overdue') {
+            assignments = assignments.filter(a => a.is_overdue);
+        } else if (overdueFilter === 'on-time') {
+            assignments = assignments.filter(a => !a.is_overdue);
+        }
+
+        // Apply category filter
+        if (categoryFilter !== 'all') {
+            assignments = assignments.filter(a => a.category === categoryFilter);
+        }
+
+        // Apply assigned date range filter
+        if (assignedDateFrom) {
+            assignments = assignments.filter(a => new Date(a.assigned_at) >= new Date(assignedDateFrom));
+        }
+        if (assignedDateTo) {
+            assignments = assignments.filter(a => new Date(a.assigned_at) <= new Date(assignedDateTo));
+        }
+
+        // Apply return date range filter
+        if (returnDateFrom) {
+            assignments = assignments.filter(a => new Date(a.expected_return_date) >= new Date(returnDateFrom));
+        }
+        if (returnDateTo) {
+            assignments = assignments.filter(a => new Date(a.expected_return_date) <= new Date(returnDateTo));
+        }
+
         // Apply search filter
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
@@ -177,7 +213,7 @@ export default function LiveTrackingAdmin({
         }
 
         return assignments;
-    }, [assignmentsBySite, localSiteFilter, searchTerm]);
+    }, [assignmentsBySite, localSiteFilter, overdueFilter, categoryFilter, assignedDateFrom, assignedDateTo, returnDateFrom, returnDateTo, searchTerm]);
 
     // Calculate overdue stats
     const overdueAssignments = allAssignments.filter(a => a.is_overdue);
@@ -262,6 +298,40 @@ export default function LiveTrackingAdmin({
                 toast.error('Failed to check in asset');
             },
         });
+    };
+
+    // Helper: Get unique categories from all assignments
+    const getUniqueCategories = () => {
+        const categories = assignmentsBySite.flatMap(sa =>
+            sa.assignments.map(a => a.category)
+        ).filter(Boolean);
+        return Array.from(new Set(categories)).sort();
+    };
+
+    // Helper: Clear all filters
+    const clearAllFilters = () => {
+        setLocalSiteFilter('all');
+        setOverdueFilter('all');
+        setCategoryFilter('all');
+        setAssignedDateFrom('');
+        setAssignedDateTo('');
+        setReturnDateFrom('');
+        setReturnDateTo('');
+        setSearchTerm('');
+    };
+
+    // Helper: Count active filters
+    const getActiveFilterCount = () => {
+        let count = 0;
+        if (localSiteFilter !== 'all') count++;
+        if (overdueFilter !== 'all') count++;
+        if (categoryFilter !== 'all') count++;
+        if (assignedDateFrom) count++;
+        if (assignedDateTo) count++;
+        if (returnDateFrom) count++;
+        if (returnDateTo) count++;
+        if (searchTerm) count++;
+        return count;
     };
 
     // Data table columns
@@ -492,9 +562,93 @@ export default function LiveTrackingAdmin({
 
             </div>
 
+            {/* Filter Bar */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+
+                        {getActiveFilterCount() > 0 && (
+                            <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Clear All
+                            </Button>
+                        )}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Search */}
+                        <div className="space-y-2">
+                            <Label htmlFor="search">Search</Label>
+                            <Input
+                                id="search"
+                                placeholder="Search "
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Site Filter */}
+                        <div className="space-y-2">
+                            <Label htmlFor="site-filter">Site</Label>
+                            <Select value={localSiteFilter} onValueChange={setLocalSiteFilter}>
+                                <SelectTrigger id="site-filter">
+                                    <SelectValue placeholder="All Sites" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sites</SelectItem>
+                                    {sites.map((site) => (
+                                        <SelectItem key={site.id} value={site.id.toString()}>
+                                            {site.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Category Filter */}
+                        <div className="space-y-2">
+                            <Label htmlFor="category-filter">Category</Label>
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                <SelectTrigger id="category-filter">
+                                    <SelectValue placeholder="All Categories" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Categories</SelectItem>
+                                    {getUniqueCategories().map((category) => (
+                                        <SelectItem key={category} value={category}>
+                                            {category}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Overdue Status Filter */}
+                        <div className="space-y-2">
+                            <Label htmlFor="overdue-filter">Status</Label>
+                            <Select value={overdueFilter} onValueChange={(value: any) => setOverdueFilter(value)}>
+                                <SelectTrigger id="overdue-filter">
+                                    <SelectValue placeholder="All Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="overdue">Overdue Only</SelectItem>
+                                    <SelectItem value="on-time">On-Time Only</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
 
 
+
+
+
+
+
+                    </div>
+                </CardContent>
+            </Card>
 
 
 

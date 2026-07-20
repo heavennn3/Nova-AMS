@@ -77,7 +77,7 @@ const navSections: NavSection[] = [
 
         items: [
 
-            { title: 'Key & Licenses', href: '/licenses', icon: KeyRound, module: 'Key & Licenses' },
+            { title: 'Licenses', href: '/licenses', icon: KeyRound, module: 'Key & Licenses' },
 
 
 
