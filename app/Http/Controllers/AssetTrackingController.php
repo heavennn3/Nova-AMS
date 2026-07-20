@@ -29,7 +29,6 @@ class AssetTrackingController extends Controller
         $liveAssignmentsQuery = AssetAssignment::with([
                 'asset.category',
                 'asset.site',
-                'asset.location',
                 'user',
                 'site',
                 'location',
