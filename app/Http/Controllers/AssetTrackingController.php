@@ -400,6 +400,22 @@ class AssetTrackingController extends Controller
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    private function assetDisplayName(?Asset $asset): string
+    {
+        if (! $asset) {
+            return '—';
+        }
+
+        foreach ([$asset->product_name, $asset->getField('asset_name'), $asset->getField('jenis_aset'), $asset->asset_id] as $value) {
+            $value = trim((string) $value);
+            if ($value !== '' && $value !== '—') {
+                return $value;
+            }
+        }
+
+        return '—';
+    }
+
     private function formatAssignment(AssetAssignment $a): array
     {
         $mins = (int) Carbon::parse($a->assigned_at)->diffInMinutes(now());
@@ -417,7 +433,7 @@ class AssetTrackingController extends Controller
             'id'           => $a->id,
             'asset_id'     => $a->asset?->asset_id ?? '—',
             'asset_db_id'  => $a->asset_id,
-            'product_name' => $a->asset?->product_name ?? '—',
+            'product_name' => $this->assetDisplayName($a->asset),
             'category'     => $a->asset?->category?->name ?? '—',
             'site'         => $a->site?->name ?? $a->asset?->site?->name ?? '—',
             'site_id'      => $a->site_id ?? $a->asset?->site_id,
@@ -446,7 +462,7 @@ class AssetTrackingController extends Controller
             'id'           => $loan->id,
             'asset_id'     => $loan->asset?->asset_id ?? $loan->asset?->getField('aset_id') ?? '—',
             'asset_db_id'  => $loan->asset_id,
-            'product_name' => $loan->asset?->product_name ?? $loan->asset?->getField('jenis_aset') ?? '—',
+            'product_name' => $this->assetDisplayName($loan->asset),
             'category'     => $loan->asset?->category?->name ?? '—',
             'site'         => $loan->site?->name ?? $loan->asset?->site?->name ?? '—',
             'site_id'      => $loan->site_id ?? $loan->asset?->site_id,

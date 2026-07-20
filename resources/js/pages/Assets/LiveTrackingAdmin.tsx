@@ -10,11 +10,10 @@ import {
     AlertTriangle,
     Bell,
     Send,
-    Filter,
+    Search,
     RefreshCw,
     Building2,
     Calendar,
-    Hash,
     ChevronDown,
     ChevronUp,
     CheckCircle,
@@ -339,7 +338,7 @@ export default function LiveTrackingAdmin({
         {
             accessorKey: 'id',
             header: ({ column }: any) => (
-                <DataTableColumnHeader column={column} title="ID" />
+                <DataTableColumnHeader column={column} title="Loan ID" />
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
@@ -351,7 +350,6 @@ export default function LiveTrackingAdmin({
                         className="font-mono text-xs text-primary hover:underline"
                         onClick={() => viewDetails(assignment)}
                     >
-                        <Hash className="h-3 w-3 mr-1" />
                         #{assignment.id}
                     </Button>
                 );
@@ -563,92 +561,67 @@ export default function LiveTrackingAdmin({
             </div>
 
             {/* Filter Bar */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-[280px]">
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                    />
+                </div>
 
-                        {getActiveFilterCount() > 0 && (
-                            <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                                <RefreshCw className="h-4 w-4 mr-2" />
-                                Clear All
-                            </Button>
-                        )}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Search */}
-                        <div className="space-y-2">
-                            <Label htmlFor="search">Search</Label>
-                            <Input
-                                id="search"
-                                placeholder="Search "
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
+                <Select value={localSiteFilter} onValueChange={setLocalSiteFilter}>
+                    <SelectTrigger className="h-8 w-[150px] text-sm">
+                        <SelectValue placeholder="Site" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Sites</SelectItem>
+                        {sites.map((site) => (
+                            <SelectItem key={site.id} value={site.id.toString()}>
+                                {site.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-                        {/* Site Filter */}
-                        <div className="space-y-2">
-                            <Label htmlFor="site-filter">Site</Label>
-                            <Select value={localSiteFilter} onValueChange={setLocalSiteFilter}>
-                                <SelectTrigger id="site-filter">
-                                    <SelectValue placeholder="All Sites" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sites</SelectItem>
-                                    {sites.map((site) => (
-                                        <SelectItem key={site.id} value={site.id.toString()}>
-                                            {site.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-8 w-[170px] text-sm">
+                        <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {getUniqueCategories().map((category) => (
+                            <SelectItem key={category} value={category}>
+                                {category}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-                        {/* Category Filter */}
-                        <div className="space-y-2">
-                            <Label htmlFor="category-filter">Category</Label>
-                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                <SelectTrigger id="category-filter">
-                                    <SelectValue placeholder="All Categories" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Categories</SelectItem>
-                                    {getUniqueCategories().map((category) => (
-                                        <SelectItem key={category} value={category}>
-                                            {category}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <Select value={overdueFilter} onValueChange={(value: any) => setOverdueFilter(value)}>
+                    <SelectTrigger className="h-8 w-[150px] text-sm">
+                        <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="overdue">Overdue Only</SelectItem>
+                        <SelectItem value="on-time">On-Time Only</SelectItem>
+                    </SelectContent>
+                </Select>
 
-                        {/* Overdue Status Filter */}
-                        <div className="space-y-2">
-                            <Label htmlFor="overdue-filter">Status</Label>
-                            <Select value={overdueFilter} onValueChange={(value: any) => setOverdueFilter(value)}>
-                                <SelectTrigger id="overdue-filter">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="overdue">Overdue Only</SelectItem>
-                                    <SelectItem value="on-time">On-Time Only</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                {getActiveFilterCount() > 0 && (
+                    <Button variant="outline" size="sm" onClick={clearAllFilters} className="h-8 text-xs">
+                        <RefreshCw className="mr-1 h-3 w-3" />
+                        Clear
+                    </Button>
+                )}
+            </div>
 
 
 
 
-
-
-
-
-                    </div>
-                </CardContent>
-            </Card>
 
 
 
