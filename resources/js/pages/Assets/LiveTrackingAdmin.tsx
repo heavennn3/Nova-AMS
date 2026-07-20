@@ -345,7 +345,7 @@ export default function LiveTrackingAdmin({
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="font-mono text-xs text-primary hover:underline"
+                        className="h-9 px-2 font-mono text-xs text-primary hover:underline"
                         onClick={() => viewDetails(assignment)}
                     >
                         #{assignment.id}
@@ -362,14 +362,14 @@ export default function LiveTrackingAdmin({
                 const assignment = row.original;
 
                 return (
-                    <div className="space-y-1">
-                        <div className="font-semibold text-sm">{assignment.product_name}</div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
+                    <div className="flex min-h-12 flex-col justify-center gap-1.5">
+                        <div className="text-sm font-semibold leading-none">{assignment.product_name}</div>
+                        <div className="flex items-center gap-2 text-xs leading-none text-muted-foreground">
+                            <span className="rounded bg-muted px-1.5 py-0.5 font-mono">
                                 {assignment.asset_id}
                             </span>
                             {assignment.category && (
-                                <span>• {assignment.category}</span>
+                                <span>{assignment.category}</span>
                             )}
                         </div>
                     </div>
@@ -385,14 +385,14 @@ export default function LiveTrackingAdmin({
                 const assignment = row.original;
 
                 return (
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
-                            <User className="h-3 w-3 text-muted-foreground" />
-                            {assignment.user_name}
+                    <div className="flex min-h-12 flex-col justify-center gap-1.5">
+                        <div className="flex items-center gap-2 text-sm leading-none">
+                            <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            <span>{assignment.user_name}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            {assignment.user_email}
+                        <div className="flex items-center gap-2 text-xs leading-none text-muted-foreground">
+                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                            <span>{assignment.user_email}</span>
                         </div>
                     </div>
                 );
@@ -407,12 +407,9 @@ export default function LiveTrackingAdmin({
                 const assignment = row.original;
 
                 return (
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
-                            <Building2 className="h-3 w-3 text-muted-foreground" />
-                            {assignment.site}
-                        </div>
-
+                    <div className="flex min-h-12 items-center gap-2 text-sm">
+                        <Building2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <span>{assignment.site}</span>
                     </div>
                 );
             },
@@ -428,12 +425,12 @@ export default function LiveTrackingAdmin({
                 const loanAge = getLoanAge(assignment.assigned_at);
 
                 return (
-                    <div className="space-y-1">
-                        <div className="text-sm">
+                    <div className="flex min-h-12 flex-col justify-center gap-1.5">
+                        <div className="text-sm leading-none">
                             {new Date(assignment.assigned_at).toLocaleDateString()}
                         </div>
-                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30">
-                            <Clock className="h-3 w-3 mr-1" />
+                        <Badge className="w-fit gap-1 bg-blue-100 text-xs text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30">
+                            <Clock className="h-3 w-3" />
                             {loanAge}
                         </Badge>
                     </div>
@@ -451,18 +448,18 @@ export default function LiveTrackingAdmin({
                 const returnStatus = getReturnStatus(assignment.expected_return_date);
 
                 return (
-                    <div className="space-y-1">
-                        <div className="text-sm">
+                    <div className="flex min-h-12 flex-col justify-center gap-1.5">
+                        <div className="text-sm leading-none">
                             {expectedDate.toLocaleDateString()}
                         </div>
                         {returnStatus.overdue ? (
-                            <Badge className="bg-red-100 text-red-700 border-red-200 text-xs dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
-                                <AlertTriangle className="h-3 w-3 mr-1" />
+                            <Badge className="w-fit gap-1 bg-red-100 text-xs text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
+                                <AlertTriangle className="h-3 w-3" />
                                 {returnStatus.message}
                             </Badge>
                         ) : (
-                            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                            <Badge className="w-fit gap-1 bg-green-100 text-xs text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
+                                <CheckCircle2 className="h-3 w-3" />
                                 {returnStatus.message}
                             </Badge>
                         )}
@@ -485,7 +482,7 @@ export default function LiveTrackingAdmin({
                 ];
 
                 return (
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex min-h-12 items-center justify-end gap-1.5">
                         {actions.map((action) => (
                             <Button
                                 key={action.label}
