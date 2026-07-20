@@ -471,7 +471,7 @@ export default function LiveTrackingAdmin({
         {
             id: 'actions',
             header: () => (
-                <div className="text-right">Actions</div>
+                <div className="mx-auto flex w-[108px] items-center justify-center text-center">Actions</div>
             ),
             cell: ({ row }: any) => {
                 const assignment = row.original;
@@ -482,13 +482,13 @@ export default function LiveTrackingAdmin({
                 ];
 
                 return (
-                    <div className="flex min-h-12 items-center justify-end gap-1.5">
+                    <div className="mx-auto flex min-h-12 w-[108px] items-center justify-center gap-1.5">
                         {actions.map((action) => (
                             <Button
                                 key={action.label}
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="h-7 w-7 p-0"
                                 onClick={action.onClick}
                                 title={action.label}
                                 aria-label={action.label}
