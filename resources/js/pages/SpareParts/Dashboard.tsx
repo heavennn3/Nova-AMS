@@ -328,7 +328,7 @@ export default function SparePartsDashboard({
                     { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10 dark:bg-blue-500/15', text: 'text-blue-600 dark:text-blue-300' },
                     { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-green-500/10 dark:bg-green-500/15', text: 'text-green-600 dark:text-green-300' },
                     { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: 'bg-red-500/10 dark:bg-red-500/15', text: 'text-red-600 dark:text-red-300' },
-                    { label: 'Recently Added', value: recentlyAdded, icon: Package, bg: 'bg-purple-500/10 dark:bg-purple-500/15', text: 'text-purple-600 dark:text-purple-300' },
+
                 ].map(s => (
                     <div key={s.label} className="flex items-center gap-4 rounded-xl border bg-card p-5 shadow-sm min-h-[90px]">
                         <div className={`rounded-full ${s.bg} p-3 shrink-0`}>
