@@ -635,12 +635,23 @@ export default function AssetInventory({
                 {canManageAssets && (
                     <div className="flex gap-2">
 
-                        <Button variant="outline" size="sm" onClick={openFilePicker}>
-                            <Upload className="mr-2 h-4 w-4" /> Import CSV
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1.5 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+                            onClick={openFilePicker}
+                        >
+                            <Upload className="h-4 w-4" />
+                            Import CSV
                         </Button>
 
-                        <Button size="sm" onClick={openCreateModal}>
-                            <Plus className="mr-2 h-4 w-4" /> New Asset
+                        <Button
+                            size="sm"
+                            className="h-8 gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                            onClick={openCreateModal}
+                        >
+                            <Plus className="h-4 w-4" />
+                            New Asset
                         </Button>
                     </div>
                 )}
