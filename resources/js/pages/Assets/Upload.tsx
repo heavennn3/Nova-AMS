@@ -104,7 +104,7 @@ row[h] = values[i];
         <div className="mx-auto max-w-2xl space-y-6 p-6">
             <Head title="Upload Assets" />
             <div className="flex items-center gap-4">
-                <Link href="/assets" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/asset-inventory" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
                     <ArrowLeft className="h-4 w-4" /> Back
                 </Link>
                 <div>

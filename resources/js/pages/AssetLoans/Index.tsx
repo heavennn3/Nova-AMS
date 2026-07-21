@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,18 +35,18 @@ import {
 } from '@/components/ui/select';
 
 const statusColors: Record<string, string> = {
-    pending: 'border-yellow-200 bg-yellow-100 text-yellow-800 dark:border-yellow-800/60 dark:bg-yellow-950/30 dark:text-yellow-300',
-    approved: 'border-blue-200 bg-blue-100 text-blue-800 dark:border-blue-800/60 dark:bg-blue-950/30 dark:text-blue-300',
-    rejected: 'border-red-200 bg-red-100 text-red-800 dark:border-red-800/60 dark:bg-red-950/30 dark:text-red-300',
-    returned: 'border-green-200 bg-green-100 text-green-800 dark:border-green-800/60 dark:bg-green-950/30 dark:text-green-300',
-    return_pending: 'border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-300',
-    cancelled: 'border-gray-200 bg-gray-100 text-gray-800 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-300',
+    pending: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30',
+    approved: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30',
+    rejected: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30',
+    returned: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30',
+    return_pending: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30',
+    cancelled: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/30',
 };
 
 const conditionColors: Record<string, string> = {
-    good: 'bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300',
-    semi_faulty: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-300',
-    faulty: 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-300',
+    good: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30',
+    semi_faulty: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30',
+    faulty: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30',
 };
 
 function parseDate(value: string): Date | null {
@@ -172,7 +173,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     <th className="p-3 text-left font-medium">Duration</th>
                                     <th className="p-3 text-left font-medium">Condition</th>
                                     <th className="p-3 text-left font-medium">Status</th>
-                                    <th className="p-3 text-left font-medium">Action</th>
+                                    <th className="p-3 text-center font-medium">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -188,17 +189,51 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                             <td className="p-3"><p className="font-mono text-xs text-muted-foreground">{loan.asset_id || '—'}</p></td>
                                             <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></td>
                                             <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Clock className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.expected_return_date)}</div></td>
-                                            <td className="p-3">{canReturn ? <span className={`inline-flex items-center gap-1 text-xs font-semibold ${duration.isOverdue ? 'text-red-600 dark:text-red-300' : 'text-emerald-600 dark:text-emerald-300'}`}>{duration.isOverdue ? <AlertTriangle className="h-3.5 w-3.5" /> : <Hourglass className="h-3.5 w-3.5" />}{duration.label}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
-                                            <td className="p-3"><span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionColors[loan.condition_status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/60 dark:text-gray-300'}`}>{loan.condition_status?.replace('_', ' ') || '—'}</span></td>
-                                            <td className="p-3"><span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColors[loan.status] || 'border-gray-200 bg-gray-100 text-gray-800 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-300'}`}>{loan.status}</span></td>
                                             <td className="p-3">
                                                 {canReturn ? (
-                                                    <Button type="button" size="sm" variant="outline" onClick={() => openReturn(loan)}>
-                                                        <RotateCcw className="mr-2 h-4 w-4" /> Return
-                                                    </Button>
+                                                    duration.isOverdue ? (
+                                                        <Badge className="gap-1 bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
+                                                            <AlertTriangle className="h-3 w-3" />
+                                                            {duration.label}
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge className="gap-1 bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
+                                                            <Hourglass className="h-3 w-3" />
+                                                            {duration.label}
+                                                        </Badge>
+                                                    )
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">—</span>
                                                 )}
+                                            </td>
+                                            <td className="p-3">
+                                                <Badge className={`gap-1 border ${conditionColors[loan.condition_status] || 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/30'}`}>
+                                                    {loan.condition_status?.replace('_', ' ') || '—'}
+                                                </Badge>
+                                            </td>
+                                            <td className="p-3">
+                                                <Badge className={`gap-1 border ${statusColors[loan.status] || 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/30'}`}>
+                                                    {loan.status}
+                                                </Badge>
+                                            </td>
+                                            <td className="p-3">
+                                                <div className="mx-auto flex min-h-12 w-[36px] items-center justify-center gap-1.5">
+                                                    {canReturn ? (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 p-0"
+                                                            onClick={() => openReturn(loan)}
+                                                            title="Return"
+                                                            aria-label="Return asset"
+                                                        >
+                                                            <RotateCcw className="h-4 w-4" />
+                                                        </Button>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground">—</span>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );

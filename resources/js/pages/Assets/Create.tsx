@@ -64,7 +64,7 @@ export default function AssetCreate({
             <Head title="Create Asset" />
 
             <div className="mb-6">
-                <Link href="/assets" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/asset-inventory" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                     <ArrowLeft className="mr-1.5 h-4 w-4" />
                     Back to Assets
                 </Link>
@@ -151,7 +151,7 @@ export default function AssetCreate({
                 </div>
 
                 <div className="flex items-center justify-end gap-3">
-                    <Link href="/assets">
+                    <Link href="/asset-inventory">
                         <Button type="button" variant="outline">Cancel</Button>
                     </Link>
                     <Button type="submit" disabled={processing}>

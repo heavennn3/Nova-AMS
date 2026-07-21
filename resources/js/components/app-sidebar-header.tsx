@@ -105,7 +105,7 @@ export function AppSidebarHeader({
                             {isCreateOpen && (
                                 <div className="absolute right-0 mt-1.5 w-48 z-50 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 slide-in-from-top-1">
                                     <button
-                                        onClick={() => router.visit('/assets/create')}
+                                        onClick={() => router.visit('/asset-inventory')}
                                         className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                     >
                                         <Package className="mr-2 h-4 w-4 opacity-70" />

@@ -16,7 +16,7 @@ class AssetController extends Controller
         if (!$siteId) {
             $firstSite = \App\Models\Site::orderBy('name')->first();
             if ($firstSite) {
-                return redirect()->to('/assets?site_id=' . $firstSite->id);
+                return redirect()->to('/asset-inventory?site_id=' . $firstSite->id);
             }
         }
 
@@ -45,15 +45,7 @@ class AssetController extends Controller
             ];
         });
 
-        return Inertia::render('Assets/Index', [
-            'assets' => $assets,
-            'sites' => \App\Models\Site::orderBy('name')->get(['id', 'name']),
-            'totalSites' => \App\Models\Site::count(),
-            'totalFaulty' => Asset::where('status_id', 5)->count(),
-            'totalRecentAdded' => Asset::where('created_at', '>=', now()->subDays(30))->count(),
-            'currentSiteId' => $siteId ? (int)$siteId : null,
-            'assetStatuses' => \App\Models\AssetStatus::orderBy('sort_order')->get(['id', 'name', 'color']),
-        ]);
+        return redirect()->route('asset-inventory');
     }
 
     public function inventory(Request $request)
@@ -152,7 +144,7 @@ class AssetController extends Controller
             return redirect()->route('asset-inventory')->with('success', 'Asset created successfully.');
         }
 
-        return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
+        return redirect()->route('asset-inventory')->with('success', 'Asset created successfully.');
     }
 
     public function show(Asset $asset)
@@ -214,7 +206,7 @@ class AssetController extends Controller
             return redirect()->route('asset-inventory')->with('success', 'Asset updated successfully.');
         }
 
-        return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
+        return redirect()->route('asset-inventory')->with('success', 'Asset updated successfully.');
     }
 
     public function destroy(Asset $asset)

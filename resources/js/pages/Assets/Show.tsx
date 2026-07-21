@@ -324,7 +324,7 @@ return;
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <Link href="/assets">
+                    <Link href="/asset-inventory">
                         <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
                             <ArrowLeft className="h-4 w-4 mr-2" />
                             Back

@@ -11,7 +11,7 @@ export function operationsMaintenance() {
 }
 
 export function assetRegister() {
-    return '/assets';
+    return '/asset-inventory';
 }
 export function assetLocation() {
     return '/operations-maintanance';
