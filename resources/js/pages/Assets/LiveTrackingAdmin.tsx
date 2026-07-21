@@ -645,7 +645,7 @@ export default function LiveTrackingAdmin({
 
             {/* Assignment Details Dialog */}
             <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-2xl p-6">
                     <DialogHeader className="space-y-1.5">
                         <DialogTitle>Loan Details</DialogTitle>
                         <DialogDescription>
@@ -774,21 +774,10 @@ export default function LiveTrackingAdmin({
                                 </div>
                             </div>
 
-                            {/* Remarks */}
-                            {selectedAssignment.remarks && (
-                                <div className="rounded-lg border bg-card/50 p-4">
-                                    <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                                        <Wrench className="h-4 w-4 text-primary" />
-                                        Remarks
-                                    </h4>
-                                    <div className="rounded-lg bg-muted p-3 text-sm leading-6">
-                                        {selectedAssignment.remarks}
-                                    </div>
-                                </div>
-                            )}
+
                         </div>
                     )}
-                    <DialogFooter className="mt-4 gap-2">
+                    <DialogFooter className="mt-4 gap-2 border-t pt-4">
                         <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
                             Close
                         </Button>
