@@ -764,7 +764,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 ) : (
                                     <div className="text-center py-12 text-slate-400">
                                         <Clock className="mx-auto h-12 w-12 text-slate-200 mb-3" />
-                                        <p className="text-sm">No previous assignment history found.</p>
+                                        <p className="text-sm">No previous history found on this asset.</p>
                                     </div>
                                 )}
                             </div>
