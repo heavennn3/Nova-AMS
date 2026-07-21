@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus, Edit, Trash2, Search, Upload, Package, Building2, Layers, Clock, Loader2,
-    HandCoins, Calendar, User, AlertTriangle, Download, FileText,
+    HandCoins, Calendar, User, AlertTriangle, Download, FileText, CheckCircle2, XCircle,
 } from 'lucide-react';
 import Papa from 'papaparse';
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -33,6 +33,25 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+function getAssetStatusConfig(status: string) {
+    const normalized = status?.toLowerCase();
+    const config: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
+        available: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2, label: 'available' },
+        stored: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Package, label: 'stored' },
+        used: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30', icon: User, label: 'used' },
+        repair: { color: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30', icon: AlertTriangle, label: 'repair' },
+        faulty: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: XCircle, label: 'faulty' },
+        not_updated: { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock, label: 'not updated' },
+    };
+
+    return config[normalized] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock, label: status || '—' };
+}
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -299,17 +318,17 @@ export default function AssetInventory({
                 header: 'Status',
                 cell: ({ row }: any) => {
                     const val = row.getValue('status') ?? 'stored';
-                    const bgColor = row.original.status_color || '#6B7280';
+                    const cfg = getAssetStatusConfig(String(val));
+                    const Icon = cfg.icon;
 
                     return (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button
-                                    type="button"
-                                    className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
-                                    style={{ backgroundColor: bgColor }}
-                                >
-                                    {val}
+                                <button type="button">
+                                    <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} gap-1`}>
+                                        <Icon className="h-3 w-3" />
+                                        {cfg.label}
+                                    </Badge>
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-40">
@@ -336,29 +355,41 @@ export default function AssetInventory({
                 id: 'actions',
                 header: 'Actions',
                 cell: ({ row }: any) => (
-                    <div className="flex items-center space-x-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10"
-                            onClick={() => openEditModal(row.original)}
-                        >
-                            <Edit className="mr-1 h-4 w-4" /> Edit
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-                            onClick={() => {
-                                if (confirm('Delete this asset?')) {
-                                    router.delete(`/assets/${row.original.id}`, {
-                                        preserveScroll: true,
-                                    });
-                                }
-                            }}
-                        >
-                            <Trash2 className="mr-1 h-4 w-4" /> Delete
-                        </Button>
+                    <div className="flex items-center justify-start gap-1.5">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => openEditModal(row.original)}
+                                    aria-label="Edit asset"
+                                >
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => {
+                                        if (confirm('Delete this asset?')) {
+                                            router.delete(`/assets/${row.original.id}`, {
+                                                preserveScroll: true,
+                                            });
+                                        }
+                                    }}
+                                    aria-label="Delete asset"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                        </Tooltip>
                     </div>
                 ),
             }] : []),
@@ -599,6 +630,7 @@ export default function AssetInventory({
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">View, manage, and monitor all registered ICT assets</p>
                 </div>
                 {canManageAssets && (
                     <div className="flex gap-2">
