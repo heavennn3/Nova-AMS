@@ -90,8 +90,8 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
 
     const formatCurrency = (val: any) => {
         if (!val || val === '—') {
-return '—';
-}
+            return '—';
+        }
 
         const cleanVal = String(val).trim();
 
@@ -134,7 +134,7 @@ return '—';
 
     // Badges:
     // Status Badge value and styling
-    const statusValue = asset.status || 'available';
+    const statusValue = asset.status?.name || asset.status_name || asset.asset_status || 'available';
     // Condition Badge
     const conditionValue = asset.condition || 'Good';
     // Category Badge
@@ -170,8 +170,8 @@ return '—';
         e.preventDefault();
 
         if (!activeAssignment) {
-return;
-}
+            return;
+        }
 
         checkinForm.patch(`/asset-track/${activeAssignment.id}/checkin`, {
             onSuccess: () => {
@@ -249,15 +249,15 @@ return;
     const leftFields = [
         { label: 'Asset Name', value: asset.asset_name || '—' },
         { label: 'Type', value: asset.type?.name || '—' },
-        { label: 'Added Date/Time', value: asset.created_at ? new Date(asset.created_at).toLocaleString() : '—' },
-        { label: 'Original Value', value: formatCurrency(asset.original_value) },
-        { label: 'Asset ID', value: asset.asset_id || '—' },
-       
+        { label: 'Registered on', value: asset.created_at ? new Date(asset.created_at).toLocaleString() : '—' },
+
+        { label: 'Asset ID', value: assetCode },
+
     ];
 
     const rightFields = [
         { label: 'Description', value: asset.description || '—' },
-       
+
         { label: 'Manufacturer / Brand', value: asset.oem?.name || '—' },
 
         { label: 'Category', value: asset.category?.name || '—' },
@@ -280,7 +280,7 @@ return;
         'description', 'keterangan', 'desc',
         'source', 'sumber', 'punca',
         'usage_start_date', 'tarikh_mula_guna', 'usage_date',
-        'original_value', 'nilai_asal', 'original_cost',
+
         'warranty_expiry', 'tamat_waranti', 'warranty_date',
         'insurance_policy_number', 'no_polisi_insurans', 'insurance_policy',
         'notes', 'nota', 'catatan',
@@ -352,7 +352,7 @@ return;
                                     variant="outline"
                                     onClick={() => setIsCheckoutOpen(true)}
                                     className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900"
-                                    disabled={asset.status === 'retired' || asset.status === 'maintenance'}
+                                    disabled={statusValue === 'retired' || statusValue === 'maintenance'}
                                 >
                                     <UserPlus className="h-4 w-4 mr-2" />
                                     Checkout
@@ -428,7 +428,7 @@ return;
                                     getStatusStyle(statusValue).text,
                                     getStatusStyle(statusValue).bg.includes('slate') ? 'border-slate-200' : getStatusStyle(statusValue).bg.replace('bg-', 'border-').replace('/80', '').replace('-50', '-200')
                                 )}>
-                                    {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
+                                    {statusValue.charAt(0).toUpperCase() + statusValue.slice(1).replace('_', ' ')}
                                 </span>
                                 <span className={cn(
                                     "px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors",
@@ -454,11 +454,11 @@ return;
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800/80 text-sm">
                         <div className="space-y-1">
                             <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Asset ID</span>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">{departmentValue}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{assetCode}</span>
                         </div>
                         <div className="space-y-1">
                             <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Status</span>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">{assignedToValue}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{statusValue.charAt(0).toUpperCase() + statusValue.slice(1).replace('_', ' ')}</span>
                         </div>
                         <div className="space-y-1">
                             <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Location</span>
@@ -514,8 +514,8 @@ return;
                         {[
                             { id: 'information', name: 'Information', icon: Info },
                             { id: 'history', name: 'History', icon: Clock },
-                            { id: 'documents', name: 'Documents', icon: FileText },
-                            { id: 'maintenance', name: 'Maintenance', icon: Wrench },
+
+
 
                         ].map((tab) => {
                             const Icon = tab.icon;
@@ -564,7 +564,7 @@ return;
                             </div>
 
                             {/* Extra custom columns dynamic list */}
-                         
+
                         </div>
                     )}
 
