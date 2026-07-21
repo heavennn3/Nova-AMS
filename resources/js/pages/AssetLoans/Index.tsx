@@ -10,6 +10,9 @@ import {
     RotateCcw,
     ImagePlus,
     X,
+    XCircle,
+    CheckCircle2,
+    BellRing,
 } from 'lucide-react';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
@@ -33,20 +36,46 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
-const statusColors: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30',
-    approved: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30',
-    rejected: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30',
-    returned: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30',
-    return_pending: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30',
-    cancelled: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/30',
+const getLoanStatusConfig = (status: string) => {
+    const normalized = status?.toLowerCase();
+    const config: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
+        pending: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', icon: Clock, label: 'Pending' },
+        approved: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2, label: 'Approved' },
+        returned: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30', icon: RotateCcw, label: 'Returned' },
+        rejected: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: XCircle, label: 'Rejected' },
+        cancelled: { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: XCircle, label: 'Cancelled' },
+        return_pending: { color: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30', icon: BellRing, label: 'Return_pending' },
+    };
+
+    return config[normalized] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock, label: status || '—' };
 };
 
-const conditionColors: Record<string, string> = {
-    good: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30',
-    semi_faulty: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30',
-    faulty: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30',
+const getConditionConfig = (condition: string) => {
+    const normalized = condition?.toLowerCase();
+    const config: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
+        good: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2, label: 'good' },
+        semi_faulty: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', icon: AlertTriangle, label: 'semi faulty' },
+        faulty: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: 'faulty' },
+    };
+
+    return config[normalized] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock, label: condition?.replace('_', ' ') || '—' };
+};
+
+const getLoanBadge = (cfg: { color: string; bg: string; border: string; icon: any; label: string }) => {
+    const Icon = cfg.icon;
+
+    return (
+        <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} gap-1`}>
+            <Icon className="h-3 w-3" />
+            {cfg.label}
+        </Badge>
+    );
 };
 
 function parseDate(value: string): Date | null {
@@ -190,46 +219,32 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                             <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></td>
                                             <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Clock className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.expected_return_date)}</div></td>
                                             <td className="p-3">
-                                                {canReturn ? (
-                                                    duration.isOverdue ? (
-                                                        <Badge className="gap-1 bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
-                                                            <AlertTriangle className="h-3 w-3" />
-                                                            {duration.label}
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge className="gap-1 bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/30">
-                                                            <Hourglass className="h-3 w-3" />
-                                                            {duration.label}
-                                                        </Badge>
-                                                    )
-                                                ) : (
+                                                {canReturn ? getLoanBadge(duration.isOverdue
+                                                    ? { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: duration.label }
+                                                    : { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: Hourglass, label: duration.label }) : (
                                                     <span className="text-xs text-muted-foreground">—</span>
                                                 )}
                                             </td>
-                                            <td className="p-3">
-                                                <Badge className={`gap-1 border ${conditionColors[loan.condition_status] || 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/30'}`}>
-                                                    {loan.condition_status?.replace('_', ' ') || '—'}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-3">
-                                                <Badge className={`gap-1 border ${statusColors[loan.status] || 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:border-slate-500/30'}`}>
-                                                    {loan.status}
-                                                </Badge>
-                                            </td>
+                                            <td className="p-3">{getLoanBadge(getConditionConfig(loan.condition_status))}</td>
+                                            <td className="p-3">{getLoanBadge(getLoanStatusConfig(loan.status))}</td>
                                             <td className="p-3">
                                                 <div className="mx-auto flex min-h-12 w-[36px] items-center justify-center gap-1.5">
                                                     {canReturn ? (
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7 p-0"
-                                                            onClick={() => openReturn(loan)}
-                                                            title="Return"
-                                                            aria-label="Return asset"
-                                                        >
-                                                            <RotateCcw className="h-4 w-4" />
-                                                        </Button>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 p-0"
+                                                                    onClick={() => openReturn(loan)}
+                                                                    aria-label="Return asset"
+                                                                >
+                                                                    <RotateCcw className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Return</TooltipContent>
+                                                        </Tooltip>
                                                     ) : (
                                                         <span className="text-xs text-muted-foreground">—</span>
                                                     )}
