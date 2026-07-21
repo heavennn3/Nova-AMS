@@ -325,10 +325,14 @@ export default function AssetInventory({
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button type="button">
-                                    <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} gap-1`}>
-                                        <Icon className="h-3 w-3" />
-                                        {cfg.label}
-                                        <ChevronDown className="h-3 w-3" />
+                                    <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[112px] grid-cols-[16px_1fr_16px] items-center gap-1`}>
+                                        <span className="flex size-4 items-center justify-center">
+                                            <Icon className="size-3 shrink-0" />
+                                        </span>
+                                        <span className="truncate text-center">{cfg.label}</span>
+                                        <span className="flex size-4 items-center justify-center">
+                                            <ChevronDown className="size-3 shrink-0" />
+                                        </span>
                                     </Badge>
                                 </button>
                             </DropdownMenuTrigger>
