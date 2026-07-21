@@ -647,7 +647,7 @@ export default function AssetInventory({
 
                         <Button
                             size="sm"
-                            className="h-8 gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                            className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
                             onClick={openCreateModal}
                         >
                             <Plus className="h-4 w-4" />
