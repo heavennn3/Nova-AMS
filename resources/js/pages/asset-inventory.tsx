@@ -628,13 +628,13 @@ export default function AssetInventory({
         <div className="w-full space-y-6 p-8">
             <Head title="Asset Inventory" />
 
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
                     <h1 className="text-2xl font-bold tracking-tight">Asset Inventory</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">View, manage, and monitor all registered ICT assets</p>
+                    <p className="text-sm text-muted-foreground">View, manage, and monitor all registered ICT assets</p>
                 </div>
                 {canManageAssets && (
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
 
                         <Button
                             variant="outline"
@@ -660,37 +660,33 @@ export default function AssetInventory({
 
             {/* Metrics cards with loan stats */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Package className="h-6 w-6 text-blue-600" />
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                    <div className="rounded-lg bg-blue-500/10 p-2.5">
+                        <Package className="h-5 w-5 text-blue-600" />
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
-                        <p className="text-2xl font-bold text-foreground">{assets.length}</p>
-                    </div>
-                </div>
-
-
-
-
-
-                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="rounded-full bg-emerald-500/10 p-3">
-                        <Package className="h-6 w-6 text-emerald-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">Stored Items</p>
-                        <p className="text-2xl font-bold text-foreground">{totalStored}</p>
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none text-muted-foreground">Total Assets</p>
+                        <p className="text-2xl font-bold leading-none text-foreground">{assets.length}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 rounded-lg border border-border/50 bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className={`rounded-full p-3 ${totalFaulty > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
-                        <AlertTriangle className={`h-6 w-6 ${totalFaulty > 0 ? 'text-red-600' : 'text-amber-600'}`} />
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                    <div className="rounded-lg bg-emerald-500/10 p-2.5">
+                        <Package className="h-5 w-5 text-emerald-600" />
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">Faulty Items</p>
-                        <p className={`text-2xl font-bold ${totalFaulty > 0 ? 'text-red-600' : 'text-foreground'}`}>
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none text-muted-foreground">Stored Items</p>
+                        <p className="text-2xl font-bold leading-none text-foreground">{totalStored}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                    <div className={`rounded-lg p-2.5 ${totalFaulty > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
+                        <AlertTriangle className={`h-5 w-5 ${totalFaulty > 0 ? 'text-red-600' : 'text-amber-600'}`} />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none text-muted-foreground">Faulty Items</p>
+                        <p className={`text-2xl font-bold leading-none ${totalFaulty > 0 ? 'text-red-600' : 'text-foreground'}`}>
                             {totalFaulty}
                         </p>
                     </div>
