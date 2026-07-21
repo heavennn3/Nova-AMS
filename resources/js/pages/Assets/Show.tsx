@@ -48,6 +48,11 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function Show({ asset, users = [] }: { asset: any; users?: any[] }) {
     const { auth } = usePage<any>().props;
@@ -323,68 +328,88 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Link href="/asset-inventory">
-                        <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Back
-                        </Button>
-                    </Link>
-
-                    <Button variant="outline" onClick={handlePrint} className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
-                        <Printer className="h-4 w-4 mr-2" />
-                        Print Label
-                    </Button>
-
-                    {isAdmin && (
-                        <>
-                            {activeAssignment ? (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsCheckinOpen(true)}
-                                    className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900"
-                                >
-                                    <UserMinus className="h-4 w-4 mr-2" />
-                                    Return
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsCheckoutOpen(true)}
-                                    className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900"
-                                    disabled={statusValue === 'retired' || statusValue === 'maintenance'}
-                                >
-                                    <UserPlus className="h-4 w-4 mr-2" />
-                                    Checkout
-                                </Button>
-                            )}
-                        </>
-                    )}
-
-                    <Link href="/multi-site/transfers">
-                        <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900">
-                            <RefreshCw className="h-4 w-4 mr-2" />
-                            Transfer
-                        </Button>
-                    </Link>
-
-                    {isAdmin && (
-                        <>
-                            <Link href={`/assets/${asset.id}/edit`}>
-                                <Button className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium shadow-sm transition-colors">
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Link href="/asset-inventory">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 p-0" aria-label="Back">
+                                    <ArrowLeft className="h-4 w-4" />
                                 </Button>
                             </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>Back</TooltipContent>
+                    </Tooltip>
 
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsDeleteOpen(true)}
-                                className="h-10 px-4 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20"
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={handlePrint} aria-label="Print label">
+                                <Printer className="h-4 w-4" />
                             </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Print Label</TooltipContent>
+                    </Tooltip>
+
+                    {isAdmin && (
+                        activeAssignment ? (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => setIsCheckinOpen(true)} aria-label="Return">
+                                        <UserMinus className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Return</TooltipContent>
+                            </Tooltip>
+                        ) : (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 p-0"
+                                        onClick={() => setIsCheckoutOpen(true)}
+                                        disabled={statusValue === 'retired' || statusValue === 'maintenance'}
+                                        aria-label="Checkout"
+                                    >
+                                        <UserPlus className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Checkout</TooltipContent>
+                            </Tooltip>
+                        )
+                    )}
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Link href="/multi-site/transfers">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 p-0" aria-label="Transfer">
+                                    <RefreshCw className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>Transfer</TooltipContent>
+                    </Tooltip>
+
+                    {isAdmin && (
+                        <>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Link href={`/assets/${asset.id}/edit`}>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 p-0" aria-label="Edit">
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit</TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => setIsDeleteOpen(true)} aria-label="Delete">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
                         </>
                     )}
                 </div>
