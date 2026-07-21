@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus, Edit, Trash2, Search, Upload, Package, Building2, Layers, Clock, Loader2,
-    HandCoins, Calendar, User, AlertTriangle, Download, FileText, CheckCircle2, XCircle,
+    HandCoins, Calendar, User, AlertTriangle, Download, FileText, CheckCircle2, XCircle, ChevronDown,
 } from 'lucide-react';
 import Papa from 'papaparse';
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -328,6 +328,7 @@ export default function AssetInventory({
                                     <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} gap-1`}>
                                         <Icon className="h-3 w-3" />
                                         {cfg.label}
+                                        <ChevronDown className="h-3 w-3" />
                                     </Badge>
                                 </button>
                             </DropdownMenuTrigger>
