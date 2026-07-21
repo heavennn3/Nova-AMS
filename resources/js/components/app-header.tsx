@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { LayoutGrid, Menu, Moon, Search, Sun } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -35,6 +35,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
+import { useState, type FormEvent } from 'react';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -64,6 +65,23 @@ const rightNavItems: NavItem[] = [
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
+const globalSearchItems = [
+    { title: 'Dashboard', href: '/dashboard', keywords: 'home summary overview' },
+    { title: 'ICT Asset List', href: '/asset-inventory', keywords: 'assets inventory ict asset list' },
+    { title: 'Asset Loan', href: '/asset-loans', keywords: 'loan borrow return' },
+    { title: 'Spare Part', href: '/spare-parts/dashboard', keywords: 'spare parts wrench' },
+    { title: 'Licenses', href: '/licenses', keywords: 'software license key' },
+    { title: 'Site Dashboard', href: '/multi-site/dashboards', keywords: 'site multisite dashboard' },
+    { title: 'Asset Transfer', href: '/multi-site/transfers', keywords: 'transfer site move asset' },
+    { title: 'Requests', href: '/requests/admin', keywords: 'request approval admin' },
+    { title: 'Asset Track', href: '/asset-track', keywords: 'tracking live loan return' },
+    { title: 'Audit Log', href: '/security/logs', keywords: 'audit logs security' },
+    { title: 'Deleted Items', href: '/security/recycle-bin', keywords: 'deleted recycle bin trash' },
+    { title: 'Users', href: '/users', keywords: 'user account people' },
+    { title: 'Access Control', href: '/security/roles', keywords: 'roles permission access' },
+    { title: 'Settings', href: '/settings', keywords: 'configuration admin settings' },
+];
+
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
     const { auth } = page.props;
@@ -71,6 +89,23 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const isDark = resolvedAppearance === 'dark';
+    const [globalSearch, setGlobalSearch] = useState('');
+
+    const handleGlobalSearch = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const query = globalSearch.trim().toLowerCase();
+        if (!query) return;
+
+        const match = globalSearchItems.find((item) =>
+            `${item.title} ${item.keywords}`.toLowerCase().includes(query),
+        );
+
+        if (match) {
+            router.visit(match.href);
+            setGlobalSearch('');
+        }
+    };
 
     return (
         <>
@@ -184,15 +219,15 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <div className="ml-auto flex items-center space-x-2">
-                        <div className="relative flex items-center space-x-1">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="group h-9 w-9 cursor-pointer"
-                            >
-                                <Search className="!size-5 opacity-80 group-hover:opacity-100" />
-                            </Button>
-                        </div>
+                        <form onSubmit={handleGlobalSearch} className="relative hidden sm:block">
+                            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                            <input
+                                value={globalSearch}
+                                onChange={(event) => setGlobalSearch(event.target.value)}
+                                placeholder="Search"
+                                className="h-9 w-48 rounded-md border border-input bg-background pl-8 pr-3 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                            />
+                        </form>
 
                         {/* Dark / Light mode toggle pill */}
                         <Tooltip>
