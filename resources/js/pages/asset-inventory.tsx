@@ -322,36 +322,38 @@ export default function AssetInventory({
                     const Icon = cfg.icon;
 
                     return (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button type="button">
-                                    <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[112px] grid-cols-[16px_1fr_16px] items-center gap-1`}>
-                                        <span className="flex size-4 items-center justify-center">
-                                            <Icon className="size-3 shrink-0" />
-                                        </span>
-                                        <span className="truncate text-center">{cfg.label}</span>
-                                        <span className="flex size-4 items-center justify-center">
-                                            <ChevronDown className="size-3 shrink-0" />
-                                        </span>
-                                    </Badge>
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-40">
-                                {assetStatuses.map((status: any) => (
-                                    <DropdownMenuItem
-                                        key={status.id}
-                                        onClick={() => updateAssetStatus(row.original.id, String(status.id))}
-                                        className="cursor-pointer"
-                                    >
-                                        <span
-                                            className="mr-2 h-2.5 w-2.5 rounded-full shadow-sm"
-                                            style={{ backgroundColor: status.color || '#6B7280' }}
-                                        />
-                                        <span className="font-medium">{status.name}</span>
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex justify-center">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button type="button">
+                                        <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[112px] grid-cols-[16px_1fr_16px] items-center gap-1`}>
+                                            <span className="flex size-4 items-center justify-center">
+                                                <Icon className="size-3 shrink-0" />
+                                            </span>
+                                            <span className="truncate text-center">{cfg.label}</span>
+                                            <span className="flex size-4 items-center justify-center">
+                                                <ChevronDown className="size-3 shrink-0" />
+                                            </span>
+                                        </Badge>
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="center" className="w-40">
+                                    {assetStatuses.map((status: any) => (
+                                        <DropdownMenuItem
+                                            key={status.id}
+                                            onClick={() => updateAssetStatus(row.original.id, String(status.id))}
+                                            className="cursor-pointer"
+                                        >
+                                            <span
+                                                className="mr-2 h-2.5 w-2.5 rounded-full shadow-sm"
+                                                style={{ backgroundColor: status.color || '#6B7280' }}
+                                            />
+                                            <span className="font-medium">{status.name}</span>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     );
                 },
             },
