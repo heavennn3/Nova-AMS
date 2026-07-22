@@ -625,7 +625,7 @@ export default function AssetInventory({
                 type={type}
                 value={form[key as keyof typeof form]}
                 onChange={(e) => handleFormChange(key, e.target.value)}
-                className="h-9"
+                className="h-10 text-sm"
                 placeholder={`Enter ${label.toLowerCase()}`}
             />
             {formErrors[key] && <p className="text-xs text-red-500">{formErrors[key]}</p>}
@@ -842,7 +842,7 @@ export default function AssetInventory({
 
             {/* ── Create Asset Modal ── */}
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent className="sm:max-w-2xl">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
                             <DialogTitle>Create New Asset</DialogTitle>
@@ -857,14 +857,14 @@ export default function AssetInventory({
                                 {renderField('asset_name', 'Asset Name')}
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="create-category" className="text-sm font-medium">Category</Label>
                                     <Select
                                         value={form.category_id}
                                         onValueChange={(val) => handleFormChange('category_id', val)}
                                     >
-                                        <SelectTrigger id="create-category" className="h-9">
+                                        <SelectTrigger id="create-category" className="h-10 w-full text-sm">
                                             <SelectValue placeholder="Select" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -880,7 +880,7 @@ export default function AssetInventory({
                                         value={form.type_id}
                                         onValueChange={(val) => handleFormChange('type_id', val)}
                                     >
-                                        <SelectTrigger id="create-type" className="h-9">
+                                        <SelectTrigger id="create-type" className="h-10 w-full text-sm">
                                             <SelectValue placeholder="Select" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -896,7 +896,7 @@ export default function AssetInventory({
                                         value={form.oem_id}
                                         onValueChange={(val) => handleFormChange('oem_id', val)}
                                     >
-                                        <SelectTrigger id="create-oem" className="h-9">
+                                        <SelectTrigger id="create-oem" className="h-10 w-full text-sm">
                                             <SelectValue placeholder="Select" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -906,14 +906,14 @@ export default function AssetInventory({
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                {renderField('quantity', 'Quantity', false, 'number')}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 {renderField('location', 'Location')}
                                 {renderField('purchase_year', 'Purchase Year', false, 'number')}
                                 {renderField('serial_number', 'Serial Number')}
                                 {renderField('part_number', 'Part Number')}
-                                {renderField('quantity', 'Quantity', false, 'number')}
                             </div>
                         </div>
 
