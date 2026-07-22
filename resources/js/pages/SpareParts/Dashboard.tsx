@@ -1,13 +1,20 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2 } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2, ChevronDown } from 'lucide-react';
 import Papa from 'papaparse';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -187,6 +194,22 @@ export default function SparePartsDashboard({
         });
     };
 
+    const updateStatus = (part: any, status: string) => {
+        router.put(`/spare-parts/${part.id}`, {
+            name: part.name,
+            part_number: part.part_number,
+            category: part.category,
+            location: part.location,
+            site_id: part.site_id ?? null,
+            status,
+            used_by: part.used_by ?? null,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Spare part status updated'),
+            onError: () => toast.error('Failed to update status'),
+        });
+    };
+
     // ── Filtering ──
     const categories = [...new Set(allParts.map((p: any) => p.category).filter(Boolean))] as string[];
 
@@ -262,16 +285,46 @@ export default function SparePartsDashboard({
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
             cell: ({ row }: any) => {
                 const status = row.getValue('status') as string;
-                const colors: Record<string, string> = {
-                    available: 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300',
-                    in_used: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300',
-                    faulty: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300',
+                const statuses: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
+                    available: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle, label: 'Available' },
+                    in_used: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Package, label: 'In Use' },
+                    faulty: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: 'Faulty' },
                 };
+                const cfg = statuses[status] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Package, label: status ? status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ') : '—' };
+                const Icon = cfg.icon;
+                const badge = (
+                    <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[112px] grid-cols-[16px_1fr_16px] items-center gap-1`}>
+                        <span className="flex size-4 items-center justify-center">
+                            <Icon className="size-3 shrink-0" />
+                        </span>
+                        <span className="truncate text-center">{cfg.label}</span>
+                        <span className="flex size-4 items-center justify-center">
+                            {canManageSpareParts && <ChevronDown className="size-3 opacity-60" />}
+                        </span>
+                    </Badge>
+                );
+
+                if (!canManageSpareParts) return <div className="flex justify-center">{badge}</div>;
 
                 return (
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/60 dark:text-gray-300'}`}>
-                        {status?.replace('_', ' ')}
-                    </span>
+                    <div className="flex justify-center">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button type="button">{badge}</button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="center">
+                                {Object.entries(statuses).map(([value, option]) => {
+                                    const OptionIcon = option.icon;
+                                    return (
+                                        <DropdownMenuItem key={value} onClick={() => updateStatus(row.original, value)}>
+                                            <OptionIcon className={`h-4 w-4 ${option.color}`} />
+                                            {option.label}
+                                        </DropdownMenuItem>
+                                    );
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 );
             },
         },
@@ -295,27 +348,33 @@ export default function SparePartsDashboard({
         <div className="w-full space-y-6 p-8">
             <Head title="Spare Parts Dashboard" />
 
-            <div className="flex items-center justify-between border-b pb-4">
-                <div>
+            <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
                         Spare Parts Inventory
                     </h1>
+                    <p className="text-sm text-muted-foreground">View, manage, and monitor all spare parts</p>
                 </div>
 
                 {canManageSpareParts && (
                     <div className="flex items-center gap-2">
-
-                        <div className="flex items-center gap-2">
-
-                            <Button variant="outline" size="sm" onClick={openFilePicker}>
-                                <Upload className="mr-2 h-4 w-4" /> Import CSV
-                            </Button>
-                        </div>
-                        <Button onClick={() => {
-                            form.reset();
-                            setCreateDialogOpen(true);
-                        }}>
-                            <Plus className="mr-2 h-4 w-4" />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1.5 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+                            onClick={openFilePicker}
+                        >
+                            <Upload className="h-4 w-4" /> Import CSV
+                        </Button>
+                        <Button
+                            size="sm"
+                            className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                            onClick={() => {
+                                form.reset();
+                                setCreateDialogOpen(true);
+                            }}
+                        >
+                            <Plus className="h-4 w-4" />
                             Add Spare Part
                         </Button>
                     </div>
@@ -323,20 +382,19 @@ export default function SparePartsDashboard({
             </div>
 
             {/* ── Stats Cards ── */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                    { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10 dark:bg-blue-500/15', text: 'text-blue-600 dark:text-blue-300' },
-                    { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-green-500/10 dark:bg-green-500/15', text: 'text-green-600 dark:text-green-300' },
-                    { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: 'bg-red-500/10 dark:bg-red-500/15', text: 'text-red-600 dark:text-red-300' },
-
+                    { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10', text: 'text-blue-600' },
+                    { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-emerald-500/10', text: 'text-emerald-600' },
+                    { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: outOfStockParts > 0 ? 'bg-red-500/20' : 'bg-amber-500/10', text: outOfStockParts > 0 ? 'text-red-600' : 'text-amber-600' },
                 ].map(s => (
-                    <div key={s.label} className="flex items-center gap-4 rounded-xl border bg-card p-5 shadow-sm min-h-[90px]">
-                        <div className={`rounded-full ${s.bg} p-3 shrink-0`}>
-                            <s.icon className={`h-6 w-6 ${s.text}`} />
+                    <div key={s.label} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className={`rounded-lg ${s.bg} p-2.5`}>
+                            <s.icon className={`h-5 w-5 ${s.text}`} />
                         </div>
-                        <div className="min-w-0">
-                            <p className="text-sm text-muted-foreground truncate">{s.label}</p>
-                            <p className="text-2xl font-bold tabular-nums text-foreground">{s.value}</p>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none text-muted-foreground">{s.label}</p>
+                            <p className={`text-2xl font-bold leading-none ${outOfStockParts > 0 && s.label === 'Faulty' ? 'text-red-600' : 'text-foreground'}`}>{s.value}</p>
                         </div>
                     </div>
                 ))}

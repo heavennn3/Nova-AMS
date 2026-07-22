@@ -14,6 +14,7 @@ import {
     CheckCircle2,
     BellRing,
     HandCoins,
+    Eye,
 } from 'lucide-react';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
@@ -109,16 +110,18 @@ function calcDaysRemaining(returnDate: string): { days: number; label: string; i
 export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [showHistory, setShowHistory] = useState(false);
+    const [tableMode, setTableMode] = useState<'all' | 'current' | 'history'>('current');
     const [returnLoan, setReturnLoan] = useState<any | null>(null);
+    const [viewLoan, setViewLoan] = useState<any | null>(null);
     const [proofPreview, setProofPreview] = useState<string | null>(null);
 
     const returnForm = useForm({ return_notes: '', proof_photo: null as File | null });
 
-    const visibleLoans = loans.filter((l) => showHistory
-        ? ['rejected', 'returned', 'cancelled'].includes(l.status)
-        : l.status === 'approved'
-    );
+    const visibleLoans = loans.filter((l) => {
+        if (tableMode === 'all') return true;
+        if (tableMode === 'history') return ['rejected', 'returned', 'cancelled'].includes(l.status);
+        return l.status === 'approved';
+    });
 
     const filtered = visibleLoans.filter((l) => {
         const q = search.toLowerCase();
@@ -247,30 +250,26 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         <SelectTrigger className="h-8 w-[150px] text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Status</SelectItem>
-                            {showHistory ? (
-                                <>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                    <SelectItem value="returned">Returned</SelectItem>
-                                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                                </>
-                            ) : (
-                                <SelectItem value="approved">Approved</SelectItem>
-                            )}
+                            {tableMode !== 'current' && <SelectItem value="rejected">Rejected</SelectItem>}
+                            <SelectItem value="approved">Approved</SelectItem>
+                            {tableMode !== 'current' && <SelectItem value="returned">Returned</SelectItem>}
+                            {tableMode !== 'current' && <SelectItem value="cancelled">Cancelled</SelectItem>}
                         </SelectContent>
                     </Select>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1.5"
-                        onClick={() => {
-                            setShowHistory((value) => !value);
+                    <Select
+                        value={tableMode}
+                        onValueChange={(value: 'all' | 'current' | 'history') => {
+                            setTableMode(value);
                             setStatusFilter('all');
                         }}
                     >
-                        <RotateCcw className="h-4 w-4" />
-                        {showHistory ? 'Show Current' : 'Show Loan History'}
-                    </Button>
+                        <SelectTrigger className="h-8 w-[170px] text-sm"><SelectValue placeholder="View" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Show All</SelectItem>
+                            <SelectItem value="current">Show Current</SelectItem>
+                            <SelectItem value="history">Show History</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="rounded-lg border border-border/50 bg-card shadow-sm">
@@ -295,7 +294,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                                         <div className="flex flex-col items-center justify-center space-y-2">
                                             <Package className="h-8 w-8 opacity-20" />
-                                            <p>{showHistory ? 'No loan history found' : 'No active loans found'}</p>
+                                            <p>{tableMode === 'history' ? 'No loan history found' : tableMode === 'current' ? 'No active loans found' : 'No loans found'}</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -336,6 +335,22 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                                             </Button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>Return</TooltipContent>
+                                                    </Tooltip>
+                                                ) : ['rejected', 'returned', 'cancelled'].includes(loan.status) ? (
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-7 w-7 p-0"
+                                                                onClick={() => setViewLoan(loan)}
+                                                                aria-label="View loan details"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>View details</TooltipContent>
                                                     </Tooltip>
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">—</span>
@@ -395,6 +410,36 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                             <Button type="submit" disabled={returnForm.processing}>{returnForm.processing ? 'Submitting...' : 'Submit return'}</Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!viewLoan} onOpenChange={(open) => !open && setViewLoan(null)}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Loan details</DialogTitle>
+                        <DialogDescription>Read-only history record.</DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-2 rounded-lg border bg-muted/20 p-3 text-sm">
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Loan ID</span><span className="font-mono text-xs">{viewLoan?.loan_id || '—'}</span></div>
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Asset</span><span className="font-medium">{viewLoan?.asset_name || '—'}</span></div>
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Asset ID</span><span className="font-mono text-xs">{viewLoan?.asset_id || '—'}</span></div>
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Loan Date</span><span>{formatDate(viewLoan?.loan_date)}</span></div>
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Expected Return</span><span>{formatDate(viewLoan?.expected_return_date)}</span></div>
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Condition</span>{getLoanBadge(getConditionConfig(viewLoan?.condition_status))}</div>
+                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Status</span>{getLoanBadge(getLoanStatusConfig(viewLoan?.status))}</div>
+                    </div>
+
+                    {viewLoan?.purpose && (
+                        <div className="space-y-1 rounded-lg border bg-background p-3 text-sm">
+                            <p className="text-muted-foreground">Purpose</p>
+                            <p>{viewLoan.purpose}</p>
+                        </div>
+                    )}
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setViewLoan(null)}>Close</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </>
