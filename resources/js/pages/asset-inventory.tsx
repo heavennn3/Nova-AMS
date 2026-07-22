@@ -91,7 +91,7 @@ export default function AssetInventory({
     const [typeFilter, setTypeFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // ── Create Asset Modal ──
+    // create 
     const [showCreate, setShowCreate] = useState(false);
     const [creating, setCreating] = useState(false);
     const [refs] = useState<{ categories: any[]; types: any[]; oems: any[] }>({
@@ -104,7 +104,7 @@ export default function AssetInventory({
     });
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-    // ── Edit Asset Modal ──
+    // update
     const [showEdit, setShowEdit] = useState(false);
     const [editingAsset, setEditingAsset] = useState<any>(null);
     const [updating, setUpdating] = useState(false);
@@ -115,7 +115,7 @@ export default function AssetInventory({
     });
     const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
 
-    // ── Loan Request Modal ──
+
     const [showLoan, setShowLoan] = useState(false);
     const [loanSubmitting, setLoanSubmitting] = useState(false);
     const [loanForm, setLoanForm] = useState({
@@ -454,6 +454,24 @@ export default function AssetInventory({
         ).length;
     }, [assets]);
 
+    const totalMoved = useMemo(() => {
+        return (assets || []).filter((asset: any) =>
+            String(asset.status ?? asset.asset_status ?? '').toLowerCase() === 'moved'
+        ).length;
+    }, [assets]);
+
+    const totalRepair = useMemo(() => {
+        return (assets || []).filter((asset: any) =>
+            String(asset.status ?? asset.asset_status ?? '').toLowerCase() === 'repair'
+        ).length;
+    }, [assets]);
+
+    const totalUsed = useMemo(() => {
+        return (assets || []).filter((asset: any) =>
+            String(asset.status ?? asset.asset_status ?? '').toLowerCase() === 'used'
+        ).length;
+    }, [assets]);
+
     // ── Available-for-loan subset ──
     const availableForLoan = useMemo(() => {
         return filteredAssets.filter((a: any) =>
@@ -665,7 +683,7 @@ export default function AssetInventory({
             </div>
 
             {/* Metrics cards with loan stats */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
                     <div className="rounded-lg bg-blue-500/10 p-2.5">
                         <Package className="h-5 w-5 text-blue-600" />
@@ -695,6 +713,36 @@ export default function AssetInventory({
                         <p className={`text-2xl font-bold leading-none ${totalFaulty > 0 ? 'text-red-600' : 'text-foreground'}`}>
                             {totalFaulty}
                         </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                    <div className="rounded-lg bg-slate-500/10 p-2.5">
+                        <Clock className="h-5 w-5 text-slate-600" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none text-muted-foreground">Moved Items</p>
+                        <p className="text-2xl font-bold leading-none text-foreground">{totalMoved}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                    <div className="rounded-lg bg-orange-500/10 p-2.5">
+                        <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none text-muted-foreground">Repair Items</p>
+                        <p className="text-2xl font-bold leading-none text-foreground">{totalRepair}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                    <div className="rounded-lg bg-violet-500/10 p-2.5">
+                        <User className="h-5 w-5 text-violet-600" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none text-muted-foreground">Used Items</p>
+                        <p className="text-2xl font-bold leading-none text-foreground">{totalUsed}</p>
                     </div>
                 </div>
             </div>

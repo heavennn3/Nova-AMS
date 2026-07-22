@@ -9,15 +9,15 @@ Route::inertia('/', 'nova-ams', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard
+    // dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware('role_or_permission:Admin|module.dashboard')->name('dashboard');
 
-    // Live Tracking polling for Inertia pages (uses web session auth)
+    // track
     Route::get('/api/live-tracking/poll', [\App\Http\Controllers\Api\TrackingApiController::class, 'poll']);
     Route::get('/api/live-tracking/history', [\App\Http\Controllers\Api\TrackingApiController::class, 'history']);
     Route::get('/api/live-tracking/report', [\App\Http\Controllers\Api\TrackingApiController::class, 'report']);
 
-    // Asset Requests (Admin/Manager)
+    // request 
     Route::middleware(['role_or_permission:Admin|module.requests-admin'])->group(function () {
         Route::get('/requests/admin', [\App\Http\Controllers\AssetRequestController::class, 'adminIndex'])->name('requests.admin');
         Route::get('/requests/{id}', [\App\Http\Controllers\AssetRequestController::class, 'show'])->name('requests.show');
@@ -28,7 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/requests/batch-reject', [\App\Http\Controllers\AssetRequestController::class, 'batchReject'])->name('requests.batch-reject');
     });
 
-    // Asset Loans
+    // loan
     Route::prefix('asset-loans')->middleware('role_or_permission:Admin|module.asset-loans')->group(function () {
         Route::get('/', [\App\Http\Controllers\AssetLoanController::class, 'index'])->name('asset-loans.index');
         Route::get('/create', [\App\Http\Controllers\AssetLoanController::class, 'create'])->name('asset-loans.create');
@@ -36,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{loan}/return', [\App\Http\Controllers\AssetLoanController::class, 'returnLoan'])->name('asset-loans.return');
     });
 
-    // Asset Inventory Module
+    // inventory
     Route::get('/asset-inventory', [\App\Http\Controllers\AssetController::class, 'inventory'])->middleware('role_or_permission:Admin|module.asset-inventory')->name('asset-inventory');
     Route::get('/licenses', [\App\Http\Controllers\LicenseController::class, 'index'])->middleware('role_or_permission:Admin|module.licenses')->name('licenses.index');
 
@@ -51,7 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('assets/bulk-update-status', [\App\Http\Controllers\AssetController::class, 'bulkUpdateStatus'])->name('assets.bulk-status');
         Route::post('/quick/bulk-delete', [\App\Http\Controllers\Api\QuickApiController::class, 'bulkDelete'])->name('quick.bulk-delete');
 
-        // Asset Registration Workflows
+        // register 
         Route::get('/assets/scan', function () {
             return Inertia::render('Assets/Scan', [
                 'site_id' => request()->query('site_id')

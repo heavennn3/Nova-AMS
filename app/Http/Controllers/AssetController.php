@@ -19,7 +19,6 @@ class AssetController extends Controller
                 return redirect()->to('/asset-inventory?site_id=' . $firstSite->id);
             }
         }
-
         $assetsQuery = Asset::with('category', 'type', 'oem', 'site')->latest();
         if ($siteId) {
             $assetsQuery->where('site_id', $siteId);
@@ -47,7 +46,6 @@ class AssetController extends Controller
 
         return redirect()->route('asset-inventory');
     }
-
     public function inventory(Request $request)
     {
         $user = $request->user();
@@ -112,7 +110,6 @@ class AssetController extends Controller
             ],
         ]);
     }
-
     public function create()
     {
         return Inertia::render('Assets/Create', [
@@ -121,7 +118,6 @@ class AssetController extends Controller
             'oems' => \App\Models\Oem::orderBy('name')->get(['id', 'name']),
         ]);
     }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -215,7 +211,7 @@ class AssetController extends Controller
         return redirect()->back()->with('success', 'Asset deleted successfully.');
     }
 
-    // ─── CSV Import ────────────────────────────────────────────────
+    
 
     public function importBulk(Request $request)
     {
@@ -229,7 +225,6 @@ class AssetController extends Controller
         $importedCount = 0;
         $lineNum = 1;
 
-        // Column mapping: display header (lowercased, underscored) → DB column
         $headerMap = [
             'asset_id'       => 'asset_id',
             'asset_name'     => 'asset_name',
@@ -247,7 +242,6 @@ class AssetController extends Controller
         foreach ($request->assets as $row) {
             $lineNum++;
 
-            // Normalise keys: lowercase, strip whitespace, underscore
             $normalized = [];
             foreach ($row as $k => $v) {
                 $normalized[preg_replace('/\s+/', '_', strtolower(trim($k)))] = trim((string)$v);

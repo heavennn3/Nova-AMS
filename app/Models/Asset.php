@@ -25,8 +25,6 @@ class Asset extends Model implements Auditable
         ];
     }
 
-    // ─── Relationships ─────────────────────────────────────────────
-
     public function site()
     {
         return $this->belongsTo(Site::class);
@@ -62,13 +60,11 @@ class Asset extends Model implements Auditable
         return $this->belongsTo(AssetStatus::class, 'status_id');
     }
 
-    /** The currently active approved loan, if any. */
     public function activeLoan()
     {
         return $this->hasOne(AssetLoan::class)->where('status', 'approved')->latestOfMany();
     }
 
-    /** Update the normalized asset status used by the loan workflow. */
     public function loans()
     {
         return $this->hasMany(AssetLoan::class);
