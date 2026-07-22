@@ -332,12 +332,28 @@ export default function SparePartsDashboard({
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex items-center gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => openEditDialog(row.original)}>
-                        <Edit className="mr-1 h-3.5 w-3.5" /> Edit
+                <div className="flex items-center justify-center gap-1.5">
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-300 dark:hover:bg-blue-500/10"
+                        onClick={() => openEditDialog(row.original)}
+                        aria-label="Edit spare part"
+                        title="Edit"
+                    >
+                        <Edit className="h-4 w-4" />
                     </Button>
-                    <Button type="button" size="sm" variant="destructive" onClick={() => handleDelete(row.original)}>
-                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10"
+                        onClick={() => handleDelete(row.original)}
+                        aria-label="Delete spare part"
+                        title="Delete"
+                    >
+                        <Trash2 className="h-4 w-4" />
                     </Button>
                 </div>
             ),

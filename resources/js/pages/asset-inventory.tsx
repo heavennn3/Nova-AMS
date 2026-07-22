@@ -368,9 +368,10 @@ export default function AssetInventory({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7 p-0"
+                                    className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-300 dark:hover:bg-blue-500/10"
                                     onClick={() => openEditModal(row.original)}
                                     aria-label="Edit asset"
+                                    title="Edit"
                                 >
                                     <Edit className="h-4 w-4" />
                                 </Button>
@@ -382,7 +383,7 @@ export default function AssetInventory({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7 p-0"
+                                    className="h-7 w-7 p-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10"
                                     onClick={() => {
                                         if (confirm('Delete this asset?')) {
                                             router.delete(`/assets/${row.original.id}`, {
@@ -391,6 +392,7 @@ export default function AssetInventory({
                                         }
                                     }}
                                     aria-label="Delete asset"
+                                    title="Delete"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
