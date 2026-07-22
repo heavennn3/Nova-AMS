@@ -194,6 +194,7 @@ class AssetController extends Controller
             'serial_number' => 'nullable|string|max:255',
             'part_number' => 'nullable|string|max:255',
             'quantity' => 'nullable|integer|min:0',
+            'site_id' => 'required|integer|exists:sites,id',
         ]);
 
         $asset->update($validated);

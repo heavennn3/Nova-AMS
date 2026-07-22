@@ -100,7 +100,7 @@ export default function AssetInventory({
     const [form, setForm] = useState({
         asset_id: '', asset_name: '', category_id: '', type_id: '',
         oem_id: '', location: '', purchase_year: '', serial_number: '',
-        part_number: '', quantity: '',
+        part_number: '', quantity: '1', site_id: currentSiteId ? String(currentSiteId) : '',
     });
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -111,7 +111,7 @@ export default function AssetInventory({
     const [editForm, setEditForm] = useState({
         asset_id: '', asset_name: '', category_id: '', type_id: '',
         oem_id: '', location: '', purchase_year: '', serial_number: '',
-        part_number: '', quantity: '',
+        part_number: '', quantity: '1', site_id: '',
     });
     const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
 
@@ -128,8 +128,8 @@ export default function AssetInventory({
     const openCreateModal = useCallback(() => {
         setShowCreate(true);
         setFormErrors({});
-        setForm({ asset_id: '', asset_name: '', category_id: '', type_id: '', oem_id: '', location: '', purchase_year: '', serial_number: '', part_number: '', quantity: '' });
-    }, []);
+        setForm({ asset_id: '', asset_name: '', category_id: '', type_id: '', oem_id: '', location: '', purchase_year: '', serial_number: '', part_number: '', quantity: '1', site_id: currentSiteId ? String(currentSiteId) : '' });
+    }, [currentSiteId]);
 
     const handleFormChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -148,10 +148,17 @@ export default function AssetInventory({
             return;
         }
 
+        if (!form.site_id) {
+            setFormErrors({ site_id: 'Site is required' });
+
+            return;
+        }
+
         setCreating(true);
         router.post('/assets', {
             ...form,
-            site_id: siteFilter === 'all' ? null : Number(siteFilter),
+            quantity: 1,
+            site_id: Number(form.site_id),
             return_to: 'asset-inventory',
         }, {
             preserveScroll: true,
@@ -177,7 +184,8 @@ export default function AssetInventory({
             purchase_year: asset.purchase_year?.toString() || '',
             serial_number: asset.serial_number || '',
             part_number: asset.part_number || '',
-            quantity: asset.quantity?.toString() || '',
+            quantity: '1',
+            site_id: asset.site_id?.toString() || '',
         });
         setShowEdit(true);
     }, []);
@@ -198,8 +206,13 @@ export default function AssetInventory({
             return;
         }
 
+        if (!editForm.site_id) {
+            setEditFormErrors({ site_id: 'Site is required' });
+            return;
+        }
+
         setUpdating(true);
-        router.put(`/assets/${editingAsset.id}`, { ...editForm, return_to: 'asset-inventory' }, {
+        router.put(`/assets/${editingAsset.id}`, { ...editForm, quantity: 1, site_id: Number(editForm.site_id), return_to: 'asset-inventory' }, {
             preserveScroll: true,
             onSuccess: () => {
                 setShowEdit(false);
@@ -906,7 +919,18 @@ export default function AssetInventory({
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                {renderField('quantity', 'Quantity', false, 'number')}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="create-site" className="text-sm font-medium">Site <span className="text-red-500 ml-1">*</span></Label>
+                                    <Select value={form.site_id} onValueChange={(val) => handleFormChange('site_id', val)}>
+                                        <SelectTrigger id="create-site" className="h-10 w-full text-sm"><SelectValue placeholder="Select site" /></SelectTrigger>
+                                        <SelectContent>
+                                            {sites.map((site: any) => (
+                                                <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {formErrors.site_id && <p className="text-xs text-red-500">{formErrors.site_id}</p>}
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -984,7 +1008,18 @@ export default function AssetInventory({
                                     </Select>
                                     {editFormErrors.oem_id && <p className="text-xs text-red-500">{editFormErrors.oem_id}</p>}
                                 </div>
-                                {renderEditField('quantity', 'Quantity', false, 'number')}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="edit-site" className="text-sm font-medium">Site <span className="ml-1 text-red-500">*</span></Label>
+                                    <Select value={editForm.site_id} onValueChange={(value) => handleEditFormChange('site_id', value)}>
+                                        <SelectTrigger id="edit-site" className="h-10 w-full text-sm"><SelectValue placeholder="Select site" /></SelectTrigger>
+                                        <SelectContent>
+                                            {sites.map((site: any) => (
+                                                <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {editFormErrors.site_id && <p className="text-xs text-red-500">{editFormErrors.site_id}</p>}
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
