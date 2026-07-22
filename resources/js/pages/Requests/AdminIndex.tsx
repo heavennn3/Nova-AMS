@@ -313,36 +313,24 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         </SelectContent>
                     </Select>
 
-                    <Select value={selectedType} onValueChange={setSelectedType}>
-                        <SelectTrigger className="h-8 w-[170px] text-sm">
-                            <SelectValue placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="Borrow">Borrow</SelectItem>
-                            <SelectItem value="Checkout">Checkout</SelectItem>
-                            <SelectItem value="Software License">Software License</SelectItem>
-                            <SelectItem value="Maintenance Request">Maintenance</SelectItem>
-                            <SelectItem value="Purchase Request">Purchase</SelectItem>
-                        </SelectContent>
-                    </Select>
 
-                    <div className="relative w-[150px]">
-                        <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+
+                    <div className="flex h-8 items-center overflow-hidden rounded-md border border-input bg-background shadow-sm">
+
                         <Input
                             type="date"
-                            className="h-8 pl-8 text-sm"
+                            className="h-8 w-[140px] rounded-none border-0 px-2 text-xs shadow-none focus-visible:ring-0"
                             value={dateFrom}
                             onChange={(e) => setDateFrom(e.target.value)}
                             title="From date"
                         />
                     </div>
 
-                    <div className="relative w-[150px]">
-                        <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <div className="flex h-8 items-center overflow-hidden rounded-md border border-input bg-background shadow-sm">
+
                         <Input
                             type="date"
-                            className="h-8 pl-8 text-sm"
+                            className="h-8 w-[140px] rounded-none border-0 px-2 text-xs shadow-none focus-visible:ring-0"
                             value={dateTo}
                             onChange={(e) => setDateTo(e.target.value)}
                             title="To date"
@@ -451,7 +439,10 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                         {r.user.site.name}
                                                     </Badge>
                                                 ) : (
-                                                    <span className="text-muted-foreground text-xs">HQ</span>
+                                                    <Badge variant="outline" className="text-slate-600 bg-slate-50 border-slate-200 gap-1 text-xs dark:text-slate-300 dark:bg-slate-500/10 dark:border-slate-500/30">
+                                                        <MapPin className="h-3 w-3" />
+                                                        {'HQ'}
+                                                    </Badge>
                                                 )}
                                             </td>
                                             <td className="px-2 py-2">
