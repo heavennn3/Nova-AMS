@@ -3,7 +3,6 @@ import {
     ChevronRight,
     ChevronDown,
     Plus,
-    MoreVertical,
     Edit,
     Trash2,
     Search,
@@ -43,14 +42,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -84,7 +75,7 @@ interface RegionData {
 interface Stats {
     total_sites: number;
     active_sites: number;
-    disabled_sites: number;
+
     total_users: number;
     total_assets: number;
     total_spare_parts: number;
@@ -309,22 +300,6 @@ export default function Dashboards({
         }
     };
 
-    const toggleSiteActive = async (site: SiteData) => {
-        const res = await fetch(`/api/sites/${site.id}`, {
-            method: 'PUT',
-            credentials: 'same-origin',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ?? '' },
-            body: JSON.stringify({ name: site.name, code: site.code, region_id: site.region_id, is_active: !site.is_active }),
-        });
-
-        if (res.ok) {
-            toast.success(site.is_active ? 'Site disabled' : 'Site activated');
-            refreshRegions();
-        } else {
-            toast.error('Failed to toggle status');
-        }
-    };
-
     const refreshRegions = async () => {
         try {
             const res = await fetch('/api/regions', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
@@ -357,14 +332,6 @@ export default function Dashboards({
 
             return next;
         });
-    };
-
-    const runAfterMenuCloses = (action: () => void) => {
-        if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
-        }
-
-        window.setTimeout(action, 0);
     };
 
     if (!mounted) {
@@ -560,50 +527,33 @@ export default function Dashboards({
                                                                     <Wrench className="h-3 w-3 text-amber-500" />
                                                                     {site.spare_parts_count}
                                                                 </span>
-                                                                <Badge
-                                                                    variant={site.is_active ? 'default' : 'secondary'}
-                                                                    className={
-                                                                        site.is_active
-                                                                            ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                                                                            : 'bg-red-500/10 text-red-600'
-                                                                    }
-                                                                >
-                                                                    {site.is_active ? 'Active' : 'Disabled'}
-                                                                </Badge>
                                                             </div>
                                                         </div>
 
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100"
-                                                                >
-                                                                    <MoreVertical className="h-3.5 w-3.5" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onSelect={() => runAfterMenuCloses(() => openEditSite(site))}>
-                                                                    <Edit className="mr-2 h-4 w-4" />
-                                                                    Edit Site
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem onSelect={() => runAfterMenuCloses(() => toggleSiteActive(site))}>
-                                                                    {site.is_active
-                                                                        ? 'Disable Site'
-                                                                        : 'Activate Site'}
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    className="text-destructive"
-                                                                    onSelect={() => runAfterMenuCloses(() => setDeleteSite(site))}
-                                                                >
-                                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                                    Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
+                                                        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-300 dark:hover:bg-blue-500/10"
+                                                                onClick={() => openEditSite(site)}
+                                                                aria-label="Edit site"
+                                                                title="Edit"
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-7 w-7 p-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10"
+                                                                onClick={() => setDeleteSite(site)}
+                                                                aria-label="Delete site"
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 ))
                                             )}
