@@ -67,6 +67,11 @@ export function DataTableActions({
     onImportCsv,
 }: DataTableActionsProps) {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [resourceType, setResourceType] = React.useState<string | undefined>();
+
+    React.useEffect(() => {
+        setResourceType(getResourceTypeFromUrl());
+    }, []);
 
     const getResourceTypeFromUrl = () => {
         if (typeof window === 'undefined') {
@@ -113,8 +118,6 @@ return 'users';
 
         return undefined;
     };
-
-    const resourceType = getResourceTypeFromUrl();
 
     const handleExportExcel = () => {
         const formattedData = formatExportData(data, columns);
