@@ -12,7 +12,7 @@ import {
     getFilteredRowModel,
     useReactTable
 } from '@tanstack/react-table';
-import { RefreshCcw, Package, AlertTriangle, CheckCircle, Download, FileText } from 'lucide-react';
+import { RefreshCcw, Package, AlertTriangle, CheckCircle, Download, FileText, Circle, XCircle } from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -35,6 +35,20 @@ import {
 
 import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
+
+const getAssetStatusStyle = (status: string) => {
+    const normalized = status?.toLowerCase();
+    const styles: Record<string, { className: string; icon: React.ElementType }> = {
+        available: { className: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300', icon: CheckCircle },
+        stored: { className: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300', icon: Package },
+        moved: { className: 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300', icon: RefreshCcw },
+        used: { className: 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-300', icon: Circle },
+        repair: { className: 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-300', icon: AlertTriangle },
+        faulty: { className: 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300', icon: XCircle },
+    };
+
+    return styles[normalized] || { className: 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-300', icon: Circle };
+};
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -424,12 +438,19 @@ return;
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-[160px]">
                                     {resourceType === 'assets' && (
-                                        <>{(assetStatuses || []).map(s => (
-                                            <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.id)}>
-                                                <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                                                {s.name}
-                                            </DropdownMenuItem>
-                                        ))}</>
+                                        <>{(assetStatuses || []).map(s => {
+                                            const style = getAssetStatusStyle(s.name);
+                                            const StatusIcon = style.icon;
+
+                                            return (
+                                                <DropdownMenuItem key={s.id} onClick={() => handleBulkStatusUpdate(s.id)} className="p-1">
+                                                    <span className={`flex w-full items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs font-semibold ${style.className}`}>
+                                                        <StatusIcon className="h-3.5 w-3.5" />
+                                                        {s.name}
+                                                    </span>
+                                                </DropdownMenuItem>
+                                            );
+                                        })}</>
                                     )}
                                     {resourceType === 'work-orders' && (
                                         <>
