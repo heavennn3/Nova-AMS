@@ -409,6 +409,7 @@ export default function AssetInventory({
                                         if (confirm('Delete this asset?')) {
                                             router.delete(`/assets/${row.original.id}`, {
                                                 preserveScroll: true,
+                                                onSuccess: () => toast.success('Asset deleted successfully.'),
                                             });
                                         }
                                     }}
