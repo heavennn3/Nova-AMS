@@ -467,24 +467,25 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                 {new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                             </td>
                                             <td className="px-2 py-2 text-right">
-                                                <div className="flex items-center justify-end gap-1">
-                                                    {(r.return_proof_path || r.proof_photo_path || r.return_proof_photo) && (
+                                                <div className="ml-auto grid w-[132px] grid-cols-4 items-center justify-items-center gap-1">
+                                                    {(r.return_proof_path || r.proof_photo_path || r.return_proof_photo) ? (
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-7 w-7 p-0"
+                                                            className="h-7 w-7 border border-violet-200 bg-violet-50 p-0 text-violet-700 hover:bg-violet-100 hover:text-violet-800 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300"
                                                             onClick={() => setProofImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`)}
                                                             title="View proof photo"
+                                                            aria-label="View proof photo"
                                                         >
                                                             <ImageIcon className="h-4 w-4" />
                                                         </Button>
-                                                    )}
+                                                    ) : <span />}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-7 w-7 p-0"
+                                                                className="h-7 w-7 border border-blue-200 bg-blue-50 p-0 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
                                                                 onClick={() => router.get(`/requests/${r.id}${r.type === 'loan' || r.original_model === 'AssetLoan' ? '?is_loan=true' : ''}`)}
                                                                 aria-label="View request details"
                                                             >
@@ -493,44 +494,53 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                         </TooltipTrigger>
                                                         <TooltipContent>View details</TooltipContent>
                                                     </Tooltip>
-                                                    {r.status === 'Pending' && (
-                                                        <>
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="h-7 w-7 p-0"
-                                                                        onClick={() => openAction(r, 'approve')}
-                                                                        aria-label="Approve request"
-                                                                    >
-                                                                        <CheckCircle className="h-4 w-4" />
-                                                                    </Button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>Approve</TooltipContent>
-                                                            </Tooltip>
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="h-7 w-7 p-0"
-                                                                        onClick={() => openAction(r, 'reject')}
-                                                                        aria-label="Reject request"
-                                                                    >
-                                                                        <XCircle className="h-4 w-4" />
-                                                                    </Button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>Reject</TooltipContent>
-                                                            </Tooltip>
-                                                        </>
-                                                    )}
-
-                                                    {r.status === 'Return_pending' && r.type === 'loan' && (
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => openAction(r, 'return')} title="Approve return" aria-label="Approve return">
-                                                            <CheckCircle className="h-4 w-4" />
-                                                        </Button>
-                                                    )}
+                                                    {r.status === 'Pending' ? (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 border border-emerald-200 bg-emerald-50 p-0 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                                                                    onClick={() => openAction(r, 'approve')}
+                                                                    aria-label="Approve request"
+                                                                >
+                                                                    <CheckCircle className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Approve</TooltipContent>
+                                                        </Tooltip>
+                                                    ) : r.status === 'Return_pending' && r.type === 'loan' ? (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 border border-orange-200 bg-orange-50 p-0 text-orange-700 hover:bg-orange-100 hover:text-orange-800 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-300"
+                                                                    onClick={() => openAction(r, 'return')}
+                                                                    aria-label="Approve return"
+                                                                >
+                                                                    <CheckCircle className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Approve return</TooltipContent>
+                                                        </Tooltip>
+                                                    ) : <span />}
+                                                    {r.status === 'Pending' ? (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 border border-rose-200 bg-rose-50 p-0 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
+                                                                    onClick={() => openAction(r, 'reject')}
+                                                                    aria-label="Reject request"
+                                                                >
+                                                                    <XCircle className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Reject</TooltipContent>
+                                                        </Tooltip>
+                                                    ) : <span />}
                                                 </div>
                                             </td>
                                         </tr>
