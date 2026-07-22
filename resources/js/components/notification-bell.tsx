@@ -40,7 +40,7 @@ export function NotificationBell() {
         if (!auth?.user) return;
 
         try {
-            const res = await fetch('/api/notifications', {
+            const res = await fetch('/notifications', {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
             if (!res.ok) return;
@@ -91,7 +91,7 @@ export function NotificationBell() {
 
     const markAsRead = async (id: string) => {
         try {
-            await fetch(`/api/notifications/${id}/read`, {
+            await fetch(`/notifications/${id}/read`, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -113,7 +113,7 @@ export function NotificationBell() {
         setLoading(true);
 
         try {
-            await fetch('/api/notifications/read-all', {
+            await fetch('/notifications/read-all', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',

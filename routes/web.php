@@ -12,6 +12,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->middleware('role_or_permission:Admin|module.dashboard')->name('dashboard');
 
+    // notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
     // track
     Route::get('/api/live-tracking/poll', [\App\Http\Controllers\Api\TrackingApiController::class, 'poll']);
     Route::get('/api/live-tracking/history', [\App\Http\Controllers\Api\TrackingApiController::class, 'history']);
