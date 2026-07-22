@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { ArrowLeft, Calendar, CheckCircle2, Filter, MapPin, Package, Search, Send, ShieldCheck, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Filter, MapPin, Package, Search, Send, ShieldCheck, X } from 'lucide-react';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
@@ -155,17 +155,17 @@ export default function AssetLoansCreate({
 
                                 </div>
                                 <div className="grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-lg border bg-background p-4">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Available</p>
-                                        <p className="mt-1 text-2xl font-semibold text-foreground">{assets.length}</p>
+                                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Available</p>
+                                        <p className="mt-1 text-2xl font-semibold text-emerald-700 dark:text-emerald-300">{assets.length}</p>
                                     </div>
-                                    <div className="rounded-lg border bg-background p-4">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Selected</p>
-                                        <p className="mt-1 text-2xl font-semibold text-foreground">{data.asset_ids.length}</p>
+                                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/30 dark:bg-blue-500/10">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-blue-700 dark:text-blue-300">Selected</p>
+                                        <p className="mt-1 text-2xl font-semibold text-blue-700 dark:text-blue-300">{data.asset_ids.length}</p>
                                     </div>
-                                    <div className="rounded-lg border bg-background p-4">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Access</p>
-                                        <p className="mt-1 flex items-center gap-2 text-sm font-medium text-foreground"><ShieldCheck className="h-4 w-4 text-muted-foreground" /> {isAdmin ? 'All sites' : 'Assigned site only'}</p>
+                                    <div className="rounded-lg border border-violet-200 bg-violet-50 p-4 dark:border-violet-500/30 dark:bg-violet-500/10">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">Access</p>
+                                        <p className="mt-1 flex items-center gap-2 text-sm font-medium text-violet-700 dark:text-violet-300"><ShieldCheck className="h-4 w-4" /> {isAdmin ? 'All sites' : 'Assigned site only'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -182,26 +182,24 @@ export default function AssetLoansCreate({
                                     <div className="space-y-2">
                                         <Label htmlFor="loan-date" className="font-medium">Loan date</Label>
                                         <div className="relative">
-                                            <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input id="loan-date" type="date" min={today} value={data.loan_date} onChange={(e) => setData('loan_date', e.target.value)} className="pl-10" />
+                                            <Input id="loan-date" type="date" min={today} value={data.loan_date} onChange={(e) => setData('loan_date', e.target.value)} />
                                         </div>
                                         <InputError message={errors.loan_date} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="return-date" className="font-medium">Expected return date</Label>
                                         <div className="relative">
-                                            <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input id="return-date" type="date" min={data.loan_date || today} value={data.expected_return_date} onChange={(e) => setData('expected_return_date', e.target.value)} className="pl-10" />
+                                            <Input id="return-date" type="date" min={data.loan_date || today} value={data.expected_return_date} onChange={(e) => setData('expected_return_date', e.target.value)} />
                                         </div>
                                         <InputError message={errors.expected_return_date} />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="rounded-lg border bg-muted/30 p-4">
+                            <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-4 dark:border-blue-500/30 dark:bg-blue-500/10">
                                 <div className="mb-4 flex items-center gap-2">
-                                    <Filter className="h-4 w-4 text-muted-foreground" />
-                                    <h2 className="font-medium text-foreground">Find asset to loan</h2>
+                                    <Filter className="h-4 w-4 text-blue-700 dark:text-blue-300" />
+                                    <h2 className="font-medium text-blue-700 dark:text-blue-300">Find asset to loan</h2>
                                 </div>
                                 <div className={`grid gap-3 ${isAdmin ? 'lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto]' : 'lg:grid-cols-[1.4fr_1fr_1fr_auto]'}`}>
                                     <div className="relative">
@@ -251,13 +249,13 @@ export default function AssetLoansCreate({
                                         const selected = data.asset_ids.includes(asset.id);
 
                                         return (
-                                            <button id={`asset-card-${asset.id}`} key={asset.id} type="button" onClick={() => toggleAsset(asset)} className={`group rounded-2xl border p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md ${selected ? 'border-primary bg-primary/5' : 'bg-background'}`}>
+                                            <button id={`asset-card-${asset.id}`} key={asset.id} type="button" onClick={() => toggleAsset(asset)} className={`group rounded-2xl border p-4 text-left shadow-sm transition hover:border-blue-300 hover:shadow-md ${selected ? 'border-blue-200 bg-blue-50 dark:border-blue-500/30 dark:bg-blue-500/10' : 'bg-background'}`}>
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="min-w-0">
                                                         <p className="truncate text-base font-medium text-foreground">{assetTitle(asset)}</p>
                                                         <p className="mt-1 font-mono text-xs text-muted-foreground">{assetCode(asset)}</p>
                                                     </div>
-                                                    {selected ? <CheckCircle2 className="h-6 w-6 shrink-0 text-primary" /> : <span className="h-6 w-6 shrink-0 rounded-full border-2 border-border group-hover:border-primary/50" />}
+                                                    {selected ? <CheckCircle2 className="h-6 w-6 shrink-0 text-blue-600" /> : <span className="h-6 w-6 shrink-0 rounded-full border-2 border-border group-hover:border-blue-300" />}
                                                 </div>
                                                 <div className="mt-4 flex flex-wrap gap-2">
                                                     <Badge variant="secondary" className="rounded-full">{assetCategory(asset)}</Badge>
@@ -291,9 +289,9 @@ export default function AssetLoansCreate({
                                 <p className="mt-1 text-sm text-muted-foreground">Fill details before submit.</p>
 
                                 <div className="mt-5 space-y-3">
-                                    <div className="rounded-lg border bg-background p-4">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Selected assets</p>
-                                        <p className="mt-1 text-3xl font-semibold text-foreground">{data.asset_ids.length}</p>
+                                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/30 dark:bg-blue-500/10">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-blue-700 dark:text-blue-300">Selected assets</p>
+                                        <p className="mt-1 text-3xl font-semibold text-blue-700 dark:text-blue-300">{data.asset_ids.length}</p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="condition-status" className="font-medium">Condition status</Label>
