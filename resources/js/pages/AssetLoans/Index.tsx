@@ -110,7 +110,7 @@ function calcDaysRemaining(returnDate: string): { days: number; label: string; i
 export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [tableMode, setTableMode] = useState<'all' | 'current' | 'history'>('current');
+    const [tableMode, setTableMode] = useState<'all' | 'current' | 'history'>('all');
     const [returnLoan, setReturnLoan] = useState<any | null>(null);
     const [viewLoan, setViewLoan] = useState<any | null>(null);
     const [proofPreview, setProofPreview] = useState<string | null>(null);
@@ -128,6 +128,19 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
         const matchesSearch = !q || l.asset_name?.toLowerCase().includes(q) || l.asset_id?.toLowerCase().includes(q) || l.loan_id?.toLowerCase().includes(q) || l.purpose?.toLowerCase().includes(q);
         const matchesStatus = statusFilter === 'all' || l.status === statusFilter;
         return matchesSearch && matchesStatus;
+    }).sort((a, b) => {
+        const aDuration = calcDaysRemaining(a.expected_return_date);
+        const bDuration = calcDaysRemaining(b.expected_return_date);
+        const aActive = a.status === 'approved';
+        const bActive = b.status === 'approved';
+        const aRank = aActive && aDuration.isOverdue ? 0 : aActive ? 1 : 2;
+        const bRank = bActive && bDuration.isOverdue ? 0 : bActive ? 1 : 2;
+
+        if (aRank !== bRank) return aRank - bRank;
+        if (aRank === 0) return bDuration.days - aDuration.days;
+        if (aRank === 1) return aDuration.days - bDuration.days;
+
+        return String(b.loan_date || '').localeCompare(String(a.loan_date || ''));
     });
 
     const formatDate = (d: string) => {
