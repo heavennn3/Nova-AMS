@@ -109,12 +109,18 @@ function calcDaysRemaining(returnDate: string): { days: number; label: string; i
 export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [showHistory, setShowHistory] = useState(false);
     const [returnLoan, setReturnLoan] = useState<any | null>(null);
     const [proofPreview, setProofPreview] = useState<string | null>(null);
 
     const returnForm = useForm({ return_notes: '', proof_photo: null as File | null });
 
-    const filtered = loans.filter((l) => {
+    const visibleLoans = loans.filter((l) => showHistory
+        ? ['rejected', 'returned', 'cancelled'].includes(l.status)
+        : l.status === 'approved'
+    );
+
+    const filtered = visibleLoans.filter((l) => {
         const q = search.toLowerCase();
         const matchesSearch = !q || l.asset_name?.toLowerCase().includes(q) || l.asset_id?.toLowerCase().includes(q) || l.loan_id?.toLowerCase().includes(q) || l.purpose?.toLowerCase().includes(q);
         const matchesStatus = statusFilter === 'all' || l.status === statusFilter;
@@ -232,7 +238,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <div className="relative w-[280px]">
                         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                         <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 pl-8 text-sm" />
@@ -241,13 +247,30 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         <SelectTrigger className="h-8 w-[150px] text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Status</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="approved">Approved</SelectItem>
-                            <SelectItem value="return_pending">Return Review</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                            <SelectItem value="returned">Returned</SelectItem>
+                            {showHistory ? (
+                                <>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                    <SelectItem value="returned">Returned</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </>
+                            ) : (
+                                <SelectItem value="approved">Approved</SelectItem>
+                            )}
                         </SelectContent>
                     </Select>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5"
+                        onClick={() => {
+                            setShowHistory((value) => !value);
+                            setStatusFilter('all');
+                        }}
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                        {showHistory ? 'Show Current' : 'Show History'}
+                    </Button>
                 </div>
 
                 <div className="rounded-lg border border-border/50 bg-card shadow-sm">
@@ -272,7 +295,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                                         <div className="flex flex-col items-center justify-center space-y-2">
                                             <Package className="h-8 w-8 opacity-20" />
-                                            <p>No loan requests found</p>
+                                            <p>{showHistory ? 'No loan history found' : 'No active loans found'}</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
