@@ -243,18 +243,18 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                 </div>
 
                 <div className="rounded-lg border border-border/50 bg-card shadow-sm">
-                    <Table>
+                    <Table className="table-auto text-xs [&_td]:px-2 [&_td]:py-2 [&_th]:h-9 [&_th]:px-2">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Loan ID</TableHead>
-                                <TableHead>Asset</TableHead>
-                                <TableHead>Asset ID</TableHead>
-                                <TableHead>Loan Date</TableHead>
-                                <TableHead>Expected Return</TableHead>
-                                <TableHead>Duration</TableHead>
-                                <TableHead>Condition</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-center">Action</TableHead>
+                                <TableHead className="w-[110px]">Loan ID</TableHead>
+                                <TableHead className="w-[140px]">Asset</TableHead>
+                                <TableHead className="w-[105px]">Asset ID</TableHead>
+                                <TableHead className="w-[120px]">Loan Date</TableHead>
+                                <TableHead className="w-[135px]">Expected Return</TableHead>
+                                <TableHead className="w-[155px]">Duration</TableHead>
+                                <TableHead className="w-[105px]">Condition</TableHead>
+                                <TableHead className="w-[110px]">Status</TableHead>
+                                <TableHead className="w-[70px] text-center">Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -287,7 +287,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                         <TableCell>{getLoanBadge(getConditionConfig(loan.condition_status))}</TableCell>
                                         <TableCell>{getLoanBadge(getLoanStatusConfig(loan.status))}</TableCell>
                                         <TableCell>
-                                            <div className="mx-auto flex min-h-12 w-[36px] items-center justify-center gap-1.5">
+                                            <div className="mx-auto flex min-h-8 w-[36px] items-center justify-center gap-1.5">
                                                 {canReturn ? (
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
