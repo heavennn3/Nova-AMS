@@ -1,7 +1,7 @@
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import {
     Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
-    Package, CheckCircle2, AlertTriangle, Clock, Users, Layers,
+    Package, CheckCircle2, AlertTriangle, Clock, Users, Layers, ChevronDown,
 } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -16,6 +16,12 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -27,11 +33,11 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-const statusConfig: Record<string, { bg: string; label: string }> = {
-    available: { bg: 'bg-green-100 text-green-700 border-green-200', label: 'Available' },
-    expired: { bg: 'bg-red-100 text-red-700 border-red-200', label: 'Expired' },
-    expiring_soon: { bg: 'bg-amber-100 text-amber-700 border-amber-200', label: 'Expiring Soon' },
-    full: { bg: 'bg-blue-100 text-blue-700 border-blue-200', label: 'Full' },
+const statusConfig: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
+    available: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2, label: 'Available' },
+    expired: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: 'Expired' },
+    expiring_soon: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', icon: Clock, label: 'Expiring Soon' },
+    full: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Users, label: 'Full' },
 };
 
 export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], currentSiteId = null }: any) {
@@ -200,7 +206,6 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         });
     };
 
-    // ── Delete ──
     const handleDelete = () => {
         if (!selectedLicense) {
             return;
@@ -215,6 +220,25 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 toast.success('License deleted');
             },
             onError: () => toast.error('Failed to delete license'),
+        });
+    };
+
+    const updateStatus = (license: any, status: string) => {
+        router.put(`/licenses/${license.id}`, {
+            name: license.name,
+            category: license.category,
+            type: license.type,
+            total_seat: Number(license.total_seat || 1),
+            site_id: license.site_id || null,
+            license_key: license.license_key || '',
+            active_date: license.active_date || '',
+            end_date: license.end_date || '',
+            notes: license.notes || '',
+            status,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('License status updated'),
+            onError: () => toast.error('Failed to update status'),
         });
     };
 
@@ -341,24 +365,66 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Status" />,
             cell: ({ row }: any) => {
                 const status = row.getValue('status') as string;
-                const cfg = statusConfig[status] || { bg: 'bg-gray-100 text-gray-700 border-gray-200', label: status };
+                const cfg = statusConfig[status] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Package, label: status || '—' };
+                const Icon = cfg.icon;
+                const badge = (
+                    <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[128px] grid-cols-[16px_1fr_16px] items-center gap-1`}>
+                        <span className="flex size-4 items-center justify-center"><Icon className="size-3 shrink-0" /></span>
+                        <span className="truncate text-center">{cfg.label}</span>
+                        <span className="flex size-4 items-center justify-center">{canManageLicenses && <ChevronDown className="size-3 opacity-60" />}</span>
+                    </Badge>
+                );
 
-                return <Badge className={`text-xs px-2 py-0.5 ${cfg.bg}`}>{cfg.label}</Badge>;
+                if (!canManageLicenses) return <div className="flex justify-center">{badge}</div>;
+
+                return (
+                    <div className="flex justify-center">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild><button type="button">{badge}</button></DropdownMenuTrigger>
+                            <DropdownMenuContent align="center">
+                                {Object.entries(statusConfig).map(([value, option]) => {
+                                    const OptionIcon = option.icon;
+                                    return (
+                                        <DropdownMenuItem key={value} onClick={() => updateStatus(row.original, value)}>
+                                            <OptionIcon className={`h-4 w-4 ${option.color}`} />
+                                            {option.label}
+                                        </DropdownMenuItem>
+                                    );
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                );
             },
         },
         ...(canManageLicenses ? [{
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openEdit(row.original)}>
-                        <Pencil className="h-3.5 w-3.5" />
+                <div className="flex items-center justify-center gap-1.5">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-300 dark:hover:bg-blue-500/10"
+                        onClick={() => openEdit(row.original)}
+                        aria-label="Edit license"
+                        title="Edit"
+                    >
+                        <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 p-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10"
                         onClick={() => {
                             setSelectedLicense(row.original); setIsDeleteOpen(true);
-                        }}>
-                        <Trash2 className="h-3.5 w-3.5" />
+                        }}
+                        aria-label="Delete license"
+                        title="Delete"
+                    >
+                        <Trash2 className="h-4 w-4" />
                     </Button>
                 </div>
             ),
@@ -390,18 +456,27 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         <div className="w-full space-y-6 p-8">
             <Head title="Software Licenses" />
 
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4">
-                <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="space-y-1">
                     <h1 className="text-2xl font-bold tracking-tight">Software Licenses</h1>
-
+                    <p className="text-sm text-muted-foreground">View, manage, and monitor all software licenses</p>
                 </div>
                 {canManageLicenses && (
                     <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
-                            <Upload className="mr-2 h-4 w-4" /> Import CSV
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1.5 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+                            onClick={() => setIsImportOpen(true)}
+                        >
+                            <Upload className="h-4 w-4" /> Import CSV
                         </Button>
-                        <Button size="sm" onClick={() => setIsCreateOpen(true)}>
-                            <Plus className="mr-2 h-4 w-4" /> Add License
+                        <Button
+                            size="sm"
+                            className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                            onClick={() => setIsCreateOpen(true)}
+                        >
+                            <Plus className="h-4 w-4" /> Add License
                         </Button>
                     </div>
                 )}
