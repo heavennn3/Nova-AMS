@@ -56,6 +56,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const [actionType, setActionType] = useState<'approve' | 'reject' | 'return' | null>(null);
     const [adminNotes, setAdminNotes] = useState('');
     const [proofImagePreview, setProofImagePreview] = useState<string | null>(null);
+    const [isProofPreviewOpen, setIsProofPreviewOpen] = useState(false);
 
     const statusSortOrder: Record<string, number> = {
         pending: 0,
@@ -410,7 +411,10 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-7 w-7 border border-violet-200 bg-violet-50 p-0 text-violet-700 hover:bg-violet-100 hover:text-violet-800 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300"
-                                                            onClick={() => setProofImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`)}
+                                                            onClick={() => {
+                                                                setProofImagePreview(`/storage/${r.return_proof_path || r.proof_photo_path || r.return_proof_photo}`);
+                                                                setIsProofPreviewOpen(true);
+                                                            }}
                                                             title="View proof photo"
                                                             aria-label="View proof photo"
                                                         >
@@ -640,7 +644,10 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             </Dialog>
 
             {/* Proof Photo Preview Dialog */}
-            <Dialog open={!!proofImagePreview} onOpenChange={() => setProofImagePreview(null)}>
+            <Dialog open={isProofPreviewOpen && !!proofImagePreview} onOpenChange={(open) => {
+                setIsProofPreviewOpen(open);
+                if (!open && !actionRequest) setProofImagePreview(null);
+            }}>
                 <DialogContent className="max-w-4xl border-0 bg-black/95 p-3 shadow-2xl">
                     <DialogHeader className="sr-only">
                         <DialogTitle>Proof Photo Preview</DialogTitle>
