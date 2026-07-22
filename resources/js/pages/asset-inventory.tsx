@@ -43,8 +43,9 @@ function getAssetStatusConfig(status: string) {
     const normalized = status?.toLowerCase();
     const config: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
         available: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2, label: 'Available' },
-        stored: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Package, label: 'Stored' },
-        used: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30', icon: User, label: 'Used' },
+        stored: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: Package, label: 'Stored' },
+        moved: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30', icon: Clock, label: 'Moved' },
+        used: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: User, label: 'Used' },
         repair: { color: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30', icon: AlertTriangle, label: 'Repair' },
         faulty: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: XCircle, label: 'Faulty' },
         not_updated: { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock, label: 'Not Updated' },
@@ -359,19 +360,23 @@ export default function AssetInventory({
                                     </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="center" className="w-40">
-                                    {assetStatuses.map((status: any) => (
-                                        <DropdownMenuItem
-                                            key={status.id}
-                                            onClick={() => updateAssetStatus(row.original.id, String(status.id))}
-                                            className="cursor-pointer"
-                                        >
-                                            <span
-                                                className="mr-2 h-2.5 w-2.5 rounded-full shadow-sm"
-                                                style={{ backgroundColor: status.color || '#6B7280' }}
-                                            />
-                                            <span className="font-medium">{status.name}</span>
-                                        </DropdownMenuItem>
-                                    ))}
+                                    {assetStatuses.map((status: any) => {
+                                        const itemCfg = getAssetStatusConfig(String(status.name));
+                                        const ItemIcon = itemCfg.icon;
+
+                                        return (
+                                            <DropdownMenuItem
+                                                key={status.id}
+                                                onClick={() => updateAssetStatus(row.original.id, String(status.id))}
+                                                className="cursor-pointer p-1"
+                                            >
+                                                <span className={`${itemCfg.color} ${itemCfg.border} ${itemCfg.bg} flex w-full items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs font-semibold`}>
+                                                    <ItemIcon className="h-3.5 w-3.5" />
+                                                    {itemCfg.label}
+                                                </span>
+                                            </DropdownMenuItem>
+                                        );
+                                    })}
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
