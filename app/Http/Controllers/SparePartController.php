@@ -119,6 +119,16 @@ class SparePartController extends Controller
 
     public function update(Request $request, SparePart $sparePart)
     {
+        if ($request->has('status') && count($request->all()) === 1) {
+            $validated = $request->validate([
+                'status' => 'required|string|in:available,in_used,faulty',
+            ]);
+
+            $sparePart->update($validated);
+
+            return redirect()->back()->with('success', 'Spare part status updated successfully.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'part_number' => 'required|string|unique:spare_parts,part_number,' . $sparePart->id,

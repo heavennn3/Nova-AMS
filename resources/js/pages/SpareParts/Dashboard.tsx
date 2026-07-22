@@ -270,15 +270,7 @@ export default function SparePartsDashboard({
     };
 
     const updateStatus = (part: any, status: string) => {
-        router.put(`/spare-parts/${part.id}`, {
-            name: part.name,
-            part_number: part.part_number,
-            category: part.category,
-            location: part.location,
-            site_id: part.site_id ?? null,
-            status,
-            used_by: part.used_by ?? null,
-        }, {
+        router.put(`/spare-parts/${part.id}`, { status }, {
             preserveScroll: true,
             onSuccess: () => toast.success('Spare part status updated'),
             onError: () => toast.error('Failed to update status'),
@@ -286,6 +278,7 @@ export default function SparePartsDashboard({
     };
 
     // ── Filtering ──
+    const inUseParts = allParts.filter((p: any) => p.status === 'in_used').length;
     const categories = [...new Set(allParts.map((p: any) => p.category).filter(Boolean))] as string[];
 
     const filteredParts = allParts.filter((p: any) => {
@@ -480,6 +473,7 @@ export default function SparePartsDashboard({
                 {[
                     { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10', text: 'text-blue-600' },
                     { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-emerald-500/10', text: 'text-emerald-600' },
+                    { label: 'In Used', value: inUseParts, icon: Package, bg: 'bg-blue-500/10', text: 'text-blue-600' },
                     { label: 'Faulty', value: outOfStockParts, icon: AlertTriangle, bg: outOfStockParts > 0 ? 'bg-red-500/20' : 'bg-amber-500/10', text: outOfStockParts > 0 ? 'text-red-600' : 'text-amber-600' },
                 ].map(s => (
                     <div key={s.label} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
@@ -488,7 +482,7 @@ export default function SparePartsDashboard({
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm font-medium leading-none text-muted-foreground">{s.label}</p>
-                            <p className={`text-2xl font-bold leading-none ${outOfStockParts > 0 && s.label === 'Faulty' ? 'text-red-600' : 'text-foreground'}`}>{s.value}</p>
+                            <p className={`text-2xl font-bold leading-none ${s.text}`}>{s.value}</p>
                         </div>
                     </div>
                 ))}
@@ -567,7 +561,7 @@ export default function SparePartsDashboard({
                                     required
                                     value={form.data.name}
                                     onChange={(e) => form.setData('name', e.target.value)}
-                                    placeholder="e.g., DDR4 16GB RAM"
+                                    placeholder="e.g DDR4 16GB RAM"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -576,7 +570,7 @@ export default function SparePartsDashboard({
                                     required
                                     value={form.data.part_number}
                                     onChange={(e) => form.setData('part_number', e.target.value)}
-                                    placeholder="e.g., SN-2024-001"
+                                    placeholder="e.g SN-2024-001"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -598,12 +592,12 @@ export default function SparePartsDashboard({
                                 />
                             </div>
                             <div className="space-y-2 col-span-2">
-                                <Label>Place (Where Kept) *</Label>
+                                <Label>Place</Label>
                                 <Input
                                     required
                                     value={form.data.location}
                                     onChange={(e) => form.setData('location', e.target.value)}
-                                    placeholder="e.g., Rack A - Shelf 3"
+                                    placeholder="e.g Rack A - Shelf 3"
                                 />
                             </div>
                         </div>
@@ -662,7 +656,7 @@ export default function SparePartsDashboard({
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Place (Where Kept) *</Label>
+                                <Label>Place </Label>
                                 <Input required value={editData.location} onChange={(e) => setEditData({ ...editData, location: e.target.value })} />
                             </div>
                         </div>
