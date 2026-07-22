@@ -27,8 +27,6 @@ class LicenseController extends Controller
                 ->get()
                 ->map(function ($license) {
                     try {
-                        $license->updateStatus();
-
                         return [
                             'id' => $license->id,
                             'name' => $license->name,
@@ -213,6 +211,16 @@ class LicenseController extends Controller
 
     public function update(Request $request, License $license)
     {
+        if ($request->has('status') && count($request->all()) === 1) {
+            $validated = $request->validate([
+                'status' => 'required|string|in:available,full,expired,expiring_soon',
+            ]);
+
+            $license->update($validated);
+
+            return redirect()->route('licenses.index')->with('success', 'License status updated successfully.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'nullable|string',

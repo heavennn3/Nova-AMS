@@ -280,18 +280,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
     };
 
     const updateStatus = (license: any, status: string) => {
-        router.put(`/licenses/${license.id}`, {
-            name: license.name,
-            category: license.category,
-            type: license.type,
-            total_seat: Number(license.total_seat || 1),
-            site_id: license.site_id || null,
-            license_key: license.license_key || '',
-            active_date: license.active_date || '',
-            end_date: license.end_date || '',
-            notes: license.notes || '',
-            status,
-        }, {
+        router.put(`/licenses/${license.id}`, { status }, {
             preserveScroll: true,
             onSuccess: () => toast.success('License status updated'),
             onError: () => toast.error('Failed to update status'),
