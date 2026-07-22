@@ -388,20 +388,20 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         </span>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                        <table className="w-full table-auto text-xs">
                             <thead className="bg-muted/30 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
                                 <tr>
-                                    <th className="px-3 py-3 w-10">
+                                    <th className="w-8 px-2 py-2">
                                     </th>
-                                    <th className="px-4 py-3 text-left">Request ID</th>
-                                    <th className="px-4 py-3 text-left">Name</th>
-                                    <th className="px-4 py-3 text-left">Site</th>
-                                    <th className="px-4 py-3 text-left">Type</th>
-                                    <th className="px-4 py-3 text-left">Asset / License</th>
-                                    <th className="px-4 py-3 text-left">Priority</th>
-                                    <th className="px-4 py-3 text-left">Status</th>
-                                    <th className="px-4 py-3 text-left">Submitted</th>
-                                    <th className="px-4 py-3 text-right">Actions</th>
+                                    <th className="w-[95px] px-2 py-2 text-left">Request ID</th>
+                                    <th className="w-[190px] px-2 py-2 text-left">Name</th>
+                                    <th className="w-[130px] px-2 py-2 text-left">Site</th>
+                                    <th className="w-[95px] px-2 py-2 text-left">Type</th>
+                                    <th className="w-[155px] px-2 py-2 text-left">Asset / License</th>
+                                    <th className="w-[90px] px-2 py-2 text-left">Priority</th>
+                                    <th className="w-[120px] px-2 py-2 text-left">Status</th>
+                                    <th className="w-[105px] px-2 py-2 text-left">Submitted</th>
+                                    <th className="w-[90px] px-2 py-2 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -421,7 +421,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             'hover:bg-muted/30'
                                                 }`}
                                         >
-                                            <td className="px-3 py-3.5 w-10">
+                                            <td className="w-8 px-2 py-2">
                                                 {isPending ? (
                                                     <Checkbox
                                                         checked={selectedRows.has(r.id)}
@@ -429,7 +429,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     />
                                                 ) : <span className="block w-4" />}
                                             </td>
-                                            <td className="px-4 py-3.5">
+                                            <td className="px-2 py-2">
                                                 <div className="flex items-center gap-2">
                                                     {isPending && (
                                                         <span className={`h-2 w-2 rounded-full ${isUrgent ? 'bg-rose-500 animate-pulse' : 'bg-amber-400'}`} />
@@ -440,11 +440,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     <span className="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-300">{r.request_number}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3.5">
+                                            <td className="px-2 py-2">
                                                 <div className="font-medium text-foreground">{r.user?.name}</div>
                                                 <div className="text-[11px] text-muted-foreground">{r.user?.email}</div>
                                             </td>
-                                            <td className="px-4 py-3.5">
+                                            <td className="px-2 py-2">
                                                 {r.user?.site ? (
                                                     <Badge variant="outline" className="text-slate-600 bg-slate-50 border-slate-200 gap-1 text-xs dark:text-slate-300 dark:bg-slate-500/10 dark:border-slate-500/30">
                                                         <MapPin className="h-3 w-3" />
@@ -454,12 +454,12 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     <span className="text-muted-foreground text-xs">—</span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3.5">
+                                            <td className="px-2 py-2">
                                                 <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-transparent text-xs dark:bg-indigo-500/10 dark:text-indigo-300">
                                                     {r.request_type}
                                                 </Badge>
                                             </td>
-                                            <td className="px-4 py-3.5">
+                                            <td className="px-2 py-2">
                                                 {r.asset ? (
                                                     <div>
                                                         <div className="font-medium text-foreground text-xs">{r.asset.product_name}</div>
@@ -476,13 +476,13 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     <span className="text-muted-foreground text-xs">—</span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3.5">{getPriorityBadge(r.priority)}</td>
-                                            <td className="px-4 py-3.5">{getStatusBadge(r.status)}</td>
-                                            <td className="px-4 py-3.5 text-muted-foreground text-xs">
+                                            <td className="px-2 py-2">{getPriorityBadge(r.priority)}</td>
+                                            <td className="px-2 py-2">{getStatusBadge(r.status)}</td>
+                                            <td className="px-2 py-2 text-muted-foreground text-xs">
                                                 {new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                             </td>
-                                            <td className="px-4 py-3.5 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
+                                            <td className="px-2 py-2 text-right">
+                                                <div className="flex items-center justify-end gap-1">
                                                     {(r.return_proof_path || r.proof_photo_path || r.return_proof_photo) && (
                                                         <Button
                                                             variant="ghost"
