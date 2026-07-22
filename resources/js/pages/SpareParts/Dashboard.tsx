@@ -258,7 +258,7 @@ export default function SparePartsDashboard({
             accessorKey: 'name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
             cell: ({ row }: any) => (
-                <Link href={`/spare-parts/${row.original.id}`} className="font-semibold text-primary hover:underline transition-colors">
+                <Link href={`/spare-parts/${row.original.id}`} className="font-medium text-foreground transition-colors hover:text-primary hover:underline">
                     {row.getValue('name')}
                 </Link>
             ),
@@ -266,19 +266,22 @@ export default function SparePartsDashboard({
         {
             accessorKey: 'part_number',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Part Number" />,
-            cell: ({ row }: any) => <span className="font-mono">{row.getValue('part_number')}</span>,
+            cell: ({ row }: any) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('part_number')}</span>,
         },
         {
             accessorKey: 'category',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
+            cell: ({ row }: any) => <span className="text-sm text-foreground">{String(row.getValue('category') ?? '—').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}</span>,
         },
         {
             accessorKey: 'site_name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Site" />,
+            cell: ({ row }: any) => <span className="text-sm text-foreground">{row.getValue('site_name')}</span>,
         },
         {
             accessorKey: 'location',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Location" />,
+            cell: ({ row }: any) => <span className="text-sm text-muted-foreground">{row.getValue('location')}</span>,
         },
         {
             accessorKey: 'status',
@@ -398,7 +401,7 @@ export default function SparePartsDashboard({
             </div>
 
             {/* ── Stats Cards ── */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 {[
                     { label: 'Total Items', value: totalParts, icon: Package, bg: 'bg-blue-500/10', text: 'text-blue-600' },
                     { label: 'Available', value: availableParts, icon: CheckCircle, bg: 'bg-emerald-500/10', text: 'text-emerald-600' },
