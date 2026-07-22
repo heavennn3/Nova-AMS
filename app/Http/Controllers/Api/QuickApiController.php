@@ -19,6 +19,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\WorkOrder;
+use OwenIt\Auditing\Models\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -134,6 +135,7 @@ class QuickApiController extends Controller
             'suppliers' => Supplier::class, 'locations' => Location::class, 'manufacturers' => Manufacturer::class,
             'status-labels' => StatusLabel::class, 'users' => User::class, 'custom-fields' => CustomField::class,
             'spare-parts' => SparePart::class, 'licenses' => License::class,
+            'logs' => Audit::class, 'audit-logs' => Audit::class,
         ];
 
         $class = $map[$type] ?? null;

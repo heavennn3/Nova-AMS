@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use OwenIt\Auditing\Contracts\Auditable;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserPagePermission extends Model
+implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'user_id',
         'page_permission_id',

@@ -60,15 +60,12 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
             const matchesSite =
                 selectedSite === 'all' || l.site_name === selectedSite;
             const q = search.toLowerCase();
-            const matchesSearch =
-                !q ||
-                l.user_name.toLowerCase().includes(q) ||
-                l.site_name.toLowerCase().includes(q) ||
-                l.event.toLowerCase().includes(q) ||
-                l.auditable_type.toLowerCase().includes(q) ||
-                (l.ip_address && l.ip_address.includes(q));
+            const searchable = [l.user_name, l.site_name, l.event, l.auditable_type, l.auditable_id, l.url, l.ip_address]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
 
-            return matchesEvent && matchesUser && matchesSite && matchesSearch;
+            return matchesEvent && matchesUser && matchesSite && (!q || searchable.includes(q));
         });
     }, [logs, search, selectedEvent, selectedUser, selectedSite]);
 
@@ -81,14 +78,20 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
         created: 'bg-emerald-100 text-emerald-700 border-emerald-200',
         updated: 'bg-amber-100 text-amber-700 border-amber-200',
         deleted: 'bg-red-100 text-red-700 border-red-200',
+        restored: 'bg-violet-100 text-violet-700 border-violet-200',
         login: 'bg-blue-100 text-blue-700 border-blue-200',
+        logout: 'bg-slate-100 text-slate-700 border-slate-200',
+        failed_login: 'bg-rose-100 text-rose-700 border-rose-200',
     };
 
     const eventDots: Record<string, string> = {
         created: 'bg-emerald-500',
         updated: 'bg-amber-500',
         deleted: 'bg-red-500',
+        restored: 'bg-violet-500',
         login: 'bg-blue-500',
+        logout: 'bg-slate-500',
+        failed_login: 'bg-rose-500',
     };
 
     const columns = useMemo(
@@ -150,6 +153,7 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                     <div className="flex items-center space-x-1.5 text-xs text-muted-foreground">
                         <Activity className="h-3 w-3" />
                         <span>{row.getValue('auditable_type')}</span>
+                        {row.original.auditable_id && <span className="text-[10px]">#{row.original.auditable_id}</span>}
                     </div>
                 ),
             },
@@ -190,6 +194,12 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                                         Change Audit Detail
                                     </DialogTitle>
                                 </DialogHeader>
+                                <div className="mt-4 grid gap-3 rounded-lg border bg-muted/40 p-3 text-xs">
+                                    <div><span className="font-semibold">Event:</span> {log.event}</div>
+                                    <div><span className="font-semibold">Resource:</span> {log.auditable_type}{log.auditable_id ? ` #${log.auditable_id}` : ''}</div>
+                                    <div><span className="font-semibold">URL:</span> {log.url || '—'}</div>
+                                    <div><span className="font-semibold">User Agent:</span> {log.user_agent || '—'}</div>
+                                </div>
                                 <div className="mt-4 grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <h4 className="text-xs font-bold text-muted-foreground uppercase">
@@ -235,8 +245,11 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
 
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
 
-                        System Logs
+                        Audit Logs
                     </h1>
+                    <p className="text-sm text-muted-foreground">
+                        View all audit logs
+                    </p>
                 </div>
             </div>
 

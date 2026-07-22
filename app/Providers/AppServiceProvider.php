@@ -25,20 +25,24 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, function (\Illuminate\Auth\Events\Login $event) {
+        $writeAuthAudit = function (string $eventName, $user = null, array $newValues = []) {
             \OwenIt\Auditing\Models\Audit::create([
-                'user_type' => get_class($event->user),
-                'user_id' => $event->user->id,
-                'event' => 'login',
-                'auditable_type' => get_class($event->user),
-                'auditable_id' => $event->user->id,
+                'user_type' => $user ? get_class($user) : null,
+                'user_id' => $user?->id,
+                'event' => $eventName,
+                'auditable_type' => $user ? get_class($user) : \App\Models\User::class,
+                'auditable_id' => $user?->id,
                 'old_values' => [],
-                'new_values' => [],
+                'new_values' => $newValues,
                 'url' => request()->fullUrl(),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
-        });
+        };
+
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, fn ($event) => $writeAuthAudit('login', $event->user));
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class, fn ($event) => $writeAuthAudit('logout', $event->user));
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Failed::class, fn ($event) => $writeAuthAudit('failed_login', $event->user, ['email' => $event->credentials['email'] ?? null]));
     }
 
     /**

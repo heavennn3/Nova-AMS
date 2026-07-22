@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use OwenIt\Auditing\Contracts\Auditable;
+
 use Illuminate\Database\Eloquent\Model;
 
 class AssetAssignment extends Model
+implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'asset_id',
         'user_id',

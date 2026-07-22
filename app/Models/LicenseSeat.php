@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use OwenIt\Auditing\Contracts\Auditable;
+
 use Illuminate\Database\Eloquent\Model;
 
 class LicenseSeat extends Model
+implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'license_id',
         'seat_number',

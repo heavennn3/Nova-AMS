@@ -20,6 +20,14 @@ class User extends Authenticatable implements Auditable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles, \OwenIt\Auditing\Auditable, SoftDeletes;
 
+    protected $auditExclude = [
+        'password',
+        'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *

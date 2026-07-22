@@ -87,7 +87,7 @@ export default function AssetInventory({
     }, [flash]);
 
     const [search, setSearch] = useState('');
-    const [siteFilter, setSiteFilter] = useState(currentSiteId || 'all');
+    const [siteFilter, setSiteFilter] = useState(currentSiteId ? String(currentSiteId) : 'all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');

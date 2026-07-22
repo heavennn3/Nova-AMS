@@ -55,6 +55,10 @@ class AssetController extends Controller
             $siteId = $user->site_id;
         }
 
+        if (!$siteId) {
+            $siteId = \App\Models\Site::orderBy('name')->value('id');
+        }
+
         $assetsQuery = Asset::with('category', 'type', 'oem', 'site', 'activeLoan.user')->latest();
 
         if ($siteId) {
