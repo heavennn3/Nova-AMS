@@ -210,11 +210,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const urgentPendingCount = requests.filter(r => (r.status === 'Pending' || r.status === 'pending') && r.priority === 'Urgent').length;
     const returnPendingCount = requests.filter(r => r.status === 'Return_pending').length;
     const stats = [
-        { label: 'Pending Review', value: pendingCount, color: 'text-amber-700 dark:text-amber-300', bg: 'from-amber-50 to-amber-100/50 dark:from-amber-500/10 dark:to-amber-500/5', iconBg: 'bg-amber-100 dark:bg-amber-500/15', icon: Clock, ring: pendingCount > 0 ? 'ring-2 ring-amber-300/50 dark:ring-amber-500/30' : '' },
-        { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-700 dark:text-emerald-300', bg: 'from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-emerald-500/5', iconBg: 'bg-emerald-100 dark:bg-emerald-500/15', icon: CheckCircle2, ring: '' },
-        { label: 'Return Review', value: returnPendingCount, color: 'text-orange-700 dark:text-orange-300', bg: 'from-orange-50 to-orange-100/50 dark:from-orange-500/10 dark:to-orange-500/5', iconBg: 'bg-orange-100 dark:bg-orange-500/15', icon: BellRing, ring: returnPendingCount > 0 ? 'ring-2 ring-orange-300/50 dark:ring-orange-500/30' : '' },
-        { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-700 dark:text-blue-300', bg: 'from-blue-50 to-blue-100/50 dark:from-blue-500/10 dark:to-blue-500/5', iconBg: 'bg-blue-100 dark:bg-blue-500/15', icon: Package, ring: '' },
-        { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-700 dark:text-rose-300', bg: 'from-rose-50 to-rose-100/50 dark:from-rose-500/10 dark:to-rose-500/5', iconBg: 'bg-rose-100 dark:bg-rose-500/15', icon: XCircle, ring: '' },
+        { label: 'Pending Review', value: pendingCount, color: 'text-amber-600', iconBg: 'bg-amber-500/10', icon: Clock, pulse: pendingCount > 0 },
+        { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-600', iconBg: 'bg-emerald-500/10', icon: CheckCircle2 },
+        { label: 'Return Review', value: returnPendingCount, color: 'text-orange-600', iconBg: 'bg-orange-500/10', icon: BellRing, pulse: returnPendingCount > 0 },
+        { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-600', iconBg: 'bg-blue-500/10', icon: Package },
+        { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-600', iconBg: 'bg-rose-500/10', icon: XCircle },
     ];
 
     const clearFilters = () => {
@@ -259,15 +259,15 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                     {stats.map(s => (
-                        <div key={s.label} className={`rounded-xl border p-4 bg-gradient-to-br ${s.bg} ${s.ring} flex items-center gap-3 transition-all`}>
+                        <div key={s.label} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
                             <div className={`rounded-lg p-2.5 ${s.iconBg}`}>
-                                <s.icon className={`h-5 w-5 ${s.color}`} />
+                                <s.icon className={`h-5 w-5 ${s.color} ${s.pulse ? 'animate-pulse' : ''}`} />
                             </div>
-                            <div>
-                                <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{s.label}</div>
-                                <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium leading-none text-muted-foreground">{s.label}</p>
+                                <p className="text-2xl font-bold leading-none text-foreground">{s.value}</p>
                             </div>
                         </div>
                     ))}
