@@ -151,7 +151,7 @@ export default function AssetLoansCreate({
                                     Asset loan
                                 </Badge>
                                 <div>
-                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Create asset loan</h1>
+                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">New asset loan</h1>
 
                                 </div>
                                 <div className="grid gap-3 sm:grid-cols-3">

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -114,6 +115,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const [returnLoan, setReturnLoan] = useState<any | null>(null);
     const [viewLoan, setViewLoan] = useState<any | null>(null);
     const [proofPreview, setProofPreview] = useState<string | null>(null);
+    const [returnErrors, setReturnErrors] = useState<{ return_notes?: string; proof_photo?: string }>({});
 
     const returnForm = useForm({ return_notes: '', proof_photo: null as File | null });
 
@@ -165,15 +167,29 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
         setProofPreview(null);
         returnForm.setData('return_notes', '');
         returnForm.setData('proof_photo', null);
+        setReturnErrors({});
     };
 
     const submitReturn = (e: React.FormEvent) => {
         e.preventDefault();
         if (!returnLoan) return;
+
+        const errors = {
+            return_notes: returnForm.data.return_notes.trim() ? '' : 'Return notes are required.',
+            proof_photo: returnForm.data.proof_photo ? '' : 'Proof photo is required.',
+        };
+
+        if (errors.return_notes || errors.proof_photo) {
+            setReturnErrors(errors);
+            return;
+        }
+
+        setReturnErrors({});
         returnForm.post(`/asset-loans/${returnLoan.id}/return`, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
+                toast.success('Return request submitted successfully.');
                 setReturnLoan(null);
                 // Reload the page to get updated loan data with proof photo
                 router.reload();
@@ -396,8 +412,18 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="return-notes">Return notes</Label>
-                            <Textarea id="return-notes" value={returnForm.data.return_notes} onChange={(e) => returnForm.setData('return_notes', e.target.value)} placeholder="Condition on return, damage notes, extra remarks..." className="min-h-28" />
+                            <Label htmlFor="return-notes">Return notes <span className="text-red-500">*</span></Label>
+                            <Textarea
+                                id="return-notes"
+                                value={returnForm.data.return_notes}
+                                onChange={(e) => {
+                                    returnForm.setData('return_notes', e.target.value);
+                                    if (returnErrors.return_notes) setReturnErrors((current) => ({ ...current, return_notes: '' }));
+                                }}
+                                placeholder="Condition on return, damage notes, extra remarks..."
+                                className="min-h-28"
+                            />
+                            {returnErrors.return_notes && <p className="text-xs text-red-500">{returnErrors.return_notes}</p>}
                         </div>
 
                         <div className="space-y-2">
@@ -412,12 +438,14 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                     onChange={(e) => {
                                         const file = e.target.files?.[0] ?? null;
                                         returnForm.setData('proof_photo', file);
+                                        if (returnErrors.proof_photo) setReturnErrors((current) => ({ ...current, proof_photo: '' }));
                                         setProofPreview(file ? URL.createObjectURL(file) : null);
                                     }}
                                 />
                             </div>
                             {proofPreview && <img src={proofPreview} alt="Proof preview" className="max-h-48 rounded-lg border object-cover" />}
-                            {!proofPreview && (
+                            {returnErrors.proof_photo && <p className="text-xs text-red-500">{returnErrors.proof_photo}</p>}
+                            {!proofPreview && !returnErrors.proof_photo && (
                                 <p className="text-xs text-muted-foreground">Please upload a clear photo of the returned item for admin review.</p>
                             )}
                         </div>
