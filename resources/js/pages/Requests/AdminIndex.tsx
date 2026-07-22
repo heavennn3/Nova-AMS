@@ -305,11 +305,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                             <SelectItem value="all">All Status</SelectItem>
                             <SelectItem value="Pending">Pending</SelectItem>
                             <SelectItem value="Approved">Approved</SelectItem>
-                            <SelectItem value="Fulfilled">Fulfilled</SelectItem>
+
                             <SelectItem value="Returned">Returned</SelectItem>
                             <SelectItem value="Return_pending">Return Review</SelectItem>
                             <SelectItem value="Rejected">Rejected</SelectItem>
-                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+
                         </SelectContent>
                     </Select>
 
@@ -525,11 +525,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             </Tooltip>
                                                         </>
                                                     )}
-                                                    {r.status === 'Fulfilled' && ['Borrow', 'Checkout'].includes(r.request_type) && (
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => openAction(r, 'return')} title="Return" aria-label="Return asset">
-                                                            <RotateCcw className="h-4 w-4" />
-                                                        </Button>
-                                                    )}
+
                                                     {r.status === 'Return_pending' && r.type === 'loan' && (
                                                         <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => openAction(r, 'return')} title="Approve return" aria-label="Approve return">
                                                             <CheckCircle className="h-4 w-4" />
