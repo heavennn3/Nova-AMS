@@ -359,6 +359,14 @@ export default function Dashboards({
         });
     };
 
+    const runAfterMenuCloses = (action: () => void) => {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        window.setTimeout(action, 0);
+    };
+
     if (!mounted) {
         return null;
     }
@@ -473,15 +481,9 @@ export default function Dashboards({
                                                 <span className="font-semibold truncate">
                                                     {region.name}
                                                 </span>
-                                                <Badge variant="secondary" className="shrink-0 text-xs">
-                                                    {region.sites_count} sites
-                                                </Badge>
-                                            </div>
-                                            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-0.5">
-                                                <span>{region.users_count} users</span>
-                                                <span>{region.assets_count} assets</span>
 
                                             </div>
+
                                         </div>
 
                                         <Button
@@ -584,18 +586,18 @@ export default function Dashboards({
                                                             <DropdownMenuContent align="end">
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onClick={() => openEditSite(site)}>
+                                                                <DropdownMenuItem onSelect={() => runAfterMenuCloses(() => openEditSite(site))}>
                                                                     <Edit className="mr-2 h-4 w-4" />
                                                                     Edit Site
                                                                 </DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => toggleSiteActive(site)}>
+                                                                <DropdownMenuItem onSelect={() => runAfterMenuCloses(() => toggleSiteActive(site))}>
                                                                     {site.is_active
                                                                         ? 'Disable Site'
                                                                         : 'Activate Site'}
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem
                                                                     className="text-destructive"
-                                                                    onClick={() => setDeleteSite(site)}
+                                                                    onSelect={() => runAfterMenuCloses(() => setDeleteSite(site))}
                                                                 >
                                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                                     Delete

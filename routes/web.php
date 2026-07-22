@@ -99,13 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Multi-Site Module
     Route::get('/multi-site/dashboards', [\App\Http\Controllers\MultiSiteController::class, 'dashboards'])->middleware('role_or_permission:Admin|module.multi-site-dashboards')->name('multi-site.dashboards');
 
-    Route::middleware(['role_or_permission:Admin|module.asset-transfer'])->group(function () {
-        Route::get('/multi-site/tracking', [\App\Http\Controllers\MultiSiteController::class, 'tracking'])->name('multi-site.tracking');
-        Route::get('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'transfers'])->middleware('role_or_permission:Admin|module.asset-transfer')->name('multi-site.transfers');
-        Route::post('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'storeTransfer'])->name('multi-site.transfers.store');
-        Route::patch('/multi-site/transfers/{id}/status', [\App\Http\Controllers\MultiSiteController::class, 'updateTransferStatus'])->name('multi-site.transfers.status');
-        Route::get('/multi-site/access', [\App\Http\Controllers\MultiSiteController::class, 'access'])->name('multi-site.access');
-
+    Route::middleware(['role_or_permission:Admin|module.multi-site-dashboards'])->group(function () {
         // Regions + Sites API (needs sessions, not api middleware)
         Route::get('/api/sites', [\App\Http\Controllers\Api\SiteApiController::class, 'index']);
         Route::post('/api/sites', [\App\Http\Controllers\Api\SiteApiController::class, 'store']);
@@ -113,6 +107,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/api/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'update']);
         Route::delete('/api/sites/{site}', [\App\Http\Controllers\Api\SiteApiController::class, 'destroy']);
         Route::apiResource('/api/regions', \App\Http\Controllers\Api\RegionApiController::class);
+    });
+
+    Route::middleware(['role_or_permission:Admin|module.asset-transfer'])->group(function () {
+        Route::get('/multi-site/tracking', [\App\Http\Controllers\MultiSiteController::class, 'tracking'])->name('multi-site.tracking');
+        Route::get('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'transfers'])->middleware('role_or_permission:Admin|module.asset-transfer')->name('multi-site.transfers');
+        Route::post('/multi-site/transfers', [\App\Http\Controllers\MultiSiteController::class, 'storeTransfer'])->name('multi-site.transfers.store');
+        Route::patch('/multi-site/transfers/{id}/status', [\App\Http\Controllers\MultiSiteController::class, 'updateTransferStatus'])->name('multi-site.transfers.status');
+        Route::get('/multi-site/access', [\App\Http\Controllers\MultiSiteController::class, 'access'])->name('multi-site.access');
     });
 
     // Spare Parts Module (moved outside Operations module)
