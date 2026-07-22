@@ -125,7 +125,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         const config: Record<string, { color: string; bg: string; border: string; icon: any }> = {
             Pending: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', icon: Clock },
             Approved: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2 },
-            Fulfilled: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Package },
+
             Returned: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30', icon: RotateCcw },
             Rejected: { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: XCircle },
             Cancelled: { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: XCircle },
@@ -213,7 +213,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         { label: 'Pending Review', value: pendingCount, color: 'text-amber-600', iconBg: 'bg-amber-500/10', icon: Clock, pulse: pendingCount > 0 },
         { label: 'Approved', value: requests.filter(r => r.status === 'Approved' || r.status === 'approved').length, color: 'text-emerald-600', iconBg: 'bg-emerald-500/10', icon: CheckCircle2 },
         { label: 'Return Review', value: returnPendingCount, color: 'text-orange-600', iconBg: 'bg-orange-500/10', icon: BellRing, pulse: returnPendingCount > 0 },
-        { label: 'Fulfilled', value: requests.filter(r => r.status === 'Fulfilled').length, color: 'text-blue-600', iconBg: 'bg-blue-500/10', icon: Package },
+
         { label: 'Rejected', value: requests.filter(r => r.status === 'Rejected' || r.status === 'rejected').length, color: 'text-rose-600', iconBg: 'bg-rose-500/10', icon: XCircle },
     ];
 
