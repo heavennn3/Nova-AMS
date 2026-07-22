@@ -721,18 +721,18 @@ export default function UsersIndex({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 gap-1.5 border-dashed"
+                                className="h-8 gap-1.5 border-sky-200 bg-sky-50 text-sky-700 shadow-sm hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/20"
                             >
                                 <Filter className="h-3.5 w-3.5" />
                                 Filters
                                 {activeFilterCount > 0 && (
-                                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky-600 text-[10px] font-bold text-white dark:bg-sky-400 dark:text-sky-950">
                                         {activeFilterCount}
                                     </span>
                                 )}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[280px] p-0" align="start">
+                        <PopoverContent className="w-[280px] overflow-hidden rounded-xl border border-sky-200 bg-card p-0 shadow-lg dark:border-sky-500/30" align="start">
                             <div className="border-b p-3">
                                 <p className="text-sm font-semibold">
                                     Filter Users
@@ -771,7 +771,13 @@ export default function UsersIndex({
                                             onClick={() =>
                                                 setSelectedStatus(opt.value)
                                             }
-                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedStatus === opt.value ? 'font-medium' : ''}`}
+                                            className={`flex w-full items-center justify-between rounded-md border px-2 py-1.5 text-sm transition-colors ${selectedStatus === opt.value
+                                                ? opt.value === 'active'
+                                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300'
+                                                    : opt.value === 'deactivated'
+                                                        ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300'
+                                                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-300'
+                                                : 'border-transparent hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 dark:hover:border-sky-500/30 dark:hover:bg-sky-500/10 dark:hover:text-sky-300'}`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 <span
@@ -779,11 +785,11 @@ export default function UsersIndex({
                                                         ? 'bg-emerald-500'
                                                         : opt.value ===
                                                             'deactivated'
-                                                            ? 'bg-red-500'
-                                                            : 'bg-gray-400'
+                                                            ? 'bg-rose-500'
+                                                            : 'bg-slate-400'
                                                         }`}
                                                 />
-                                                <span>{opt.label}</span>
+                                                <span className="font-medium">{opt.label}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 <span className="text-[10px] text-muted-foreground">
@@ -791,7 +797,7 @@ export default function UsersIndex({
                                                 </span>
                                                 {selectedStatus ===
                                                     opt.value && (
-                                                        <Check className="h-3.5 w-3.5 text-primary" />
+                                                        <Check className="h-3.5 w-3.5" />
                                                     )}
                                             </div>
                                         </button>
@@ -806,11 +812,11 @@ export default function UsersIndex({
                                 <div className="max-h-[180px] space-y-0.5 overflow-y-auto">
                                     <button
                                         onClick={() => setSelectedRole('all')}
-                                        className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedRole === 'all' ? 'font-medium' : ''}`}
+                                        className={`flex w-full items-center justify-between rounded-md border px-2 py-1.5 text-sm transition-colors ${selectedRole === 'all' ? 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-300' : 'border-transparent hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 dark:hover:border-sky-500/30 dark:hover:bg-sky-500/10 dark:hover:text-sky-300'}`}
                                     >
-                                        <span>All Roles</span>
+                                        <span className="font-medium">All Roles</span>
                                         {selectedRole === 'all' && (
-                                            <Check className="h-3.5 w-3.5 text-primary" />
+                                            <Check className="h-3.5 w-3.5" />
                                         )}
                                     </button>
                                     {allRoles.map((role) => (
@@ -819,32 +825,34 @@ export default function UsersIndex({
                                             onClick={() =>
                                                 setSelectedRole(role)
                                             }
-                                            className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedRole === role ? 'font-medium' : ''}`}
+                                            className={`flex w-full items-center justify-between rounded-md border px-2 py-1.5 text-sm transition-colors ${selectedRole === role ? `${roleColors[role]?.border || roleColors.None.border} ${roleColors[role]?.bg || roleColors.None.bg} ${roleColors[role]?.color || roleColors.None.color}` : 'border-transparent hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 dark:hover:border-sky-500/30 dark:hover:bg-sky-500/10 dark:hover:text-sky-300'}`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 <span
                                                     className={`inline-block h-2 w-2 rounded-full ${role === 'Admin'
-                                                        ? 'bg-purple-500'
+                                                        ? 'bg-violet-500'
                                                         : role ===
                                                             'Site Manager'
-                                                            ? 'bg-blue-500'
+                                                            ? 'bg-sky-500'
                                                             : role ===
                                                                 'Technician'
-                                                                ? 'bg-emerald-500'
+                                                                ? 'bg-amber-500'
                                                                 : role ===
                                                                     'Viewer'
-                                                                    ? 'bg-gray-500'
-                                                                    : 'bg-orange-500'
+                                                                    ? 'bg-slate-500'
+                                                                    : role === 'Employee'
+                                                                        ? 'bg-emerald-500'
+                                                                        : 'bg-blue-500'
                                                         }`}
                                                 />
-                                                <span>{role}</span>
+                                                <span className="font-medium">{role}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 <span className="text-[10px] text-muted-foreground">
                                                     {roleBreakdown[role] || 0}
                                                 </span>
                                                 {selectedRole === role && (
-                                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                                    <Check className="h-3.5 w-3.5" />
                                                 )}
                                             </div>
                                         </button>
