@@ -269,7 +269,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         }}
                     >
                         <RotateCcw className="h-4 w-4" />
-                        {showHistory ? 'Show Current' : 'Show History'}
+                        {showHistory ? 'Show Current' : 'Show Loan History'}
                     </Button>
                 </div>
 
