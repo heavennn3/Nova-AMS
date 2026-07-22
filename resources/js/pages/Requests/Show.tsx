@@ -73,21 +73,20 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
     // Timeline
     const timelineEvents = [
         { label: 'Submitted', date: r.created_at, icon: FileText, color: 'text-slate-500', done: true },
-        { label: 'Approved', date: r.approved_at, icon: CheckCircle2, color: 'text-emerald-500', done: !!r.approved_at && r.status !== 'Rejected' },
-        { label: r.status === 'Rejected' ? 'Rejected' : 'Fulfilled', date: r.status === 'Rejected' ? r.approved_at : r.fulfilled_at || r.approved_at, icon: r.status === 'Rejected' ? XCircle : Package, color: r.status === 'Rejected' ? 'text-red-500' : 'text-blue-500', done: r.status === 'Rejected' || !!(r.fulfilled_at || r.approved_at) },
+        { label: r.status === 'Rejected' ? 'Rejected' : 'Approved', date: r.approved_at, icon: r.status === 'Rejected' ? XCircle : CheckCircle2, color: r.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500', done: ['Approved', 'Return pending', 'Returned', 'Rejected'].includes(r.status) },
         ...(isLoanFlow ? [{
             label: 'Return Requested',
             date: r.return_requested_at,
             icon: Clock,
             color: 'text-orange-500',
-            done: !!r.return_requested_at
+            done: ['Return pending', 'Returned'].includes(r.status) || !!r.return_requested_at
         }] : []),
         ...(isLoanFlow ? [{
             label: 'Returned',
             date: r.returned_at,
             icon: RotateCcw,
             color: 'text-violet-500',
-            done: !!r.returned_at,
+            done: r.status === 'Returned' || !!r.returned_at,
             hasProof: !!(r.return_proof_path || r.proof_photo_path || r.return_proof_photo)
         }] : []),
     ];
@@ -404,7 +403,7 @@ export default function RequestShow({ assetRequest }: { assetRequest: any }) {
                                                 <event.icon className={`h-4 w-4 ${event.done ? event.color : 'text-muted-foreground/30'}`} />
                                             </div>
                                             {i < timelineEvents.length - 1 && (
-                                                <div className={`w-px h-8 ${event.done ? 'bg-border' : 'bg-muted/30'}`} />
+                                                <div className={`w-px h-8 ${timelineEvents[i + 1]?.done ? 'bg-border' : 'bg-muted/30'}`} />
                                             )}
                                         </div>
                                         <div className="pb-6">

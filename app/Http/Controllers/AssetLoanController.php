@@ -44,7 +44,13 @@ class AssetLoanController extends Controller
                     'returned_at' => $loan->returned_at?->format('Y-m-d'),
                     'return_proof_path' => $loan->return_proof_path,
                     'return_notes' => $loan->return_notes,
+                    'notes' => $loan->notes,
                     'return_requested_at' => $loan->return_requested_at?->format('Y-m-d H:i:s'),
+                    'created_at' => $loan->created_at?->format('Y-m-d H:i:s'),
+                    'approver' => $loan->approver ? [
+                        'name' => $loan->approver->name,
+                        'email' => $loan->approver->email,
+                    ] : null,
                     'user' => $loan->user?->name ?? 'Unknown User',
                     'type' => 'loan',
                     'original_model' => 'AssetLoan',

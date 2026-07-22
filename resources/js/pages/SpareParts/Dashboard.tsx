@@ -1,7 +1,7 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2, ChevronDown } from 'lucide-react';
 import Papa from 'papaparse';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
@@ -24,6 +24,81 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+
+type ComboOption = { value: string; label: string };
+
+function SearchCombo({
+    value,
+    options,
+    placeholder,
+    onChange,
+}: {
+    value: string;
+    options: ComboOption[];
+    placeholder: string;
+    onChange: (value: string) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const rootRef = useRef<HTMLDivElement>(null);
+    const selected = options.find((option) => option.value === value);
+    const filtered = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+
+    useEffect(() => {
+        if (!open) return;
+        const closeOnOutsideTouch = (event: PointerEvent) => {
+            if (!rootRef.current?.contains(event.target as Node)) {
+                setOpen(false);
+                setQuery('');
+            }
+        };
+        document.addEventListener('pointerdown', closeOnOutsideTouch);
+        return () => document.removeEventListener('pointerdown', closeOnOutsideTouch);
+    }, [open]);
+
+    return (
+        <div ref={rootRef} className="relative">
+            <Button type="button" variant="outline" className="h-10 w-full justify-between bg-background font-normal" onClick={() => setOpen((current) => !current)}>
+                <span className={selected ? 'truncate' : 'truncate text-muted-foreground'}>{selected?.label || placeholder}</span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+            {open && (
+                <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
+                    <div className="flex items-center border-b px-3">
+                        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${placeholder.toLowerCase()}`} className="h-10 border-0 px-0 shadow-none focus-visible:ring-0" />
+                    </div>
+                    <div className="max-h-56 overflow-y-auto p-1">
+                        {filtered.length === 0 ? (
+                            <div className="px-2 py-3 text-center text-sm text-muted-foreground">No results</div>
+                        ) : filtered.map((option) => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => {
+                                    onChange(option.value);
+                                    setOpen(false);
+                                    setQuery('');
+                                }}
+                            >
+                                <span>{option.label}</span>
+                                {option.value === value && <CheckCircle className="h-4 w-4 text-blue-600" />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const categoryOptions = ['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((category) => ({ value: category, label: category }));
+const statusOptions = [
+    { value: 'available', label: 'Available' },
+    { value: 'in_used', label: 'In Used' },
+    { value: 'faulty', label: 'Faulty' },
+];
 
 export default function SparePartsDashboard({
     totalParts = 0,
@@ -506,38 +581,21 @@ export default function SparePartsDashboard({
                             </div>
                             <div className="space-y-2">
                                 <Label>Category *</Label>
-                                <Select
+                                <SearchCombo
                                     value={form.data.category}
-                                    onValueChange={(v) => form.setData('category', v)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((cat) => (
-                                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                    placeholder="Select category"
+                                    options={categoryOptions}
+                                    onChange={(v) => form.setData('category', v)}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Site</Label>
-                                <Select
+                                <SearchCombo
                                     value={form.data.site_id}
-                                    onValueChange={(v) => form.setData('site_id', v)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select site" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Global (All Sites)</SelectItem>
-                                        {sites.map((site: any) => (
-                                            <SelectItem key={site.id} value={String(site.id)}>
-                                                {site.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                    placeholder="Select site"
+                                    options={[{ value: 'all', label: 'Global (All Sites)' }, ...sites.map((site: any) => ({ value: String(site.id), label: site.name }))]}
+                                    onChange={(v) => form.setData('site_id', v)}
+                                />
                             </div>
                             <div className="space-y-2 col-span-2">
                                 <Label>Place (Where Kept) *</Label>
@@ -578,37 +636,30 @@ export default function SparePartsDashboard({
                             </div>
                             <div className="space-y-2">
                                 <Label>Category *</Label>
-                                <Select value={editData.category} onValueChange={(v) => setEditData({ ...editData, category: v })}>
-                                    <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                                    <SelectContent>
-                                        {['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((cat) => (
-                                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo
+                                    value={editData.category}
+                                    placeholder="Select category"
+                                    options={categoryOptions}
+                                    onChange={(v) => setEditData({ ...editData, category: v })}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Status *</Label>
-                                <Select value={editData.status} onValueChange={(v) => setEditData({ ...editData, status: v })}>
-                                    <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="available">Available</SelectItem>
-                                        <SelectItem value="in_used">In Used</SelectItem>
-                                        <SelectItem value="faulty">Faulty</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo
+                                    value={editData.status}
+                                    placeholder="Select status"
+                                    options={statusOptions}
+                                    onChange={(v) => setEditData({ ...editData, status: v })}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Site</Label>
-                                <Select value={editData.site_id} onValueChange={(v) => setEditData({ ...editData, site_id: v })}>
-                                    <SelectTrigger><SelectValue placeholder="Select site" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Global (All Sites)</SelectItem>
-                                        {sites.map((site: any) => (
-                                            <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo
+                                    value={editData.site_id}
+                                    placeholder="Select site"
+                                    options={[{ value: 'all', label: 'Global (All Sites)' }, ...sites.map((site: any) => ({ value: String(site.id), label: site.name }))]}
+                                    onChange={(v) => setEditData({ ...editData, site_id: v })}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Place (Where Kept) *</Label>

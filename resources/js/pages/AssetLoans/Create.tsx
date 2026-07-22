@@ -1,13 +1,13 @@
 import { Head, useForm } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle2, Filter, MapPin, Package, Search, Send, ShieldCheck, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronDown, Filter, MapPin, Package, Search, Send, ShieldCheck, X } from 'lucide-react';
 import * as React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Textarea } from '@/components/ui/textarea';
 
 type Asset = {
@@ -55,6 +55,87 @@ const assetCategory = (asset: Asset) => asset.category_name || fieldValue(asset,
 const assetType = (asset: Asset) => asset.type_name || fieldValue(asset, ['jenis_aset', 'type', 'asset_type', 'product']) || '—';
 const assetLocation = (asset: Asset) => asset.location || fieldValue(asset, ['location', 'lokasi', 'room', 'department']) || '—';
 
+type ComboOption = { value: string; label: string };
+
+function SearchCombo({
+    id,
+    value,
+    options,
+    placeholder,
+    disabled = false,
+    onChange,
+}: {
+    id: string;
+    value: string;
+    options: ComboOption[];
+    placeholder: string;
+    disabled?: boolean;
+    onChange: (value: string) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const rootRef = useRef<HTMLDivElement>(null);
+    const selected = options.find((option) => option.value === value);
+    const filtered = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+
+    useEffect(() => {
+        if (!open) return;
+
+        const closeOnOutsideTouch = (event: PointerEvent) => {
+            if (!rootRef.current?.contains(event.target as Node)) {
+                setOpen(false);
+                setQuery('');
+            }
+        };
+
+        document.addEventListener('pointerdown', closeOnOutsideTouch);
+        return () => document.removeEventListener('pointerdown', closeOnOutsideTouch);
+    }, [open]);
+
+    return (
+        <div ref={rootRef} className="relative">
+            <Button
+                id={id}
+                type="button"
+                variant="outline"
+                disabled={disabled}
+                className="h-10 w-full justify-between bg-background text-sm font-normal"
+                onClick={() => setOpen((current) => !current)}
+            >
+                <span className={selected ? 'truncate' : 'truncate text-muted-foreground'}>{selected?.label || placeholder}</span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+            {open && !disabled && (
+                <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
+                    <div className="flex items-center border-b px-3">
+                        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${placeholder.toLowerCase()}`} className="h-10 border-0 px-0 shadow-none focus-visible:ring-0" />
+                    </div>
+                    <div className="max-h-56 overflow-y-auto p-1">
+                        {filtered.length === 0 ? (
+                            <div className="px-2 py-3 text-center text-sm text-muted-foreground">No results</div>
+                        ) : filtered.map((option) => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => {
+                                    onChange(option.value);
+                                    setOpen(false);
+                                    setQuery('');
+                                }}
+                            >
+                                <span>{option.label}</span>
+                                {option.value === value && <CheckCircle2 className="h-4 w-4 text-blue-600" />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function AssetLoansCreate({
     assets = [],
     sites = [],
@@ -82,6 +163,7 @@ export default function AssetLoansCreate({
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
     const [page, setPage] = useState(0);
+    const [formErrors, setFormErrors] = useState<{ asset_ids?: string; site_id?: string; loan_date?: string; expected_return_date?: string; purpose?: string }>({});
 
     const selectedAssets = useMemo(() => assets.filter((asset) => data.asset_ids.includes(asset.id)), [assets, data.asset_ids]);
     const selectedSiteId = selectedAssets[0]?.site_id ? String(selectedAssets[0].site_id) : data.site_id;
@@ -123,6 +205,7 @@ export default function AssetLoansCreate({
         const nextSiteId = nextIds.length ? String(asset.site_id ?? '') : isAdmin ? '' : String(userSiteId ?? '');
 
         setData((current) => ({ ...current, asset_ids: nextIds, site_id: nextSiteId }));
+        setFormErrors((current) => ({ ...current, asset_ids: '', site_id: '' }));
     };
 
     const clearFilters = () => {
@@ -135,6 +218,20 @@ export default function AssetLoansCreate({
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        const nextErrors = {
+            asset_ids: data.asset_ids.length ? '' : 'Select at least one asset.',
+            site_id: data.site_id ? '' : 'Site is required.',
+            loan_date: data.loan_date ? '' : 'Loan date is required.',
+            expected_return_date: data.expected_return_date ? '' : 'Expected return date is required.',
+            purpose: data.purpose.trim() ? '' : 'Purpose is required.',
+        };
+
+        if (Object.values(nextErrors).some(Boolean)) {
+            setFormErrors(nextErrors);
+            return;
+        }
+
+        setFormErrors({});
         post('/asset-loans');
     };
 
@@ -182,16 +279,34 @@ export default function AssetLoansCreate({
                                     <div className="space-y-2">
                                         <Label htmlFor="loan-date" className="font-medium">Loan date</Label>
                                         <div className="relative">
-                                            <Input id="loan-date" type="date" min={today} value={data.loan_date} onChange={(e) => setData('loan_date', e.target.value)} />
+                                            <Input
+                                                id="loan-date"
+                                                type="date"
+                                                min={today}
+                                                value={data.loan_date}
+                                                onChange={(e) => {
+                                                    setData('loan_date', e.target.value);
+                                                    if (formErrors.loan_date) setFormErrors((current) => ({ ...current, loan_date: '' }));
+                                                }}
+                                            />
                                         </div>
-                                        <InputError message={errors.loan_date} />
+                                        <InputError message={formErrors.loan_date || errors.loan_date} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="return-date" className="font-medium">Expected return date</Label>
                                         <div className="relative">
-                                            <Input id="return-date" type="date" min={data.loan_date || today} value={data.expected_return_date} onChange={(e) => setData('expected_return_date', e.target.value)} />
+                                            <Input
+                                                id="return-date"
+                                                type="date"
+                                                min={data.loan_date || today}
+                                                value={data.expected_return_date}
+                                                onChange={(e) => {
+                                                    setData('expected_return_date', e.target.value);
+                                                    if (formErrors.expected_return_date) setFormErrors((current) => ({ ...current, expected_return_date: '' }));
+                                                }}
+                                            />
                                         </div>
-                                        <InputError message={errors.expected_return_date} />
+                                        <InputError message={formErrors.expected_return_date || errors.expected_return_date} />
                                     </div>
                                 </div>
                             </div>
@@ -207,35 +322,39 @@ export default function AssetLoansCreate({
                                         <Input id="asset-search" placeholder="Search " value={search} onChange={(e) => resetPage(() => setSearch(e.target.value))} className="bg-background pl-10" />
                                     </div>
                                     {isAdmin && (
-                                        <Select value={siteFilter} onValueChange={(value) => resetPage(() => setSiteFilter(value))} disabled={data.asset_ids.length > 0}>
-                                            <SelectTrigger id="site-filter" className="bg-background"><SelectValue placeholder="All sites" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">All sites</SelectItem>
-                                                {sites.map((site) => <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
+                                        <SearchCombo
+                                            id="site-filter"
+                                            value={siteFilter}
+                                            disabled={data.asset_ids.length > 0}
+                                            placeholder="All sites"
+                                            options={[{ value: 'all', label: 'All sites' }, ...sites.map((site) => ({ value: String(site.id), label: site.name }))]}
+                                            onChange={(value) => {
+                                                resetPage(() => setSiteFilter(value));
+                                                setFormErrors((current) => ({ ...current, site_id: '' }));
+                                            }}
+                                        />
                                     )}
-                                    <Select value={categoryFilter} onValueChange={(value) => resetPage(() => setCategoryFilter(value))}>
-                                        <SelectTrigger id="category-filter" className="bg-background"><SelectValue placeholder="Category" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All categories</SelectItem>
-                                            {categories.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={typeFilter} onValueChange={(value) => resetPage(() => setTypeFilter(value))}>
-                                        <SelectTrigger id="type-filter" className="bg-background"><SelectValue placeholder="Type" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All types</SelectItem>
-                                            {types.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <SearchCombo
+                                        id="category-filter"
+                                        value={categoryFilter}
+                                        placeholder="Category"
+                                        options={[{ value: 'all', label: 'All categories' }, ...categories.map((category) => ({ value: category, label: category }))]}
+                                        onChange={(value) => resetPage(() => setCategoryFilter(value))}
+                                    />
+                                    <SearchCombo
+                                        id="type-filter"
+                                        value={typeFilter}
+                                        placeholder="Type"
+                                        options={[{ value: 'all', label: 'All types' }, ...types.map((type) => ({ value: type, label: type }))]}
+                                        onChange={(value) => resetPage(() => setTypeFilter(value))}
+                                    />
                                     <Button type="button" variant="outline" onClick={clearFilters} className="bg-background"><X className="mr-2 h-4 w-4" /> Clear</Button>
                                 </div>
 
                             </div>
 
-                            <InputError message={errors.asset_ids} />
-                            <InputError message={errors.site_id} />
+                            <InputError message={formErrors.asset_ids || errors.asset_ids} />
+                            <InputError message={formErrors.site_id || errors.site_id} />
 
                             <div className="grid gap-3 md:grid-cols-2">
                                 {paginatedAssets.length === 0 ? (
@@ -295,20 +414,32 @@ export default function AssetLoansCreate({
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="condition-status" className="font-medium">Condition status</Label>
-                                        <Select value={data.condition_status} onValueChange={(value) => setData('condition_status', value)}>
-                                            <SelectTrigger id="condition-status"><SelectValue /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="good">Good</SelectItem>
-                                                <SelectItem value="semi_faulty">Semi-Faulty</SelectItem>
-                                                <SelectItem value="faulty">Faulty</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <SearchCombo
+                                            id="condition-status"
+                                            value={data.condition_status}
+                                            placeholder="Condition status"
+                                            options={[
+                                                { value: 'good', label: 'Good' },
+                                                { value: 'semi_faulty', label: 'Semi-Faulty' },
+                                                { value: 'faulty', label: 'Faulty' },
+                                            ]}
+                                            onChange={(value) => setData('condition_status', value)}
+                                        />
                                         <InputError message={errors.condition_status} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="loan-purpose" className="font-medium">Purpose <span className="text-red-500">*</span></Label>
-                                        <Textarea id="loan-purpose" placeholder="Reason to withdraw" value={data.purpose} onChange={(e) => setData('purpose', e.target.value)} className="min-h-28 resize-y" />
-                                        <InputError message={errors.purpose} />
+                                        <Textarea
+                                            id="loan-purpose"
+                                            placeholder="Reason to withdraw"
+                                            value={data.purpose}
+                                            onChange={(e) => {
+                                                setData('purpose', e.target.value);
+                                                if (formErrors.purpose) setFormErrors((current) => ({ ...current, purpose: '' }));
+                                            }}
+                                            className="min-h-28 resize-y"
+                                        />
+                                        <InputError message={formErrors.purpose || errors.purpose} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="loan-notes" className="font-medium">Notes</Label>
@@ -332,7 +463,7 @@ export default function AssetLoansCreate({
 
                                 <div className="mt-5 flex gap-3 border-t pt-5">
                                     <Button type="button" variant="outline" onClick={() => window.location.assign('/asset-loans')} className="flex-1">Cancel</Button>
-                                    <Button id="submit-loan-request" type="submit" disabled={processing || data.asset_ids.length === 0 || !data.site_id || !data.expected_return_date} className="flex-1">
+                                    <Button id="submit-loan-request" type="submit" disabled={processing} className="flex-1">
                                         <Send className="mr-2 h-4 w-4" /> Submit
                                     </Button>
                                 </div>

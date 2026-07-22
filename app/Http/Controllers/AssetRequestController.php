@@ -302,10 +302,15 @@ class AssetRequestController extends Controller
         if ($isLoanRequest) {
             // Handle AssetLoan rejection
             $loan = \App\Models\AssetLoan::findOrFail($id);
+            $request->validate([
+                'admin_notes' => 'required|string',
+            ]);
+
             $loan->update([
                 'status' => 'rejected',
                 'approved_by' => $request->user()->id,
                 'approved_at' => now(),
+                'notes' => $request->input('admin_notes'),
             ]);
 
             return back()->with('success', 'Loan request rejected.');

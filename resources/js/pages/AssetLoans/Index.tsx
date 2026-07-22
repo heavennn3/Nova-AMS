@@ -118,6 +118,14 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
     const [returnErrors, setReturnErrors] = useState<{ return_notes?: string; proof_photo?: string }>({});
 
     const returnForm = useForm({ return_notes: '', proof_photo: null as File | null });
+    const viewStatus = String(viewLoan?.status || '').toLowerCase();
+
+    const viewTimeline = viewLoan ? [
+        { label: 'Submitted', date: viewLoan.created_at || viewLoan.loan_date, icon: Calendar, color: 'text-slate-500', done: true },
+        { label: 'Approved', date: viewLoan.approved_at, icon: CheckCircle2, color: 'text-emerald-500', done: ['approved', 'return_pending', 'returned'].includes(viewStatus) },
+        { label: 'Return Requested', date: viewLoan.return_requested_at, icon: BellRing, color: 'text-orange-500', done: ['return_pending', 'returned'].includes(viewStatus) || !!viewLoan.return_requested_at },
+        { label: 'Returned', date: viewLoan.returned_at, icon: RotateCcw, color: 'text-violet-500', done: viewStatus === 'returned' || !!viewLoan.returned_at },
+    ] : [];
 
     const visibleLoans = loans.filter((l) => {
         if (tableMode === 'all') return true;
@@ -333,7 +341,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                 return (
                                     <TableRow key={loan.id} className={duration.isOverdue && canReturn ? 'bg-red-50/60 dark:bg-red-950/15' : ''}>
                                         <TableCell className="text-center font-medium text-muted-foreground">{index + 1}</TableCell>
-                                        <TableCell><Link href={`/requests/${loan.id}?is_loan=true`} className="font-mono text-sm font-medium text-primary hover:underline">{loan.loan_id}</Link></TableCell>
+                                        <TableCell><span className="text-sm font-normal text-foreground">{loan.loan_id}</span></TableCell>
                                         <TableCell><p className="font-medium text-foreground">{loan.asset_name || '—'}</p></TableCell>
                                         <TableCell><p className="font-mono text-xs text-muted-foreground">{loan.asset_id || '—'}</p></TableCell>
                                         <TableCell><div className="flex items-center gap-1.5 text-sm text-foreground"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></TableCell>
@@ -376,7 +384,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                                                 type="button"
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-7 w-7 p-0"
+                                                                className="h-7 w-7 border border-blue-200 bg-blue-50 p-0 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
                                                                 onClick={() => setViewLoan(loan)}
                                                                 aria-label="View loan details"
                                                             >
@@ -459,20 +467,41 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
             </Dialog>
 
             <Dialog open={!!viewLoan} onOpenChange={(open) => !open && setViewLoan(null)}>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent className="sm:max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Loan details</DialogTitle>
                         <DialogDescription>Read-only history record.</DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2 rounded-lg border bg-muted/20 p-3 text-sm">
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Loan ID</span><span className="font-mono text-xs">{viewLoan?.loan_id || '—'}</span></div>
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Asset</span><span className="font-medium">{viewLoan?.asset_name || '—'}</span></div>
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Asset ID</span><span className="font-mono text-xs">{viewLoan?.asset_id || '—'}</span></div>
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Loan Date</span><span>{formatDate(viewLoan?.loan_date)}</span></div>
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Expected Return</span><span>{formatDate(viewLoan?.expected_return_date)}</span></div>
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Condition</span>{getLoanBadge(getConditionConfig(viewLoan?.condition_status))}</div>
-                        <div className="flex items-center justify-between"><span className="text-muted-foreground">Status</span>{getLoanBadge(getLoanStatusConfig(viewLoan?.status))}</div>
+                    <div className="grid gap-4 sm:grid-cols-[1.2fr_.8fr]">
+                        <div className="space-y-2 rounded-lg border bg-muted/20 p-3 text-sm">
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Loan ID</span><span className="text-xs font-medium">{viewLoan?.loan_id || '—'}</span></div>
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Asset</span><span className="font-medium">{viewLoan?.asset_name || '—'}</span></div>
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Asset ID</span><span className="font-mono text-xs">{viewLoan?.asset_id || '—'}</span></div>
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Loan Date</span><span>{formatDate(viewLoan?.loan_date)}</span></div>
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Expected Return</span><span>{formatDate(viewLoan?.expected_return_date)}</span></div>
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Condition</span>{getLoanBadge(getConditionConfig(viewLoan?.condition_status))}</div>
+                            <div className="flex items-center justify-between"><span className="text-muted-foreground">Status</span>{getLoanBadge(getLoanStatusConfig(viewLoan?.status))}</div>
+                        </div>
+
+                        <div className="space-y-3 rounded-lg border bg-background p-3 text-sm">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{viewStatus === 'rejected' ? 'Rejected by' : 'Approved by'}</p>
+                            <div className="flex items-center gap-3">
+                                <div className={`flex h-9 w-9 items-center justify-center rounded-full ${viewStatus === 'rejected' ? 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'}`}>
+                                    {viewStatus === 'rejected' ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="truncate font-medium text-foreground">{viewLoan?.approver?.name || '—'}</p>
+                                    {viewLoan?.approver?.email && <p className="truncate text-xs text-muted-foreground">{viewLoan.approver.email}</p>}
+                                </div>
+                            </div>
+                            {viewStatus === 'rejected' && (
+                                <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                                    <p className="text-xs font-semibold uppercase tracking-wide">Reason</p>
+                                    <p className="mt-1 text-sm">{viewLoan?.notes || 'No reason recorded.'}</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {viewLoan?.purpose && (
@@ -481,6 +510,26 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                             <p>{viewLoan.purpose}</p>
                         </div>
                     )}
+
+                    <div className="rounded-lg border bg-background p-3">
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Timeline</p>
+                        <div>
+                            {viewTimeline.map((event, index) => (
+                                <div key={event.label} className="flex gap-3">
+                                    <div className="flex flex-col items-center">
+                                        <div className={`rounded-full p-1 ${event.done ? 'bg-white' : 'bg-muted/50'}`}>
+                                            <event.icon className={`h-4 w-4 ${event.done ? event.color : 'text-muted-foreground/30'}`} />
+                                        </div>
+                                        {index < viewTimeline.length - 1 && <div className={`h-8 w-px ${viewTimeline[index + 1]?.done ? 'bg-border' : 'bg-muted/30'}`} />}
+                                    </div>
+                                    <div className="pb-5">
+                                        <p className={`text-sm font-medium ${event.done ? 'text-foreground' : 'text-muted-foreground/40'}`}>{event.label}</p>
+                                        {event.date && <p className="text-xs text-muted-foreground">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setViewLoan(null)}>Close</Button>
