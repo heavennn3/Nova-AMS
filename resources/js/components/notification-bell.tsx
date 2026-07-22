@@ -37,22 +37,28 @@ export function NotificationBell() {
     const [loading, setLoading] = useState(false);
 
     const fetchNotifications = useCallback(async () => {
+        if (!auth?.user) return;
+
         try {
             const res = await fetch('/api/notifications', {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
+            if (!res.ok) return;
+
             const data = await res.json();
             setNotifications(data.notifications || []);
             setUnreadCount(data.unreadCount || 0);
         } catch (err) {
             console.error('Failed to fetch notifications', err);
         }
-    }, []);
+    }, [auth?.user]);
 
     useEffect(() => {
+        if (!auth?.user) return;
+
         fetchNotifications();
 
-        if (auth.user && typeof window !== 'undefined' && window.Echo) {
+        if (typeof window !== 'undefined' && window.Echo) {
             // Listen for real-time notifications
             window.Echo.private(`App.Models.User.${auth.user.id}`).notification(
                 (notification: any) => {
