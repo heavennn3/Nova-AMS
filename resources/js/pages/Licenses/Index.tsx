@@ -357,13 +357,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         {
             accessorKey: 'name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
-            cell: ({ row }: any) => (
-                <button onClick={() => {
-                    setViewLicense(row.original); setIsViewOpen(true);
-                }} className="font-semibold text-primary hover:underline text-left">
-                    {row.getValue('name')}
-                </button>
-            ),
+            cell: ({ row }: any) => <span className="text-sm font-normal text-foreground">{row.getValue('name')}</span>,
         },
         {
             accessorKey: 'category',
@@ -458,6 +452,17 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                         type="button"
                         variant="ghost"
                         size="icon"
+                        className="h-7 w-7 border border-blue-200 bg-blue-50 p-0 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
+                        onClick={() => { setViewLicense(row.original); setIsViewOpen(true); }}
+                        aria-label="View license"
+                        title="View"
+                    >
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
                         className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-300 dark:hover:bg-blue-500/10"
                         onClick={() => openEdit(row.original)}
                         aria-label="Edit license"
@@ -536,36 +541,23 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-blue-500/10 p-3">
-                        <Package className="h-6 w-6 text-blue-600" />
+                {[
+                    { label: 'Total Licenses', value: stats.total, icon: Package, bg: 'bg-slate-500/10', text: 'text-slate-600' },
+                    { label: 'Available', value: stats.available, icon: CheckCircle2, bg: 'bg-emerald-500/10', text: 'text-emerald-600' },
+                    { label: 'Full', value: stats.full, icon: Users, bg: 'bg-blue-500/10', text: 'text-blue-600' },
+                    { label: 'Expiring Soon', value: stats.expiring, icon: Clock, bg: 'bg-amber-500/10', text: 'text-amber-600' },
+                    { label: 'Expired', value: stats.expired, icon: AlertTriangle, bg: 'bg-red-500/10', text: 'text-red-600' },
+                ].map((s) => (
+                    <div key={s.label} className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className={`rounded-full ${s.bg} p-3`}>
+                            <s.icon className={`h-6 w-6 ${s.text}`} />
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">{s.label}</p>
+                            <p className={`text-2xl font-bold ${s.text}`}>{s.value}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Licenses</p>
-                        <p className="text-2xl font-bold">{stats.total}</p>
-                    </div>
-                </div>
-
-
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-amber-500/10 p-3">
-                        <Clock className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Expiring Soon</p>
-                        <p className="text-2xl font-bold">{stats.expiring}</p>
-                    </div>
-                </div>
-                <div className="flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="rounded-full bg-red-500/10 p-3">
-                        <AlertTriangle className="h-6 w-6 text-red-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Expired</p>
-                        <p className="text-2xl font-bold">{stats.expired}</p>
-                    </div>
-                </div>
-
+                ))}
             </div>
 
             {/* Filters */}
