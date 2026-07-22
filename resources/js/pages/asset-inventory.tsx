@@ -643,7 +643,7 @@ export default function AssetInventory({
                 type={type}
                 value={editForm[key as keyof typeof editForm]}
                 onChange={(e) => handleEditFormChange(key, e.target.value)}
-                className="h-9"
+                className="h-10 text-sm"
                 placeholder={`Enter ${label.toLowerCase()}`}
             />
             {editFormErrors[key] && <p className="text-xs text-red-500">{editFormErrors[key]}</p>}
@@ -932,7 +932,7 @@ export default function AssetInventory({
 
             {/* ── Edit Asset Modal ── */}
             <Dialog open={showEdit} onOpenChange={setShowEdit}>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent className="sm:max-w-2xl">
                     <form onSubmit={handleUpdate}>
                         <DialogHeader>
                             <DialogTitle>Edit Asset</DialogTitle>
@@ -947,11 +947,11 @@ export default function AssetInventory({
                                 {renderEditField('asset_name', 'Asset Name')}
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="edit-category" className="text-sm font-medium">Category</Label>
                                     <Select value={editForm.category_id} onValueChange={(value) => handleEditFormChange('category_id', value)}>
-                                        <SelectTrigger id="edit-category" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                        <SelectTrigger id="edit-category" className="h-10 w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                                         <SelectContent>
                                             {refs.categories.map((category: any) => (
                                                 <SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>
@@ -963,7 +963,7 @@ export default function AssetInventory({
                                 <div className="space-y-1.5">
                                     <Label htmlFor="edit-type" className="text-sm font-medium">Type</Label>
                                     <Select value={editForm.type_id} onValueChange={(value) => handleEditFormChange('type_id', value)}>
-                                        <SelectTrigger id="edit-type" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                        <SelectTrigger id="edit-type" className="h-10 w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                                         <SelectContent>
                                             {refs.types.map((type: any) => (
                                                 <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
@@ -975,7 +975,7 @@ export default function AssetInventory({
                                 <div className="space-y-1.5">
                                     <Label htmlFor="edit-oem" className="text-sm font-medium">OEM</Label>
                                     <Select value={editForm.oem_id} onValueChange={(value) => handleEditFormChange('oem_id', value)}>
-                                        <SelectTrigger id="edit-oem" className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                                        <SelectTrigger id="edit-oem" className="h-10 w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                                         <SelectContent>
                                             {refs.oems.map((oem: any) => (
                                                 <SelectItem key={oem.id} value={String(oem.id)}>{oem.name}</SelectItem>
@@ -984,14 +984,14 @@ export default function AssetInventory({
                                     </Select>
                                     {editFormErrors.oem_id && <p className="text-xs text-red-500">{editFormErrors.oem_id}</p>}
                                 </div>
+                                {renderEditField('quantity', 'Quantity', false, 'number')}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 {renderEditField('location', 'Location')}
                                 {renderEditField('purchase_year', 'Purchase Year', false, 'number')}
                                 {renderEditField('serial_number', 'Serial Number')}
                                 {renderEditField('part_number', 'Part Number')}
-                                {renderEditField('quantity', 'Quantity', false, 'number')}
                             </div>
                         </div>
 
