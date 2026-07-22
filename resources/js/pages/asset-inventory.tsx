@@ -116,6 +116,14 @@ export default function AssetInventory({
     const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
 
 
+    const closeDialogSafely = (close: () => void) => {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        window.setTimeout(close, 0);
+    };
+
     const [showLoan, setShowLoan] = useState(false);
     const [loanSubmitting, setLoanSubmitting] = useState(false);
     const [loanForm, setLoanForm] = useState({
@@ -163,7 +171,7 @@ export default function AssetInventory({
         }, {
             preserveScroll: true,
             onSuccess: () => {
-                setShowCreate(false);
+                closeDialogSafely(() => setShowCreate(false));
                 toast.success('Asset created!');
             },
             onError: (errors) => setFormErrors(errors as Record<string, string>),
@@ -215,7 +223,7 @@ export default function AssetInventory({
         router.put(`/assets/${editingAsset.id}`, { ...editForm, quantity: 1, site_id: Number(editForm.site_id), return_to: 'asset-inventory' }, {
             preserveScroll: true,
             onSuccess: () => {
-                setShowEdit(false);
+                closeDialogSafely(() => setShowEdit(false));
                 toast.success('Asset updated!');
             },
             onError: (errors) => setEditFormErrors(errors as Record<string, string>),
@@ -627,6 +635,85 @@ export default function AssetInventory({
         win.document.close();
     };
 
+    const SearchCombo = ({
+        id,
+        label,
+        required = false,
+        value,
+        options,
+        placeholder = 'Select',
+        error,
+        onChange,
+    }: {
+        id: string;
+        label: string;
+        required?: boolean;
+        value: string;
+        options: any[];
+        placeholder?: string;
+        error?: string;
+        onChange: (value: string) => void;
+    }) => {
+        const [open, setOpen] = useState(false);
+        const [query, setQuery] = useState('');
+        const selected = options.find((option) => String(option.id) === value);
+        const filtered = options.filter((option) => option.name.toLowerCase().includes(query.toLowerCase()));
+
+        return (
+            <div className="relative space-y-1.5">
+                <Label htmlFor={id} className="text-sm font-medium">
+                    {label}{required && <span className="ml-1 text-red-500">*</span>}
+                </Label>
+                <Button
+                    id={id}
+                    type="button"
+                    variant="outline"
+                    className="h-10 w-full justify-between text-sm font-normal"
+                    onClick={() => setOpen((current) => !current)}
+                >
+                    <span className={selected ? '' : 'text-muted-foreground'}>{selected?.name || placeholder}</span>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+                {open && (
+                    <div className="absolute z-[70] mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
+                        <div className="flex items-center border-b px-3">
+                            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                            <Input
+                                autoFocus
+                                value={query}
+                                onChange={(event) => setQuery(event.target.value)}
+                                placeholder={`Search ${label.toLowerCase()}`}
+                                className="h-10 border-0 px-0 shadow-none focus-visible:ring-0"
+                            />
+                        </div>
+                        <div className="max-h-56 overflow-y-auto p-1">
+                            {filtered.length === 0 ? (
+                                <div className="px-2 py-3 text-center text-sm text-muted-foreground">No results</div>
+                            ) : (
+                                filtered.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        type="button"
+                                        className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                        onClick={() => {
+                                            onChange(String(option.id));
+                                            setOpen(false);
+                                            setQuery('');
+                                        }}
+                                    >
+                                        <span>{option.name}</span>
+                                        {String(option.id) === value && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+                {error && <p className="text-xs text-red-500">{error}</p>}
+            </div>
+        );
+    };
+
     const renderField = (key: string, label: string, required = false, type = 'text') => (
         <div className="space-y-1.5">
             <Label htmlFor={`create-${key}`} className="text-sm font-medium">
@@ -854,7 +941,7 @@ export default function AssetInventory({
             <DataTable columns={columns} data={filteredAssets} hideToolbar={!canManageAssets} assetStatuses={canManageAssets ? assetStatuses : []} />
 
             {/* ── Create Asset Modal ── */}
-            <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <Dialog open={showCreate} onOpenChange={(open) => open ? setShowCreate(true) : closeDialogSafely(() => setShowCreate(false))}>
                 <DialogContent className="sm:max-w-2xl">
                     <form onSubmit={handleCreate}>
                         <DialogHeader>
@@ -871,66 +958,10 @@ export default function AssetInventory({
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="create-category" className="text-sm font-medium">Category</Label>
-                                    <Select
-                                        value={form.category_id}
-                                        onValueChange={(val) => handleFormChange('category_id', val)}
-                                    >
-                                        <SelectTrigger id="create-category" className="h-10 w-full text-sm">
-                                            <SelectValue placeholder="Select" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {refs.categories.map((c: any) => (
-                                                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="create-type" className="text-sm font-medium">Type</Label>
-                                    <Select
-                                        value={form.type_id}
-                                        onValueChange={(val) => handleFormChange('type_id', val)}
-                                    >
-                                        <SelectTrigger id="create-type" className="h-10 w-full text-sm">
-                                            <SelectValue placeholder="Select" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {refs.types.map((t: any) => (
-                                                <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="create-oem" className="text-sm font-medium">OEM</Label>
-                                    <Select
-                                        value={form.oem_id}
-                                        onValueChange={(val) => handleFormChange('oem_id', val)}
-                                    >
-                                        <SelectTrigger id="create-oem" className="h-10 w-full text-sm">
-                                            <SelectValue placeholder="Select" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {refs.oems.map((o: any) => (
-                                                <SelectItem key={o.id} value={String(o.id)}>{o.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="create-site" className="text-sm font-medium">Site <span className="text-red-500 ml-1">*</span></Label>
-                                    <Select value={form.site_id} onValueChange={(val) => handleFormChange('site_id', val)}>
-                                        <SelectTrigger id="create-site" className="h-10 w-full text-sm"><SelectValue placeholder="Select site" /></SelectTrigger>
-                                        <SelectContent>
-                                            {sites.map((site: any) => (
-                                                <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {formErrors.site_id && <p className="text-xs text-red-500">{formErrors.site_id}</p>}
-                                </div>
+                                <SearchCombo id="create-category" label="Category" value={form.category_id} options={refs.categories} onChange={(val) => handleFormChange('category_id', val)} />
+                                <SearchCombo id="create-type" label="Type" value={form.type_id} options={refs.types} onChange={(val) => handleFormChange('type_id', val)} />
+                                <SearchCombo id="create-oem" label="OEM" value={form.oem_id} options={refs.oems} onChange={(val) => handleFormChange('oem_id', val)} />
+                                <SearchCombo id="create-site" label="Site" required value={form.site_id} options={sites} placeholder="Select site" error={formErrors.site_id} onChange={(val) => handleFormChange('site_id', val)} />
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -942,7 +973,7 @@ export default function AssetInventory({
                         </div>
 
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setShowCreate(false)} disabled={creating}>
+                            <Button type="button" variant="outline" onClick={() => closeDialogSafely(() => setShowCreate(false))} disabled={creating}>
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={creating}>
@@ -955,7 +986,7 @@ export default function AssetInventory({
             </Dialog>
 
             {/* ── Edit Asset Modal ── */}
-            <Dialog open={showEdit} onOpenChange={setShowEdit}>
+            <Dialog open={showEdit} onOpenChange={(open) => open ? setShowEdit(true) : closeDialogSafely(() => setShowEdit(false))}>
                 <DialogContent className="sm:max-w-2xl">
                     <form onSubmit={handleUpdate}>
                         <DialogHeader>
@@ -972,54 +1003,10 @@ export default function AssetInventory({
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="edit-category" className="text-sm font-medium">Category</Label>
-                                    <Select value={editForm.category_id} onValueChange={(value) => handleEditFormChange('category_id', value)}>
-                                        <SelectTrigger id="edit-category" className="h-10 w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                                        <SelectContent>
-                                            {refs.categories.map((category: any) => (
-                                                <SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {editFormErrors.category_id && <p className="text-xs text-red-500">{editFormErrors.category_id}</p>}
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="edit-type" className="text-sm font-medium">Type</Label>
-                                    <Select value={editForm.type_id} onValueChange={(value) => handleEditFormChange('type_id', value)}>
-                                        <SelectTrigger id="edit-type" className="h-10 w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                                        <SelectContent>
-                                            {refs.types.map((type: any) => (
-                                                <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {editFormErrors.type_id && <p className="text-xs text-red-500">{editFormErrors.type_id}</p>}
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="edit-oem" className="text-sm font-medium">OEM</Label>
-                                    <Select value={editForm.oem_id} onValueChange={(value) => handleEditFormChange('oem_id', value)}>
-                                        <SelectTrigger id="edit-oem" className="h-10 w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                                        <SelectContent>
-                                            {refs.oems.map((oem: any) => (
-                                                <SelectItem key={oem.id} value={String(oem.id)}>{oem.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {editFormErrors.oem_id && <p className="text-xs text-red-500">{editFormErrors.oem_id}</p>}
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="edit-site" className="text-sm font-medium">Site <span className="ml-1 text-red-500">*</span></Label>
-                                    <Select value={editForm.site_id} onValueChange={(value) => handleEditFormChange('site_id', value)}>
-                                        <SelectTrigger id="edit-site" className="h-10 w-full text-sm"><SelectValue placeholder="Select site" /></SelectTrigger>
-                                        <SelectContent>
-                                            {sites.map((site: any) => (
-                                                <SelectItem key={site.id} value={String(site.id)}>{site.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {editFormErrors.site_id && <p className="text-xs text-red-500">{editFormErrors.site_id}</p>}
-                                </div>
+                                <SearchCombo id="edit-category" label="Category" value={editForm.category_id} options={refs.categories} error={editFormErrors.category_id} onChange={(value) => handleEditFormChange('category_id', value)} />
+                                <SearchCombo id="edit-type" label="Type" value={editForm.type_id} options={refs.types} error={editFormErrors.type_id} onChange={(value) => handleEditFormChange('type_id', value)} />
+                                <SearchCombo id="edit-oem" label="OEM" value={editForm.oem_id} options={refs.oems} error={editFormErrors.oem_id} onChange={(value) => handleEditFormChange('oem_id', value)} />
+                                <SearchCombo id="edit-site" label="Site" required value={editForm.site_id} options={sites} placeholder="Select site" error={editFormErrors.site_id} onChange={(value) => handleEditFormChange('site_id', value)} />
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1031,7 +1018,7 @@ export default function AssetInventory({
                         </div>
 
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setShowEdit(false)} disabled={updating}>Cancel</Button>
+                            <Button type="button" variant="outline" onClick={() => closeDialogSafely(() => setShowEdit(false))} disabled={updating}>Cancel</Button>
                             <Button type="submit" disabled={updating}>
                                 {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {updating ? 'Saving...' : 'Save Changes'}
