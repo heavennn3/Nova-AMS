@@ -164,12 +164,20 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
             <Head title="Asset Loans" />
 
             <div className="flex flex-col space-y-6 p-8">
-                <div className="flex items-center justify-between">
-                    <div>
+                <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
                         <h1 className="text-2xl font-bold tracking-tight">My Asset Loans</h1>
-                        <p className="mt-1 text-sm text-muted-foreground">View loan status, return proof, and admin review state</p>
+                        <p className="text-sm text-muted-foreground">View loan status, return proof, and admin review state</p>
                     </div>
-                    <Link href="/asset-loans/create"><Button><Plus className="mr-2 h-4 w-4" /> Asset Loan</Button></Link>
+                    <Link href="/asset-loans/create">
+                        <Button
+                            size="sm"
+                            className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Asset Loan
+                        </Button>
+                    </Link>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
