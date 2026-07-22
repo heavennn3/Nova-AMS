@@ -3,7 +3,7 @@ import {
     Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
     Package, CheckCircle2, AlertTriangle, Clock, Users, Layers, ChevronDown,
 } from 'lucide-react';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
@@ -39,6 +39,64 @@ const statusConfig: Record<string, { color: string; bg: string; border: string; 
     expiring_soon: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30', icon: Clock, label: 'Expiring Soon' },
     full: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30', icon: Users, label: 'Full' },
 };
+
+type ComboOption = { value: string; label: string; color?: string; bg?: string; border?: string };
+
+function SearchCombo({ value, options, placeholder, onChange }: { value: string; options: ComboOption[]; placeholder: string; onChange: (value: string) => void }) {
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const rootRef = useRef<HTMLDivElement>(null);
+    const selected = options.find((option) => option.value === value);
+    const filtered = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+
+    useEffect(() => {
+        if (!open) return;
+        const closeOnOutsideTouch = (event: PointerEvent) => {
+            if (!rootRef.current?.contains(event.target as Node)) {
+                setOpen(false);
+                setQuery('');
+            }
+        };
+        document.addEventListener('pointerdown', closeOnOutsideTouch);
+        return () => document.removeEventListener('pointerdown', closeOnOutsideTouch);
+    }, [open]);
+
+    return (
+        <div ref={rootRef} className="relative">
+            <Button type="button" variant="outline" className={`h-9 w-full justify-between bg-background font-normal ${selected?.color || ''} ${selected?.bg || ''} ${selected?.border || ''}`} onClick={() => setOpen((current) => !current)}>
+                <span className={selected ? 'truncate' : 'truncate text-muted-foreground'}>{selected?.label || placeholder}</span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+            {open && (
+                <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
+                    <div className="flex items-center border-b px-3">
+                        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${placeholder.toLowerCase()}`} className="h-10 border-0 px-0 shadow-none focus-visible:ring-0" />
+                    </div>
+                    <div className="max-h-56 overflow-y-auto p-1">
+                        {filtered.length === 0 ? (
+                            <div className="px-2 py-3 text-center text-sm text-muted-foreground">No results</div>
+                        ) : filtered.map((option) => (
+                            <button key={option.value} type="button" className={`flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground ${option.color || ''}`} onClick={() => { onChange(option.value); setOpen(false); setQuery(''); }}>
+                                <span className="flex items-center gap-2">{option.bg && <span className={`h-2 w-2 rounded-full ${option.bg}`} />}{option.label}</span>
+                                {option.value === value && <CheckCircle2 className={`h-4 w-4 ${option.color || 'text-blue-600'}`} />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const typeOptions = [
+    { value: 'per_user', label: 'Per User' },
+    { value: 'per_device', label: 'Per Device' },
+    { value: 'concurrent', label: 'Concurrent' },
+    { value: 'subscription', label: 'Subscription' },
+    { value: 'perpetual', label: 'Perpetual' },
+];
+const licenseStatusOptions = Object.entries(statusConfig).map(([value, config]) => ({ value, label: config.label, color: config.color, bg: config.bg, border: config.border }));
 
 export default function LicensesIndex({ licenses = [], users = [], assets = [], sites = [], currentSiteId = null }: any) {
     const roles = usePage<any>().props.auth?.user?.roles ?? [];
@@ -294,7 +352,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
         {
             accessorKey: 'id',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="ID" />,
-            cell: ({ row }: any) => <span className="font-mono text-xs text-muted-foreground">#{row.getValue('id')}</span>,
+            cell: ({ row }: any) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('id')}</span>,
         },
         {
             accessorKey: 'name',
@@ -311,15 +369,8 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
             accessorKey: 'category',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Category" />,
         },
-        {
-            accessorKey: 'type',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Type" />,
-        },
-        {
-            accessorKey: 'total_seat',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Total Seats" />,
-            cell: ({ row }: any) => <span className="font-medium">{row.getValue('total_seat')}</span>,
-        },
+
+
 
         {
             accessorKey: 'site',
@@ -348,11 +399,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 );
             },
         },
-        {
-            accessorKey: 'active_date',
-            header: ({ column }: any) => <DataTableColumnHeader column={column} title="Active" />,
-            cell: ({ row }: any) => <span className="text-xs">{row.getValue('active_date') || '—'}</span>,
-        },
+
         {
             accessorKey: 'end_date',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="End" />,
@@ -668,16 +715,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Type</label>
-                                <Select value={form.data.type} onValueChange={v => form.setData('type', v)}>
-                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="per_user">Per User</SelectItem>
-                                        <SelectItem value="per_device">Per Device</SelectItem>
-                                        <SelectItem value="concurrent">Concurrent</SelectItem>
-                                        <SelectItem value="subscription">Subscription</SelectItem>
-                                        <SelectItem value="perpetual">Perpetual</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo value={form.data.type} placeholder="Select" options={typeOptions} onChange={v => form.setData('type', v)} />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Allowed Seats *</label>
@@ -697,14 +735,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Site</label>
-                                <Select value={form.data.site_id} onValueChange={v => form.setData('site_id', v)}>
-                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
-                                    <SelectContent>
-                                        {sites.map((s: any) => (
-                                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo value={form.data.site_id} placeholder="Select" options={sites.map((s: any) => ({ value: String(s.id), label: s.name }))} onChange={v => form.setData('site_id', v)} />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Active Date</label>
@@ -750,16 +781,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Type</label>
-                                <Select value={editForm.data.type} onValueChange={v => editForm.setData('type', v)}>
-                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="per_user">Per User</SelectItem>
-                                        <SelectItem value="per_device">Per Device</SelectItem>
-                                        <SelectItem value="concurrent">Concurrent</SelectItem>
-                                        <SelectItem value="subscription">Subscription</SelectItem>
-                                        <SelectItem value="perpetual">Perpetual</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo value={editForm.data.type} placeholder="Select" options={typeOptions} onChange={v => editForm.setData('type', v)} />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Allowed Seats *</label>
@@ -772,14 +794,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Site</label>
-                                <Select value={editForm.data.site_id} onValueChange={v => editForm.setData('site_id', v)}>
-                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
-                                    <SelectContent>
-                                        {sites.map((s: any) => (
-                                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo value={editForm.data.site_id} placeholder="Select" options={sites.map((s: any) => ({ value: String(s.id), label: s.name }))} onChange={v => editForm.setData('site_id', v)} />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Active Date</label>
@@ -795,15 +810,7 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Status</label>
-                                <Select value={editForm.data.status} onValueChange={v => editForm.setData('status', v)}>
-                                    <SelectTrigger className="h-9"><SelectValue placeholder="Select status" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="available">Available</SelectItem>
-                                        <SelectItem value="full">Full</SelectItem>
-                                        <SelectItem value="expiring_soon">Expiring Soon</SelectItem>
-                                        <SelectItem value="expired">Expired</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <SearchCombo value={editForm.data.status} placeholder="Select status" options={licenseStatusOptions} onChange={v => editForm.setData('status', v)} />
                             </div>
                             <div className="space-y-1.5 col-span-2">
                                 <label className="text-sm font-medium">Notes</label>
