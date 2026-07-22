@@ -246,6 +246,7 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     <Table className="table-auto text-xs [&_td]:px-2 [&_td]:py-2 [&_th]:h-9 [&_th]:px-2">
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-[48px] text-center">No.</TableHead>
                                 <TableHead className="w-[110px]">Loan ID</TableHead>
                                 <TableHead className="w-[140px]">Asset</TableHead>
                                 <TableHead className="w-[105px]">Asset ID</TableHead>
@@ -260,18 +261,19 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                         <TableBody>
                             {filtered.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                                         <div className="flex flex-col items-center justify-center space-y-2">
                                             <Package className="h-8 w-8 opacity-20" />
                                             <p>No loan requests found</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : filtered.map((loan) => {
+                            ) : filtered.map((loan, index) => {
                                 const duration = calcDaysRemaining(loan.expected_return_date);
                                 const canReturn = loan.status === 'approved';
                                 return (
                                     <TableRow key={loan.id} className={duration.isOverdue && canReturn ? 'bg-red-50/60 dark:bg-red-950/15' : ''}>
+                                        <TableCell className="text-center font-medium text-muted-foreground">{index + 1}</TableCell>
                                         <TableCell><Link href={`/requests/${loan.id}?is_loan=true`} className="font-mono text-sm font-medium text-primary hover:underline">{loan.loan_id}</Link></TableCell>
                                         <TableCell><p className="font-medium text-foreground">{loan.asset_name || '—'}</p></TableCell>
                                         <TableCell><p className="font-mono text-xs text-muted-foreground">{loan.asset_id || '—'}</p></TableCell>
