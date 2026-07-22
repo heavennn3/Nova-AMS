@@ -813,8 +813,8 @@ export default function AssetInventory({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-                    <div className={`rounded-lg p-2.5 ${totalFaulty > 0 ? 'bg-red-500/20' : 'bg-amber-500/10'}`}>
-                        <AlertTriangle className={`h-5 w-5 ${totalFaulty > 0 ? 'text-red-600' : 'text-amber-600'}`} />
+                    <div className={`rounded-lg p-2.5 ${totalFaulty > 0 ? 'bg-rose-500/20' : 'bg-rose-500/10'}`}>
+                        <AlertTriangle className={`h-5 w-5 ${totalFaulty > 0 ? 'text-rose-600' : 'text-rose-600'}`} />
                     </div>
                     <div className="space-y-1">
                         <p className="text-sm font-medium leading-none text-muted-foreground">Faulty Items</p>
@@ -825,8 +825,8 @@ export default function AssetInventory({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-                    <div className="rounded-lg bg-slate-500/10 p-2.5">
-                        <Clock className="h-5 w-5 text-slate-600" />
+                    <div className="rounded-lg bg-violet-500/10 p-2.5">
+                        <Clock className="h-5 w-5 text-violet-600" />
                     </div>
                     <div className="space-y-1">
                         <p className="text-sm font-medium leading-none text-muted-foreground">Moved Items</p>
@@ -845,8 +845,8 @@ export default function AssetInventory({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-                    <div className="rounded-lg bg-violet-500/10 p-2.5">
-                        <User className="h-5 w-5 text-violet-600" />
+                    <div className="rounded-lg bg-blue-500/10 p-2.5">
+                        <User className="h-5 w-5 text-blue-600" />
                     </div>
                     <div className="space-y-1">
                         <p className="text-sm font-medium leading-none text-muted-foreground">Used Items</p>
