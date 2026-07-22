@@ -42,6 +42,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
 
 export default function AdminIndex({ requests = [], sites = [] }: { requests: any[]; sites: any[] }) {
     const [search, setSearch] = useState('');
@@ -165,8 +166,15 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
         }, {
             preserveScroll: true,
             onSuccess: () => {
+                const message = actionType === 'approve'
+                    ? 'Request approved successfully'
+                    : actionType === 'reject'
+                        ? 'Request rejected successfully'
+                        : 'Return approved successfully';
+                toast.success(message);
                 setActionRequest(null); setActionType(null); setAdminNotes('');
             },
+            onError: () => toast.error('Failed to update request'),
         });
     };
 
