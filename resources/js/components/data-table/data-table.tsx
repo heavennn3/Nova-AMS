@@ -529,7 +529,7 @@ return;
                 </div>
             )}
             <div className="rounded-lg border border-border/50 bg-card shadow-sm">
-                <Table>
+                <Table className="table-auto text-xs [&_td]:px-2 [&_td]:py-2 [&_th]:h-9 [&_th]:px-2">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
