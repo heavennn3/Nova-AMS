@@ -45,6 +45,13 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { UserFormDialog } from '@/pages/Users/UserFormDialog';
 
 type UserType = {
@@ -93,6 +100,7 @@ export default function UsersIndex({
     const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set());
     const [bulkAction, setBulkAction] = useState<string | null>(null);
     const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+    const [bulkRoleId, setBulkRoleId] = useState('3');
 
     const selectedSite = useMemo(
         () => sites.find((s) => s.id.toString() === selectedSiteId),
@@ -235,7 +243,7 @@ export default function UsersIndex({
         };
 
         if (bulkAction === 'role') {
-            payload.role_id = '2'; // Default to Manager
+            payload.role_id = bulkRoleId;
         } else if (bulkAction === 'site') {
             payload.site_id = selectedSiteId !== 'all' ? parseInt(selectedSiteId) : null;
         }
@@ -651,10 +659,10 @@ export default function UsersIndex({
 
             {/* Bulk actions bar */}
             {selectedUsers.size > 0 && (
-                <div className="flex items-center gap-3 rounded-lg border bg-blue-50 px-4 py-3 dark:bg-blue-950/20">
+                <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-blue-700 shadow-sm dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300">
                     <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300"
+                        className="h-4 w-4 rounded border-blue-300 accent-blue-600"
                         checked={true}
                         readOnly
                     />
@@ -664,31 +672,30 @@ export default function UsersIndex({
                     <div className="ml-auto flex gap-2">
                         <Button
                             size="sm"
-                            className="h-8 bg-emerald-600 hover:bg-emerald-700"
+                            className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
                             onClick={() => { setBulkAction('activate'); setBulkDialogOpen(true); }}
                         >
-                            <UserCheck className="mr-2 h-4 w-4" /> Activate
+                            <UserCheck className="h-4 w-4" /> Activate
                         </Button>
                         <Button
                             size="sm"
-                            variant="destructive"
-                            className="h-8"
+                            className="h-8 gap-1.5 border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
                             onClick={() => { setBulkAction('deactivate'); setBulkDialogOpen(true); }}
                         >
-                            <UserX className="mr-2 h-4 w-4" /> Deactivate
+                            <UserX className="h-4 w-4" /> Deactivate
                         </Button>
                         <Button
                             size="sm"
                             variant="outline"
-                            className="h-8"
-                            onClick={() => { setBulkAction('role'); setBulkDialogOpen(true); }}
+                            className="h-8 gap-1.5 border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20"
+                            onClick={() => { setBulkAction('role'); setBulkRoleId('3'); setBulkDialogOpen(true); }}
                         >
-                            <ShieldCheck className="mr-2 h-4 w-4" /> Set Role
+                            <ShieldCheck className="h-4 w-4" /> Set Role
                         </Button>
                         <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8"
+                            className="h-8 text-muted-foreground hover:text-foreground"
                             onClick={() => setSelectedUsers(new Set())}
                         >
                             Clear
@@ -912,7 +919,7 @@ export default function UsersIndex({
                 />
             </div>
 
-            <DataTable columns={columns} data={filteredUsers} hideToolbar />
+            <DataTable columns={columns} data={filteredUsers} hideToolbar enableRowSelection={false} />
 
             <UserFormDialog
                 open={!!editUser}
@@ -981,10 +988,24 @@ export default function UsersIndex({
                         <DialogDescription>
                             {bulkAction === 'activate' && `Activate ${selectedUsers.size} selected user(s). They will regain access to the system.`}
                             {bulkAction === 'deactivate' && `Deactivate ${selectedUsers.size} selected user(s). They will lose access to the system.`}
-                            {bulkAction === 'role' && `Set role for ${selectedUsers.size} selected user(s) to Manager.`}
+                            {bulkAction === 'role' && `Choose new role for ${selectedUsers.size} selected user(s).`}
                             {bulkAction === 'delete' && `Delete ${selectedUsers.size} selected user(s). This action cannot be undone.`}
                         </DialogDescription>
                     </DialogHeader>
+                    {bulkAction === 'role' && (
+                        <div className="space-y-2 py-2">
+                            <label className="text-sm font-medium text-foreground">Update role to</label>
+                            <Select value={bulkRoleId} onValueChange={setBulkRoleId}>
+                                <SelectTrigger className="h-9 border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300">
+                                    <SelectValue placeholder="Choose role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="3">Employee</SelectItem>
+                                    <SelectItem value="2">Manager</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button
                             variant="outline"

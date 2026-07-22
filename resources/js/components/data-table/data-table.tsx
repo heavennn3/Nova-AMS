@@ -45,6 +45,7 @@ interface DataTableProps<TData, TValue> {
     onBatchDelete?: (selectedRows: TData[]) => void;
     onBatchRestore?: (selectedRows: TData[]) => void;
     assetStatuses?: { id: number; name: string; color: string }[];
+    enableRowSelection?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -56,6 +57,7 @@ export function DataTable<TData, TValue>({
     onBatchDelete,
     onBatchRestore,
     assetStatuses,
+    enableRowSelection = true,
 }: DataTableProps<TData, TValue>) {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -173,8 +175,8 @@ return 'licenses';
     }), []);
 
     const tableColumns = React.useMemo(() => {
-        return [selectColumn, ...columns];
-    }, [columns, selectColumn]);
+        return enableRowSelection ? [selectColumn, ...columns] : columns;
+    }, [columns, enableRowSelection, selectColumn]);
 
     const table = useReactTable({
         data,
