@@ -370,11 +370,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
 
                 {/* Table */}
                 <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-                    <div className="bg-muted/30 border-b px-4 py-3 flex items-center justify-between">
-                        <span className="text-sm font-medium text-muted-foreground">
-                            Showing {filteredRequests.length} of {requests.length} requests
-                        </span>
-                    </div>
+
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto text-xs">
                             <thead className="bg-muted/30 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
@@ -433,17 +429,15 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                 <div className="text-[11px] text-muted-foreground">{r.user?.email}</div>
                                             </td>
                                             <td className="px-2 py-2">
-                                                {r.user?.site ? (
-                                                    <Badge variant="outline" className="text-slate-600 bg-slate-50 border-slate-200 gap-1 text-xs dark:text-slate-300 dark:bg-slate-500/10 dark:border-slate-500/30">
-                                                        <MapPin className="h-3 w-3" />
-                                                        {r.user.site.name}
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge variant="outline" className="text-slate-600 bg-slate-50 border-slate-200 gap-1 text-xs dark:text-slate-300 dark:bg-slate-500/10 dark:border-slate-500/30">
-                                                        <MapPin className="h-3 w-3" />
-                                                        {'HQ'}
-                                                    </Badge>
-                                                )}
+                                                <Badge
+                                                    variant="outline"
+                                                    className="grid w-[118px] grid-cols-[16px_1fr] items-center gap-1 border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-300"
+                                                >
+                                                    <span className="flex size-4 items-center justify-center">
+                                                        <MapPin className="size-3 shrink-0" />
+                                                    </span>
+                                                    <span className="truncate text-left">{r.user?.site?.name || 'HQ'}</span>
+                                                </Badge>
                                             </td>
                                             <td className="px-2 py-2">
                                                 <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-transparent text-xs dark:bg-indigo-500/10 dark:text-indigo-300">
