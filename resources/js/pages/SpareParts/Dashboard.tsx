@@ -25,18 +25,20 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-type ComboOption = { value: string; label: string };
+type ComboOption = { value: string; label: string; color?: string; bg?: string; border?: string };
 
 function SearchCombo({
     value,
     options,
     placeholder,
     onChange,
+    buttonClassName = 'h-10',
 }: {
     value: string;
     options: ComboOption[];
     placeholder: string;
     onChange: (value: string) => void;
+    buttonClassName?: string;
 }) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -58,7 +60,7 @@ function SearchCombo({
 
     return (
         <div ref={rootRef} className="relative">
-            <Button type="button" variant="outline" className="h-10 w-full justify-between bg-background font-normal" onClick={() => setOpen((current) => !current)}>
+            <Button type="button" variant="outline" className={`${buttonClassName} w-full justify-between bg-background font-normal ${selected?.color || ''} ${selected?.bg || ''} ${selected?.border || ''}`} onClick={() => setOpen((current) => !current)}>
                 <span className={selected ? 'truncate' : 'truncate text-muted-foreground'}>{selected?.label || placeholder}</span>
                 <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
@@ -75,15 +77,18 @@ function SearchCombo({
                             <button
                                 key={option.value}
                                 type="button"
-                                className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                className={`flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground ${option.color || ''}`}
                                 onClick={() => {
                                     onChange(option.value);
                                     setOpen(false);
                                     setQuery('');
                                 }}
                             >
-                                <span>{option.label}</span>
-                                {option.value === value && <CheckCircle className="h-4 w-4 text-blue-600" />}
+                                <span className="flex items-center gap-2">
+                                    {option.bg && <span className={`h-2 w-2 rounded-full ${option.bg}`} />}
+                                    {option.label}
+                                </span>
+                                {option.value === value && <CheckCircle className={`h-4 w-4 ${option.color || 'text-blue-600'}`} />}
                             </button>
                         ))}
                     </div>
@@ -95,9 +100,9 @@ function SearchCombo({
 
 const categoryOptions = ['RAM', 'MONITOR', 'STORAGE', 'CABLE', 'PSU', 'RJ45', 'CABLE TRACER'].map((category) => ({ value: category, label: category }));
 const statusOptions = [
-    { value: 'available', label: 'Available' },
-    { value: 'in_used', label: 'In Used' },
-    { value: 'faulty', label: 'Faulty' },
+    { value: 'available', label: 'Available', color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-500/20', border: 'border-emerald-200 dark:border-emerald-500/30' },
+    { value: 'in_used', label: 'In Use', color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-500/20', border: 'border-blue-200 dark:border-blue-500/30' },
+    { value: 'faulty', label: 'Faulty', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-500/20', border: 'border-rose-200 dark:border-rose-500/30' },
 ];
 
 export default function SparePartsDashboard({
@@ -501,39 +506,33 @@ export default function SparePartsDashboard({
                         className="h-8 pl-8 text-sm"
                     />
                 </div>
-                <Select value={filterSite} onValueChange={setFilterSite}>
-                    <SelectTrigger className="h-8 w-[140px] text-sm">
-                        <SelectValue placeholder="All Sites" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Sites</SelectItem>
-                        {sites.map((s: any) => (
-                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                    <SelectTrigger className="h-8 w-[140px] text-sm">
-                        <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Categories</SelectItem>
-                        {categories.map((c: string) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="h-8 w-[130px] text-sm">
-                        <SelectValue placeholder="All Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Status</SelectItem>
-                        <SelectItem value="available">Available</SelectItem>
-                        <SelectItem value="in_used">In Use</SelectItem>
-                        <SelectItem value="faulty">Faulty</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="w-[180px]">
+                    <SearchCombo
+                        value={filterSite}
+                        placeholder="Sites"
+                        buttonClassName="h-8 text-sm"
+                        options={[{ value: 'all', label: 'Sites' }, ...sites.map((s: any) => ({ value: String(s.id), label: s.name }))]}
+                        onChange={setFilterSite}
+                    />
+                </div>
+                <div className="w-[180px]">
+                    <SearchCombo
+                        value={filterCategory}
+                        placeholder="Categories"
+                        buttonClassName="h-8 text-sm"
+                        options={[{ value: 'all', label: 'Categories' }, ...categories.map((category) => ({ value: category, label: category }))]}
+                        onChange={setFilterCategory}
+                    />
+                </div>
+                <div className="w-[160px]">
+                    <SearchCombo
+                        value={filterStatus}
+                        placeholder="Status"
+                        buttonClassName="h-8 text-sm"
+                        options={[{ value: 'all', label: 'Status' }, ...statusOptions]}
+                        onChange={setFilterStatus}
+                    />
+                </div>
                 {(filterSite !== 'all' || filterCategory !== 'all' || filterStatus !== 'all' || search) && (
                     <Button variant="ghost" size="sm" className="h-8 text-xs"
                         onClick={() => {
