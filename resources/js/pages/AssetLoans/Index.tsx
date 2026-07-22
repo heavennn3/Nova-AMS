@@ -325,9 +325,13 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                                         <TableCell>
                                             {canReturn ? getLoanBadge(duration.isOverdue
                                                 ? { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: duration.label }
-                                                : { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: Hourglass, label: duration.label }) : (
-                                                <span className="text-xs text-muted-foreground">—</span>
-                                            )}
+                                                : { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: Hourglass, label: duration.label }) : getLoanBadge({
+                                                    color: 'text-blue-700 dark:text-blue-300',
+                                                    bg: 'bg-blue-50 dark:bg-blue-500/10',
+                                                    border: 'border-blue-200 dark:border-blue-500/30',
+                                                    icon: CheckCircle2,
+                                                    label: 'Completed',
+                                                })}
                                         </TableCell>
                                         <TableCell>{getLoanBadge(getConditionConfig(loan.condition_status))}</TableCell>
                                         <TableCell>{getLoanBadge(getLoanStatusConfig(loan.status))}</TableCell>
