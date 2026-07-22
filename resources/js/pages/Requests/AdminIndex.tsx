@@ -451,7 +451,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                         {r.user.site.name}
                                                     </Badge>
                                                 ) : (
-                                                    <span className="text-muted-foreground text-xs">—</span>
+                                                    <span className="text-muted-foreground text-xs">HQ</span>
                                                 )}
                                             </td>
                                             <td className="px-2 py-2">
