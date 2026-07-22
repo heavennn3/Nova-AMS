@@ -1,5 +1,5 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2, ChevronDown } from 'lucide-react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Package, AlertTriangle, CheckCircle, Plus, Upload, Download, Search, Edit, Trash2, ChevronDown, Eye } from 'lucide-react';
 import Papa from 'papaparse';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -135,6 +135,7 @@ export default function SparePartsDashboard({
     const [categoryPage, setCategoryPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [editPart, setEditPart] = useState<any | null>(null);
+    const [viewPart, setViewPart] = useState<any | null>(null);
     const [editData, setEditData] = useState({
         name: '',
         part_number: '',
@@ -330,11 +331,7 @@ export default function SparePartsDashboard({
         {
             accessorKey: 'name',
             header: ({ column }: any) => <DataTableColumnHeader column={column} title="Name" />,
-            cell: ({ row }: any) => (
-                <Link href={`/spare-parts/${row.original.id}`} className="font-medium text-foreground transition-colors hover:text-primary hover:underline">
-                    {row.getValue('name')}
-                </Link>
-            ),
+            cell: ({ row }: any) => <span className="text-sm font-normal text-foreground">{row.getValue('name')}</span>,
         },
         {
             accessorKey: 'part_number',
@@ -409,6 +406,17 @@ export default function SparePartsDashboard({
             header: 'Actions',
             cell: ({ row }: any) => (
                 <div className="flex items-center justify-center gap-1.5">
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 border border-blue-200 bg-blue-50 p-0 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
+                        onClick={() => setViewPart(row.original)}
+                        aria-label="View spare part"
+                        title="View"
+                    >
+                        <Eye className="h-4 w-4" />
+                    </Button>
                     <Button
                         type="button"
                         size="icon"
@@ -609,6 +617,27 @@ export default function SparePartsDashboard({
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!viewPart} onOpenChange={(open) => !open && setViewPart(null)}>
+                <DialogContent className="max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Spare part information</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-2 rounded-lg border bg-muted/20 p-3 text-sm">
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Name</span><span className="font-medium text-foreground">{viewPart?.name || '—'}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Part Number</span><span className="font-mono text-xs text-muted-foreground">{viewPart?.part_number || '—'}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Category</span><span>{viewPart?.category || '—'}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Site</span><span>{viewPart?.site_name || 'N/A'}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Place</span><span>{viewPart?.location || '—'}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Status</span><span className="capitalize">{String(viewPart?.status || '—').replace('_', ' ')}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Used By</span><span>{viewPart?.used_by_name || '—'}</span></div>
+                        <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">Created By</span><span>{viewPart?.created_by_name || 'N/A'}</span></div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setViewPart(null)}>Close</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
