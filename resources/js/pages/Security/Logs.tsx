@@ -35,6 +35,8 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
     const [selectedEvent, setSelectedEvent] = useState<string>('all');
     const [selectedUser, setSelectedUser] = useState<string>('all');
     const [selectedSite, setSelectedSite] = useState<string>('all');
+    const [userFilterSearch, setUserFilterSearch] = useState('');
+    const [siteFilterSearch, setSiteFilterSearch] = useState('');
 
     // Derive unique values
     const allEvents = useMemo(
@@ -48,6 +50,14 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
     const allSites = useMemo(
         () => [...new Set(logs.map((l) => l.site_name))].sort(),
         [logs],
+    );
+    const filteredUsers = useMemo(
+        () => allUsers.filter((user) => String(user).toLowerCase().includes(userFilterSearch.toLowerCase())),
+        [allUsers, userFilterSearch],
+    );
+    const filteredSites = useMemo(
+        () => allSites.filter((site) => String(site).toLowerCase().includes(siteFilterSearch.toLowerCase())),
+        [allSites, siteFilterSearch],
     );
 
     // Filter
@@ -338,40 +348,46 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                             <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                 User
                             </p>
-                            <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
-                                <button
-                                    onClick={() => setSelectedUser('all')}
-                                    className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedUser === 'all' ? 'font-medium' : ''}`}
-                                >
-                                    <span>All Users</span>
-                                    {selectedUser === 'all' && (
-                                        <Check className="h-3.5 w-3.5 text-primary" />
-                                    )}
-                                </button>
-                                {allUsers.map((user) => (
+                                <div className="relative mb-2">
+                                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        value={userFilterSearch}
+                                        onChange={(e) => setUserFilterSearch(e.target.value)}
+                                        placeholder="Search user"
+                                        className="h-8 pl-8 text-xs"
+                                    />
+                                </div>
+                                <div className="max-h-[180px] space-y-0.5 overflow-y-auto">
                                     <button
-                                        key={user}
-                                        onClick={() => setSelectedUser(user)}
-                                        className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedUser === user ? 'font-medium' : ''}`}
+                                        onClick={() => setSelectedUser('all')}
+                                        className={`flex w-full items-center justify-between rounded-lg border px-2 py-2 text-sm transition-all hover:bg-muted ${selectedUser === 'all' ? 'border-blue-200 bg-blue-50 font-medium text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300' : 'border-transparent'}`}
                                     >
-                                        <span>{user}</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {
-                                                    logs.filter(
-                                                        (l) =>
-                                                            l.user_name ===
-                                                            user,
-                                                    ).length
-                                                }
-                                            </span>
-                                            {selectedUser === user && (
-                                                <Check className="h-3.5 w-3.5 text-primary" />
-                                            )}
-                                        </div>
+                                        <span>All Users</span>
+                                        {selectedUser === 'all' && (
+                                            <Check className="h-3.5 w-3.5 text-current" />
+                                        )}
                                     </button>
-                                ))}
-                            </div>
+                                    {filteredUsers.map((user) => (
+                                        <button
+                                            key={user}
+                                            onClick={() => setSelectedUser(user)}
+                                            className={`flex w-full items-center justify-between rounded-lg border px-2 py-2 text-sm transition-all hover:bg-muted ${selectedUser === user ? 'border-indigo-200 bg-indigo-50 font-medium text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300' : 'border-transparent'}`}
+                                        >
+                                            <span className="truncate">{user}</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    {logs.filter((l) => l.user_name === user).length}
+                                                </span>
+                                                {selectedUser === user && (
+                                                    <Check className="h-3.5 w-3.5 text-current" />
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                    {filteredUsers.length === 0 && (
+                                        <div className="px-2 py-3 text-center text-xs text-muted-foreground">No users found</div>
+                                    )}
+                                </div>
                         </div>
 
                         {/* Site */}
@@ -379,40 +395,46 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                             <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                 Site
                             </p>
-                            <div className="max-h-[150px] space-y-0.5 overflow-y-auto">
-                                <button
-                                    onClick={() => setSelectedSite('all')}
-                                    className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedSite === 'all' ? 'font-medium' : ''}`}
-                                >
-                                    <span>All Sites</span>
-                                    {selectedSite === 'all' && (
-                                        <Check className="h-3.5 w-3.5 text-primary" />
-                                    )}
-                                </button>
-                                {allSites.map((site) => (
+                                <div className="relative mb-2">
+                                    <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        value={siteFilterSearch}
+                                        onChange={(e) => setSiteFilterSearch(e.target.value)}
+                                        placeholder="Search site"
+                                        className="h-8 pl-8 text-xs"
+                                    />
+                                </div>
+                                <div className="max-h-[180px] space-y-0.5 overflow-y-auto">
                                     <button
-                                        key={site}
-                                        onClick={() => setSelectedSite(site)}
-                                        className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted ${selectedSite === site ? 'font-medium' : ''}`}
+                                        onClick={() => setSelectedSite('all')}
+                                        className={`flex w-full items-center justify-between rounded-lg border px-2 py-2 text-sm transition-all hover:bg-muted ${selectedSite === 'all' ? 'border-blue-200 bg-blue-50 font-medium text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300' : 'border-transparent'}`}
                                     >
-                                        <span>{site}</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {
-                                                    logs.filter(
-                                                        (l) =>
-                                                            l.site_name ===
-                                                            site,
-                                                    ).length
-                                                }
-                                            </span>
-                                            {selectedSite === site && (
-                                                <Check className="h-3.5 w-3.5 text-primary" />
-                                            )}
-                                        </div>
+                                        <span>All Sites</span>
+                                        {selectedSite === 'all' && (
+                                            <Check className="h-3.5 w-3.5 text-current" />
+                                        )}
                                     </button>
-                                ))}
-                            </div>
+                                    {filteredSites.map((site) => (
+                                        <button
+                                            key={site}
+                                            onClick={() => setSelectedSite(site)}
+                                            className={`flex w-full items-center justify-between rounded-lg border px-2 py-2 text-sm transition-all hover:bg-muted ${selectedSite === site ? 'border-cyan-200 bg-cyan-50 font-medium text-cyan-700 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-300' : 'border-transparent'}`}
+                                        >
+                                            <span className="truncate">{site}</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    {logs.filter((l) => l.site_name === site).length}
+                                                </span>
+                                                {selectedSite === site && (
+                                                    <Check className="h-3.5 w-3.5 text-current" />
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                    {filteredSites.length === 0 && (
+                                        <div className="px-2 py-3 text-center text-xs text-muted-foreground">No sites found</div>
+                                    )}
+                                </div>
                         </div>
 
                         {/* Clear */}
@@ -426,6 +448,8 @@ export default function Logs({ logs = [] }: { logs: any[] }) {
                                         setSelectedEvent('all');
                                         setSelectedUser('all');
                                         setSelectedSite('all');
+                                        setUserFilterSearch('');
+                                        setSiteFilterSearch('');
                                     }}
                                 >
                                     Clear all filters

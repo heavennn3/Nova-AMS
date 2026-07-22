@@ -87,6 +87,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     const isOnLoan = !!activeLoan;
     const historicalLoans = (asset.loans || []).filter((loan: any) => !['approved', 'return_pending'].includes(String(loan.status).toLowerCase()));
     const previousAssignments = asset.assignments?.filter((assignment: any) => assignment.status !== 'active') || [];
+    const siteMovements = asset.site_movements || [];
     const loanUser = activeLoan?.user?.name || null;
     const loanReturnDate = activeLoan?.expected_return_date || null;
     const isOverdue = loanReturnDate && new Date(loanReturnDate) < new Date();
@@ -665,6 +666,51 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                     </div>
                                 </div>
                             )}
+
+                            {/* Site Movement Section */}
+                            <div>
+                                <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2 mb-4">
+                                    Site Movement History
+                                </h3>
+                                {siteMovements.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {siteMovements.map((movement: any) => (
+                                            <div key={`movement-${movement.id}`} className="border border-violet-200 bg-violet-50/40 dark:border-violet-800/40 dark:bg-violet-950/10 rounded-lg p-4">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex-1">
+                                                        <div className="mb-3 flex items-center gap-2">
+                                                            <MapPin className="h-4 w-4 text-violet-600" />
+                                                            <span className="font-semibold text-slate-900 dark:text-slate-100">
+                                                                {movement.from_site} → {movement.to_site}
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4 text-xs ml-6">
+                                                            <div>
+                                                                <span className="text-slate-500 dark:text-slate-500 block">Moved By:</span>
+                                                                <span className="text-slate-900 dark:text-slate-100 font-medium">{movement.moved_by}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-slate-500 dark:text-slate-500 block">Date & Time:</span>
+                                                                <span className="text-slate-900 dark:text-slate-100 font-medium">
+                                                                    {movement.moved_at ? new Date(movement.moved_at).toLocaleString() : '—'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300">
+                                                        Moved
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border border-dashed py-8 text-center text-slate-400">
+                                        <MapPin className="mx-auto mb-2 h-8 w-8 text-slate-300" />
+                                        <p className="text-sm">No site movement history found.</p>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Previous Users Section */}
                             <div>

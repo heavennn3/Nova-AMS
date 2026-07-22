@@ -413,74 +413,7 @@ export default function Dashboard({
 
 
 
-            {/* Recent Activities Section */}
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b px-5 py-4 gap-4 sm:gap-0">
-                    <div>
-                        <h3 className="text-sm font-semibold text-foreground">Recent Activities</h3>
 
-                    </div>
-
-                </div>
-                <div className="overflow-x-auto px-5 py-2">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                <th className="pb-3 pl-2">User</th>
-                                <th className="pb-3">Action</th>
-                                <th className="pb-3">Location / Site</th>
-                                <th className="pb-3 pr-2 text-right">Date & Time</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border/40 text-sm">
-                            {filteredActivities.slice(0, 5).map((activity: any) => (
-                                <tr key={activity.id} className="hover:bg-muted/10 transition-colors">
-                                    <td className="py-3 pl-2">
-                                        <div className="flex items-center space-x-2">
-                                            <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">
-                                                {activity.user.substring(0, 2)}
-                                            </div>
-                                            <span className="font-medium">{activity.user}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-3 text-foreground">{activity.details}</td>
-                                    <td className="py-3">
-                                        <span className="inline-flex items-center text-muted-foreground">
-                                            <MapPin className="h-3.5 w-3.5 mr-1 text-slate-400" />
-                                            {activity.location}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 pr-2 text-right font-mono text-xs text-muted-foreground flex items-center justify-end">
-                                        <Clock className="h-3.5 w-3.5 mr-1 text-slate-400" />
-                                        {activity.date_time}
-                                    </td>
-                                </tr>
-                            ))}
-                            {filteredActivities.length === 0 && (
-                                <tr>
-                                    <td colSpan={4} className="py-8 text-center text-muted-foreground text-xs">
-                                        No system logs match the selected filters.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-                {filteredActivities.length > 5 && (
-                    <div className="flex justify-end border-t px-5 py-3">
-                        <Button variant="ghost" className="text-xs" asChild>
-                            <Link href="/security/logs">Show More Audit Logs</Link>
-                        </Button>
-                    </div>
-                )}
-                {filteredActivities.length > 0 && filteredActivities.length <= 5 && (
-                    <div className="flex justify-center border-t px-5 py-3">
-                        <Button variant="ghost" className="text-xs" asChild>
-                            <Link href="/security/logs">View All Audit Logs</Link>
-                        </Button>
-                    </div>
-                )}
-            </div>
         </div>
     );
 }

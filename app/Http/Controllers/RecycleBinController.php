@@ -11,6 +11,7 @@ use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\AssetType;
 use App\Models\TableConfiguration;
+use OwenIt\Auditing\Models\Audit;
 
 class RecycleBinController extends Controller
 {
@@ -62,10 +63,18 @@ class RecycleBinController extends Controller
                 $query->where('name', 'like', "%{$search}%");
             }
         }
-        
-        $items = $query->get()->map(function ($item) use ($type) {
+        $items = $query->get()->map(function ($item) use ($type, $modelClass) {
+            $deletedBy = Audit::with('user')
+                ->where('auditable_type', $modelClass)
+                ->where('auditable_id', $item->id)
+                ->where('event', 'deleted')
+                ->latest()
+                ->first()?->user?->name;
+
             $data = [
                 'id' => $item->id,
+                'item_id' => $item->id,
+                'deleted_by' => $deletedBy ?? 'System',
                 'deleted_at' => $item->deleted_at->toIso8601String(),
                 'type' => $type
             ];
@@ -87,6 +96,8 @@ class RecycleBinController extends Controller
                 $data['name'] = $item->name ?? $item->id;
                 $data['details'] = $item->description ?? '';
             }
+
+            $data['item_name'] = $data['name'] ?? '#' . $item->id;
             
             return $data;
         })->values()->toArray();

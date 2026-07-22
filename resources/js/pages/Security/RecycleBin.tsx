@@ -192,12 +192,21 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
                 ),
             },
             {
-                accessorKey: 'name',
+                accessorKey: 'item_id',
                 header: ({ column }: any) => (
-                    <DataTableColumnHeader column={column} title="Name" />
+                    <DataTableColumnHeader column={column} title="Item ID" />
                 ),
                 cell: ({ row }: any) => (
-                    <span className="font-medium">{row.original.name}</span>
+                    <span className="font-mono text-xs text-muted-foreground">#{row.original.item_id}</span>
+                ),
+            },
+            {
+                accessorKey: 'item_name',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Item Name" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="font-medium">{row.original.item_name}</span>
                 ),
             },
             {
@@ -209,6 +218,15 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
                     <span className="text-muted-foreground">
                         {row.original.details}
                     </span>
+                ),
+            },
+            {
+                accessorKey: 'deleted_by',
+                header: ({ column }: any) => (
+                    <DataTableColumnHeader column={column} title="Deleted By" />
+                ),
+                cell: ({ row }: any) => (
+                    <span className="font-medium">{row.original.deleted_by}</span>
                 ),
             },
             {
@@ -232,21 +250,23 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
                         <div className="flex gap-2">
                             <Button
                                 variant="outline"
-                                size="sm"
+                                size="icon"
+                                className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                                 onClick={() => handleRestore(item.id)}
                                 title="Restore"
+                                aria-label="Restore item"
                             >
-                                <RefreshCcw className="mr-2 h-4 w-4" />
-                                Restore
+                                <RefreshCcw className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="destructive"
-                                size="sm"
+                                size="icon"
+                                className="h-8 w-8"
                                 onClick={() => handleForceDelete(item.id)}
                                 title="Delete Permanently"
+                                aria-label="Delete item permanently"
                             >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
                     );
@@ -262,7 +282,7 @@ export default function RecycleBin({ items, stats, filters }: RecycleBinProps) {
             <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
-                        Deleted Item
+                        Deleted Items
                     </h1>
                 </div>
             </div>

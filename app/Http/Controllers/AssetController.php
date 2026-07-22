@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Site;
 use Inertia\Inertia;
 
 class AssetController extends Controller
@@ -150,6 +151,18 @@ class AssetController extends Controller
     public function show(Asset $asset)
     {
         $asset->load('category', 'type', 'oem', 'site', 'assignments.user', 'assignments.location', 'audits.user', 'activeLoan.user', 'loans.user');
+
+        $siteNames = Site::pluck('name', 'id');
+        $asset->setAttribute('site_movements', $asset->audits
+            ->filter(fn ($audit) => $audit->event === 'updated' && array_key_exists('site_id', $audit->old_values ?? []) && array_key_exists('site_id', $audit->new_values ?? []))
+            ->map(fn ($audit) => [
+                'id' => $audit->id,
+                'from_site' => $siteNames[$audit->old_values['site_id']] ?? 'Unknown Site',
+                'to_site' => $siteNames[$audit->new_values['site_id']] ?? 'Unknown Site',
+                'moved_by' => $audit->user?->name ?? 'System',
+                'moved_at' => $audit->created_at?->toIso8601String(),
+            ])
+            ->values());
 
         $users = \App\Models\User::select('id', 'name', 'email')->orderBy('name')->get();
 
