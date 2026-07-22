@@ -1,7 +1,7 @@
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import {
     Key, Plus, Pencil, Trash2, Eye, EyeOff, Search, Upload,
-    Package, CheckCircle2, AlertTriangle, Clock, Users, Layers, ChevronDown,
+    Package, CheckCircle2, AlertTriangle, Clock, Users, Layers, ChevronDown, Copy,
 } from 'lucide-react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
@@ -386,14 +386,21 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                 const visible = visibleKeys[id];
 
                 return (
-                    <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs truncate max-w-[100px]">
+                    <div className="flex max-w-[320px] items-center gap-1.5">
+                        <span className={`font-mono text-xs ${visible ? 'whitespace-normal break-all' : 'truncate'}`}>
                             {visible ? (key || '—') : (key ? '••••••••' : '—')}
                         </span>
                         {key && (
-                            <button onClick={() => toggleKeyVisibility(id)} className="text-muted-foreground hover:text-foreground">
-                                {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                            </button>
+                            <>
+                                <button type="button" onClick={() => toggleKeyVisibility(id)} className="shrink-0 text-muted-foreground hover:text-foreground" title={visible ? 'Hide key' : 'Show key'}>
+                                    {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                </button>
+                                {visible && (
+                                    <button type="button" onClick={() => navigator.clipboard.writeText(key).then(() => toast.success('License key copied'))} className="shrink-0 text-muted-foreground hover:text-foreground" title="Copy license key">
+                                        <Copy className="h-3.5 w-3.5" />
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
                 );
