@@ -614,7 +614,16 @@ export default function LicensesIndex({ licenses = [], users = [], assets = [], 
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Status</div>
-                                    <Badge className={statusConfig[viewLicense.status]?.bg || ''}>{statusConfig[viewLicense.status]?.label || viewLicense.status}</Badge>
+                                    {(() => {
+                                        const cfg = statusConfig[viewLicense.status] || statusConfig.available;
+                                        const Icon = cfg.icon;
+                                        return (
+                                            <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} inline-flex items-center gap-1.5 px-3 py-1`}>
+                                                <Icon className="h-3.5 w-3.5" />
+                                                {cfg.label}
+                                            </Badge>
+                                        );
+                                    })()}
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Category</div>
