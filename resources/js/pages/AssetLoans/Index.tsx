@@ -13,6 +13,7 @@ import {
     XCircle,
     CheckCircle2,
     BellRing,
+    HandCoins,
 } from 'lucide-react';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
@@ -41,6 +42,14 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 
 const getLoanStatusConfig = (status: string) => {
     const normalized = status?.toLowerCase();
@@ -163,12 +172,56 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     <Link href="/asset-loans/create"><Button><Plus className="mr-2 h-4 w-4" /> Asset Loan</Button></Link>
                 </div>
 
-                <div className="grid grid-cols-5 gap-4">
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">{stats.pending}</p></div>
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Active Loans</p><p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{stats.approved}</p></div>
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Return Review</p><p className="text-2xl font-bold text-amber-600 dark:text-amber-300">{stats.return_pending}</p></div>
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Overdue</p><p className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600 dark:text-red-300' : 'text-muted-foreground'}`}>{stats.overdue}{stats.overdue > 0 && <AlertTriangle className="ml-1 inline h-5 w-5 animate-pulse text-red-500 dark:text-red-300" />}</p></div>
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm"><p className="text-sm text-muted-foreground">Returned</p><p className="text-2xl font-bold text-green-600 dark:text-green-300">{stats.returned}</p></div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className="rounded-lg bg-amber-500/10 p-2.5">
+                            <Clock className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none text-muted-foreground">Pending</p>
+                            <p className="text-2xl font-bold leading-none text-foreground">{stats.pending}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className="rounded-lg bg-blue-500/10 p-2.5">
+                            <HandCoins className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none text-muted-foreground">Active Loans</p>
+                            <p className="text-2xl font-bold leading-none text-foreground">{stats.approved}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className="rounded-lg bg-orange-500/10 p-2.5">
+                            <BellRing className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none text-muted-foreground">Return Review</p>
+                            <p className="text-2xl font-bold leading-none text-foreground">{stats.return_pending}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className={`rounded-lg p-2.5 ${stats.overdue > 0 ? 'bg-red-500/20' : 'bg-slate-500/10'}`}>
+                            <AlertTriangle className={`h-5 w-5 ${stats.overdue > 0 ? 'animate-pulse text-red-600' : 'text-slate-600'}`} />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none text-muted-foreground">Overdue</p>
+                            <p className={`text-2xl font-bold leading-none ${stats.overdue > 0 ? 'text-red-600' : 'text-foreground'}`}>{stats.overdue}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+                        <div className="rounded-lg bg-violet-500/10 p-2.5">
+                            <RotateCcw className="h-5 w-5 text-violet-600" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none text-muted-foreground">Returned</p>
+                            <p className="text-2xl font-bold leading-none text-foreground">{stats.returned}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -189,73 +242,78 @@ export default function AssetLoanIndex({ loans = [] }: { loans: any[] }) {
                     </Select>
                 </div>
 
-                <div className="rounded-xl border bg-card">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/50">
-                                    <th className="p-3 text-left font-medium">Loan ID</th>
-                                    <th className="p-3 text-left font-medium">Asset</th>
-                                    <th className="p-3 text-left font-medium">Asset ID</th>
-                                    <th className="p-3 text-left font-medium">Loan Date</th>
-                                    <th className="p-3 text-left font-medium">Expected Return</th>
-                                    <th className="p-3 text-left font-medium">Duration</th>
-                                    <th className="p-3 text-left font-medium">Condition</th>
-                                    <th className="p-3 text-left font-medium">Status</th>
-                                    <th className="p-3 text-center font-medium">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filtered.length === 0 ? (
-                                    <tr><td colSpan={9} className="p-12 text-center text-muted-foreground"><Package className="mx-auto mb-3 h-12 w-12 opacity-30" /><p>No loan requests found</p></td></tr>
-                                ) : filtered.map((loan) => {
-                                    const duration = calcDaysRemaining(loan.expected_return_date);
-                                    const canReturn = loan.status === 'approved';
-                                    return (
-                                        <tr key={loan.id} className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${duration.isOverdue && canReturn ? 'bg-red-50/60 dark:bg-red-950/15' : ''}`}>
-                                            <td className="p-3"><Link href={`/requests/${loan.id}?is_loan=true`} className="font-mono text-sm font-medium text-primary hover:underline">{loan.loan_id}</Link></td>
-                                            <td className="p-3"><p className="font-medium text-foreground">{loan.asset_name || '—'}</p></td>
-                                            <td className="p-3"><p className="font-mono text-xs text-muted-foreground">{loan.asset_id || '—'}</p></td>
-                                            <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></td>
-                                            <td className="p-3"><div className="flex items-center gap-1.5 text-sm text-foreground"><Clock className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.expected_return_date)}</div></td>
-                                            <td className="p-3">
-                                                {canReturn ? getLoanBadge(duration.isOverdue
-                                                    ? { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: duration.label }
-                                                    : { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: Hourglass, label: duration.label }) : (
+                <div className="rounded-lg border border-border/50 bg-card shadow-sm">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Loan ID</TableHead>
+                                <TableHead>Asset</TableHead>
+                                <TableHead>Asset ID</TableHead>
+                                <TableHead>Loan Date</TableHead>
+                                <TableHead>Expected Return</TableHead>
+                                <TableHead>Duration</TableHead>
+                                <TableHead>Condition</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-center">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filtered.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                                        <div className="flex flex-col items-center justify-center space-y-2">
+                                            <Package className="h-8 w-8 opacity-20" />
+                                            <p>No loan requests found</p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : filtered.map((loan) => {
+                                const duration = calcDaysRemaining(loan.expected_return_date);
+                                const canReturn = loan.status === 'approved';
+                                return (
+                                    <TableRow key={loan.id} className={duration.isOverdue && canReturn ? 'bg-red-50/60 dark:bg-red-950/15' : ''}>
+                                        <TableCell><Link href={`/requests/${loan.id}?is_loan=true`} className="font-mono text-sm font-medium text-primary hover:underline">{loan.loan_id}</Link></TableCell>
+                                        <TableCell><p className="font-medium text-foreground">{loan.asset_name || '—'}</p></TableCell>
+                                        <TableCell><p className="font-mono text-xs text-muted-foreground">{loan.asset_id || '—'}</p></TableCell>
+                                        <TableCell><div className="flex items-center gap-1.5 text-sm text-foreground"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.loan_date)}</div></TableCell>
+                                        <TableCell><div className="flex items-center gap-1.5 text-sm text-foreground"><Clock className="h-3.5 w-3.5 text-muted-foreground" />{formatDate(loan.expected_return_date)}</div></TableCell>
+                                        <TableCell>
+                                            {canReturn ? getLoanBadge(duration.isOverdue
+                                                ? { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: AlertTriangle, label: duration.label }
+                                                : { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: Hourglass, label: duration.label }) : (
+                                                <span className="text-xs text-muted-foreground">—</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>{getLoanBadge(getConditionConfig(loan.condition_status))}</TableCell>
+                                        <TableCell>{getLoanBadge(getLoanStatusConfig(loan.status))}</TableCell>
+                                        <TableCell>
+                                            <div className="mx-auto flex min-h-12 w-[36px] items-center justify-center gap-1.5">
+                                                {canReturn ? (
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-7 w-7 p-0"
+                                                                onClick={() => openReturn(loan)}
+                                                                aria-label="Return asset"
+                                                            >
+                                                                <RotateCcw className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Return</TooltipContent>
+                                                    </Tooltip>
+                                                ) : (
                                                     <span className="text-xs text-muted-foreground">—</span>
                                                 )}
-                                            </td>
-                                            <td className="p-3">{getLoanBadge(getConditionConfig(loan.condition_status))}</td>
-                                            <td className="p-3">{getLoanBadge(getLoanStatusConfig(loan.status))}</td>
-                                            <td className="p-3">
-                                                <div className="mx-auto flex min-h-12 w-[36px] items-center justify-center gap-1.5">
-                                                    {canReturn ? (
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-7 w-7 p-0"
-                                                                    onClick={() => openReturn(loan)}
-                                                                    aria-label="Return asset"
-                                                                >
-                                                                    <RotateCcw className="h-4 w-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>Return</TooltipContent>
-                                                        </Tooltip>
-                                                    ) : (
-                                                        <span className="text-xs text-muted-foreground">—</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
 
