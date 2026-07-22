@@ -20,7 +20,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -52,52 +51,18 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
 
-    // Selection
-    const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-
     // Action dialogs
     const [actionRequest, setActionRequest] = useState<any>(null);
     const [actionType, setActionType] = useState<'approve' | 'reject' | 'return' | null>(null);
     const [adminNotes, setAdminNotes] = useState('');
     const [proofImagePreview, setProofImagePreview] = useState<string | null>(null);
 
-    // Batch dialogs
-    const [batchAction, setBatchAction] = useState<'approve' | 'reject' | null>(null);
-    const [batchNotes, setBatchNotes] = useState('');
-
-    const toggleRow = (id: number) => {
-        setSelectedRows(prev => {
-            const next = new Set(prev);
-            next.has(id) ? next.delete(id) : next.add(id);
-
-            return next;
-        });
-    };
-
-    const toggleAll = () => {
-        const pendingIds = filteredRequests.filter(r => r.status === 'Pending').map(r => r.id);
-
-        if (pendingIds.every(id => selectedRows.has(id))) {
-            setSelectedRows(new Set());
-        } else {
-            setSelectedRows(new Set(pendingIds));
-        }
-    };
-
-    const pendingSelected = [...selectedRows].filter(id => requests.find(r => r.id === id && r.status === 'Pending'));
-
-    const submitBatchAction = () => {
-        if (!batchAction || pendingSelected.length === 0) {
-            return;
-        }
-
-        const url = `/requests/batch-${batchAction}`;
-        router.post(url, { ids: pendingSelected, admin_notes: batchNotes }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setBatchAction(null); setBatchNotes(''); setSelectedRows(new Set());
-            },
-        });
+    const statusSortOrder: Record<string, number> = {
+        pending: 0,
+        return_pending: 1,
+        approved: 2,
+        returned: 3,
+        rejected: 4,
     };
 
     const filteredRequests = requests.filter((r) => {
@@ -119,6 +84,11 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             !dateTo || new Date(r.created_at) <= new Date(dateTo + 'T23:59:59');
 
         return matchesSearch && matchesStatus && matchesType && matchesSite && matchesDateFrom && matchesDateTo;
+    }).sort((a, b) => {
+        const aOrder = statusSortOrder[a.status?.toLowerCase()] ?? 99;
+        const bOrder = statusSortOrder[b.status?.toLowerCase()] ?? 99;
+
+        return aOrder - bOrder || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
     const getStatusConfig = (status: string) => {
@@ -345,29 +315,6 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                     )}
                 </div>
 
-                {/* Batch Action Bar */}
-                {pendingSelected.length > 0 && (
-                    <div className="flex items-center gap-3 bg-primary/5 border rounded-xl px-5 py-3">
-                        <Checkbox checked={true} className="pointer-events-none" />
-                        <span className="text-sm font-semibold">{pendingSelected.length} pending request(s) selected</span>
-                        <div className="ml-auto flex gap-2">
-                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
-                                setBatchAction('approve'); setBatchNotes('');
-                            }}>
-                                <CheckCircle className="h-3.5 w-3.5 mr-1" /> Batch Approve
-                            </Button>
-                            <Button size="sm" variant="destructive" onClick={() => {
-                                setBatchAction('reject'); setBatchNotes('');
-                            }}>
-                                <XCircle className="h-3.5 w-3.5 mr-1" /> Batch Reject
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setSelectedRows(new Set())}>
-                                Clear
-                            </Button>
-                        </div>
-                    </div>
-                )}
-
                 {/* Table */}
                 <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
 
@@ -375,8 +322,6 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         <table className="w-full table-auto text-xs">
                             <thead className="bg-muted/30 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider border-b">
                                 <tr>
-                                    <th className="w-8 px-2 py-2">
-                                    </th>
                                     <th className="w-[95px] px-2 py-2 text-left">Request ID</th>
                                     <th className="w-[190px] px-2 py-2 text-left">Name</th>
                                     <th className="w-[130px] px-2 py-2 text-left">Site</th>
@@ -405,14 +350,6 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                             'hover:bg-muted/30'
                                                 }`}
                                         >
-                                            <td className="w-8 px-2 py-2">
-                                                {isPending ? (
-                                                    <Checkbox
-                                                        checked={selectedRows.has(r.id)}
-                                                        onCheckedChange={() => toggleRow(r.id)}
-                                                    />
-                                                ) : <span className="block w-4" />}
-                                            </td>
                                             <td className="px-2 py-2">
                                                 <div className="flex items-center gap-2">
                                                     {isPending && (
@@ -421,7 +358,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                                                     {isReturnPending && (
                                                         <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
                                                     )}
-                                                    <span className="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-300">{r.request_number}</span>
+                                                    <span className="text-xs font-normal text-foreground">{r.request_number}</span>
                                                 </div>
                                             </td>
                                             <td className="px-2 py-2">
@@ -718,43 +655,7 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                 </DialogContent>
             </Dialog>
 
-            {/* Batch Action Dialog */}
-            <Dialog open={!!batchAction} onOpenChange={() => setBatchAction(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            {batchAction === 'approve' ? 'Batch Approve' : 'Batch Reject'} {pendingSelected.length} Request(s)
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-2">
-                        <div className="rounded-lg bg-muted/50 p-3 text-sm">
-                            <span className="text-muted-foreground">Selected requests: </span>
-                            <span className="font-semibold">{pendingSelected.length} pending</span>
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-sm font-semibold">
-                                Admin Notes {batchAction === 'reject' && <span className="text-rose-500">*</span>}
-                            </Label>
-                            <Textarea
-                                value={batchNotes}
-                                onChange={(e) => setBatchNotes(e.target.value)}
-                                placeholder={batchAction === 'reject' ? 'Provide a reason for rejection...' : 'Optional notes for all selected requests...'}
-                                className="min-h-[80px]"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setBatchAction(null)}>Cancel</Button>
-                        <Button
-                            onClick={submitBatchAction}
-                            className={batchAction === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-rose-600 hover:bg-rose-700 text-white'}
-                            disabled={batchAction === 'reject' && !batchNotes.trim()}
-                        >
-                            {batchAction === 'approve' ? 'Approve All' : 'Reject All'} ({pendingSelected.length})
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+
         </>
     );
 }
