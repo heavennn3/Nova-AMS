@@ -14,11 +14,15 @@ import {
     MapPin,
     MoreHorizontal,
     UserCheck,
+    Shield,
+    CheckCircle2,
+    XCircle,
 } from 'lucide-react';
 import { useState, useMemo, useCallback } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableActions } from '@/components/data-table/data-table-actions';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -153,16 +157,14 @@ export default function UsersIndex({
         [users],
     );
 
-    const roleColors: Record<string, string> = {
-        Admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-        Manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-        Employee: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
-        'Site Manager':
-            'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
-        Technician:
-            'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-        Viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300',
-        None: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    const roleColors: Record<string, { color: string; bg: string; border: string }> = {
+        Admin: { color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-200 dark:border-violet-500/30' },
+        Manager: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/30' },
+        Employee: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30' },
+        'Site Manager': { color: 'text-sky-700 dark:text-sky-300', bg: 'bg-sky-50 dark:bg-sky-500/10', border: 'border-sky-200 dark:border-sky-500/30' },
+        Technician: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30' },
+        Viewer: { color: 'text-slate-600 dark:text-slate-300', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30' },
+        None: { color: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30' },
     };
 
     const getInitials = (name: string) =>
@@ -341,9 +343,13 @@ export default function UsersIndex({
                             type="button"
                             onClick={() => setSelectedRole(role)}
                             title={`Filter by ${role}`}
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-opacity hover:opacity-80 ${colorClass}`}
                         >
-                            {role}
+                            <Badge variant="outline" className={`${colorClass.color} ${colorClass.border} ${colorClass.bg} grid w-[112px] grid-cols-[16px_1fr] items-center gap-1`}>
+                                <span className="flex size-4 items-center justify-center">
+                                    <Shield className="size-3 shrink-0" />
+                                </span>
+                                <span className="truncate text-left">{role}</span>
+                            </Badge>
                         </button>
                     );
                 },
@@ -357,18 +363,18 @@ export default function UsersIndex({
                 cell: ({ row }: any) => {
                     const isActive = row.original.is_active;
 
+                    const cfg = isActive
+                        ? { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-200 dark:border-emerald-500/30', icon: CheckCircle2, label: 'Active' }
+                        : { color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', icon: XCircle, label: 'Deactivated' };
+                    const Icon = cfg.icon;
+
                     return (
-                        <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${isActive
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                }`}
-                        >
-                            <span
-                                className={`inline-block h-1.5 w-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-red-500'}`}
-                            />
-                            {isActive ? 'Active' : 'Deactivated'}
-                        </span>
+                        <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[112px] grid-cols-[16px_1fr] items-center gap-1`}>
+                            <span className="flex size-4 items-center justify-center">
+                                <Icon className="size-3 shrink-0" />
+                            </span>
+                            <span className="truncate text-left">{cfg.label}</span>
+                        </Badge>
                     );
                 },
                 enableSorting: false,
@@ -422,57 +428,41 @@ export default function UsersIndex({
                     const user = row.original;
 
                     return (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Open menu</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44">
-                                <DropdownMenuItem
-                                    onClick={() => setEditUser(user)}
-                                >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit User
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={`/users/${user.id}/edit`}>
-                                        <ShieldCheck className="mr-2 h-4 w-4" />
-                                        Full Profile
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        setConfirmAction({
-                                            type: 'toggle',
-                                            user,
-                                        })
-                                    }
-                                >
-                                    <Power className="mr-2 h-4 w-4" />
-                                    {user.is_active ? 'Deactivate' : 'Activate'}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="text-red-600 focus:text-red-600"
-                                    onClick={() =>
-                                        setConfirmAction({
-                                            type: 'delete',
-                                            user,
-                                        })
-                                    }
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete User
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-300 dark:hover:bg-blue-500/10"
+                                onClick={() => setEditUser(user)}
+                                aria-label="Edit user"
+                                title="Edit"
+                            >
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 p-0 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-300 dark:hover:bg-amber-500/10"
+                                onClick={() => setConfirmAction({ type: 'toggle', user })}
+                                aria-label={user.is_active ? 'Deactivate user' : 'Activate user'}
+                                title={user.is_active ? 'Deactivate' : 'Activate'}
+                            >
+                                <Power className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 p-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10"
+                                onClick={() => setConfirmAction({ type: 'delete', user })}
+                                aria-label="Delete user"
+                                title="Delete"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
                     );
                 },
                 enableSorting: false,
@@ -642,7 +632,7 @@ export default function UsersIndex({
                             }
                         >
                             <div
-                                className={`flex h-9 w-9 items-center justify-center rounded-md ${color}`}
+                                className={`flex h-9 w-9 items-center justify-center rounded-md ${color.bg} ${color.color}`}
                             >
                                 <ShieldCheck className="h-4.5 w-4.5" />
                             </div>
