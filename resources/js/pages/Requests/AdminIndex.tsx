@@ -29,13 +29,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Tooltip,
@@ -43,6 +36,48 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+
+type ComboOption = { value: string; label: string; color?: string; bg?: string; border?: string };
+
+function SearchCombo({ value, options, placeholder, onChange }: { value: string; options: ComboOption[]; placeholder: string; onChange: (value: string) => void }) {
+    const [open, setOpen] = React.useState(false);
+    const [query, setQuery] = React.useState('');
+    const ref = React.useRef<HTMLDivElement>(null);
+    const selected = options.find(o => o.value === value);
+    const filtered = options.filter(o => o.label.toLowerCase().includes(query.toLowerCase()));
+
+    React.useEffect(() => {
+        const close = (event: MouseEvent) => {
+            if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+        };
+        document.addEventListener('mousedown', close);
+        return () => document.removeEventListener('mousedown', close);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative w-[150px]">
+            <button type="button" onClick={() => setOpen(v => !v)} className={`flex h-8 w-full items-center justify-between rounded-md border bg-background px-3 text-left text-sm shadow-sm ${selected?.color || ''} ${selected?.border || ''} ${selected?.bg || ''}`}>
+                <span className="truncate">{selected?.label || placeholder}</span>
+                <span className="text-muted-foreground">⌄</span>
+            </button>
+            {open && (
+                <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
+                    <div className="p-1">
+                        <Input autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search..." className="h-8 text-sm" />
+                    </div>
+                    <div className="max-h-56 overflow-auto p-1">
+                        {filtered.map(option => (
+                            <button key={option.value} type="button" onClick={() => { onChange(option.value); setOpen(false); setQuery(''); }} className={`mb-1 flex w-full items-center rounded-md border px-2 py-1.5 text-left text-sm hover:bg-muted ${option.color || ''} ${option.border || 'border-transparent'} ${option.bg || ''}`}>
+                                {option.label}
+                            </button>
+                        ))}
+                        {filtered.length === 0 && <div className="px-2 py-2 text-sm text-muted-foreground">No results</div>}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function AdminIndex({ requests = [], sites = [] }: { requests: any[]; sites: any[] }) {
     const [search, setSearch] = useState('');
@@ -104,7 +139,8 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             'Return_pending': { color: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-200 dark:border-orange-500/30', icon: BellRing },
         };
 
-        return config[status] || { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock };
+        const fallback = { color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10', border: 'border-slate-200 dark:border-slate-500/30', icon: Clock };
+        return config[status] || config[status?.toLowerCase()?.replace(/^./, c => c.toUpperCase())] || fallback;
     };
 
     const getStatusBadge = (status: string) => {
@@ -118,6 +154,18 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
             </Badge>
         );
     };
+
+    const statusFilterOptions = [
+        { value: 'all', label: 'All Status' },
+        ...['Pending', 'Return_pending', 'Approved', 'Returned', 'Rejected'].map(status => {
+            const cfg = getStatusConfig(status);
+            return { value: status, label: status === 'Return_pending' ? 'Return Review' : status, color: cfg.color, bg: cfg.bg, border: cfg.border };
+        }),
+    ];
+    const siteFilterOptions = [
+        { value: 'all', label: 'All Sites' },
+        ...sites.map((site: any) => ({ value: site.id.toString(), label: site.name })),
+    ];
 
     const getPriorityBadge = (priority: string) => {
         switch (priority) {
@@ -264,33 +312,9 @@ export default function AdminIndex({ requests = [], sites = [] }: { requests: an
                         />
                     </div>
 
-                    <Select value={selectedSite} onValueChange={setSelectedSite}>
-                        <SelectTrigger className="h-8 w-[150px] text-sm">
-                            <SelectValue placeholder="Site" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Sites</SelectItem>
-                            {sites.map((site: any) => (
-                                <SelectItem key={site.id} value={site.id.toString()}>{site.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <SearchCombo value={selectedSite} placeholder="Site" options={siteFilterOptions} onChange={setSelectedSite} />
 
-                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                        <SelectTrigger className="h-8 w-[150px] text-sm">
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="Approved">Approved</SelectItem>
-
-                            <SelectItem value="Returned">Returned</SelectItem>
-                            <SelectItem value="Return_pending">Return Review</SelectItem>
-                            <SelectItem value="Rejected">Rejected</SelectItem>
-
-                        </SelectContent>
-                    </Select>
+                    <SearchCombo value={selectedStatus} placeholder="Status" options={statusFilterOptions} onChange={setSelectedStatus} />
 
 
 
