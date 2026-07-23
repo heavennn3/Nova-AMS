@@ -90,6 +90,8 @@ export default function AssetInventory({
     const [siteFilter, setSiteFilter] = useState(currentSiteId ? String(currentSiteId) : 'all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
+    const [typeFilterOpen, setTypeFilterOpen] = useState(false);
+    const [typeFilterQuery, setTypeFilterQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
     // create 
@@ -337,22 +339,22 @@ export default function AssetInventory({
                 id: 'status',
                 accessorKey: 'status',
                 filterFn: (row: any, id: string, filterValue: string[]) => filterValue.includes(row.getValue(id)),
-                header: 'Status',
+                header: () => <div className="w-[104px] text-center">Status</div>,
                 cell: ({ row }: any) => {
                     const val = row.getValue('status') ?? 'stored';
                     const cfg = getAssetStatusConfig(String(val));
                     const Icon = cfg.icon;
 
                     return (
-                        <div className="flex justify-center">
+                        <div className="flex w-[104px] justify-center">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button type="button">
-                                        <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid w-[112px] grid-cols-[16px_1fr_16px] items-center gap-1`}>
+                                    <button type="button" className="inline-flex h-7 items-center justify-center">
+                                        <Badge variant="outline" className={`${cfg.color} ${cfg.border} ${cfg.bg} grid h-7 w-[104px] grid-cols-[14px_1fr_14px] items-center gap-1 px-2 py-0 text-xs leading-none`}>
                                             <span className="flex size-4 items-center justify-center">
                                                 <Icon className="size-3 shrink-0" />
                                             </span>
-                                            <span className="truncate text-center">{cfg.label}</span>
+                                            <span className="truncate text-center leading-none">{cfg.label}</span>
                                             <span className="flex size-4 items-center justify-center">
                                                 <ChevronDown className="size-3 shrink-0" />
                                             </span>
@@ -470,6 +472,11 @@ export default function AssetInventory({
 
         return result;
     }, [assets, search, siteFilter, categoryFilter, typeFilter, statusFilter]);
+
+    const typeFilterOptions = useMemo(() => Array.from(new Set<string>((assets || [])
+        .map((a: any) => String(a.type_name ?? a.type ?? '').trim())
+        .filter(Boolean)))
+        .filter((type) => type.toLowerCase().includes(typeFilterQuery.toLowerCase())), [assets, typeFilterQuery]);
 
     const totalStored = useMemo(() => {
         return (assets || []).filter((asset: any) =>
@@ -880,19 +887,64 @@ export default function AssetInventory({
                     </SelectContent>
                 </Select>
 
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="h-8 w-[180px] text-sm">
-                        <SelectValue placeholder="All Types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Types</SelectItem>
-                        {Array.from(new Set<string>((assets || []).map((a: any) => String(a.type_name ?? a.type ?? '').trim()).filter(Boolean))).map((type) => (
-                            <SelectItem key={type} value={type.toLowerCase()}>
-                                {type}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <div className="relative">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="h-8 w-[180px] justify-between text-sm font-normal"
+                        onClick={() => setTypeFilterOpen((open) => !open)}
+                    >
+                        <span className={typeFilter === 'all' ? 'text-muted-foreground' : ''}>
+                            {typeFilter === 'all' ? 'Types' : typeFilter}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                    {typeFilterOpen && (
+                        <div className="absolute z-[70] mt-1 w-[220px] overflow-hidden rounded-md border bg-popover shadow-lg">
+                            <div className="flex items-center border-b px-3">
+                                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                <Input
+                                    autoFocus
+                                    value={typeFilterQuery}
+                                    onChange={(event) => setTypeFilterQuery(event.target.value)}
+                                    placeholder="Search types"
+                                    className="h-9 border-0 px-0 shadow-none focus-visible:ring-0"
+                                />
+                            </div>
+                            <div className="max-h-56 overflow-y-auto p-1">
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                    onClick={() => {
+                                        setTypeFilter('all');
+                                        setTypeFilterOpen(false);
+                                        setTypeFilterQuery('');
+                                    }}
+                                >
+                                    <span>Types</span>
+                                    {typeFilter === 'all' && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                                </button>
+                                {typeFilterOptions.length === 0 ? (
+                                    <div className="px-2 py-3 text-center text-sm text-muted-foreground">No results</div>
+                                ) : typeFilterOptions.map((type) => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                        onClick={() => {
+                                            setTypeFilter(type.toLowerCase());
+                                            setTypeFilterOpen(false);
+                                            setTypeFilterQuery('');
+                                        }}
+                                    >
+                                        <span>{type}</span>
+                                        {type.toLowerCase() === typeFilter && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="h-8 w-[180px] text-sm">
