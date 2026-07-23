@@ -141,8 +141,8 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
     // Badges:
     // Status Badge value and styling
     const statusValue = asset.status?.name || asset.status_name || asset.asset_status || 'available';
-    // Condition Badge
-    const conditionValue = asset.condition || 'Good';
+    // Site Badge
+    const siteLocationValue = asset.site?.name || asset.site_name || 'No Site';
     // Category Badge
     const categoryValue = asset.category?.name || '—';
 
@@ -350,34 +350,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                         <TooltipContent>Print Label</TooltipContent>
                     </Tooltip>
 
-                    {isAdmin && (
-                        activeAssignment ? (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => setIsCheckinOpen(true)} aria-label="Return">
-                                        <UserMinus className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Return</TooltipContent>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7 p-0"
-                                        onClick={() => setIsCheckoutOpen(true)}
-                                        disabled={statusValue === 'retired' || statusValue === 'maintenance'}
-                                        aria-label="Checkout"
-                                    >
-                                        <UserPlus className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Checkout</TooltipContent>
-                            </Tooltip>
-                        )
-                    )}
+
 
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -456,13 +429,8 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 )}>
                                     {statusValue.charAt(0).toUpperCase() + statusValue.slice(1).replace('_', ' ')}
                                 </span>
-                                <span className={cn(
-                                    "px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors",
-                                    getConditionStyle(conditionValue).bg,
-                                    getConditionStyle(conditionValue).text,
-                                    getConditionStyle(conditionValue).bg.includes('slate') ? 'border-slate-200' : getConditionStyle(conditionValue).bg.replace('bg-', 'border-').replace('/80', '').replace('-50', '-200')
-                                )}>
-                                    {conditionValue}
+                                <span className="px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/30">
+                                    {siteLocationValue}
                                 </span>
                                 <span className={cn(
                                     "px-3 py-0.5 rounded-full text-xs font-semibold border transition-colors",
@@ -670,7 +638,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                             {/* Site Movement Section */}
                             <div>
                                 <h3 className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 uppercase border-b border-slate-100 dark:border-slate-800 pb-2 mb-4">
-                                    Site Movement History
+                                    ASSET TRANSFER
                                 </h3>
                                 {siteMovements.length > 0 ? (
                                     <div className="space-y-3">
@@ -707,7 +675,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 ) : (
                                     <div className="rounded-lg border border-dashed py-8 text-center text-slate-400">
                                         <MapPin className="mx-auto mb-2 h-8 w-8 text-slate-300" />
-                                        <p className="text-sm">No site movement history found.</p>
+                                        <p className="text-sm">No transfer record found.</p>
                                     </div>
                                 )}
                             </div>
@@ -810,7 +778,7 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
                                 ) : (
                                     <div className="text-center py-12 text-slate-400">
                                         <Clock className="mx-auto h-12 w-12 text-slate-200 mb-3" />
-                                        <p className="text-sm">No previous history found on this asset.</p>
+                                        <p className="text-sm">No record found on.</p>
                                     </div>
                                 )}
                             </div>
@@ -878,64 +846,6 @@ export default function Show({ asset, users = [] }: { asset: any; users?: any[] 
             `}} />
 
             {/* MODALS / DIALOGS POPUPS */}
-
-            {/* CHECKOUT DIALOG */}
-            <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Assign / Checkout Asset</DialogTitle>
-                        <DialogDescription>
-                            Assign this asset to an active user.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={handleCheckoutSubmit} className="space-y-4 py-2 text-left">
-                        <div className="space-y-2">
-                            <Label htmlFor="user_id">Select User</Label>
-                            <Select
-                                value={checkoutForm.data.user_id}
-                                onValueChange={(val) => checkoutForm.setData('user_id', val)}
-                                required
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select target user..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {users.map((user: any) => (
-                                        <SelectItem key={user.id} value={user.id.toString()}>
-                                            {user.name} ({user.email})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="remarks">Administrative Notes / Remarks</Label>
-                            <Textarea
-                                id="remarks"
-                                value={checkoutForm.data.remarks}
-                                onChange={(e) => checkoutForm.setData('remarks', e.target.value)}
-                                placeholder="State condition, reason, or remarks..."
-                                rows={3}
-                            />
-                        </div>
-
-                        <DialogFooter className="pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsCheckoutOpen(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={checkoutForm.processing} className="bg-blue-600 hover:bg-blue-700 text-white">
-                                Checkout
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
 
             {/* CHECKIN DIALOG */}
             <Dialog open={isCheckinOpen} onOpenChange={setIsCheckinOpen}>
