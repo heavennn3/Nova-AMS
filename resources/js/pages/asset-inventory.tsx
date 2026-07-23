@@ -294,7 +294,7 @@ export default function AssetInventory({
         setSiteFilter(value);
 
         if (value === 'all') {
-            router.get('/asset-inventory', {}, { preserveState: true, replace: true });
+            router.get('/asset-inventory', { site_id: 'all' }, { preserveState: true, replace: true });
         } else {
             router.get('/asset-inventory', { site_id: value }, { preserveState: true, replace: true });
         }

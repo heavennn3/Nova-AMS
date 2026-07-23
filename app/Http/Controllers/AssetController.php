@@ -52,12 +52,12 @@ class AssetController extends Controller
         $user = $request->user();
         $siteId = $request->query('site_id');
 
-        if ($user && !$user->hasRole('Admin') && !$user->hasRole('Manager')) {
-            $siteId = $user->site_id;
+        if ($siteId === 'all') {
+            $siteId = null;
         }
 
-        if (!$siteId) {
-            $siteId = \App\Models\Site::orderBy('name')->value('id');
+        if ($user && !$user->hasRole('Admin') && !$user->hasRole('Manager')) {
+            $siteId = $user->site_id;
         }
 
         $assetsQuery = Asset::with('category', 'type', 'oem', 'site', 'activeLoan.user')->latest();
