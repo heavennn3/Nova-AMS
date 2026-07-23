@@ -30,6 +30,10 @@ import {
     XAxis,
     YAxis,
     CartesianGrid,
+    PieChart,
+    Pie,
+    Cell,
+    Legend,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import {
@@ -76,9 +80,13 @@ export default function Dashboard({
     const isManager = roles.includes('Manager') || roles.includes('Site Manager');
     const canViewGlobalCards = roles.includes('Admin') || isManager;
 
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
+    const [currentDateTime, setCurrentDateTime] = useState<Date | null>(null);
     const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
     const [selectedActionFilter, setSelectedActionFilter] = useState('all');
+    const categoryChartData = stats.assetSummary?.byCategory ?? [];
+    const categoryTotal = categoryChartData.reduce((total: number, item: any) => total + (item.count ?? 0), 0);
+    const categoryColors = ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2', '#db2777', '#64748b'];
+    const categoryScope = roles.includes('Admin') ? 'All sites' : 'Your site';
 
     const filteredActivities = recentActivities.filter((activity: any) => {
         const matchesSite = selectedSiteFilter === 'all' || activity.site_id?.toString() === selectedSiteFilter;
@@ -99,6 +107,7 @@ export default function Dashboard({
     });
 
     useEffect(() => {
+        setCurrentDateTime(new Date());
         const timer = setInterval(() => {
             setCurrentDateTime(new Date());
         }, 1000);
@@ -118,17 +127,17 @@ export default function Dashboard({
                 </div>
                 <div className="flex items-center space-x-4">
                     <div className="text-sm text-muted-foreground/70 tabular-nums">
-                        {currentDateTime.toLocaleDateString('en-US', {
+                        {currentDateTime ? `${currentDateTime.toLocaleDateString('en-US', {
                             weekday: 'short',
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
-                        })} · {currentDateTime.toLocaleTimeString('en-US', {
+                        })} · ${currentDateTime.toLocaleTimeString('en-US', {
                             hour: '2-digit',
                             minute: '2-digit',
                             second: '2-digit',
                             hour12: false
-                        })}
+                        })}` : '—'}
                     </div>
                     <div className="flex space-x-3">
 
@@ -236,6 +245,7 @@ export default function Dashboard({
                             <div className="rounded-full bg-violet-500/10 p-3">
                                 <ShieldAlert className="h-6 w-6 text-violet-600" />
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Site Licenses</p>
                                 <p className="text-2xl font-bold text-violet-600">{stats.employee?.siteLicenses ?? 0}</p>
@@ -243,6 +253,50 @@ export default function Dashboard({
                         </Link>
                     </>
                 )}
+            </div>
+
+            <div className="rounded-lg border bg-card shadow-sm">
+                <div className="flex items-center justify-between border-b px-5 py-4">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-blue-500/10 p-2.5">
+                            <Layers className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-foreground">Assets by Category</h3>
+                            <p className="text-xs text-muted-foreground">{categoryScope} · {categoryTotal} total assets</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="grid gap-4 p-5 lg:grid-cols-[320px_1fr]">
+                    <div className="h-[260px] min-h-[260px] min-w-0">
+                        {categoryChartData.length > 0 ? (
+                            <PieChart width={300} height={260}>
+                                <Pie data={categoryChartData} dataKey="count" nameKey="name" innerRadius={58} outerRadius={92} paddingAngle={3} cx="50%" cy="45%">
+                                    {categoryChartData.map((entry: any, index: number) => (
+                                        <Cell key={entry.name} fill={categoryColors[index % categoryColors.length]} />
+                                    ))}
+                                </Pie>
+                                <RechartsTooltip formatter={(value: any) => [`${value} items`, 'Total']} />
+                                <Legend />
+                            </PieChart>
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">No category data.</div>
+                        )}
+                    </div>
+                    <div className="divide-y divide-border/60 rounded-lg border">
+                        {categoryChartData.length > 0 ? categoryChartData.map((item: any, index: number) => (
+                            <div key={item.name} className="flex items-center justify-between px-4 py-3 text-sm">
+                                <div className="flex min-w-0 items-center gap-2">
+                                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: categoryColors[index % categoryColors.length] }} />
+                                    <span className="truncate font-medium text-foreground">{item.name}</span>
+                                </div>
+                                <span className="ml-3 rounded bg-muted px-2 py-1 text-xs font-semibold text-foreground">{item.count}</span>
+                            </div>
+                        )) : (
+                            <div className="px-5 py-6 text-center text-xs text-muted-foreground">No assets found.</div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {canViewGlobalCards && (

@@ -22,8 +22,16 @@ class DashboardController extends Controller
             return redirect()->route('technician.dashboard');
         }
 
-        // Basic Stats
-        $totalAssets = Asset::count();
+        $userSiteIds = $user
+            ? collect([$user->site_id])->merge($user->sites()->pluck('sites.id'))->filter()->unique()->values()
+            : collect();
+        $categoryAssetQuery = Asset::with('category');
+
+        if (!$user?->hasRole('Admin')) {
+            $categoryAssetQuery->whereIn('site_id', $userSiteIds);
+        }
+
+        $totalAssets = $user?->hasRole('Admin') ? Asset::count() : (clone $categoryAssetQuery)->count();
         $totalSites = Site::count();
         $totalUsers = \App\Models\User::count();
         $totalRecentAdded = Asset::where('created_at', '>=', Carbon::now()->subDays(30))->count();
@@ -40,13 +48,13 @@ class DashboardController extends Controller
                 ->sortByDesc('count')
                 ->values()
                 ->take(6),
-            'byCategory' => Asset::with('category')
+            'byCategory' => $categoryAssetQuery
                 ->get()
                 ->groupBy(fn($asset) => $asset->category?->name ?? 'Uncategorized')
-                ->map(fn($items, $name) => ['name' => $name, 'count' => $items->count()])
+                ->map(fn($items, $name) => ['name' => $name, 'count' => $items->count(), 'value' => $items->count()])
                 ->sortByDesc('count')
                 ->values()
-                ->take(6),
+                ->take(8),
             'bySite' => Asset::with('site')
                 ->get()
                 ->groupBy(fn($asset) => $asset->site?->name ?? 'No Site')
@@ -56,9 +64,6 @@ class DashboardController extends Controller
                 ->take(6),
         ];
 
-        $userSiteIds = $user
-            ? collect([$user->site_id])->merge($user->sites()->pluck('sites.id'))->filter()->unique()->values()
-            : collect();
         $employeeStats = [
             'siteSpareParts' => $userSiteIds->isEmpty() ? 0 : \App\Models\SparePart::whereIn('site_id', $userSiteIds)->count(),
             'itemsCurrentlyUsing' => $user ? \App\Models\AssetAssignment::active()->where('user_id', $user->id)->count()

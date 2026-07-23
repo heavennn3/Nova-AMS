@@ -119,7 +119,7 @@ export function AppSidebarHeader({
                                         <span>Create User</span>
                                     </button>
                                     <button
-                                        onClick={() => router.visit('/spare-parts')}
+                                        onClick={() => router.visit('/spare-parts/dashboard')}
                                         className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground text-left"
                                     >
                                         <Settings2 className="mr-2 h-4 w-4 opacity-70" />
