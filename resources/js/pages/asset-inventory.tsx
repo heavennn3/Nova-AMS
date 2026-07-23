@@ -4,7 +4,7 @@ import {
     HandCoins, Calendar, User, AlertTriangle, Download, FileText, CheckCircle2, XCircle, ChevronDown,
 } from 'lucide-react';
 import Papa from 'papaparse';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/data-table/data-table';
 import { Badge } from '@/components/ui/badge';
@@ -86,12 +86,24 @@ export default function AssetInventory({
         }
     }, [flash]);
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (!typeFilterRef.current?.contains(event.target as Node)) {
+                setTypeFilterOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const [search, setSearch] = useState('');
     const [siteFilter, setSiteFilter] = useState(currentSiteId ? String(currentSiteId) : 'all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
     const [typeFilterOpen, setTypeFilterOpen] = useState(false);
     const [typeFilterQuery, setTypeFilterQuery] = useState('');
+    const typeFilterRef = useRef<HTMLDivElement>(null);
     const [statusFilter, setStatusFilter] = useState('all');
 
     // create 
@@ -887,12 +899,15 @@ export default function AssetInventory({
                     </SelectContent>
                 </Select>
 
-                <div className="relative">
+                <div ref={typeFilterRef} className="relative">
                     <Button
                         type="button"
                         variant="outline"
                         className="h-8 w-[180px] justify-between text-sm font-normal"
-                        onClick={() => setTypeFilterOpen((open) => !open)}
+                        onClick={() => {
+                            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                            setTypeFilterOpen((open) => !open);
+                        }}
                     >
                         <span className={typeFilter === 'all' ? 'text-muted-foreground' : ''}>
                             {typeFilter === 'all' ? 'Types' : typeFilter}
