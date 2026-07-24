@@ -9,13 +9,10 @@ use Inertia\Inertia;
 
 class AssetRequestController extends Controller
 {
-    // ──────────────────────────────
-    //  Normal User endpoints
-    // ──────────────────────────────
-
+  
     public function index(Request $request)
     {
-        // Admins should use the admin dashboard
+
         if ($request->user()->hasRole('Admin')) {
             return redirect()->route('requests.admin');
         }
@@ -76,13 +73,10 @@ class AssetRequestController extends Controller
         return back()->with('success', 'Request cancelled.');
     }
 
-    // ──────────────────────────────
-    //  Admin endpoints
-    // ──────────────────────────────
-
+  
     public function adminIndex()
     {
-        // Get all regular requests
+
         $requests = AssetRequest::with([
                 'user.site',
                 'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
@@ -93,7 +87,7 @@ class AssetRequestController extends Controller
             ->latest()
             ->get();
 
-        // Get all loan requests and merge them
+
         $loanRequests = \App\Models\AssetLoan::with([
                 'user.site',
                 'asset' => fn($q) => $q->withoutGlobalScope('site_access'),
